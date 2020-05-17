@@ -3,8 +3,9 @@
 
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
-  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh):
-  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch),
+  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
+  SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold,SEXP Rsearch, SEXP Rmesh):
+  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, RnThreads_int, RnThreads_l, RnThreads_fold, Rsearch),
    mesh_(Rmesh){
 
     #ifdef R_VERSION_
@@ -92,19 +93,19 @@ Real DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::FEintegrate
 
   constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
 
+  omp_set_num_threads(deData_.getNThreads_int()); // set the number of threads
+  #pragma omp parallel for reduction(+: total_sum)
   for(UInt triangle=0; triangle<mesh_.num_elements(); triangle++){
 
     FiniteElement<Integrator_noPoly, ORDER, mydim, ndim> fe;
     Element<Nodes, mydim, ndim> tri_activated = mesh_.getElement(triangle);
     fe.updateElement(tri_activated);
 
-// (3) -------------------------------------------------
     VectorXr sub_g(Nodes);
     for (UInt i=0; i<Nodes; i++){
       sub_g[i]=g[tri_activated[i].getId()];
     }
 
-// (4) -------------------------------------------------
     VectorXr expg = (PsiQuad_*sub_g).array().exp();
 
     // mind we are using quadrature rules whom weights sum to the element measure.

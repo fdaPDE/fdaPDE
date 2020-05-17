@@ -39,6 +39,11 @@ class  DEData{
 		Real tol2_;
 		// A boolean that is true if the user wants to see the value of the functional printed during the optimization descent.
 		bool print_;
+		// Integres specifying the number of threads to use in the omp parallelizations
+		UInt nThreads_int_;
+		UInt nThreads_l_;
+		UInt nThreads_fold_;
+
 
 		// Integer specifying the search algorithm type (tree or naive search algorithm)
 		UInt search_;
@@ -57,7 +62,7 @@ class  DEData{
 
 		explicit DEData(const std::vector<Point>& data, const UInt& order, const VectorXr& fvec, Real heatStep, UInt heatIter,
 			const std::vector<Real>& lambda, const UInt& nfolds, const UInt& nsim, const std::vector<Real>& stepProposals,
-			 Real tol1, Real tol2, bool print, UInt search);
+			 Real tol1, Real tol2, bool print,  UInt nThreads_int, UInt nThreads_l, UInt nThreads_fold, UInt search);
 
 
 		/*! Costructor useful for the R C++ interface.
@@ -74,11 +79,14 @@ class  DEData{
 			\param Rtol1 an R-double specifying the tolerance to use for the termination criterion based on the percentage differences.
 			\param Rtol2 an R-double specifying the tolerance to use for the termination criterion based on the norm of the gradient.
 			\param Rprint and R-integer specifying if print on console.
+			\param RnThreads_int an R-integer specifying the number of threads to paralllize the computation of integrals.
+			\param RnThreads_l an R-integer specifying the number of threads to paralllize the loop over smoothing parameters.
+			\param RnThreads_fold an R-integer specifying the number of threads to paralllize the loop over folds during cross-validation.
 			\param Rsearch an R-integer to decide the search algorithm type (tree or naive search algorithm).
 		*/
 		#ifdef R_VERSION_
 		explicit DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
-			SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch);
+			SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rsearch);
 		#endif
 
 
@@ -122,6 +130,12 @@ class  DEData{
 		inline Real getTol2() const {return tol2_;}
 		//! A method returning the boolean print member.
 		inline bool Print() const {return print_;}
+		//! A method returning the number of threads to use in the omp parallelization to compute integrals.
+		inline UInt getNThreads_int() const {return nThreads_int_;}
+		//! A method returning the number of threads to use in the omp parallelization to loop over smoothing parameters.
+		inline UInt getNThreads_l() const {return nThreads_l_;}
+		//! A method returning the number of threads to use in the omp parallelization to loop over folds during cross-validation.
+		inline UInt getNThreads_fold() const {return nThreads_fold_;}
 		//! A method returning the integer that specifies the search algorithm type.
 		inline UInt getSearch() const {return search_;}
 
