@@ -1,4 +1,4 @@
-checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search) 
+checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, nThreads_int, nThreads_l, nThreads_fold, heatStep, heatIter, search) 
 {
   #################### Parameter Check #########################
   if (is.null(data)) 
@@ -53,6 +53,13 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
 
   if(!is.numeric(nsimulations) || nsimulations<1)
     stop("'nrealizations' needs to be a positive integer.")
+  
+  if(!is.numeric(nThreads_int) || nThreads_int<1)
+    stop("'nThreads_int' needs to be a positive integer.")  
+  if(!is.numeric(nThreads_l) || nThreads_l<1)
+    stop("'nThreads_l' needs to be a positive integer.")  
+  if(!is.numeric(nThreads_fold) || nThreads_fold<1)
+    stop("'nThreads_fold' needs to be a positive integer.")  
   
   if(!is.numeric(heatStep) || heatStep<0 || heatStep>1)
     stop("'heatStep' needs to be a positive real number not greater than 1.")

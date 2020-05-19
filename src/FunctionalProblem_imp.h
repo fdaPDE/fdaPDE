@@ -1,6 +1,9 @@
 #ifndef _FUNCTIONAL_PROBLEM_IMP_HPP_
 #define _FUNCTIONAL_PROBLEM_IMP_HPP_
 
+#pragma omp declare reduction(sumVectorXd: Eigen::VectorXd: omp_out = omp_out + omp_in)\
+										initializer(omp_priv = Eigen::VectorXd::Zero(omp_orig.size()))
+
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 std::pair<Real,VectorXr>
 FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const{
@@ -11,6 +14,8 @@ FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeInt
 
 	constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
 
+	omp_set_num_threads(dataProblem_.getNThreads_int()); // set the number of threads
+  #pragma omp parallel for reduction(+: int1) reduction(sumVectorXd: int2)
 	for(UInt triangle=0; triangle<dataProblem_.getNumElements(); triangle++){
 
 		FiniteElement<Integrator_noPoly, ORDER, mydim, ndim> fe;

@@ -3,10 +3,12 @@
 
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
-  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh):
-  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch),
+  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
+  SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold,SEXP Rsearch, SEXP Rmesh):
+  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, RnThreads_int, RnThreads_l, RnThreads_fold, Rsearch),
    mesh_(Rmesh){
 
+    // PROJECTION
     #ifdef R_VERSION_
       if(mydim == 2 && ndim == 3){
         Rprintf("##### DATA PROJECTION #####\n");
@@ -17,6 +19,44 @@ DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP
     std::vector<Point> new_data = projection.computeProjection();
     deData_.setNewData(new_data);
 
+
+    // REMOVE POINTS NOT IN THE DOMAIN
+    data = deData_.getData(); // for the 2.5D case
+    constexpr UInt Nodes = mydim ==2? 3*ORDER : 6*ORDER-2;
+    Element<Nodes, mydim, ndim> tri_activated;
+
+    bool check = false;
+    for(auto it = data.begin(); it != data.end(); ){
+
+      if (deData_.getSearch() == 1) { //use Naive search
+        tri_activated = mesh_.findLocationNaive(data[it - data.begin()]);
+      } else if (deData_.getSearch() == 2) { //use Tree search (default)
+        tri_activated = mesh_.findLocationTree(data[it - data.begin()]); 
+      }
+
+      if(tri_activated.getId() == Identifier::NVAL)
+      {
+        it = data.erase(it);
+        #ifdef R_VERSION_
+        Rprintf("WARNING: an observation is not in the domain. It is removed and the algorithm proceeds.\n");
+        #else
+        std::cout << "WARNING: an observation is not in the domain. It is removed and the algorithm proceeds.\n";
+        #endif
+
+        if(!check) check = true;
+      }
+      else {
+        it++;
+      }
+    }
+
+    if(check){
+      deData_.setNewData(data);
+      deData_.updateN(data.size());
+    }
+
+
+    // FILL MATRICES
     fillFEMatrices();
     fillPsiQuad();
 
@@ -92,19 +132,19 @@ Real DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::FEintegrate
 
   constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
 
+  omp_set_num_threads(deData_.getNThreads_int()); // set the number of threads
+  #pragma omp parallel for reduction(+: total_sum)
   for(UInt triangle=0; triangle<mesh_.num_elements(); triangle++){
 
     FiniteElement<Integrator_noPoly, ORDER, mydim, ndim> fe;
     Element<Nodes, mydim, ndim> tri_activated = mesh_.getElement(triangle);
     fe.updateElement(tri_activated);
 
-// (3) -------------------------------------------------
     VectorXr sub_g(Nodes);
     for (UInt i=0; i<Nodes; i++){
       sub_g[i]=g[tri_activated[i].getId()];
     }
 
-// (4) -------------------------------------------------
     VectorXr expg = (PsiQuad_*sub_g).array().exp();
 
     // mind we are using quadrature rules whom weights sum to the element measure.

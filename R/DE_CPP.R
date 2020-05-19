@@ -1,5 +1,5 @@
 CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                       stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+                       stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
   
@@ -37,6 +37,12 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, m
   storage.mode(tol1) <- "double"
   storage.mode(tol2) <- "double"
   storage.mode(print) <- "logical"
+  nThreads_int <- as.integer(nThreads_int)
+  nThreads_l <- as.integer(nThreads_l)
+  nThreads_fold <- as.integer(nThreads_fold)
+  storage.mode(nThreads_int) <- "integer"
+  storage.mode(nThreads_l) <- "integer"
+  storage.mode(nThreads_fold) <- "integer"
   nfolds <- as.integer(nfolds)
   storage.mode(nfolds) <- "integer"
   nsimulations <- as.integer(nsimulations)
@@ -44,9 +50,9 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, m
   storage.mode(search) <- "integer"
   
   ## Call C++ function
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec,
-                  heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2, 
-                  print, step_method, direction_method, preprocess_method, search,
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec, heatStep, heatIter, lambda,
+                  nfolds, nsimulations, stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, step_method, 
+                  direction_method, preprocess_method, search,
                   PACKAGE = "fdaPDE")
   
   ## Reset them correctly
@@ -58,7 +64,7 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, m
 
 
 CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method, 
-                                stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+                                stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
 {
   # C++ function for manifold works with vectors not with matrices
   
@@ -99,13 +105,19 @@ CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter
   storage.mode(tol1) <- "double"
   storage.mode(tol2) <- "double"
   storage.mode(print) <- "logical"
+  nThreads_int <- as.integer(nThreads_int)
+  nThreads_l <- as.integer(nThreads_l)
+  nThreads_fold <- as.integer(nThreads_fold)
+  storage.mode(nThreads_int) <- "integer"
+  storage.mode(nThreads_l) <- "integer"
+  storage.mode(nThreads_fold) <- "integer"
   storage.mode(nfolds) <- "integer"
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
   
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec,
-                  heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2, 
-                  print, step_method, direction_method, preprocess_method, search,
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec, heatStep, heatIter,
+                  lambda, nfolds, nsimulations, stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, 
+                  step_method, direction_method, preprocess_method, search,
                   PACKAGE = "fdaPDE")
   
   return(bigsol)
@@ -113,7 +125,7 @@ CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter
 
 
 CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method, 
-                              stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+                              stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
 {
   
   FEMbasis$mesh$tetrahedrons=c(t(FEMbasis$mesh$tetrahedrons))
@@ -152,13 +164,19 @@ CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, 
   storage.mode(tol1) <- "double"
   storage.mode(tol2) <- "double"
   storage.mode(print) <- "logical"
+  nThreads_int <- as.integer(nThreads_int)
+  nThreads_l <- as.integer(nThreads_l)
+  nThreads_fold <- as.integer(nThreads_fold)
+  storage.mode(nThreads_int) <- "integer"
+  storage.mode(nThreads_l) <- "integer"
+  storage.mode(nThreads_fold) <- "integer"
   storage.mode(nfolds) <- "integer"
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
   
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec, 
-                  heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2, 
-                  print, step_method, direction_method, preprocess_method, search,
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec, heatStep, heatIter,
+                  lambda, nfolds, nsimulations, stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, 
+                  step_method, direction_method, preprocess_method, search,
                   PACKAGE = "fdaPDE")
   
   return(bigsol)
