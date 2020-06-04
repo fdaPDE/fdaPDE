@@ -19,7 +19,7 @@ and, if ndim=3, the third column corresponds to the \code{z}-coordinates.}
 
 \item{heatIter}{Integer specifying the number of iteriations to perform the discretized heat diffusion process.}
 
-\item{init}{String. This parameter specifies the initialization procedure. It can be either 'Heat' or 'CV'}
+\item{init}{String. This parameter specifies the initialization procedure. It can be either 'Heat' or 'CV'.}
 
 \item{nFolds}{An integer specifying the number of folds used in cross validation techinque. It is useful only 
 for the case \code{init = 'CV'}.}
@@ -29,11 +29,10 @@ The default is 2.}
 }
 \value{
 If \code{init = 'Heat'} it returns a matrix in which each column contains the initial vector 
-for each \code{lambda}. If \code{init = 'CV'} it return the initial vector associated to the \code{lambda} given.
+for each \code{lambda}. If \code{init = 'CV'} it returns the initial vector associated to the \code{lambda} given.
 }
 \description{
-This function implements the density initialization procedure useful to start the
-density estimation algorithm.
+This function implements two methods for the density initialization procedure.
 }
 \examples{
 library(fdaPDE)
@@ -57,10 +56,10 @@ data <- cbind(data_x, data_y)
 plot(mesh)
 points(data, col="red", pch=19, cex=0.5)
 
-## Density Estimation
+## Density initialization
 lambda = 0.1
 sol = DE.heat.FEM(data, FEMbasis, lambda, heatStep=0.1, heatIter=500, init="Heat")
 
 ## Visualization 
-plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis)
+plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis))
 }
