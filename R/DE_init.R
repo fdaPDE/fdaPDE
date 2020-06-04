@@ -7,15 +7,14 @@
 #' @param lambda A scalar or vector of smoothing parameters. 
 #' @param heatStep Real specifying the time step for the discretized heat diffusionn process.
 #' @param heatIter Integer specifying the number of iteriations to perform the discretized heat diffusion process.
-#' @param init String. This parameter specifies the initialization procedure. It can be either 'Heat' or 'CV'
+#' @param init String. This parameter specifies the initialization procedure. It can be either 'Heat' or 'CV'.
 #' @param nFolds An integer specifying the number of folds used in cross validation techinque. It is useful only 
 #' for the case \code{init = 'CV'}.
 #' @param search An integer specifying the search algorithm to use. It is either 1 (Naive search algorithm) or 2 (Tree search algorithm).
 #' The default is 2.
 #' @return If \code{init = 'Heat'} it returns a matrix in which each column contains the initial vector 
-#' for each \code{lambda}. If \code{init = 'CV'} it return the initial vector associated to the \code{lambda} given.
-#' @description This function implements the density initialization procedure useful to start the
-#' density estimation algorithm.
+#' for each \code{lambda}. If \code{init = 'CV'} it returns the initial vector associated to the \code{lambda} given.
+#' @description This function implements two methods for the density initialization procedure.
 #' @usage DE.heat.FEM(data, FEMbasis, lambda, heatStep=0.1, heatIter=500, init="Heat", nFolds=5, search = 2) 
 #' @export
 #' @examples
@@ -40,12 +39,12 @@
 #' plot(mesh)
 #' points(data, col="red", pch=19, cex=0.5)
 #' 
-#' ## Density Estimation
+#' ## Density initialization
 #' lambda = 0.1
 #' sol = DE.heat.FEM(data, FEMbasis, lambda, heatStep=0.1, heatIter=500, init="Heat")
 #' 
 #' ## Visualization 
-#' plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis)
+#' plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis))
 
 DE.heat.FEM <- function(data, FEMbasis, lambda, heatStep=0.1, heatIter=500, init="Heat", nFolds=5, search=2) 
 { 
