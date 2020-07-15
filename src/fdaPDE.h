@@ -1,6 +1,6 @@
 #ifndef FDAPDE_H_
 #define FDAPDE_H_
-
+//ma pare che possa cambiare direttamente da qui no?
 // Insert principal libraries
 #ifdef R_VERSION_
 #define R_NO_REMAP
