@@ -43,7 +43,7 @@ ran = range(sol_exact)
 data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
 
 # Set smoothing parameter
-lambda = 10^seq(-6,-6,by=0.25)
+lambda = 10^seq(-6,-3,by=0.25)
 
 #### Test 1.1: Without GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
