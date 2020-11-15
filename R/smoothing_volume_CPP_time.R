@@ -135,6 +135,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
     lambdaSIC <- as.matrix(lambdaSIC)
     storage.mode(lambdaSIC) <- "double"
     ## call the smoothing function with initial observations to estimates the IC
+    print("Estimation of the Initial Conditions")
     ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
      FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
      BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
@@ -146,6 +147,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
       lambdaSIC <- 10^seq(-9,-7,0.1)
       lambdaSIC <- as.matrix(lambdaSIC)
       storage.mode(lambdaSIC) <- "double"
+      print("Improving the estimate of the Initial Conditions")
       ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
@@ -159,6 +161,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
         lambdaSIC <- 10^seq(3,5,0.1)
         lambdaSIC <- as.matrix(lambdaSIC)
         storage.mode(lambdaSIC) <- "double"
+        print("Improving the estimate of the Initial Conditions")
         ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,

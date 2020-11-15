@@ -598,21 +598,20 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 			V_.leftCols(nnodes) = W.transpose()*P->asDiagonal()*psi_;
 		}
 
-		// Build "right side" of U_
-		if(P->size() == 0)
-			U_.topRows(nnodes) = W;
-		else
-			U_.topRows(nnodes) = P->asDiagonal()*W;
-
-		// Build "left side" of U_
 		if(regressionData_.getNumberOfRegions()==0)
 		{ // pointwise data
-			U_.topRows(nnodes) = psi_.transpose()*U_.topRows(nnodes);
+			if(P->size() == 0)
+				U_.topRows(nnodes) = psi_.transpose()*W;
+			else
+				U_.topRows(nnodes) = psi_.transpose()*P->asDiagonal()*W;
 		}
 		else
 		{ //areal data
-		 	U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*U_.topRows(nnodes);
-    		}
+			if(P->size() == 0)
+				U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*W;
+			else
+				U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*P->asDiagonal()*W;
+		}
 
 		MatrixXr D = V_*matrixNoCovdec_.solve(U_);
 

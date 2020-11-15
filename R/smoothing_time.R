@@ -86,13 +86,15 @@ NULL
 #' \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 #' \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #' @description Space-time regression  with differential regularization. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
-#' @usage smooth.FEM.time(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
-#' covariates = NULL, PDE_parameters = NULL,  BC = NULL,
+#' @usage smooth.FEM.time(locations = NULL, time_locations = NULL, observations, FEMbasis, 
+#' time_mesh=NULL, covariates = NULL, PDE_parameters = NULL,  BC = NULL,
 #' incidence_matrix = NULL, areal.data.avg = TRUE,
 #' FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
 #' search = "tree", bary.locations = NULL,
-#' lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
-#' lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+#' lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
+#' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
+#' DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
+#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 #' @export
 #' @references #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
 #' spatially dependent functional data via regression with differential regularization. 
@@ -184,7 +186,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     optim = c(optim,2)
   }else
   {
-    stop("'DOF.evaluation' must be 'not_required', 'stochastic' or 'exact'.")
+    stop("'DOF.evaluation' must be NULL, 'stochastic' or 'exact'.")
   }
   
   if(is.null(lambda.selection.lossfunction))
@@ -369,7 +371,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.manifold.FEM.time(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+    bigsol = CPP_smooth.manifold.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
       covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
@@ -379,7 +381,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.volume.FEM.time(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+    bigsol = CPP_smooth.volume.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
       covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
