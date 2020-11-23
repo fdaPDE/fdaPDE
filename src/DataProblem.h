@@ -32,7 +32,7 @@ class DataProblem{
   public:
     //! A constructor: it delegates DEData and MeshHandler costructors.
     DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
-      SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh);
+      SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rsearch, SEXP Rmesh);
 
     //! A method to compute the integral of a function.
     inline Real FEintegrate(const VectorXr& f) const {return (R0_*f).sum();}
@@ -78,6 +78,12 @@ class DataProblem{
     inline Real getTol2() const {return deData_.getTol2();}
     //! A method returning the boolean print member. It calls the same method of DEData class.
     inline bool Print() const {return deData_.Print();}
+    //! A method returning the number of threads to use in the omp parallelization to compute integrals. It calls the same method of DEData class.
+    inline UInt getNThreads_int() const {return deData_.getNThreads_int();}
+    //! A method returning the number of threads to use in the omp parallelization to loop over smoothing parameters. It calls the same method of DEData class.
+    inline UInt getNThreads_l() const {return deData_.getNThreads_l();}
+    //! A method returning the number of threads to use in the omp parallelization to loop over folds during cross-validation. It calls the same method of DEData class.
+    inline UInt getNThreads_fold() const {return deData_.getNThreads_fold();}
     //! A method returning the integer that specifies the search algorithm type.
     inline UInt getSearch() const {return deData_.getSearch();}
 

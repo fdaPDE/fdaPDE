@@ -68,6 +68,9 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   tol1=NULL
   tol2=NULL
   print=NULL
+  nThreads_int=NULL
+  nThreads_l=NULL
+  nThreads_fold=NULL
   nfolds=NULL
   nsimulations=NULL
   step_method=NULL
@@ -90,16 +93,16 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   if(class(FEMbasis$mesh) == 'mesh.2D'){	  
     print('C++ Code Execution')
     bigsol = CPP_FEM.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                        stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+                        stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
     
   } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
     print('C++ Code Execution')
     bigsol = CPP_FEM.manifold.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                 stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+                                 stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
     
   } else if(class(FEMbasis$mesh) == 'mesh.3D'){
     bigsol = CPP_FEM.volume.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+                               stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
   }
   
   ###################### Collect Results ############################################################  

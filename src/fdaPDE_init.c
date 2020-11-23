@@ -8,8 +8,8 @@
 */
 
 /* .Call calls */
-extern SEXP Density_Estimation(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP Density_Initialization(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP Density_Estimation(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP Density_Initialization(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP eval_FEM_fd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP eval_FEM_time(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP eval_FEM_time_nodes(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -34,8 +34,8 @@ extern SEXP gam_PDE_space_varying( SEXP, SEXP, SEXP, SEXP, SEXP,SEXP, SEXP, SEXP
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"Density_Estimation",                (DL_FUNC) &Density_Estimation,                19},
-    {"Density_Initialization",            (DL_FUNC) &Density_Initialization,            18},
+    {"Density_Estimation",                (DL_FUNC) &Density_Estimation,                22},
+    {"Density_Initialization",            (DL_FUNC) &Density_Initialization,            21},
     {"eval_FEM_fd",                       (DL_FUNC) &eval_FEM_fd,                       10},
     {"eval_FEM_time",                     (DL_FUNC) &eval_FEM_time,                     13},
     {"eval_FEM_time_nodes",               (DL_FUNC) &eval_FEM_time_nodes,                5},
