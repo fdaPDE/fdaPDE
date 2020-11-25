@@ -11,6 +11,7 @@ library(fdaPDE)
 #            no covariates
 #            no BC
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -76,15 +77,12 @@ output_CPP<-smooth.FEM(locations = locations,
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 
-
-
-
-
 #### Test 2: c-shaped domain ####
 #            locations = nodes
 #            with covariates
 #            no BC
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 

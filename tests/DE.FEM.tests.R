@@ -6,6 +6,7 @@
 library(fdaPDE)
 
 # 2D ------------------
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -117,6 +118,7 @@ sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
 
 
 # 2.5D -------------
+library(fdaPDE)
 rm(list=ls())
 
 ## Create a 2.5D mesh
@@ -153,6 +155,7 @@ plot(FEM(exp(sol$g), FEMbasis))
 
 
 # 3D -------------------------------------------
+library(fdaPDE)
 rm(list=ls())
 
 ## Create a 3D mesh 

@@ -8,6 +8,7 @@ library(fdaPDE)
 #### Test 1: 2D square domain ####
 #            locations = nodes 
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -103,6 +104,7 @@ sol.pointwise$lambda
 #### Test 2: 2D square domain ####
 #            locations != nodes
 #            order FE = 2
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -198,6 +200,7 @@ sol.pointwise$lambda
 #### Test 3: 2.5D sphere domain ####
 #            locations = nodes 
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -282,6 +285,7 @@ sol.pointwise$lambda
 #### Test 4: 3D sphere domain ####
 #            locations = nodes 
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -320,7 +324,7 @@ error<-rnorm(n=nSamples*nnodes,sd=sd_error*truedatarange)
 datamatrix.pointwise<-datamatrix.pointwise.exact+error
 dm.pointwise.centred<-datamatrix.pointwise-matrix(apply(datamatrix.pointwise,2,mean),ncol=ncol(datamatrix.pointwise),nrow=nrow(datamatrix.pointwise),byrow=TRUE)
 
-#### Test 1.1: Without GCV
+#### Test 4.1: Without GCV
 lambda = 10^-2
 sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
                         FEMbasis=FEMbasis,
@@ -329,7 +333,7 @@ sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
 
 plot(sol.pointwise$loadings.FEM)
 
-#### Test 1.2: K-Fold validation - Stochastic
+#### Test 4.2: K-Fold validation - Stochastic
 lambda = 10^c(-6,-5,-4,-3,-2)
 
 sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
@@ -339,7 +343,7 @@ sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
 plot(sol.pointwise$loadings.FEM)
 sol.pointwise$lambda
 
-#### Test 1.3: K-Fold validation - Exact
+#### Test 4.3: K-Fold validation - Exact
 sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
                         FEMbasis=FEMbasis,lambda=lambda,nPC=2,
                         validation='KFold',GCVmethod='Exact')
@@ -347,7 +351,7 @@ sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
 plot(sol.pointwise$loadings.FEM)
 sol.pointwise$lambda
 
-#### Test 1.4: GCV validation - Stochastic
+#### Test 4.4: GCV validation - Stochastic
 sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
                         FEMbasis=FEMbasis,lambda=lambda,nPC=2,
                         validation='GCV',GCVmethod='Stochastic')
@@ -355,7 +359,7 @@ sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
 plot(sol.pointwise$loadings.FEM)
 sol.pointwise$lambda
 
-#### Test 1.5: GCV validation - Exact
+#### Test 4.5: GCV validation - Exact
 sol.pointwise<-FPCA.FEM(datamatrix=dm.pointwise.centred,
                         FEMbasis=FEMbasis,lambda=lambda,nPC=2,
                         validation='GCV',GCVmethod='Exact')
