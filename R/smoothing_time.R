@@ -58,10 +58,11 @@ NULL
 #' Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but it is fairly less time consuming. Stochastic evaluation is highly suggested for meshes with more than 5000 nodes.
 #' Default value \code{DOF.evaluation=NULL}
 #' @param lambda.selection.lossfunction This parameter is used to determine if some loss function has to be evaluated.
-#' The following possibilities are allowed: NULL and 'GCV' (generalized cross validation)
-#' If NULL is selected, \code{lambda.selection.criterion='grid'} is required. 'GCV' is employed for both \code{lambda.selection.criterion='grid'} and optimization methods.
-#' Default value \code{lambda.selection.lossfunction=NULL}
-#' @param lambda a vector of spatial smoothing parameters provided if \code{lambda.selection.criterion='grid}'. An optional initialization otherwise.
+#' The following methods are implemented: 'grid', further optimization methods are yet to come. 
+#' The 'grid' is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
+#' Default value \code{lambda.selection.criterion='grid'}
+#' @param lambdaS A scalar or vector of spatial smoothing parameters.
+#' @param lambdaT A scalar or vector of temporal smoothing parameters.
 #' @param DOF.stochastic.realizations This positive integer is considered only when \code{DOF.evaluation = 'stochastic'}.
 #' It is the number of uniform random variables used in stochastic DOF evaluation.
 #' Default value \code{DOF.stochastic.realizations=100}.
@@ -73,7 +74,7 @@ NULL
 #' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.0} or \code{1.8} in GAM.
 #' It is advised to set \code{GCV.inflation.factor} larger than 1 to avoid overfitting.
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
-#' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
+#' Not implemented yet.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
