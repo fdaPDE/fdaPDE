@@ -118,20 +118,11 @@
 #'          }
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
-#' }
-#' A list with the following variables in others GAM case:
-#' \itemize{
-#'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
-#'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{beta}}{If covariates is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
-#' the smoothing parameter is equal to \code{lambda[j]}.}
-#'    \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or vector with the trace of the smoothing matrix for each value of the smoothing parameter specified in \code{lambda}.}
-#'    \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or vector with the estimate of the standard deviation of the error for each value of the smoothing parameter specified in \code{lambda}.}
-#'    \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or vector with the value of the GCV criterion for each value of the smoothing parameter specified in \code{lambda}.}
-#'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
-#'    \item{\code{fn_hat}}{ A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contain the evaluaton of the spatial field in the location points.}
-#'    \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
-#'    \item {\code{variance.est}}{ A vector which return the variance estimates for the Generative Additive Models}
+#'    \item{\code{GAM_output}}{A list of GAM related data:
+#'          \item{\code{fn_hat}}{ A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contain the evaluaton of the spatial field in the location points.}
+#'          \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
+#'          \item {\code{variance.est}}{ A vector which return the variance estimates for the Generative Additive Models}
+#'         }
 #' }
 #' @description This function implements a spatial regression model with differential regularization.
 #'  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the

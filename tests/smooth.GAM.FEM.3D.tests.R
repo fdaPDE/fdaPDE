@@ -131,20 +131,20 @@ output_CPP <- smooth.FEM(locations = loc, observations = as.numeric(response), F
 output_CPP <- smooth.FEM(locations = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = W2,
                         max.steps=15, family =FAMILY, mu0=NULL, scale.param=NULL,
                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV', GCV.inflation.factor = 1)
-plot(log10(lambda),output_CPP$GCV)
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
 
-beta= output_CPP$beta
-func_estimation= output_CPP$fit.FEM$coeff[,output_CPP$bestlambda]
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
 plot(FEM(func_estimation,FEMbasis))
 
 #### Test 1.3: grid with stochastic GCV
 output_CPP <- smooth.FEM(locations = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = W2,
                          max.steps=15, family = FAMILY, mu0=NULL, scale.param=NULL, 
-                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV', GCV.inflation.factor = 1)
-plot(log10(lambda),output_CPP$GCV)
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV', GCV.inflation.factor = 1, DOF.stochastic.realizations = 1000)
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
 
-beta= output_CPP$beta
-func_estimation= output_CPP$fit.FEM$coeff[,output_CPP$bestlambda]
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
 plot(FEM(func_estimation,FEMbasis))
 
 

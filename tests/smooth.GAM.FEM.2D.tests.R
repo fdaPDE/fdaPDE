@@ -86,16 +86,16 @@ image(output_CPP$fit.FEM)
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 #### Test 1.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 
@@ -179,16 +179,16 @@ image(FEM(sol_nodes, FEMbasis))
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 #### Test 2.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 
@@ -272,16 +272,16 @@ image(output_CPP$fit.FEM)
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 #### Test 3.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 
@@ -366,15 +366,15 @@ image(output_CPP$fit.FEM)
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
 #### Test 4.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV' )
-plot(log10(lambda),output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
