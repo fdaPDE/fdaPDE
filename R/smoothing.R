@@ -733,13 +733,35 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       if(bestlambda == 1 || bestlambda == length(lambda))
         warning("Your optimal 'GCV' is on the border of lambda sequence")
       stderr=sqrt(GCV_*(sum(!is.na(observations))-dof)/sum(!is.na(observations)))
-      reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM,
-                   beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, bary.locations = bary.locations)
+      optimization_type = "full DOF grid"
     }
     else
     {
-      reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, beta = beta, bary.locations = bary.locations)
+      stderr = -1
+      optimization_type = "uninformative"
     }
+    
+    solution = list(
+      f = f,
+      g = g,
+      z_hat = -1,
+      beta = beta,
+      rmse = -1,
+      estimated_sd=stderr
+    )
+    
+    optimization = list(
+      lambda_solution = lambda[bestlambda],
+      lambda_position = bestlambda,
+      GCV = GCV_[bestlambda],
+      optimization_details = list(
+        iterations = -1,
+        termination = "uninformative",
+        optimization_type = optimization_type),
+      dof = dof,
+      lambda_vector = lambda,
+      GCV_vector = GCV_
+    )
     
     # GAM outputs
     if(sum(family==c("binomial", "exponential", "gamma", "poisson")) == 1)
@@ -747,10 +769,14 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       fn.eval = bigsol[[13]]
       J_minima = bigsol[[14]]
       variance.est=bigsol[[15]]
-      if( variance.est[1]<0 ) variance.est = NULL
-      reslist = c(reslist, list(fn.eval = fn.eval, J_minima = J_minima, variance.est = variance.est))
+      if(variance.est[1]<0)
+        variance.est = NULL
+      GAM_output = list(fn.eval = fn.eval, J_minima = J_minima, variance.est = variance.est)
     }
     
+    reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
+                   optimization  = optimization, bary.locations = bary.locations,
+                   GAM_output = GAM_output)
     return(reslist)
   }
   else
