@@ -71,7 +71,7 @@
 #' The remaining two are optimization methods that automatically select the best penalization according to \code{lambda.selection.lossfunction} criterion.
 #' They implement respectively a pure Newton method and a finite differences Newton method.
 #' Default value \code{lambda.selection.criterion='grid'}
-#' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed.
+#' @param DOF.evaluation This parameter is used to identify if and how to perform degrees of freedom computation.
 #' The following possibilities are allowed: NULL, 'exact' and 'stochastic'
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
 #' Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but is highly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
@@ -85,7 +85,7 @@
 #' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
 #' Default value \code{DOF.stochastic.realizations=100}.
 #' @param DOF.stochastic.seed This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
-#' It is a positive integer that represents user defined seed employed in stochastic GCV computation.
+#' It is a positive integer that represents a user defined seed employed in stochastic GCV computation.
 #' Default value \code{DOF.stochastic.seed = 0} means random.
 #' @param DOF.matrix Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambda} is available from precedent computation. This allows to save time
 #' since the computation of the DOFs is the most expensive part of GCV.
@@ -119,9 +119,9 @@
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #'    \item{\code{GAM_output}}{A list of GAM related data:
-#'          \item{\code{fn_hat}}{ A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contain the evaluaton of the spatial field in the location points.}
+#'          \item{\code{fn_hat}}{A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contains the evaluaton of the spatial field in the location points.}
 #'          \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
-#'          \item {\code{variance.est}}{ A vector which return the variance estimates for the Generative Additive Models}
+#'          \item{\code{variance.est}}{A vector which returns the variance estimates for the Generative Additive Models}
 #'         }
 #' }
 #' @description This function implements a spatial regression model with differential regularization.
