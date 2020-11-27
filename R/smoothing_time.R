@@ -47,10 +47,8 @@ NULL
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
 #' @param lambda.selection.criterion This parameter is used to select the optimization method for the smoothing parameter \code{lambda}.
-#' The following methods are implemented: 'grid', 'newton', 'newton_fd'.
-#' The former is a pure evaluation method. A test vector of \code{lambda} must be provided.
-#' The remaining two are optimization methods that automatically select the best penalization according to \code{lambda.selection.lossfunction} criterion.
-#' They implement respectively a pure Newton method and a finite differences Newton method.
+#' The following methods are implemented: 'grid', further optimization methods are yet to come. 
+#' The 'grid' is a pure evaluation method. A vector of \code{lambda} testing penalizations must be provided.
 #' Default value \code{lambda.selection.criterion='grid'}
 #' @param DOF.evaluation This parameter is used to identify if and how to perform degrees of freedom computation.
 #' The following possibilities are allowed: NULL, 'exact' and 'stochastic'
@@ -58,9 +56,8 @@ NULL
 #' Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but it is fairly less time consuming. Stochastic evaluation is highly suggested for meshes with more than 5000 nodes.
 #' Default value \code{DOF.evaluation=NULL}
 #' @param lambda.selection.lossfunction This parameter is used to determine if some loss function has to be evaluated.
-#' The following methods are implemented: 'grid', further optimization methods are yet to come. 
-#' The 'grid' is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
-#' Default value \code{lambda.selection.criterion='grid'}
+#' The following possibilities are allowed: NULL and 'GCV' (generalized cross validation)
+#' Default value \code{lambda.selection.lossfunction=NULL}
 #' @param lambdaS A scalar or vector of spatial smoothing parameters.
 #' @param lambdaT A scalar or vector of temporal smoothing parameters.
 #' @param DOF.stochastic.realizations This positive integer is considered only when \code{DOF.evaluation = 'stochastic'}.
