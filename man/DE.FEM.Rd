@@ -77,10 +77,9 @@ N.B. Only one between \code{nThread_int}, \code{nThread_l}, \code{nThread_fold} 
 \item{nThread_fold}{Integer specifying the number of threads to paralllize the loop over folds during cross-validation. Default is 1.
 #' N.B. Only one between \code{nThread_int}, \code{nThread_l}, \code{nThread_fold} can be 2, the others need to be 1.}
 }
-                 
 \value{
 A list with the following variables:
-\item{\code{FEMbasis}}{Given FEMbasis with tree informations.}
+\item{\code{treeFEMbasis}}{ Tree informations.}
 \item{\code{g}}{A vector of length #\code{nodes} that represents the value of the g-function estimated for each \code{node} of the mesh.
 The density is the exponential of this function.}
 \item{\code{f_init}}{A #\code{nodes}-by-#\code{lambda} parameters matrix. Each column contains the node values of the initial
@@ -137,6 +136,5 @@ evaluation <- eval.FEM(FEM(FEMbasis, coeff = sol$g), locations = grid)
 evaluation <- exp(evaluation)
 eval <- matrix(evaluation, n, n)
 
-image2D(x = X, y = Y, z = eval, col = heat.colors(100), xlab = "x", ylab = "y", 
-        contour = list(drawlabels = FALSE), main = "Estimated density")
+image2D(x=X, y=Y, z=eval, col=heat.colors(100), xlab="x",ylab="y", contour=list(drawlabels = FALSE), main = "Estimated density")
 }

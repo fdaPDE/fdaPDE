@@ -11,6 +11,7 @@ library(fdaPDE)
 #            no covariates
 #            no BC
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -63,6 +64,7 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 #            with covariates
 #            no BC
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -135,7 +137,6 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 output_CPP$solution$beta
 
 #### Test 2.4: Newton method with exact GCV, default initial lambda and tolerance
-
 output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
                        covariates = cov1,
                        FEMbasis=FEMbasis, 
@@ -146,7 +147,6 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 output_CPP$solution$beta
 
 #### Test 2.5: Newton_fd method with exact GCV, default initial lambda and tolerance
-
 output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
                        covariates = cov1,
                        FEMbasis=FEMbasis, 

@@ -101,6 +101,7 @@ image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis
 #            no BC
 #            order FE = 1
 #            separate penalizations 
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -202,7 +203,7 @@ output_CPP$beta[,bestlambdas[1],bestlambdas[2]]
 #            no BC
 #            order FE = 2
 #            separate penalizations
-
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -279,7 +280,7 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations,
 #            with BC
 #            order FE = 1
 #            parabolic smoothing
-
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -467,7 +468,7 @@ output_CPP<-smooth.FEM.time(observations=observations,
 ####### 2.5D ########
 
 #### hub pointwise (examples with and without covariates) ####
-
+library(fdaPDE)
 rm(list=ls())
 
 data(hub2.5D)
@@ -561,6 +562,7 @@ RMSE(sol_eval,sol_exact)
 
 
 #### hub areal (examples with and without covariates) ####
+library(fdaPDE)
 rm(list=ls())
 
 data(hub2.5Dareal)
@@ -630,7 +632,7 @@ solPar = smooth.FEM.time(observations = datacov[,2:length(TimeNodes)],time_mesh 
 ######### 3D (These tests are slow!) #########
 
 #### sphere 3D pointwise (with or without covariates + locations at nodes or not + stochastic GCV) ####
-
+library(fdaPDE)
 rm(list=ls())
 
 # Build mesh: Sphere

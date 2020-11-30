@@ -12,6 +12,7 @@ library(fdaPDE)
 #            no covariates
 #            no BC
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -75,6 +76,7 @@ output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda.selection.cr
 #            with covariates
 #            no BC
 #            order FE = 1
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -178,6 +180,7 @@ output_CPP$solution$beta
 #            no covariates
 #            no BC
 #            order FE = 2
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
@@ -274,7 +277,7 @@ image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 #            no covariates
 #            with BC
 #            order FE = 1
-
+library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
