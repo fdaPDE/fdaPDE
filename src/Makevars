@@ -1,7 +1,7 @@
 #Makevars to make the compiler compile in the subdirectories (do not need to modify)
 
 #Open MP library
-PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS)
+PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS) -Wno-ignored-attributes
 PKG_LIBS=$(SHLIB_OPENMP_CXXFLAGS)
 
 #Use c++11

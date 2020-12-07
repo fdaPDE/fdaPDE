@@ -1,24 +1,22 @@
 #ifndef __DATA_PROBLEM_IMP_H__
 #define __DATA_PROBLEM_IMP_H__
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
-DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+DataProblem<Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
   SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
   SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold,SEXP Rsearch, SEXP Rmesh):
   deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, RnThreads_int, RnThreads_l, RnThreads_fold, Rsearch),
-   mesh_(Rmesh){
+   mesh_(Rmesh, INTEGER(Rsearch)[0]){
 
     // PROJECTION
 
       if(mydim == 2 && ndim == 3){
         Rprintf("##### DATA PROJECTION #####\n");
+        std::vector<Point<ndim> > data = deData_.getData();
+        projection<ORDER, mydim, ndim> projection(mesh_, data);
+        std::vector<Point<ndim> > new_data = projection.computeProjection();
+        deData_.setNewData(new_data);
       }
-
-    std::vector<Point> data = deData_.getData();
-    projection<ORDER, mydim, ndim> projection(mesh_, data);
-    std::vector<Point> new_data = projection.computeProjection();
-    deData_.setNewData(new_data);
-
 
     // REMOVE POINTS NOT IN THE DOMAIN
     data = deData_.getData(); // for the 2.5D case
@@ -28,11 +26,7 @@ DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP
     bool check = false;
     for(auto it = data.begin(); it != data.end(); ){
 
-      if (deData_.getSearch() == 1) { //use Naive search
-        tri_activated = mesh_.findLocationNaive(data[it - data.begin()]);
-      } else if (deData_.getSearch() == 2) { //use Tree search (default)
-        tri_activated = mesh_.findLocationTree(data[it - data.begin()]);
-      }
+      tri_activated = mesh_.findLocation(data[it - data.begin()]); 
 
       if(tri_activated.getId() == Identifier::NVAL)
       {
@@ -64,11 +58,11 @@ DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::DataProblem(SEXP
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
-void DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::fillFEMatrices(){
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+void DataProblem<Integrator_noPoly, ORDER, mydim, ndim>::fillFEMatrices(){
 
   //fill R0 and R1
-  FiniteElement<Integrator, ORDER, mydim, ndim> fe;
+  FiniteElement<ORDER, mydim, ndim> fe;
   typedef EOExpr<Mass> ETMass; Mass EMass; ETMass mass(EMass);
   typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
   Assembler::operKernel(mass, mesh_, fe, R0_);
@@ -82,61 +76,37 @@ void DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::fillFEMatri
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
-void DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::fillPsiQuad(){
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+void DataProblem<Integrator_noPoly, ORDER, mydim, ndim>::fillPsiQuad(){
 
   constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
 
-	PsiQuad_.resize(Integrator_noPoly::NNODES, Nodes);
+  PsiQuad_.resize(Integrator_noPoly::NNODES, Nodes);
 
-	//Set the properties of the reference element
-	std::vector<Point> reference_nodes;
-
-  if (mydim==2){
-  	reference_nodes.push_back(Point(0,0));
-  	reference_nodes.push_back(Point(1,0));
-  	reference_nodes.push_back(Point(0,1));
+  for(UInt i=0; i<Integrator_noPoly::NNODES; i++)
+  {
+    Eigen::Matrix<Real, Nodes, 1> evaluator=reference_eval_point<Nodes, mydim>(Integrator_noPoly::NODES[i]);
+    for(UInt node = 0; node < Nodes ; ++node)
+    {
+      PsiQuad_(i, node) = evaluator[node];
+    }
   }
-  else if (mydim==3){
-    reference_nodes.push_back(Point(0,0,0));
-  	reference_nodes.push_back(Point(1,0,0));
-  	reference_nodes.push_back(Point(0,1,0));
-    reference_nodes.push_back(Point(0,0,1));
-  }
-
-	Element<Nodes,mydim,ndim> referenceElem = Element<Nodes,mydim,ndim> (Id(0), reference_nodes);
-
-	Eigen::Matrix<Real,Nodes,1> coefficients;
-
-	Real evaluator;
-
-	for(UInt i=0; i<Integrator_noPoly::NNODES; i++)
-	{
-			for(UInt node = 0; node < Nodes ; ++node)
-			{
-				coefficients = Eigen::Matrix<Real,Nodes,1>::Zero();
-				coefficients(node) = 1; //Activates only current base
-				evaluator = evaluate_point<Nodes, mydim, ndim>(referenceElem, Integrator_noPoly::NODES[i], coefficients);
-				PsiQuad_(i, node) = evaluator;
-			}
-	}
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
-Real DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::FEintegrate_exponential(const VectorXr& g) const{
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+Real DataProblem<Integrator_noPoly, ORDER, mydim, ndim>::FEintegrate_exponential(const VectorXr& g) const{
+
+  using EigenMap2WEIGHTS = Eigen::Map<const Eigen::Matrix<Real, Integrator_noPoly::NNODES, 1> >;
+  constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
 
   Real total_sum = 0.;
-
-  constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
 
   omp_set_num_threads(deData_.getNThreads_int()); // set the number of threads
   #pragma omp parallel for reduction(+: total_sum)
   for(UInt triangle=0; triangle<mesh_.num_elements(); triangle++){
 
-    FiniteElement<Integrator_noPoly, ORDER, mydim, ndim> fe;
     Element<Nodes, mydim, ndim> tri_activated = mesh_.getElement(triangle);
-    fe.updateElement(tri_activated);
 
     VectorXr sub_g(Nodes);
     for (UInt i=0; i<Nodes; i++){
@@ -145,22 +115,17 @@ Real DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::FEintegrate
 
     VectorXr expg = (PsiQuad_*sub_g).array().exp();
 
-    // mind we are using quadrature rules whom weights sum to the element measure.
-    if (ndim==2){
-      total_sum+=expg.dot(Integrator_noPoly::WEIGHTS)*std::abs(fe.getDet());
-    }
-    else if (ndim==3){
-      total_sum+=expg.dot(Integrator_noPoly::WEIGHTS)*std::sqrt(std::abs(fe.getDet()));
-    }
+    total_sum+=expg.dot(EigenMap2WEIGHTS(&Integrator_noPoly::WEIGHTS[0]))*tri_activated.getMeasure();
+
   }
 
   return total_sum;
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 SpMat
-DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computePsi(const std::vector<UInt>& indices) const{
+DataProblem<Integrator_noPoly, ORDER, mydim, ndim>::computePsi(const std::vector<UInt>& indices) const{
 
   UInt nnodes = mesh_.num_nodes();
 	UInt nlocations = indices.size();
@@ -171,21 +136,15 @@ DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computePsi(const
 
 	// Constexpr is used for selecting the right number of nodes to pass as a template parameter to the Element object.In case of planar domain(i.e. mydim==2), we have that the number of nodes is 3*ORDER. In case of volumetric domain (i.e. mydim==3), we have that the number of nodes is 4 nodes if ORDER==1 and 10 nodes if ORDER==2, so the expression is 6*ORDER-2. ORDER==2 if mydim==3 is not yet implemented.
 	constexpr UInt Nodes = mydim ==2? 3*ORDER : 6*ORDER-2;
-	Element<Nodes, mydim, ndim> tri_activated;
-	Eigen::Matrix<Real,Nodes,1> coefficients;
-
-	Real evaluator;
+	
+  Element<Nodes, mydim, ndim> tri_activated;
 	std::vector<coeff> triplets;
 	triplets.reserve(Nodes*nlocations);
 
 	for(auto it = indices.cbegin(); it != indices.cend(); it++)
 	{
 
-    if (deData_.getSearch() == 1) { //use Naive search
-      tri_activated = mesh_.findLocationNaive(deData_.getDatum(*it));
-    } else if (deData_.getSearch() == 2) { //use Tree search (default)
-      tri_activated = mesh_.findLocationTree(deData_.getDatum(*it));
-    }
+    tri_activated = mesh_.findLocation(deData_.getDatum(*it));
 
 		if(tri_activated.getId() == Identifier::NVAL)
 		{
@@ -199,10 +158,8 @@ DataProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computePsi(const
     {
 			for(UInt node = 0; node < Nodes ; ++node)
 			{
-				coefficients = Eigen::Matrix<Real,Nodes,1>::Zero();
-				coefficients(node) = 1; //Activates only current base
-				evaluator = evaluate_point<Nodes, mydim, ndim>(tri_activated, deData_.getDatum(*it), coefficients);
-				triplets.emplace_back(it-indices.cbegin(), tri_activated[node].getId(), evaluator);
+        Real evaluator = tri_activated.evaluate_point(deData_.getDatum(*it), Eigen::Matrix<Real,Nodes,1>::Unit(node));
+        triplets.emplace_back(it-indices.cbegin(), tri_activated[node].getId(), evaluator);
 			}
 		}
 	}
