@@ -4,9 +4,11 @@
 #pragma omp declare reduction(sumVectorXd: Eigen::VectorXd: omp_out = omp_out + omp_in)\
 										initializer(omp_priv = Eigen::VectorXd::Zero(omp_orig.size()))
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 std::pair<Real,VectorXr>
-FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const{
+FunctionalProblem<Integrator_noPoly, ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const{
+
+  using EigenMap2WEIGHTS = Eigen::Map<const Eigen::Matrix<Real, Integrator_noPoly::NNODES, 1> >;
 
   // Initialization
 	Real int1 = 0.;
@@ -18,10 +20,7 @@ FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeInt
   #pragma omp parallel for reduction(+: int1) reduction(sumVectorXd: int2)
 	for(UInt triangle=0; triangle<dataProblem_.getNumElements(); triangle++){
 
-		FiniteElement<Integrator_noPoly, ORDER, mydim, ndim> fe;
-
-		Element<Nodes, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
-		fe.updateElement(tri_activated);
+    Element<Nodes, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
 
 // (1) -------------------------------------------------
 
@@ -33,15 +32,9 @@ FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeInt
 		VectorXr expg = (dataProblem_.getPsiQuad()*sub_g).array().exp();
 
     VectorXr sub_int2;
-    // mind we are using quadrature rules whom weights sum to the element measure.
-    if (ndim==2){
-      int1+=expg.dot(Integrator_noPoly::WEIGHTS)*std::abs(fe.getDet());
-  		sub_int2 =((expg.cwiseProduct(Integrator_noPoly::WEIGHTS)).transpose()*dataProblem_.getPsiQuad())*std::abs(fe.getDet());
-    }
-    else if (ndim==3){
-      int1+=expg.dot(Integrator_noPoly::WEIGHTS)*std::sqrt(std::abs(fe.getDet()));
-  		sub_int2 =((expg.cwiseProduct(Integrator_noPoly::WEIGHTS)).transpose()*dataProblem_.getPsiQuad())*std::sqrt(std::abs(fe.getDet()));
-    }
+
+    int1+=expg.dot(EigenMap2WEIGHTS(&Integrator_noPoly::WEIGHTS[0]))*tri_activated.getMeasure();
+    sub_int2 =((expg.cwiseProduct(EigenMap2WEIGHTS(&Integrator_noPoly::WEIGHTS[0]))).transpose()*dataProblem_.getPsiQuad())*tri_activated.getMeasure();
 
   	for (UInt i=0; i<Nodes; i++){
   		int2[tri_activated[i].getId()]+= sub_int2[i];
@@ -52,9 +45,9 @@ FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeInt
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 std::tuple<Real, VectorXr, Real, Real>
-FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeFunctional_g(const VectorXr& g, Real lambda, const SpMat& Psi) const{
+FunctionalProblem<Integrator_noPoly, ORDER, mydim, ndim>::computeFunctional_g(const VectorXr& g, Real lambda, const SpMat& Psi) const{
 
   Real int1;
   VectorXr int2;
@@ -75,9 +68,9 @@ FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeFun
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 std::pair<Real,Real>
-FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeLlikPen_f(const VectorXr& f) const{
+FunctionalProblem<Integrator_noPoly, ORDER, mydim, ndim>::computeLlikPen_f(const VectorXr& f) const{
 
   Real llik = - (dataProblem_.getGlobalPsi()*f).array().log().sum() +
                   dataProblem_.getNumberofData()*dataProblem_.FEintegrate(f);
