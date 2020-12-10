@@ -17,8 +17,6 @@ class DEData{
 	private:
 		// Data = locations.
 		std::vector<Point<ndim> > data_;
-		// Number of observations.
-		UInt n_;
 		// Finite element order.
 		UInt order_;
 		// Initial coefficients for the density.
@@ -90,20 +88,17 @@ class DEData{
 			SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rsearch);
 
 
-
-		// Setters
-		//! A method to set new data (needed for projection).
-		void setNewData(const std::vector<Point<ndim> >& );
-		void setDatum(const Point<ndim>& , UInt );
-		void updateN(UInt );
-
 		// Getters
-		//! A method returning the data.
-		std::vector<Point<ndim> > getData() const {return data_;}
-		//! A method returning a datum.
-		Point<ndim> getDatum(UInt i) const {return data_[i];}
+		//! A method to access the data.
+		std::vector<Point<ndim> >& data() {return data_;}
+		//! A const method to access the data.
+		const std::vector<Point<ndim> >& data() const {return data_;}
+		//! A method to access a datum.
+		Point<ndim>& data(UInt i) {return data_[i];}
+		//! A const method to access a datum.
+		const Point<ndim>& data(UInt i) const {return data_[i];}
 		//! A method returning the number of observations.
-		UInt getNumberofData() const {return n_;}
+		UInt dataSize() const {return data_.size();}
 		//! A method returning the the input order.
 		UInt getOrder() const {return order_;}
 		//! A method returning the initial coefficients for the density.
@@ -147,5 +142,5 @@ class DEData{
 
 };
 
-
+#include "DE_Data_imp.h"
 #endif

@@ -6,7 +6,7 @@
 #include "../../FE_Assemblers_Solvers/Include/Matrix_Assembler.h"
 #include "../../Mesh/Include/Mesh.h"
 
-template<typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP get_integration_points_skeleton(SEXP Rmesh)
 {
 	using Integrator = typename FiniteElement<ORDER, mydim, ndim>::Integrator;
@@ -30,7 +30,7 @@ SEXP get_integration_points_skeleton(SEXP Rmesh)
 	return(result);
 }
 
-template<typename Integrator, UInt ORDER, UInt mydim, UInt ndim, typename A>
+template<UInt ORDER, UInt mydim, UInt ndim, typename A>
 SEXP get_FEM_Matrix_skeleton(SEXP Rmesh, EOExpr<A> oper)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);

@@ -15,14 +15,16 @@
 // This file contains data informations for the Density Estimation problem
 
 //! @brief A class to store common data for the problem.
-template<typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim>
 class DataProblem{
   private:
+    using Integrator = typename DensityIntegratorHelper::Integrator<mydim>;
+    static constexpr UInt EL_NNODES = how_many_nodes(ORDER,mydim);
     DEData deData_;
     MeshHandler<ORDER, mydim, ndim> mesh_;
     SpMat R0_, R1_, GlobalPsi_;
-    MatrixXr P_, PsiQuad_;
-    static constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
+    MatrixXr P_;
+    Eigen::Matrix<Real, Integrator::NNODES, EL_NNODES> PsiQuad_;
 
     //! A method to compute the finite element matrices.
     void fillFEMatrices();
@@ -43,13 +45,13 @@ class DataProblem{
     //! A method to compute the matrix which evaluates the basis function at the data points.
     SpMat computePsi(const std::vector<UInt>& indices) const;
 
-    // Getters
-		//! A method returning the data. It calls the same method of DEData class.
-		std::vector<Point<ndim> > getData() const {return deData_.getData();}
+    //! A method to access the data. It calls the same method of DEData class.
+    const std::vector<Point<ndim> >& data() const {return deData_.data();}
     //! A method returning a datum. It calls the same method of DEData class.
-    Point<ndim> getDatum(UInt i) const {return deData_.getDatum(i);}
+    const Point<ndim>& data(UInt i) const {return deData_.data(i);}
+
     //! A method returning the number of observations. It calls the same method of DEData class.
-		UInt getNumberofData() const {return deData_.getNumberofData();}
+    UInt dataSize() const {return deData_.dataSize();}
 		//! A method returning the the input order. It calls the same method of DEData class.
 		UInt getOrder() const {return deData_.getOrder();}
 		//! A method returning the initial coefficients for the density. It calls the same method of DEData class.
@@ -98,15 +100,15 @@ class DataProblem{
     //! A method returning a node. It calls the same method of MeshHandler class.
     Point<ndim> getPoint(Id id) const {return mesh_.getPoint(id);}
     //! A method returning an element. It calls the same method of MeshHandler class.
-    Element<Nodes,mydim,ndim> getElement(Id id) const {return mesh_.getElement(id);}
+    Element<EL_NNODES,mydim,ndim> getElement(Id id) const {return mesh_.getElement(id);}
     //! A method returning the element in which the point in input is located. It calls the same method of MeshHandler class.
-    Element<Nodes,mydim,ndim> findLocation(const Point<ndim>& point) const {return mesh_.findLocation(point);}
+    Element<EL_NNODES,mydim,ndim> findLocation(const Point<ndim>& point) const {return mesh_.findLocation(point);}
 
     //getter for matrices
     //! A method returning the P matrix.
     MatrixXr getP() const {return P_;}
     //! A method returning the PsiQuad_ matrix.
-    MatrixXr getPsiQuad() const {return PsiQuad_;}
+    const Eigen::Matrix<Real, Integrator::NNODES, EL_NNODES>& getPsiQuad() const {return PsiQuad_;}
     //! A method returning the GlobalPsi_ matrix.
     SpMat getGlobalPsi() const {return GlobalPsi_;}
 };

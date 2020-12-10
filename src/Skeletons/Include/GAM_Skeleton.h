@@ -7,7 +7,7 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 
-template<typename InputHandler,typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
+template<typename InputHandler,UInt ORDER, UInt mydim, UInt ndim>
 SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, SEXP Rmesh, SEXP Rmu0, std::string family, SEXP RscaleParam)
 {
   MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, GAMData.getSearch());
