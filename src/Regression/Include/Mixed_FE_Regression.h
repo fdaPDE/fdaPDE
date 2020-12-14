@@ -233,7 +233,7 @@ class MixedFERegression : public MixedFERegressionBase<InputHandler>
 };
 
 //! A class for the construction of the temporal matrices needed for the parabolic case
-template<typename InputHandler, typename Integrator, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
+template<typename InputHandler>
 class MixedSplineRegression
 {
 	private:

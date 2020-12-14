@@ -33,7 +33,7 @@ HeatProcess<ORDER, mydim, ndim>::HeatProcess(const DataProblem<ORDER, mydim, ndi
     llik_.resize(niter_);
     penTerm_.resize(niter_);
 
-    data_index_.resize(this->dataProblem_.getNumberofData());
+    data_index_.resize(this->dataProblem_.dataSize());
     std::iota(data_index_.begin(),data_index_.end(),0);
 
     computePatchAreas();
@@ -136,7 +136,7 @@ Heat_CV<ORDER, mydim, ndim>::Heat_CV(const DataProblem<ORDER, mydim, ndim>& dp,
 
     cv_errors_.resize(this->niter_, 0);
 
-    K_folds_.resize(dp.getNumberofData());
+    K_folds_.resize(dp.dataSize());
 
     perform_init_cv();
 
@@ -146,7 +146,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 void
 Heat_CV<ORDER, mydim, ndim>::perform_init_cv(){
 
-    UInt N = this->dataProblem_.getNumberofData();
+    UInt N = this->dataProblem_.dataSize();
     UInt K = nFolds_;
 
     for (UInt i = 0; i< N; i++){
@@ -188,7 +188,7 @@ Heat_CV<ORDER, mydim, ndim>::perform_init_cv(){
    
 
     // totale
-    this->data_index_.resize(this->dataProblem_.getNumberofData());
+    this->data_index_.resize(this->dataProblem_.dataSize());
     std::iota(this->data_index_.begin(),this->data_index_.end(),0);
 
     this-> computeStartingDensities();

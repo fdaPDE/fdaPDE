@@ -7,10 +7,8 @@ MeshHandler<ORDER,mydim,ndim>::MeshHandler(SEXP Rmesh, UInt search) :
 	points_(VECTOR_ELT(Rmesh, 0)), sides_(VECTOR_ELT(Rmesh, 6)),
 		elements_(VECTOR_ELT(Rmesh, 3)), neighbors_(VECTOR_ELT(Rmesh, 8)),
 		 	search_(search) {
-				if((XLENGTH(Rmesh)==11 || TYPEOF(VECTOR_ELT(Rmesh, 11))==0) && search==2)
-					tree_ptr_.reset(new ADTree<meshElement>(points_, elements_));
-				else if (search==2)
-					tree_ptr_.reset(new ADTree<meshElement>(Rmesh));
+		 		if(search==2)
+		 			tree_ptr_=make_unique<const ADTree<meshElement> > (Rmesh);
 				}
 
 template <UInt ORDER, UInt mydim, UInt ndim>

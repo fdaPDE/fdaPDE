@@ -77,7 +77,7 @@ void FPCAData::setDatamatrix(SEXP Rdatamatrix)
 
 	nRegions_ = incidenceMatrix_.rows();
 
-	if(locations_.size() == 0 && nRegions_==0)
+	if(locations_.nrows() == 0 && nRegions_==0)
 	{
 		locations_by_nodes_ = true;
 		for(auto i=0; i<n_; ++i)

@@ -458,7 +458,7 @@ SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_loca
 	UInt nRegions = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[0];
 	UInt nElements = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[1]; //number of triangles/tetrahedron if areal data
 	//Declare pointer to access data from C++
-	const Real *X, *Y, *Z, *mesh_time, *t;
+	Real *X, *Y, *Z, *mesh_time, *t;
 	UInt **incidenceMatrix;
 	double *coef;
 	int order, search;
@@ -750,11 +750,11 @@ SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_loca
 			prjData_ = projector.computeProjection();
 		}
 
-		// if (order == 2) {
-		// MeshHandler<2,2,3> mesh(Rmesh);
-		// projection<2,2,3> projector(mesh, deData_);
-		// prjData_ = projector.computeProjection();
-		// }
+		if (order == 2) {
+			MeshHandler<2,2,3> mesh(Rmesh);
+			projection<2,2,3> projector(mesh, deData_);
+			prjData_ = projector.computeProjection();
+		}
 	}
 
 	for (int i=0; i<n_X; ++i)

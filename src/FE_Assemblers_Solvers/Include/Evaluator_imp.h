@@ -2,7 +2,7 @@
 #define __EVALUATOR_IMP_H__
 
 template <UInt ORDER>
-void Evaluator<ORDER,2,2>::eval(Real* X, Real *Y, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside)
+void Evaluator<ORDER,2,2>::eval(const Real* X, const Real *Y, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside)
 {
 
 	constexpr UInt Nodes = 3*ORDER;
@@ -34,7 +34,7 @@ void Evaluator<ORDER,2,2>::eval(Real* X, Real *Y, UInt length, const Real *coef,
 }
 
 template <UInt ORDER>
-void Evaluator<ORDER,2,2>::evalWithInfo(Real* X, Real *Y, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside, const std::vector<UInt> & element_id, Real **barycenters)
+void Evaluator<ORDER,2,2>::evalWithInfo(const Real* X, const Real *Y, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside, const std::vector<UInt> & element_id, Real **barycenters)
 {
 
 	constexpr UInt Nodes = 3*ORDER;
@@ -64,7 +64,7 @@ void Evaluator<ORDER,2,2>::evalWithInfo(Real* X, Real *Y, UInt length, const Rea
 
 
 template <UInt ORDER>
-void Evaluator<ORDER,2,3>::eval(Real* X, Real *Y,  Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside)
+void Evaluator<ORDER,2,3>::eval(const Real* X, const Real *Y,  const Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside)
 {
 
 	constexpr UInt Nodes = 3*ORDER;
@@ -93,7 +93,7 @@ void Evaluator<ORDER,2,3>::eval(Real* X, Real *Y,  Real *Z, UInt length, const R
 }
 
 template <UInt ORDER>
-void Evaluator<ORDER,2,3>::evalWithInfo(Real* X, Real *Y, Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside, const std::vector<UInt> & element_id, Real **barycenters)
+void Evaluator<ORDER,2,3>::evalWithInfo(const Real* X, const Real *Y, const Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside, const std::vector<UInt> & element_id, Real **barycenters)
 {
 
 	constexpr UInt Nodes = 3*ORDER;
@@ -120,7 +120,7 @@ void Evaluator<ORDER,2,3>::evalWithInfo(Real* X, Real *Y, Real *Z, UInt length, 
 }
 
 template <UInt ORDER>
-void Evaluator<ORDER,3,3>::eval(Real* X, Real *Y,  Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside)
+void Evaluator<ORDER,3,3>::eval(const Real* X, const Real *Y,  const Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside)
 {
 
 	constexpr UInt Nodes = 6*ORDER-2;
@@ -155,7 +155,7 @@ void Evaluator<ORDER,3,3>::eval(Real* X, Real *Y,  Real *Z, UInt length, const R
 }
 
 template <UInt ORDER>
-void Evaluator<ORDER,3,3>::evalWithInfo(Real* X, Real *Y, Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside, const std::vector<UInt> & element_id, Real **barycenters)
+void Evaluator<ORDER,3,3>::evalWithInfo(const Real* X, const Real *Y, const Real *Z, UInt length, const Real *coef, bool redundancy, Real* result, std::vector<bool>& isinside, const std::vector<UInt> & element_id, Real **barycenters)
 {
 
 	constexpr UInt Nodes = 6*ORDER-2;

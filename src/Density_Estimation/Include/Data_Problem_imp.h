@@ -3,9 +3,13 @@
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
-  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh):
-  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch),
+  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
+  SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold,SEXP Rsearch, SEXP Rmesh):
+  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, RnThreads_int, RnThreads_l, RnThreads_fold),
    mesh_(Rmesh, INTEGER(Rsearch)[0]){
+
+
+    std::vector<Point<ndim> >& data = deData_.data();
 
     // PROJECTION
 
@@ -32,7 +36,7 @@ DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec
     fillFEMatrices();
     fillPsiQuad();
 
-    std::vector<UInt> v(deData_.getNumberofData());
+    std::vector<UInt> v(deData_.dataSize());
     std::iota(v.begin(),v.end(),0);
     GlobalPsi_ = computePsi(v);
 }

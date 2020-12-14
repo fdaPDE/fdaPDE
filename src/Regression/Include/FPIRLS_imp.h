@@ -304,7 +304,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_variance_est(){
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS<InputHandler,ORDER, mydim, ndim>::apply(){
 
-  FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply(ForcingTerm(std::vector<Real>(1)));
+  FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply(ForcingTerm());
 
 }
 

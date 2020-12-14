@@ -71,7 +71,7 @@ std::pair<Real,Real>
 FunctionalProblem<ORDER, mydim, ndim>::computeLlikPen_f(const VectorXr& f) const{
 
   Real llik = - (dataProblem_.getGlobalPsi()*f).array().log().sum() +
-                  dataProblem_.getNumberofData()*dataProblem_.FEintegrate(f);
+                  dataProblem_.dataSize()*dataProblem_.FEintegrate(f);
   VectorXr tmp = f.array().log();
   Real pen = tmp.dot(dataProblem_.getP()*tmp);
 

@@ -20,7 +20,7 @@ class DataProblem{
   private:
     using Integrator = typename DensityIntegratorHelper::Integrator<mydim>;
     static constexpr UInt EL_NNODES = how_many_nodes(ORDER,mydim);
-    DEData deData_;
+    DEData<ndim> deData_;
     MeshHandler<ORDER, mydim, ndim> mesh_;
     SpMat R0_, R1_, GlobalPsi_;
     MatrixXr P_;

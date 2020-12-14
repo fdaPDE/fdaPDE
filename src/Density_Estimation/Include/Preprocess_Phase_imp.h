@@ -41,7 +41,7 @@ CrossValidation<ORDER, mydim, ndim>::CrossValidation(const DataProblem<ORDER, my
   std::shared_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> ma):
   Preprocess<ORDER, mydim, ndim>(dp, fp), minAlgo_(ma), error_(dp){
 
-    K_folds_.resize(dp.getNumberofData());
+    K_folds_.resize(dp.dataSize());
     CV_errors_.resize(dp.getNlambda(), 0);
     g_sols_.resize(dp.getNlambda());
 
@@ -52,7 +52,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::pair<VectorXr, Real>
 CrossValidation<ORDER, mydim, ndim>::performCV(){
 
-  UInt N = this->dataProblem_.getNumberofData();
+  UInt N = this->dataProblem_.dataSize();
   UInt K = this->dataProblem_.getNfolds();
 
   for (UInt i = 0; i< N; i++){

@@ -158,7 +158,7 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 			}
 			else
 			{ // tri_activated.getId() found, it's action might be felt a priori by all the psi of the element, one for each node
-				for(UInt node=0; node<Nodes ; ++node)
+				for(UInt node=0; node<EL_NNODES ; ++node)
 				{// Loop on all the nodes of the found element and update the related entries of Psi
 					Real evaluator = regressionData_.getBarycenter(i,node); // We already know the value to add
 					// Insert the value in the column given by the GLOBAL indexing of the evaluated NODE

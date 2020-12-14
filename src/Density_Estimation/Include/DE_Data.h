@@ -61,7 +61,7 @@ class DEData{
 
 		explicit DEData(const std::vector<Point<ndim> >& data, const UInt& order, const VectorXr& fvec, Real heatStep, UInt heatIter,
 			const std::vector<Real>& lambda, const UInt& nfolds, const UInt& nsim, const std::vector<Real>& stepProposals,
-			 Real tol1, Real tol2, bool print, UInt search);
+			 Real tol1, Real tol2, bool print, UInt nThreads_int, UInt nThreads_l, UInt nThreads_fold, UInt search);
 
 
 		/*! Costructor useful for the R C++ interface.

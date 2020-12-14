@@ -9,7 +9,6 @@
 #include "../../FE_Assemblers_Solvers/Include/Solver.h"
 #include "FPCA_Data.h"
 #include "FPCA_Object.h"
-#include "../../FE_Assemblers_Solvers/Include/Integrate_Psi.h"
 #include "../../Global_Utilities/Include/Solver_Definitions.h"
 #include <memory>
 

@@ -1,25 +1,21 @@
 #ifndef __AD_TREE_IMP_H__
 #define __AD_TREE_IMP_H__
+
 template<class Shape>
-// Initialize header_ and data_
-ADTree<Shape>::ADTree(TreeHeader<Shape> const & header): header_(header) {
-  /*
-   * The first element in the tree nodes vector is the head.
-   * It stores the address of the tree root (i.e. the first node in the tree).
-   * If it stores 0 it means that the tree is empty.
-   */
-  data_.reserve(header_.gettreeloc()+1);
-
-  // Id, obj are arbitrary parameters. Remember that data_[0] is the head, not a tree node.
-  Shape obj;
-  Id id = std::numeric_limits<UInt>::max();
-  data_.push_back(TreeNode<Shape>(id,obj));
-
+ADTree<Shape>::ADTree(SEXP Rmesh){
+  if((XLENGTH(Rmesh)==11 || TYPEOF(VECTOR_ELT(Rmesh, 11))==0)){
+    RNumericMatrix points(VECTOR_ELT(Rmesh, 0));
+    RIntegerMatrix elements(VECTOR_ELT(Rmesh, 3));
+    setTree(points, elements);
+  }
+  else
+    setTree(Rmesh);
 }
 
 
+//Shape is given as Element<NNODES,myDim,nDim> from mesh.h
 template<class Shape>
-ADTree<Shape>::ADTree(const RNumericMatrix& points, const RIntegerMatrix& triangle) {
+void ADTree<Shape>::setTree(const RNumericMatrix& points, const RIntegerMatrix& triangle) {
     int ndimp = Shape::dp(); //physical dimension
     int nvertex = Shape::numVertices; //number of nodes at each Element (not total number of nodes!)
 
@@ -74,8 +70,9 @@ ADTree<Shape>::ADTree(const RNumericMatrix& points, const RIntegerMatrix& triang
     } //end of loop
 }
 
+
 template<class Shape>
-ADTree<Shape>::ADTree(SEXP Rmesh){
+void ADTree<Shape>::setTree(SEXP Rmesh){
   int tree_loc_ = INTEGER(Rf_getAttrib(VECTOR_ELT(Rmesh, 3), R_DimSymbol))[0];
   int tree_lev_ = INTEGER(VECTOR_ELT(Rmesh, 11))[0];
   int ndimp_ = Shape::dp();
@@ -117,6 +114,8 @@ ADTree<Shape>::ADTree(SEXP Rmesh){
     coord.clear();
   }
 }
+
+
 
 
 template<class Shape>
@@ -207,7 +206,7 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
      * The list of available node is empty, so we have to put the new node
      * in the yet unassigned portion of the vector storing the tree.
      */
-    data_.push_back(TreeNode<Shape>(shapeid, shapeobj)); // push dummy object to be changed
+    data_.push_back(TreeNode<Shape>(shapeid, shapebox)); // push dummy object to be changed
   }
   // else {
   //   std::vector<Real> bcoords = {shapebox[0], shapebox[1], shapebox[2], shapebox[3]};
@@ -399,7 +398,7 @@ bool ADTree<Shape>::search(std::vector<Real> const & region, std::set<int> & fou
       }
 
       if(dimp == dimt) {
-        std::cout << "when dimp == dimt but in our case, there shouldn't be this case" << std::endl;
+        //std::cout << "when dimp == dimt but in our case, there shouldn't be this case" << std::endl;
       /*
        * This function works when we have either points or boxes.
        * In the first case we have to repeat the object's coordinates.
