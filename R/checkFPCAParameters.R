@@ -69,14 +69,10 @@ checkSmoothingParametersSizeFPCA<-function(locations = NULL, datamatrix, FEMbasi
     stop("'datamatrix' must contain at least one element")
   if(is.null(locations))
   {
-    if(class(FEMbasis$mesh) == "mesh.2D"){
-    	if(ncol(datamatrix) > nrow(FEMbasis$mesh$nodes))
+   	if(ncol(datamatrix) > nrow(FEMbasis$mesh$nodes))
      	 stop("Size of 'datamatrix' is larger then the size of 'nodes' in the mesh")
-    }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(FEMbasis$mesh) == "mesh.3D"){
-    	if(ncol(datamatrix) > FEMbasis$mesh$nnodes)
-     	 stop("Size of 'datamatrix' is larger then the size of 'nodes' in the mesh")
-    }
   }
+  
   if(!is.null(locations))
   {
     if(ncol(locations) != ndim)

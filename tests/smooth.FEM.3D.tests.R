@@ -225,7 +225,7 @@ exact_sol=func_evaluation
   
 # Plot exact solution
 plot(FEM(exact_sol, FEMbasis))
-title3d(main=paste("Exact solution, order ", j), 
+title3d(main="Exact solution, order 2", 
           col="black")
   
 # Add noise to exact solution to generate data for the simulation

@@ -68,7 +68,7 @@
 #'   a2 = rnorm(1, mean = 1, sd = 1)
 #'   a3 = rnorm(1, mean = 1, sd = 1)
 #'   
-#'   func_evaluation = numeric(mesh$nnodes)
+#'   func_evaluation = numeric(nrow(mesh$nodes))
 #'   for (i in 0:(mesh$nnodes-1)){
 #'     func_evaluation[i+1] = a1* sin(2*pi*mesh$nodes[i+1,1]) +  
 #'                            a2* sin(2*pi*mesh$nodes[i+1,2]) +  
