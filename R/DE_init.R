@@ -46,7 +46,7 @@
 #' ## Visualization 
 #' plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis))
 
-DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500, init="Heat", nFolds=5, search=2) 
+DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500, init="Heat", nFolds=5, search="tree") 
 { 
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2

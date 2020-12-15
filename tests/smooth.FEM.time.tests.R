@@ -479,7 +479,7 @@ FEMbasis <- create.FEM.basis(mesh)
 nodesLocations=mesh$nodes
 
 # Exact data - Locations at nodes
-nnodes = mesh$nnodes
+nnodes = nrow(mesh$nodes)
 a1 = rnorm(1,mean = 1, sd = 1)
 a2 = rnorm(1,mean = 1, sd = 1)
 a3 = rnorm(1,mean = 1, sd = 1)
@@ -525,8 +525,8 @@ data = func_evaluation +rnorm(nnodes,mean=0,sd=0.05*(ran[2]-ran[1]))
 ran = range(func_evaluation+ W%*%beta_exact)
 datacov=func_evaluation+ W%*%beta_exact +rnorm(nnodes,mean=0,sd=0.05*(ran[2]-ran[1]))
 
-data = matrix(data,mesh$nnodes,length(TimeNodes))
-datacov = matrix(datacov,mesh$nnodes,length(TimeNodes))
+data = matrix(data,nrow(mesh$nodes),length(TimeNodes))
+datacov = matrix(datacov,nrow(mesh$nodes),length(TimeNodes))
 
 #########################################SEPARABLE####################################################
 solSep = smooth.FEM.time(observations=data,
@@ -546,10 +546,10 @@ solPar = smooth.FEM.time(observations=data,
                          lambdaS = lambdaS, lambdaT = lambdaT,
                          FLAG_PARABOLIC = TRUE)
 
-solParCov = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+mesh$nnodes):(length(TimeNodes)*mesh$nnodes),],
+solParCov = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
                             FEMbasis = FEMbasis, time_mesh = TimeNodes,
                             lambdaS = lambdaS, lambdaT = lambdaT,
-                            IC=func_evaluation[1:mesh$nnodes],
+                            IC=func_evaluation[1:nrow(mesh$nodes)],
                             FLAG_PARABOLIC = TRUE)
   
 # Example of RMSE computation
@@ -569,7 +569,7 @@ data(hub2.5Dareal)
 
 nodesLocations=mesh$nodes
 
-nnodes = mesh$nnodes
+nnodes = nrow(mesh$nodes)
 a1 = rnorm(1,mean = 1, sd = 1)
 a2 = rnorm(1,mean = 1, sd = 1)
 a3 = rnorm(1,mean = 1, sd = 1)
@@ -622,11 +622,11 @@ solSep = smooth.FEM.time(observations = datacov,time_mesh = TimeNodes, covariate
 ##########################################PARABOLIC####################################################
 solPar = smooth.FEM.time(observations = data[,2:length(TimeNodes)],time_mesh = TimeNodes, incidence_matrix = incidence_matrix,
                          FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
-                         IC=func_evaluation[1:mesh$nnodes])
+                         IC=func_evaluation[1:nrow(mesh$nodes)])
 
 solPar = smooth.FEM.time(observations = datacov[,2:length(TimeNodes)],time_mesh = TimeNodes, incidence_matrix = incidence_matrix,covariates = W_areal[(1+RDD_groups):(length(TimeNodes)*RDD_groups),],
                          FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, 
-                         IC=func_evaluation[1:mesh$nnodes])
+                         IC=func_evaluation[1:nrow(mesh$nodes)])
 
 
 ######### 3D (These tests are slow!) #########
@@ -641,7 +641,7 @@ sphere3D<-create.mesh.3D(sphere3Ddata$nodes, sphere3Ddata$tetrahedrons)
 # plot(sphere3D)
 FEMbasis <- create.FEM.basis(sphere3D)
 nodesLocations=sphere3D$nodes
-nnodes = sphere3D$nnodes
+nnodes = nrow(sphere3D$nodes)
 TimeLocations = seq(0,1,length.out = 5)
 Locations = cbind(rep(TimeLocations,each=nnodes),rep(nodesLocations[,1],length(TimeLocations)),rep(nodesLocations[,2],length(TimeLocations)),rep(nodesLocations[,3],length(TimeLocations)))
 
