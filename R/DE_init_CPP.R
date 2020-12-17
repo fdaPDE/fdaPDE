@@ -106,20 +106,20 @@ CPP_FEM.volume.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatI
                               stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
 {
   
-  FEMbasis$mesh$tetrahedrons=c(t(FEMbasis$mesh$tetrahedrons))
-  FEMbasis$mesh$nodes=c(t(FEMbasis$mesh$nodes))
-  
-  #riporto in R lo shift degli indici
-  FEMbasis$mesh$tetrahedrons=FEMbasis$mesh$tetrahedrons-1
+  # Indexes in C++ starts from 0, in R from 1, opportune transformation
+
+  FEMbasis$mesh$tetrahedrons = FEMbasis$mesh$tetrahedrons - 1
+  FEMbasis$mesh$faces = FEMbasis$mesh$faces - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
   
   
   ## Set proper type for correct C++ reading
   storage.mode(data) <- "double"                        
   storage.mode(FEMbasis$mesh$order) <- "integer"
-  storage.mode(FEMbasis$mesh$nnodes) <- "integer"
-  storage.mode(FEMbasis$mesh$ntetrahedrons) <- "integer"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$tetrahedrons) <- "integer"
+  storage.mode(FEMbasis$mesh$faces) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   storage.mode(lambda) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"

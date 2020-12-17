@@ -6,7 +6,7 @@
 \usage{
 DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
 tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2, nThreads_l=1, nThreads_fold=1, nfolds=NULL,
-nsimulations=500, step_method = "Fixed_Step", direction_method = "BFGS", preprocess_method="NoCrossValidation", search = 2)
+nsimulations=500, step_method = "Fixed_Step", direction_method = "BFGS", preprocess_method="NoCrossValidation", search = "tree")
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point, 
@@ -65,8 +65,7 @@ cross validation method is performed. If it is \code{SimplifiedCV} a simplified 
 In the latter case the number of smoothing parameters \code{lambda} must be equal to the number of folds \code{nfolds}.
 Default is \code{NULL}.}
 
-\item{search}{An integer specifying the search algorithm to use. It is either 1 (Naive search algorithm) or 2 (Tree search algorithm).
-The default is 2.}
+\item{search}{a flag to decide the search algorithm type (tree or naive or walking search algorithm).}
 
 \item{nThread_int}{Integer specifying the number of threads to paralllize the computation of integrals. Default is 2. 
 N.B. Only one between \code{nThread_int}, \code{nThread_l}, \code{nThread_fold} can be 2, the others need to be 1.}
@@ -124,7 +123,7 @@ sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, fvec=NULL, heat
                   heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2,
                   nThreads_l=1, nThreads_fold=1, nfolds=NULL, nsimulations=500, 
                   step_method = "Fixed_Step", direction_method = "BFGS",
-                  preprocess_method="NoCrossValidation", search = 2)
+                  preprocess_method="NoCrossValidation", search = "tree")
 
 ## Visualization 
 n = 100

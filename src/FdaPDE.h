@@ -49,6 +49,8 @@ typedef Eigen::SparseMatrix<Real> SpMat;
 typedef Eigen::SparseVector<Real> SpVec;
 typedef Eigen::Triplet<Real> coeff;
 
+#include "Global_Utilities/Include/RObjects.h"
+
 template <bool ... b>
 struct multi_bool_type
 {};

@@ -68,7 +68,7 @@
 #'   a2 = rnorm(1, mean = 1, sd = 1)
 #'   a3 = rnorm(1, mean = 1, sd = 1)
 #'   
-#'   func_evaluation = numeric(mesh$nnodes)
+#'   func_evaluation = numeric(nrow(mesh$nodes))
 #'   for (i in 0:(mesh$nnodes-1)){
 #'     func_evaluation[i+1] = a1* sin(2*pi*mesh$nodes[i+1,1]) +  
 #'                            a2* sin(2*pi*mesh$nodes[i+1,2]) +  
@@ -117,13 +117,19 @@ FPCA.FEM<-function(locations = NULL, datamatrix, FEMbasis, lambda, nPC = 1, vali
     stop("GCVmethod must be either Stochastic or Exact")
   }
 
-  if(search=="naive")
+    # Search algorithm
+  if(search=="naive"){
     search=1
-  else if(search=="tree")
+  }else if(search=="tree"){
     search=2
-  else{
-    stop("search must be either tree or naive.")
+  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.2.5D"){
+    stop("walking search is not available for mesh class mesh.2.5D.")
+  }else if(search=="walking" & class(FEMbasis$mesh) != "mesh.2.5D"){
+    search=3
+  }else{
+    stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
   }
+
 ##################### Checking parameters, sizes and conversion ################################
   #if locations is null but bary.locations is not null, use the locations in bary.locations
   if(is.null(locations) & !is.null(bary.locations)) {
@@ -176,7 +182,7 @@ FPCA.FEM<-function(locations = NULL, datamatrix, FEMbasis, lambda, nPC = 1, vali
 	  print('C++ Code Execution')
 	  bigsol = CPP_smooth.volume.FEM.FPCA(locations=locations, bary.locations=bary.locations, datamatrix=datamatrix, FEMbasis=FEMbasis, incidence_matrix=incidence_matrix, 
                                       lambda=lambda, ndim=ndim, mydim=mydim, nPC=nPC, validation=validation, NFolds=NFolds, GCVmethod=GCVmethod, nrealizations=nrealizations, search=search)
-	  numnodes = FEMbasis$mesh$nnodes
+    numnodes = nrow(FEMbasis$mesh$nodes)
   }
   
   loadings=bigsol[[1]]

@@ -4,57 +4,48 @@
 #pragma omp declare reduction(sumVectorXd: Eigen::VectorXd: omp_out = omp_out + omp_in)\
 										initializer(omp_priv = Eigen::VectorXd::Zero(omp_orig.size()))
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim>
 std::pair<Real,VectorXr>
-FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const{
+FunctionalProblem<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const{
+
+  using EigenMap2WEIGHTS = Eigen::Map<const Eigen::Matrix<Real, Integrator::NNODES, 1> >;
 
   // Initialization
 	Real int1 = 0.;
 	VectorXr int2 = VectorXr::Zero(dataProblem_.getNumNodes());
 
-	constexpr UInt Nodes = mydim==2? 3*ORDER : 6*ORDER-2;
-
 	omp_set_num_threads(dataProblem_.getNThreads_int()); // set the number of threads
   #pragma omp parallel for reduction(+: int1) reduction(sumVectorXd: int2)
 	for(UInt triangle=0; triangle<dataProblem_.getNumElements(); triangle++){
 
-		FiniteElement<Integrator_noPoly, ORDER, mydim, ndim> fe;
-
-		Element<Nodes, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
-		fe.updateElement(tri_activated);
+    Element<EL_NNODES, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
 
 // (1) -------------------------------------------------
 
-		VectorXr sub_g(Nodes);
-		for (UInt i=0; i<Nodes; i++){
-			sub_g[i]=g[tri_activated[i].getId()];
-		}
+    Eigen::Matrix<Real,EL_NNODES,1> sub_g;
+    for (UInt i=0; i<EL_NNODES; i++){
+      sub_g[i]=g[tri_activated[i].getId()];
+    }
 // (2) -------------------------------------------------
-		VectorXr expg = (dataProblem_.getPsiQuad()*sub_g).array().exp();
+    Eigen::Matrix<Real,Integrator::NNODES,1> expg = (dataProblem_.getPsiQuad()*sub_g).array().exp();
 
-    VectorXr sub_int2;
-    // mind we are using quadrature rules whom weights sum to the element measure.
-    if (ndim==2){
-      int1+=expg.dot(Integrator_noPoly::WEIGHTS)*std::abs(fe.getDet());
-  		sub_int2 =((expg.cwiseProduct(Integrator_noPoly::WEIGHTS)).transpose()*dataProblem_.getPsiQuad())*std::abs(fe.getDet());
+    Eigen::Matrix<Real,EL_NNODES,1> sub_int2;
+
+    int1+=expg.dot(EigenMap2WEIGHTS(&Integrator::WEIGHTS[0]))*tri_activated.getMeasure();
+    sub_int2 = dataProblem_.getPsiQuad().transpose() * expg.cwiseProduct(EigenMap2WEIGHTS(&Integrator::WEIGHTS[0]))*tri_activated.getMeasure();
+
+    for (UInt i=0; i<EL_NNODES; i++){
+      int2[tri_activated[i].getId()]+= sub_int2[i];
     }
-    else if (ndim==3){
-      int1+=expg.dot(Integrator_noPoly::WEIGHTS)*std::sqrt(std::abs(fe.getDet()));
-  		sub_int2 =((expg.cwiseProduct(Integrator_noPoly::WEIGHTS)).transpose()*dataProblem_.getPsiQuad())*std::sqrt(std::abs(fe.getDet()));
-    }
+  }
 
-  	for (UInt i=0; i<Nodes; i++){
-  		int2[tri_activated[i].getId()]+= sub_int2[i];
-  	}
-	}
-
-	return std::pair<Real, VectorXr> (int1, int2);
+  return std::pair<Real, VectorXr> (int1, int2);
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim>
 std::tuple<Real, VectorXr, Real, Real>
-FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeFunctional_g(const VectorXr& g, Real lambda, const SpMat& Psi) const{
+FunctionalProblem<ORDER, mydim, ndim>::computeFunctional_g(const VectorXr& g, Real lambda, const SpMat& Psi) const{
 
   Real int1;
   VectorXr int2;
@@ -75,12 +66,12 @@ FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeFun
 }
 
 
-template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim>
 std::pair<Real,Real>
-FunctionalProblem<Integrator, Integrator_noPoly, ORDER, mydim, ndim>::computeLlikPen_f(const VectorXr& f) const{
+FunctionalProblem<ORDER, mydim, ndim>::computeLlikPen_f(const VectorXr& f) const{
 
   Real llik = - (dataProblem_.getGlobalPsi()*f).array().log().sum() +
-                  dataProblem_.getNumberofData()*dataProblem_.FEintegrate(f);
+                  dataProblem_.dataSize()*dataProblem_.FEintegrate(f);
   VectorXr tmp = f.array().log();
   Real pen = tmp.dot(dataProblem_.getP()*tmp);
 

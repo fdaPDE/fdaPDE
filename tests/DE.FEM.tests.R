@@ -111,7 +111,7 @@ sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
 lambda = 0.1
 sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, 
               step_method = "Fixed_Step", direction_method = "BFGS",
-              preprocess_method="NoCrossValidation", search = 1)
+              preprocess_method="NoCrossValidation", search = "naive")
 
 # ## Visualization 
 # image(FEM(exp(sol$g), FEMbasis))

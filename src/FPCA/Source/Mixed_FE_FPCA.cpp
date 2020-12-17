@@ -197,7 +197,18 @@ void MixedFEFPCAGCV::computeDegreesOfFreedomExact(UInt output_index, Real lambda
 
 	auto k = this->fpcaData_.getObservationsIndices();
 
-	if (!this->fpcaData_.isLocationsByNodes()){
+	if (this->fpcaData_.isLocationsByNodes()){
+		MatrixXr X;		
+		MatrixXr B;
+		B = MatrixXr::Zero(nnodes,nlocations);
+		for (auto i=0; i<nlocations; ++i)
+			B.row(k[i]) = Eigen::VectorXd::Unit(nlocations,i);
+		X = Dsolver.solve(B);
+		for (auto i = 0; i < k.size(); ++i) {
+			degrees += X(k[i], i);
+		}
+
+	} else {
 		MatrixXr X;
 		X = Dsolver.solve(MatrixXr(X1));
 		for (int i = 0; i<nnodes; ++i) {
