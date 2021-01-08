@@ -30,6 +30,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
+#include <Eigen/SVD>
 #define  EIGEN_MPL2_ONLY
 
 typedef double Real;
