@@ -13,6 +13,7 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "Regression_Data.h"
+#include "System_solver.h"
 
 /*! A base class for the smooth regression.
 */

@@ -1154,6 +1154,7 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S)
 		this->R0_lambda = (-lambda_S) * (R0_);
 	}
 
+	//preconditioner->buildSystemMatrix(this->DMat_, this->R0_lambda, this->R1_lambda, (this->R1_lambda).transpose());
         this->buildMatrixNoCov(this->DMat_, this->R1_lambda, this->R0_lambda);
 }
 
@@ -1185,9 +1186,11 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
 	if(regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
 	{
 		this->buildMatrixNoCov(this->DMat_+lambdaT*Ptk_, R1_lambda, R0_lambda);
+		//prec->buildSystemMatrix(this->DMat_+lambdaT*Ptk, this->R0_lambda, this->R1_lambda, (this->R1_lambda).transpose());
 	}
 	else
 	{
+		//prec->buildSystemMatrix(this->DMat_, this->R0_lambda, this->R1_lambda, (this->R1_lambda).transpose())
 		this->buildMatrixNoCov(this->DMat_, R1_lambda, R0_lambda);
 	}
 
