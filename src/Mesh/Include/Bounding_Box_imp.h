@@ -45,6 +45,8 @@ Box<NDIMP>::Box(std::vector<Real> const & coord) {
 	}
 }
 
+
+
 template<int NDIMP>
 template <UInt NNODES,int NDIME,int NDIMPP>
 Box<NDIMP>::Box(Element<NNODES,NDIME,NDIMPP> const & element) {
@@ -82,6 +84,7 @@ Box<NDIMP>::Box(Element<NNODES,NDIME,NDIMPP> const & element) {
 }
 
 
+
 template<int NDIMP>
 void Box<NDIMP>::set(std::vector<Real> const & data) {
 	for(int i = 0; i < 2*NDIMP; ++i) { //multiply 2 for min, max
@@ -104,5 +107,3 @@ void Box<NDIMP>::print(std::ostream & out) const {
 }
 
 #endif //__BOUNDING_BOX_IMP_H__
-
-

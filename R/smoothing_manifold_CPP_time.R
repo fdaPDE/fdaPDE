@@ -1,14 +1,14 @@
 CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
                                        covariates = NULL, ndim, mydim, BC = NULL,
                                        incidence_matrix = NULL, areal.data.avg = TRUE,
-                                       FLAG_MASS, FLAG_PARABOLIC, IC,
+                                       FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, threshold = 10^(-4), max.steps = 50, IC,
                                        search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
 
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
-
+  max.steps = max.steps - 1
 
   if(is.null(covariates))
   {
@@ -58,7 +58,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   {
     lambdaS<-as.vector(lambdaS)
   }
-  
+
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
@@ -66,6 +66,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   {
     lambdaT<-as.vector(lambdaT)
   }
+
 
   ## Set propr type for correct C++ reading
   locations <- as.matrix(locations)
@@ -95,6 +96,10 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(FLAG_MASS) <-"integer"
   FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
   storage.mode(FLAG_PARABOLIC) <-"integer"
+  FLAG_PARABOLIC <- as.integer(FLAG_ITERATIVE)
+  storage.mode(FLAG_ITERATIVE) <-"integer"
+  storage.mode(max.steps) <- "integer"
+  storage.mode(threshold) <- "double"
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
   storage.mode(search) <- "integer"
@@ -107,7 +112,6 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
-
 
   ## Call C++ function
   ICsol=NA
@@ -131,22 +135,21 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
     lambdaSIC <- as.matrix(lambdaSIC)
     storage.mode(lambdaSIC) <- "double"
     ## call the smoothing function with initial observations to estimates the IC
-    print("Estimation of the Initial Conditions")
     ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
-                   FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
-                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                   search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+      FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+      BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+      search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if(ICsol[[6]]==1)
     {
       lambdaSIC <- 10^seq(-9,-7,0.1)
       lambdaSIC <- as.matrix(lambdaSIC)
       storage.mode(lambdaSIC) <- "double"
-      print("Improving Estimation of the Initial Conditions")
       ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
-                     FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
-                     BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                     search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+         FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+         BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+         search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -156,11 +159,10 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
         lambdaSIC <- 10^seq(3,5,0.1)
         lambdaSIC <- as.matrix(lambdaSIC)
         storage.mode(lambdaSIC) <- "double"
-        print("Improving Estimation of the Initial Conditions")
         ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
-                       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
-                       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                       search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor,lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+           FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+           BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+           search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor,lambda.optimization.tolerance, PACKAGE = "fdaPDE")
       }
     }
 
@@ -191,7 +193,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(BC$BC_values) <-"double"
 
   bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
-                  mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
+                  mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
                   IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
 
   return(c(bigsol,ICsol))
@@ -202,24 +204,30 @@ CPP_eval.manifold.FEM.time = function(FEM.time, locations, time_locations, incid
   FEMbasis = FEM.time$FEMbasis
   # C++ function for manifold works with vectors not with matrices
 
-  FEMbasis$mesh$triangles=c(t(FEMbasis$mesh$triangles))
-  FEMbasis$mesh$nodes=c(t(FEMbasis$mesh$nodes))
+  FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
+  FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
 
-  #NEW: riporto shift indici in R
-  FEMbasis$mesh$triangles=FEMbasis$mesh$triangles-1
+
+  if(is.null(time_locations)){
+    time_locations<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_locations <- as.matrix(time_locations)
+  }
 
   # Imposing types, this is necessary for correct reading from C++
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
-  time_locations <- as.matrix(time_locations)
   storage.mode(time_locations) <- "double"
   incidence_matrix <- as.matrix(incidence_matrix)
   storage.mode(incidence_matrix) <- "integer"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$triangles) <- "integer"
+  storage.mode(FEMbasis$mesh$edges) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   storage.mode(FEMbasis$order) <- "integer"
-  storage.mode(FEM.time$mesh_time) <- "double"
   coeff <- as.matrix(FEM.time$coeff)
   storage.mode(coeff) <- "double"
   storage.mode(ndim) <- "integer"

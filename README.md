@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # fdaPDE with automatic optimization methods for GCV function
+=======
+# fdaPDE
+>>>>>>> master
 
 This repository contains the development version of fdaPDE package. In particular it contains the possibility of using iterative optimization methods (Newton's methods) to find the best smoothing parameter from the minimization of the GCV. 
 

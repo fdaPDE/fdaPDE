@@ -19,7 +19,11 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	MixedFERegression<InputHandler> regression(mesh_time, regressionData, optimizationData, mesh.num_nodes());//! load data in a C++ object
 
 	regression.preapply(mesh); //! solve the problem (compute the _solution, _dof, _GCV, _beta)
-    regression.apply();
+	if (regression.isIter())
+	    regression.apply_iterative();
+	else
+	    regression.apply();
+
 
 	//! copy result in R memory
 	MatrixXv const & solution = regression.getSolution();
@@ -127,7 +131,6 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 				rans9[i + num_tree_nodes*j] = mesh.getTree().gettreenode(i).getbox().get()[j];
 		}
 	}
-
 
 	//SEND BARYCENTER INFORMATION TO R
 	SET_VECTOR_ELT(result, 10, Rf_allocVector(INTSXP, elementIds.rows())); //element id of the locations point (vector)

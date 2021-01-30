@@ -14,7 +14,6 @@
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "Regression_Data.h"
 
-
 //Forward declaration
 template<typename InputHandler>
 class MixedSplineRegression;
@@ -26,12 +25,15 @@ template<typename InputHandler>
 class MixedFERegressionBase
 {
 	protected:
+
 		const std::vector<Real> mesh_time_;
 		const UInt N_; 			//!< Number of spatial basis functions.
 		const UInt M_;
 
 		const InputHandler & regressionData_;
-                OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
+
+        OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
+
 		// For only space problems
 		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
 		//	                |     R1        | R0	      |      |         O             |  O |
@@ -45,6 +47,7 @@ class MixedFERegressionBase
 		//  system matrix= 	|          B^T * Ak *B           | -lambdaS*(R1k^T+lambdaT*LR0k)  |   +  |B^T * Ak * (-H) * B |  O |   =  matrixNoCov + matrixOnlyCov
 		//	                | -lambdaS*(R1k^T+lambdaT*LR0k)  |        -lambdaS*R0k	          |      |         O          |  O |
 
+
 		SpMat 		matrixNoCov_;	//!< System matrix without
 		SpMat 		DMat_;
 		SpMat 		R1_;		//!< R1 matrix of the model
@@ -52,6 +55,7 @@ class MixedFERegressionBase
 		SpMat 		R0_lambda;
 		SpMat 		R1_lambda;
 		SpMat 		psi_;  		//!< Psi matrix of the model
+		SpMat       psi_mini;   //!< (Marti) It saves the psi_before the tensor product
 		SpMat 		psi_t_;  	//!< Psi ^T matrix of the model
 		SpMat 		Ptk_; 		//!< kron(Pt,IN) (separable version)
 		SpMat 		LR0k_; 		//!< kron(L,R0) (parabolic version)
@@ -82,7 +86,13 @@ class MixedFERegressionBase
 		MatrixXr _GCV;			//!< A Eigen::MatrixXr storing the computed GCV
 		MatrixXv _beta;			//!< A Eigen::MatrixXv storing the computed beta coefficients
 
-		//Flag to avoid the computation of R0, R1, Psi_ onece already performed
+		// members for the iterative method
+        MatrixXr _solution_k_;       //!< A Eigen::MatrixXr: Stores the solution for each time instant
+        VectorXr _solution_f_old_;  //!< A Eigen::VectorXr: Stores the old system solution
+        VectorXr _rightHandSide_k_; //!< A Eigen::VectorXr: Stores the update system right hand side
+
+        //Flag to avoid the computation of R0, R1, Psi_ onece already performed
+
 		bool isAComputed   = false;
 		bool isPsiComputed = false;
 		bool isR0Computed  = false;
@@ -91,9 +101,12 @@ class MixedFERegressionBase
 		bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
 		bool isGAMData;
 
+		bool isIterative;
+
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
-	        void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
+	    void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
+
 		//! A method computing the no-covariates version of the system matrix
 		void buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock);
 
@@ -104,7 +117,9 @@ class MixedFERegressionBase
 		//! A method which takes care of missing values setting to 0 the corresponding rows of B_
 		void addNA();
 	 	//! A member function which builds the A vector containing the areas of the regions in case of areal data
-	        template<UInt ORDER, UInt mydim, UInt ndim>
+
+	    template<UInt ORDER, UInt mydim, UInt ndim>
+
 		void setA(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 		//! A member function which sets psi_t_
 		void setpsi_t_(void);
@@ -118,10 +133,16 @@ class MixedFERegressionBase
 		void getRightHandData(VectorXr& rightHandData);
 		//! A method which builds all the matrices needed for assembling matrixNoCov_
 		void buildSpaceTimeMatrices();
+        //! A method which compute the tensorized psi for iterative method
+        void buildSpaceTimeMatrices_iterative();
 		//! A method computing dofs in case of exact GCV, it is called by computeDegreesOfFreedom
 		void computeDegreesOfFreedomExact(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+        //! Exact GCV: iterative method
+		void computeDOFExact_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method computing dofs in case of stochastic GCV, it is called by computeDegreesOfFreedom
 		void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+		//! Stochastic GCV: iterative method
+        void computeDOFStochastic_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method computing GCV from the dofs
 		void computeGeneralizedCrossValidation(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 
@@ -140,14 +161,40 @@ class MixedFERegressionBase
 		template<typename Derived>
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
 
+
+        //! A function which solves the factorized system in presence of covariates
+        template<typename Derived>
+        MatrixXr solve_covariates_iter(const Eigen::MatrixBase<Derived>&, UInt time_index);
+
+        // -- methods for the iterative method --
+        //! A method to initialize f
+        void initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index);
+         //! A method to initialize g
+        void initialize_g(Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
+        //! A method that stops the iterative algorithm based on difference between functionals J_k J_k+1 or n_iterations > max_num_iterations .
+        bool stopping_criterion(UInt& index, Real J, Real J_old);
+        //!A method that computes and return the current value of the functional J. It is divided in parametric and non parametric part.
+        Real compute_J(UInt& lambdaS_index, UInt& lambdaT_index);
+        //!  A methdd that update the system rhs for each time instant
+        void update_rhs(UInt& time_index, Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
 	public:
+
 		//!A Constructor.
 		MixedFERegressionBase( const InputHandler & regressionData, OptimizationData & optimizationData,  UInt nnodes_) :
-			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
+			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix())
+			{
+		        isGAMData = regressionData.getisGAM();
+		        isIterative = false;
+			};
 
 		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, OptimizationData & optimizationData, UInt nnodes_) :
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()-1+MixedSplineRegression<InputHandler>::SPLINE_DEGREE),
-			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
+			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix())
+			{
+		        isGAMData = regressionData.getisGAM();
+		        isIterative = regressionData.getFlagIterative();
+			};
+
 
 		//! A member function computing the dofs for external calls
 		//template<typename A>
@@ -195,8 +242,11 @@ class MixedFERegressionBase
 		//! A method returning the forcing term
 		const VectorXr *	getu_(void) const {return &this->rhs_ft_correction_;}
 		//! A method returning the number of nodes of the mesh
+
 		UInt getnnodes_(void) const {return this->N_;}
 		bool isSV(void) const {return this->isSpaceVarying;}
+		bool isIter(void) const {return this->isIterative;}
+
 
 		//! A function that given a vector u, performs Q*u efficiently
 		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
@@ -209,9 +259,10 @@ class MixedFERegressionBase
 		*/
 		//! A method which builds all the space matrices
 		template<UInt ORDER, UInt mydim, UInt ndim, typename A>
-		void preapply(EOExpr<A> oper,const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
+		void preapply(EOExpr<A> oper, const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
 
 		MatrixXv apply(void);
+        MatrixXv apply_iterative(void);
 		MatrixXr apply_to_b(const MatrixXr & b);
 };
 
@@ -230,6 +281,12 @@ class MixedFERegression : public MixedFERegressionBase<InputHandler>
 		{
 			Rprintf("Option not implemented!\n");
 		}
+
+         void apply_iterative(void)
+        {
+            Rprintf("Option not implemented!\n");
+         }
+
 };
 
 //! A class for the construction of the temporal matrices needed for the parabolic case
