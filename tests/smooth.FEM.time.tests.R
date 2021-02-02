@@ -511,7 +511,7 @@ output_CPP_iter<-smooth.FEM.time(observations=observations,
                             BC = BC,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)
-plot(output_CPP:iter$fit.FEM, t = 1)
+plot(output_CPP_iter$fit.FEM, t = 1)
 
 
 #### Test 4.3.2: BC != 0 exact GCV
