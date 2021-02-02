@@ -738,6 +738,18 @@ solParIter = smooth.FEM.time(observations = datacov[,2:length(TimeNodes)],time_m
                          FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
                          FLAG_ITERATIVE = TRUE, 
                          IC=func_evaluation[1:nrow(mesh$nodes)])
+### GCV Exact
+solParIter = smooth.FEM.time(observations=data,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
+                             lambda.selection.criterion='grid',DOF.evaluation='exact',lambda.selection.lossfunction='GCV')
+
+### GCV Stochastic 
+solParIter = smooth.FEM.time(observations=data,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes,
+                             lambdaS = lambdaS_par, lambdaT = lambdaT_par,FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
+                             lambda.selection.criterion='grid',DOF.evaluation='stochastic',lambda.selection.lossfunction='GCV')
+
+solParIter$bestlambda 
 
 ######### 3D (These tests are slow!) #########
 
