@@ -644,7 +644,7 @@ solParCov = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariat
 ### ITERATIVE METHOD
 solParIter = smooth.FEM.time(observations=data,
                          FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
-                         lambdaS = lambdaS, lambdaT = lambdaT,
+                         lambdaS = lambdaS_par, lambdaT = lambdaT_par,
                          FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)
 
 solParCovIter = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
