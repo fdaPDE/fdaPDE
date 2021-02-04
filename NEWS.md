@@ -1,4 +1,8 @@
-# fdaPDE 1.1-1
+# fdaPDE 1.1-2
+
+## New features
+
+Iterative method for spatio-temporal regression with PDE regularization (in this framework also two methods for the computation of GCV Exact and Stochastic)
 
 ## New features
 

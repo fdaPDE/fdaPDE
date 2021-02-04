@@ -1,5 +1,5 @@
 Package: fdaPDE
-Version: 1.1-1
+Version: 1.1-2
 Date: 2020-07-27
 Title: Functional Data Analysis and Partial Differential Equations (PDE); Statistical Analysis of Functional and Spatial Data, Based on Regression with PDE Regularization
 Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
@@ -20,10 +20,12 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		    person("Luca", "Colombo", role = "ctb"),
 		    person("Lorenzo", "Ghilotti", role = "ctb"),
 		    person("Jiyoung", "Kim", role = "ctb"),
+		    person("Martina", "Massardi", role = "ctb"),
 		    person("Giorgio", "Meretti", role = "ctb"),
 		    person("Giulio", "Perin", role = "ctb"),
 		    person("Clara", "Pigolotti", role = "ctb"),
 		    person("Andrea", "Poiatti", role = "ctb"),
+		    person("Stefano", "Spaziani", role = "ctb"),
 		    person("Andrea", "Vicini", role = "ctb")
 		    )
 Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
