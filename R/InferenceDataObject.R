@@ -92,7 +92,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 level = 0.05,
                                 definition=1){
   
-  #Preliminary check of parameters input types, translation into numeric representation of default occurrencies.
+  # Preliminary check of parameters input types, translation into numeric representation of default occurrencies.
   if(!is.null(test)){
     if(class(test)!="character")
       stop("'test'should be a character: choose one between 'pvalue' or 'power'")
@@ -159,14 +159,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'level' is zerodimensional, should be a positive number between 0 and 1")
   }
   
-  #Check of consistency of parameters. Translation into numeric representation.
-  if(is.null(test) && is.null(interval))                                        # however, they can be both set
+  # Check of consistency of parameters. Translation into numeric representation.
+  if(is.null(test) && is.null(interval))                                        # However, they can be both set
     stop("at least one between 'test' and 'interval' should be not NULL")
   
-  if(is.null(dim) || dim <= 0)                                                  # otherwise the function won't be able to default the coeff neither object nor beta0
+  if(is.null(dim) || dim <= 0)                                                  # Otherwise the function won't be able to default the coeff neither object nor beta0
     stop("number of covariates is needed")
   else{
-    if(is.null(coeff)){                                                         #if it is left as NULL, all the coefficients will be taken into acccount
+    if(is.null(coeff)){                                                         # If it is left as NULL, all the coefficients will be taken into acccount
       coeff = as.integer(rep(1, dim)) 
       count = dim
     }
@@ -180,7 +180,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
         if(coeff[i]==1)
           count = count + 1
       }
-      if(count == 0)                                                            # otherwise object is not needed
+      if(count == 0)                                                            # Otherwise object is not needed
         stop("at least one coefficient must be indicated")
       rm(list = ("i"))
     }
@@ -199,7 +199,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
         if(test=="pvalue") test_numeric=as.integer(1)
         if(test=="power") test_numeric=as.integer(2)
       }
-    if(is.null(beta0))                                                          # if it left to NULL, all the beta0 that are needed w.r.t. coeff will be se to 0 (H0 beta0=0 vs H1 beta0!=0)
+    if(is.null(beta0))                                                          # If it left to NULL, all the beta0 that are needed w.r.t. coeff will be se to 0 (H0 beta0=0 vs H1 beta0!=0)
       beta0<-rep(0, count)
     else{
       if(length(beta0)!=count)
@@ -225,7 +225,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(is.null(beta1)) beta1=0 #won't be used anyway                              # If beta0 is still NULL here, no power is required, and this parameter is not considered. Set to zero in order to compell with the dataInferencebject class.
   definition=as.integer(definition)
   
-  # # Bulding the output object, returning it
+  # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
               coeff = coeff, beta0 = beta0, beta1 = beta1, level = level,definition=definition)
   

@@ -94,6 +94,8 @@
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
+#' @param R_Inference_Data_Object An [inferenceDataObject] that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+#' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results
 #' @return A list with the following variables in \code{family="gaussian"} case:
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
@@ -118,6 +120,9 @@
 #'          }
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+    
+#Aggiungere risultato Inferenza    
+
 #' }
 #' A list with the following variables in others GAM case:
 #' \itemize{
@@ -148,8 +153,13 @@
 #'  max.steps.FPIRLS = 15, lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #'  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
 #'  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
-#'  lambda.optimization.tolerance = 0.05)
+#'  lambda.optimization.tolerance = 0.05,
+#'  R_Inference_Data_Object=NULL)
 #' @export
+
+### Aggiungere referenza Ferraccioli, esempio smooth.fem.
+
+# Aggiungere esempio inferenza
 
 #' @references
 #' \itemize{
@@ -351,7 +361,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                      search = "tree", bary.locations = NULL,
                      family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
                      lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
-                     lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+                     lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
+                     R_Inference_Data_Object=NULL)
 {
   # Mesh identification
   if(class(FEMbasis$mesh) == "mesh.2D")
@@ -498,6 +509,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
     DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
 
+  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistence
+  
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying == FALSE)
   {
@@ -539,7 +552,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
 
-
+  if(R_Inference_Data_Object@definition==1 &(
+    family!= "gaussian" | !((class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters)) | (class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE))
+  )) {
+    warning("Inference for linear estimators is implemented only in regression-laplace and regression-pde non time varying cases,\nInference Data are ignored")
+  }
 
   ################## End checking parameters, sizes and conversion #############################
   if(family == "gaussian")
@@ -555,7 +572,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
-        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+        R_Inference_Data_Object=R_Inference_Data_Object)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
     {
@@ -565,7 +583,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, 
-        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+        R_Inference_Data_Object=R_Inference_Data_Object)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
     {

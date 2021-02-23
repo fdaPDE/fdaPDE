@@ -1,4 +1,4 @@
-checkInferenceData <- function(R_Inference_Object_Data,checknumber){
+checkInferenceParameters <- function(R_Inference_Object_Data,checknumber){
   
   #################### Consistency Parameter Check #########################
   if(is.null(R_Inference_Object_Data)|R_Inference_Object_Data@definition==0){

@@ -5,6 +5,7 @@
 #include "../Include/Regression_Data.h"
 #include "../../FE_Assemblers_Solvers/Include/Integration.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
+#include "../../Inference/Include/Inference_Data.h"
 
 // GAM
 #include "../Include/FPIRLS.h"
@@ -39,15 +40,27 @@ extern "C"
 		\param RDOF_matrix user provided DOF matrix for GCV computation
 		\param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
 		\param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
+		\param RtestType an integer defining if a hypotesis test is required, and which type (p-value, power)
+		\param RintervalType an integer defining if a confidence interval is required, and which type (one at the time, bonferroni)
+		\param RimplementationType an integer defining the typr of implementation required for inferential analysis (wald, sandwich, permutational)
+		\param RexactInference a bool that, if true, means an exact inferential analysis is required
+		\param RcoeffInference a vector of bool that defines which covariates are interested by inferential analysis
+		\param Rbeta0 a vector of double, contains the null hypotesis values for the betas, needed for test
+		\param Rbeta1 a vector of double, contains the alternative hypotesis value for the betas, needed for test
+		\param RinferenceLevel a double defining the significance for the confidence intervals for the betas
+		\param RinferenceDefined a bool; if not set, inference analysis will not be carried out
 		\return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
 	*/
 	SEXP regression_Laplace(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-		SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
-		SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
+				SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
+				SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
+				SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
+				SEXP Rbeta0, SEXP Rbeta1, SEXP RinferenceLevel, SEXP RinferenceDefined)
 	{
 		//Set input data
 		RegressionData regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
 		OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
+		InferenceData inferenceData(RTestType, RIntervalType, RImplementationType, RExactInference, RCoeffInference, RBeta0, Rbeta1, RInferenceLevel, RInferenceDefined);
 
 		UInt mydim = INTEGER(Rmydim)[0];
 		UInt ndim = INTEGER(Rndim)[0];
