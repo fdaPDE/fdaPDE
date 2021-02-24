@@ -7,8 +7,9 @@
 smooth.FEM.time(locations = NULL, time_locations = NULL, observations, FEMbasis, 
 time_mesh=NULL, covariates = NULL, PDE_parameters = NULL,  BC = NULL,
 incidence_matrix = NULL, areal.data.avg = TRUE,
-FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE,FLAG_ITERATIVE=FALSE, IC = NULL,
-search = "tree", bary.locations = NULL,
+FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE,FLAG_ITERATIVE=FALSE,
+threshold = 10^(-4), max.steps = 50,
+IC = NULL, search = "tree", bary.locations = NULL,
 lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
@@ -60,6 +61,11 @@ This is only for areal data. In case of pointwise data, this parameter is set to
 \item{FLAG_PARABOLIC}{Boolean. If \code{TRUE} the parabolic problem problem is selected, if \code{FALSE} the separable one.}
 
 \item{FLAG_ITERATIVE}{Boolean. If \code{TRUE} the iterative method problem is selected, if \code{FALSE} the monolithic one.}
+
+\item{threshold}{This parameter is used for arresting algorithm iterations. Algorithm stops when two successive iterations lead to improvement in penalized log-likelihood smaller than threshold.
+Default value \code{threshold = 10^(-4)}.}
+
+\item{max.steps}{This parameter is used to limit the maximum number of iteration. Default value \code{max.steps=50}.}
 
 \item{IC}{Initial condition needed in case of parabolic problem i.e. when \code{FLAG_PARABOLIC==TRUE}. 
 If \code{FLAG_PARABOLIC==FALSE} this parameter is ignored. If \code{FLAG_PARABOLIC=TRUE} and \code{IC=NULL} it is necessary to provide
