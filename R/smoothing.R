@@ -142,7 +142,7 @@
 #'  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
 #'  Laplacian of the spatial field, that induces an isotropic smoothing. When prior information about the anisotropy or
 #'  non-stationarity is available the PDE involves a general second order linear differential operator with possibly
-#'  space-varying coefficients.
+#'  space-varying coefficients. 
 #'  The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions
 #'  can be imposed at the domain boundaries.
 #' @usage smooth.FEM(locations = NULL, observations, FEMbasis,
@@ -509,7 +509,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
     DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
 
-  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistence
+  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency
   
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying == FALSE)
@@ -552,10 +552,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
 
-  if(R_Inference_Data_Object@definition==1 &(
-    family!= "gaussian" | !((class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters)) | (class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE))
-  )) {
-    warning("Inference for linear estimators is implemented only in regression-laplace and regression-pde non time varying cases,\nInference Data are ignored")
+  if(R_Inference_Data_Object@definition==1 & (family!= "gaussian" | space_varying==T))
+  {
+    warning("Inference for linear estimators is implemented only in regression-Laplace and regression-PDE non space varying cases,\nInference Data are ignored")
   }
 
   ################## End checking parameters, sizes and conversion #############################
@@ -583,8 +582,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, 
-        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
-        R_Inference_Data_Object=R_Inference_Data_Object)
+        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance
+        #,R_Inference_Data_Object=R_Inference_Data_Object
+      )
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
     {
@@ -606,8 +606,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
        search = search, bary.locations = bary.locations,
        optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
-       DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
-      numnodes = nrow(FEMbasis$mesh$nodes)
+       DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance#, R_Inference_Data_Object=R_Inference_Data_Object
+       )
+       numnodes = nrow(FEMbasis$mesh$nodes)
   	}else if(class(FEMbasis$mesh) == 'mesh.3D' & is.null(PDE_parameters))
     {
       bigsol = NULL
@@ -616,7 +617,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
-        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance#, R_Inference_Data_Object=R_Inference_Data_Object
+        )
       numnodes = nrow(FEMbasis$mesh$nodes)
     } else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==FALSE)
     {
@@ -626,7 +628,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
-        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance#, R_Inference_Data_Object=R_Inference_Data_Object
+        )
       numnodes = nrow(FEMbasis$mesh$nodes)
   	} else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==TRUE)
   	{

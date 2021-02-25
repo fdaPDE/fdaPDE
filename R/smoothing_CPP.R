@@ -55,9 +55,8 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   interval_Type<-R_Inference_Data_Object@interval
   implementation_Type<-R_Inference_Data_Object@type
   exact_Inference<-R_Inference_Data_Object@exact
-  coeff_Inference=as.vector(R_Inference_Data_Object@coeff)
+  coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  beta_1=as.vector(R_Inference_Data_Object@beta1)
   inference_Level=R_Inference_Data_Object@level
   inference_Defined=R_Inference_Data_Object@definition
   
@@ -94,9 +93,8 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   storage.mode(interval_Type) <- "integer"
   storage.mode(implementation_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
-  storage.mode(coeff_Inference) <- "integer"
+  storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
-  storage.mode(beta_1) <- "double"
   storage.mode(inference_Level) <- "double"
   storage.mode(inference_Defined) <- "integer"
   
@@ -105,7 +103,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, 
                   GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE",
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,beta_1,inference_Level,inference_Defined)
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined)
   return(bigsol)
 }
 
@@ -167,9 +165,8 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   interval_Type<-R_Inference_Data_Object@interval
   implementation_Type<-R_Inference_Data_Object@type
   exact_Inference<-R_Inference_Data_Object@exact
-  coeff_Inference=as.vector(R_Inference_Data_Object@coeff)
+  coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  beta_1=as.vector(R_Inference_Data_Object@beta1)
   inference_Level=R_Inference_Data_Object@level
   inference_Defined=R_Inference_Data_Object@definition
 
@@ -210,9 +207,8 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   storage.mode(interval_Type) <- "integer"
   storage.mode(implementation_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
-  storage.mode(coeff_Inference) <- "integer"
+  storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
-  storage.mode(beta_1) <- "double"
   storage.mode(inference_Level) <- "double"
   storage.mode(inference_Defined) <- "integer"
 
@@ -222,7 +218,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
                   GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE",
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,beta_1,inference_Level,inference_Defined)
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined)
   return(bigsol)
 }
 
