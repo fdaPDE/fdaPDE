@@ -40,42 +40,41 @@ extern "C"
                 \param RDOF_matrix user provided DOF matrix for GCV computation
                 \param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
                 \param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
-		\param RtestType an integer defining if a hypotesis test is required, and which type (p-value, power)
-		\param RintervalType an integer defining if a confidence interval is required, and which type (one at the time, bonferroni)
-		\param RimplementationType an integer defining the typr of implementation required for inferential analysis (wald, sandwich, permutational)
-		\param RexactInference a bool that, if true, means an exact inferential analysis is required
-		\param RcoeffInference a vector of bool that defines which covariates are interested by inferential analysis
-		\param Rbeta0 a vector of double, contains the null hypotesis values for the betas, needed for test
-		\param Rbeta1 a vector of double, contains the alternative hypotesis value for the betas, needed for test
-		\param RinferenceLevel a double defining the significance for the confidence intervals for the betas
-		\param RinferenceDefined a bool; if not set, inference analysis will not be carried out
+		\param RtestType an integer defining if a hypotesis test is required, and which type (one at the time, simultaneous)
+		\param RintervalType an R-integer defining if a confidence interval is required, and which type (one at the time, simultaneous, bonferroni)
+		\param RimplementationType an R-integer defining the type of implementation required for inferential analysis (Wald, sandwich, permutational)
+		\param RexactInference an R-integer that defines if an exact inferential analysis is required
+		\param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
+		\param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for test
+		\param RinferenceLevel an R-double defining the significance for the confidence intervals for the betas parameters
+		\param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
                 \return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
         */
         SEXP regression_PDE(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
 			    SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
 			    SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
 			    SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
-			    SEXP Rbeta0, SEXP Rbeta1, SEXP RinferenceLevel, SEXP RinferenceDefined)
+			    SEXP Rbeta0, SEXP RinferenceLevel, SEXP RinferenceDefined)
         {
         	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
                 OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-		InferenceData inferenceData(RTestType, RIntervalType, RImplementationType, RExactInference, RCoeffInference, RBeta0, Rbeta1, RInferenceLevel, RInferenceDefined);
+		InferenceData inferenceData(RTestType, RIntervalType, RImplementationType, RExactInference, RCoeffInference, RBeta0, RInferenceLevel, RInferenceDefined);
 
         	UInt mydim = INTEGER(Rmydim)[0];
         	UInt ndim = INTEGER(Rndim)[0];
 
         	if(regressionData.getOrder()==1 && ndim==2)
-        		return(regression_skeleton<RegressionDataElliptic, 1, 2, 2>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataElliptic, 1, 2, 2>(regressionData, optimizationData, inferenceData, Rmesh));
         	else if(regressionData.getOrder()==2 && ndim==2)
-        		return(regression_skeleton<RegressionDataElliptic, 2, 2, 2>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataElliptic, 2, 2, 2>(regressionData, optimizationData, inferenceData, Rmesh));
         	else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
-        		return(regression_skeleton<RegressionDataElliptic, 1, 2, 3>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataElliptic, 1, 2, 3>(regressionData, optimizationData, inferenceData, Rmesh));
         	else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
-        		return(regression_skeleton<RegressionDataElliptic, 2, 2, 3>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataElliptic, 2, 2, 3>(regressionData, optimizationData, inferenceData, Rmesh));
             else if(regressionData.getOrder()==1 && mydim==3 && ndim==3)
-                return(regression_skeleton<RegressionDataElliptic, 1, 3, 3>(regressionData, optimizationData, Rmesh));
+	      return(regression_skeleton<RegressionDataElliptic, 1, 3, 3>(regressionData, optimizationData, inferenceData, Rmesh));
             else if(regressionData.getOrder()==2 && mydim==3 && ndim==3)
-                return(regression_skeleton<RegressionDataElliptic, 2, 3, 3>(regressionData, optimizationData, Rmesh));
+	      return(regression_skeleton<RegressionDataElliptic, 2, 3, 3>(regressionData, optimizationData, inferenceData, Rmesh));
 
         	return(NILSXP);
         }

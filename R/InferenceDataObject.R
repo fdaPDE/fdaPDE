@@ -1,6 +1,6 @@
 #' Class for inference data
 #'
-#'@slot test An integer taking value 0, 1 or 2; in the first case no test is performed, in the second a one-at-the-time tests are performed,
+#'@slot test An integer taking value 0, 1 or 2; in the first case no test is performed, in the second one-at-the-time tests are performed,
 #'in the third a simultaneous test is performed.
 #'@slot interval An integer taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 #'in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.
@@ -123,7 +123,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   if(!is.null(dim)){
     if(class(dim)!="numeric")
-      stop("'dim' should be an integer or converitble to integer type")
+      stop("'dim' should be an integer or convertible to integer type")
     dim=as.integer(dim)
   }
   
@@ -161,7 +161,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   else{
     if(is.null(coeff)){                                                         # If it is left as NULL, all the parameters are individually taken into account without any linear combination.
       coeff = diag(1, nrow=dim, ncol=dim)
-    }
+      }
     else{
       if(dim(coeff)[2]!=dim)
         stop("number of covariates and coefficients do not match")
@@ -188,7 +188,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("test should be either 'one-at-the-time' or 'simultaneous'")}else{
         if(test=="one-at-the-time") test_numeric=as.integer(1)
         if(test=="simultaneous") test_numeric=as.integer(2)
-      }
+       }
     if(is.null(beta0))                                                          # If it left to NULL, beta0 is set to a vector of zeros.
       beta0<-rep(0, dim(coeff)[1])
     else{
