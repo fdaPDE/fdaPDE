@@ -25,6 +25,11 @@ class Inference_Carrier{
 		const InferenceData * inf_data = nullptr;				//!< Pointer to the inference data needed to perform inference
 
 		// SYSTEM PARAMETERS
+		const UInt n_obs; 							//!< Number of observations
+		const UInt n_nodes;							//!< Number of nodes
+		const Uint p;								//!< Number of covariates
+		const Real var_res; 							//!< Variance of the residuals i n the optimal model
+
 		Real lambda=0; 								//!< Optimal smothing parameter
   		const MatrixXr * Wp = nullptr;						//!< Pointer to the covariates matrix [size n_obs x n_covariates]
 		const Diffusion<PDEParameterOptions::SpaceVarying> * Kp = nullptr; 	//!< Pointer to the nuisance matrix K [in the cases in which inference is allowed K is always a matrix]
@@ -51,6 +56,12 @@ class Inference_Carrier{
 		inline void setOptData (const OptimizationData * opt_data_){opt_data = opt_data_;}			//!< Setter of opt_data \param opt_data_ new opt_data
 		inline void setModel (const MixedFERegressionBase<InputHandler> * model_){model = model_;}		//!< Setter of model \param model_ new model
 		inline void setInfData (const InferenceData * inf_data_){inf_data = inf_data_;}				//!< Setter of inf_data \param inf_data_ new inf_data
+
+		inline void setN_obs (UInt n_obs){n_obs = n_obs_;}							//!< Setter of n_obs \param n_obs_ new n_obs
+		inline void setN_nodes (UInt n_nodes_){n_nodes = n_nodes_;}						//!< Setter of n_nodes \param n_nodes_ new n_nodes
+		inline void setp (UInt p_){p = p_;}									//!< Setter of p \param p_ new p
+		inline void setVar_res (Real var_res_){var_res = var_res_;}						//!< Setter of var_res \param var_res_ new var_res
+
 		inline void setLambda (Real lambda_){lambda = lambda_;}							//!< Setter of lambda \param lambda_ new lambda
 		inline void setWp (const MatrixXr * Wp_){Wp = Wp_;}							//!< Setter of Wp \param Wp_ new Wp
 		inline void setKp (const Diffusion<PDEParameterOptions::SpaceVarying> * Kp_){Kp = Kp_;}			//!< Setter of Kp \param Kp_ new Kp
@@ -80,6 +91,12 @@ class Inference_Carrier{
 		inline const OptimizationData * opt_data getOptData (void){return opt_data;} const 			//!< Getter of opt_data \return opt_data
 		inline const MixedFERegressionBase<InputHandler> * getModel (void){return model;} const			//!< Getter of model \return model
 		inline const InferenceData * getInfData (void){return inf_data;} const					//!< Getter of inf_data \return inf_data
+
+		inline UInt getN_obs (void){return n_obs;} const							//!< Getter of n_obs \return n_obs
+		inline UInt getN_nodes (void){return n_nodes;} const							//!< Getter of n_nodes \return n_nodes
+		inline UInt getp (void){return p;} const								//!< Getter of p \return p
+		inline Real getVar_res (void){return var_res;} const							//!< Getter of var_res \return var_res
+
 		inline Real getLambda (void){return lambda;} const							//!< Getter of lambda \return lambda
 		inline const MatrixXr * getWp (void){return Wp;} const							//!< Getter of Wp \return Wp
 		inline const MatrixXr * getKp (void){return Kp;} const							//!< Getter of Kp \return Kp
