@@ -2,7 +2,7 @@
 #define __SOLUTION_BUILDERS_IMP_H__
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData )
+SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MatrixXv & inference_Output, const Inference_Data & inf_Data)
 {
         // ---- Preparation ----
         // Prepare regresion coefficients space
@@ -18,6 +18,38 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                 beta = output.betas;
         }
 
+	// Prepare the inference output space
+	VectorXr p_values;
+	MatrixXv intervals;
+	if (inf_Data.get_definition()==false){
+	  intervals.resize(1,1);
+	  intervals(0,0).resize(1);
+	  intervals(0,0)(0) = 10e20;
+	  
+	  p_values.resize(1);
+	  p_values(0)= 10e20;
+	}else{
+	  if(inf_Data.get_test_type()=="not-defined"){
+	    p_values.resize(1);
+	    p_values(0)= 10e20;
+	    
+	    intervals=inference_Output;
+	  }else{
+	    if(inf_Data.get_interval_type()=="not-defined"){
+	      intervals.resize(1,1);
+	      intervals(0,0).resize(1);
+	      intervals(0,0)(0) = 10e20;
+	      
+	      p_values=inference_Output(0);
+	    }else{
+	      p_values=inference_Output(0);
+	      
+	      intervals=inference_Output.rightcols(inf_Data.get_coefficients().getrows());
+	    }
+	  }
+	}
+	
+	
         // Define string for optimzation method
         UInt code_string;
         if(output.content == "full_optimization")
@@ -38,7 +70,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
         // ---- Copy results in R memory ----
         SEXP result = NILSXP;  // Define emty term --> never pass to R empty or is "R session aborted"
-        result = PROTECT(Rf_allocVector(VECSXP, 22)); // 22 elements to be allocated
+        result = PROTECT(Rf_allocVector(VECSXP, 24)); // 24 elements to be allocated
 
         // Add solution matrix in position 0
         SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
@@ -195,6 +227,21 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                         rans11[i + barycenters.rows()*j] = barycenters(i,j);
         }
 
+	SET_VECTOR_ELT(result,22,Rf_allocVector(RealSXP,p_values.size())); // P_values info (inference on betas)
+	Real *rans12=REAL(VECTOR_ELT(result,22));
+	for(UInti = 0; i<p_values.size(),i++){
+	  rans12[i]=p_values(i);
+	}
+	
+	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3,intervals.size())) // Confidence Intervals info (Inference on betas)
+	  Real *rans13 = REAL(VECTOR_ELT(result,23));
+	for(UInt j =0; j<intervals.size(); j++){
+	  for(UInt i=0; i<3,i++){
+	    rans13[i+3*j]=intervals(j)(i):
+	  }
+	}
+
+	
         UNPROTECT(1);
 
         return(result);

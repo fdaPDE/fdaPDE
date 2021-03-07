@@ -8,6 +8,7 @@
 #include "../../FdaPDE.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Regression_Data.h"
+#include "../../Inference/Include/Inference_Data.h"
 
 //! Output struct to be used to return values in R
 struct output_Data
@@ -44,7 +45,7 @@ namespace Solution_Builders
          \return SEXP containg all the data that will be managed by R code
         */
         template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-        static SEXP build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData);
+        static SEXP build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MatrixXv & inference_Output, const Inference_Data & inf_Data);
 };
 
 #include "Solution_Builders_imp.h"

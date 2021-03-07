@@ -5,6 +5,7 @@
 
 using boost::math::chi_squared;
 using boost::math::normal;
+using boost::quantile;
 using boost::math; 
 
 void template<InputHandler> Wald_Solver<InputHandler>::compute_S(void){
@@ -17,9 +18,9 @@ void template<InputHandler> Wald_Solver<InputHandler>::compute_S(void){
   const MatrixXr * U = inf_car.getUp();
   const MatrixXr * V = inf_car.getVp();
   const Eigen::PartialPivLU<MatrixXr> * G_decp = inf_car.getG_decp();
-
+  
   M_inv = *E_inv - (*E_inv)*(*U)*((*G_decp).solve((*V)*(*E_inv)));
-
+  
   Uint n_obs = inf_car.getN_obs();
   Uint n_nodes = inf_car.getN_nodes();
   S.resize(n_obs, n_obs);
@@ -27,9 +28,9 @@ void template<InputHandler> Wald_Solver<InputHandler>::compute_S(void){
   const Spmat * Psi_t = inf_car.getPsi_tp();
   Uint p = inf_car.getp(); 
   MatrixXr Q = MatrixXr::Identity(p, p) - *(inf_car.getHp()); 
-
+  
   S = (*Psi)*M_inv.system.block<n_nodes, n_nodes>(0,0)*(-(*Psi_t)*Q);
-
+  
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
   is_S_computed = true;
@@ -42,21 +43,21 @@ void template<InputHandler> Wald_Solver<InputHandler>::compute_V(){
   // resize the variance-covariance matrix
   Uint p = inf_car.getp();
   V.resize(p,p);
-
+  
   const MatrixXr * W = inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
   
   V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
-
+  
   return;
 };
 
 VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
-
+  
   // simultaneous test
   if(inf_car.getInfData()->get_test_type() == "simultaneous"){
     // get the matrix of coefficients for the test
@@ -69,7 +70,7 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
     MatrixXr diff_t = diff.transpose();
-
+    
     // compute the variance-covariance matrix if needed
     if(!is_S_computed){
       compute_S();
@@ -77,20 +78,20 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
     if(!is_V_computed){
       compute_V();
     }
-
+    
     MatrixXr Sigma = C*V*C_t;
     // compute the LU factorization of Sigma
     Eigen::PartialPivLU<MatrixXr> Sigma_dec;
     Sigma_dec.compute(Sigma);
-
+    
     // compute the test statistic
     Real stat = diff_t * Sigma_dec.solve(diff);
-
+    
     chi_squared distribution(C.rows());
-
+    
     // compute the p-value
     Real pval = cdf(complement(distribution), stat);
-
+    
     result.resize(1);
     result(0) = pval;
     return result;
@@ -106,7 +107,7 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
     VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
     VectorXr beta_hat = *(inf_car.getBeta_hatp());
-
+    
     // compute S and V if needed
       if(!is_S_computed){
         compute_S();
@@ -114,33 +115,92 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
       if(!is_V_computed){
         compute_V();
       }
-
-    // for each row of C matrix
-    for(Uint i=0; i<q; ++i){
-      MatrixXr row = C.row(i);
-      Real diff = row*beta_hat - beta_0(i);
-      Real sigma = row*V*col;
-      // compute the test statistic
-      Real stat = diff/sqrt(sigma);
-      normal distribution(0,1);
-      // compute the pvalue
-      Real pval = 2*cdf(complement(distr), fabs(stat));
-      result(i) = pval; 	
-    }
-
-    return result;
+      
+      // for each row of C matrix
+      for(Uint i=0; i<q; ++i){
+	MatrixXr row = C.row(i);
+	Real diff = row*beta_hat - beta_0(i);
+	Real sigma = row*V*col;
+	// compute the test statistic
+	Real stat = diff/std::sqrt(sigma);
+	normal distribution(0,1);
+	// compute the pvalue
+	Real pval = 2*cdf(complement(distr), fabs(stat));
+	result(i) = pval; 	
+      }
+      
+      return result;
   }
-
+  
 };
+
+VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
+  
+  // get the matrix of coefficients
+  MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+  
+  // declare the matrix that will store the p-values
+  Real alpha=inf_car.getInfData()->get_inference_level();
+  Real quant=0;
+  UInt q=C.rows();
+  MatrixXr result;
+  result.resize(1,q);
+  
+  
+  // simultaneous confidence interval (overall confidence aplha)
+  if(inf_car.getInfData()->get_interval_type() == "simultaneous"){
+    chi_squared distribution(q);
+    quant =std::sqrt(quantile(complement(distribution,alpha)));
+  }
+  else{
+    // one-at-the-time confidence intervals (each interval has confidence alpha)
+    if(inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
+      normal distribution(0,1);
+      quant = quantile(complement(distribution,alpha/2));
+    }
+    // Bonferroni confidence intervals (overall confidence approximately alpha)
+    else{
+      normal distribution(0,1);
+      quant = quantile(complement(distribution,alpha/(2*q)));
+    }
+  }
+  // for each row of C matrix
+  for(Uint i=0; i<q; ++i){
+    result(i).resize(3);
+    MatrixXr row = C.row(i);
+    MatrixXr col = row.transpose();
+    //Central element
+    result(i)(1)=row*beta_hat;
+    
+    // compute S and V if needed
+    if(!is_S_computed){
+      compute_S();
+    }
+    if(!is_V_computed){
+      compute_V();
+    }
+    
+    // compute the standard deviation of the linear combination and half range of the interval
+    Real sd_comb = std::sqrt(row*V*col);
+    Real half_range=sd_comb*quant;
+
+    // compute the limits of the interval
+    result(i)(0) = result(i)(1) - half_range; 
+    result(i)(2) = result(i)(1) + half_range; 	
+  }
+  
+  return result;
+};
+
 
 MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_inference_output(void){
   // declare the result Matrix of vectors to be returned
   MatrixXv result;
-
+  
   // get the test_type and interval_type
   std::string test_type = inf_car.getInfData()->get_test_type();
   std::string interval_type = inf_car.getInfData()->get_interval_type();
-
+  
   // if test_type is not defined, only intervals are required
   if(test_type == "not-defined"){
     result = compute_CI();

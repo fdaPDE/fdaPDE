@@ -10,6 +10,11 @@
 #include "../../Lambda_Optimization/Include/Optimization_Methods_Factory.h"
 #include "../../Lambda_Optimization/Include/Solution_Builders.h"
 #include "../../Inference/Include/Inference_Data.h"
+#include "../../Inference/Include/Inference_Carrier.h"
+#include "../../Inference/Include/Inference_Carrier_imp.h"
+#include "../../Inference/Include/Inverter.h"
+#include "../../Inference/Include/Wald_Solver.h"
+#include "../../Inference/Include/Wald_Solver_imp.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 
@@ -26,7 +31,8 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
 	regression.preapply(mesh); // preliminary apply (preapply) to store all problem matrices
 
-    std::pair<MatrixXr, output_Data> solution_bricks;	// Prepare solution to be filled
+	std::pair<MatrixXr, output_Data> solution_bricks;	// Prepare solution to be filled
+	MatrixXv Inference_output; 				//Matrix that will store the output from inference, i.e. p-values and/or intervals
 
 	// Build the Carrier according to problem type
 	if(regression.isSV())
@@ -61,10 +67,23 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			Carrier<InputHandler>
 				carrier = CarrierBuilder<InputHandler>::build_plain_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler>>(carrier);
+			//Inference
+			if(inferenceData.get_definition()==true){ //only if inference is actually required
+			  Inference_Carrier<regressionData> inf_car (regressionData, regression, optimizationData, inferenceData); //Carrier for inference Data
+			  if(inferenceData.get_exact_inference()==true){
+			    Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
+			    Wald_Solver<regressionData> inference_Solver (&inference_Inverter, inf_car); //Class for inference resolution
+			    Inference_Output = inference_Solver.compute_inference_output(); //check names
+			  }// else{
+			  //  Inverse_Non_Exact inference_Inverter; // Inverter for the noCovMatrix
+			  //  Wald<regressionData> inference_Solver (&inference_Inverter, inf_car); //Class for inference resolution
+			  //  Inference_Output = inference_Solver.inference_output(); //check names
+			  // }
+ }
 		}
 	}
 
- 	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData);
+ 	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,Inference_Output,InferenceData);
 }
 
 //! Function to select the right optimization method
