@@ -13,8 +13,8 @@
 //! Carrier for Inference Data
 /*!
  This class contains all the information needed by inference methods. All the needed objects are wrapped with pointers
- whith the exceprion of the smoohing parameter lambda and the functional fitted values f_hat
- \tparam InputHandler the type of regression problem neede to determine the MIxedFERegressionBase object type
+ whith the exception of the smoohing parameter lambda and the functional fitted values f_hat
+ \tparam InputHandler the type of regression problem needed to determine the MIxedFERegressionBase object type
 */
 template<typename InputHandler>
 class Inference_Carrier{
@@ -88,38 +88,38 @@ class Inference_Carrier{
 		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression, const InferenceData inf_data_*); //Main constructor of the class
 
 		// GETTERS
-		inline const OptimizationData * opt_data getOptData (void){return opt_data;} const 			//!< Getter of opt_data \return opt_data
-		inline const MixedFERegressionBase<InputHandler> * getModel (void){return model;} const			//!< Getter of model \return model
-		inline const InferenceData * getInfData (void){return inf_data;} const					//!< Getter of inf_data \return inf_data
+		inline const OptimizationData * opt_data getOptData (void) const {return opt_data;}  			//!< Getter of opt_data \return opt_data
+		inline const MixedFERegressionBase<InputHandler> * getModel (void) const {return model;} 		//!< Getter of model \return model
+		inline const InferenceData * getInfData (void) const {return inf_data;}					//!< Getter of inf_data \return inf_data
 
-		inline UInt getN_obs (void){return n_obs;} const							//!< Getter of n_obs \return n_obs
-		inline UInt getN_nodes (void){return n_nodes;} const							//!< Getter of n_nodes \return n_nodes
-		inline UInt getp (void){return p;} const								//!< Getter of p \return p
-		inline Real getVar_res (void){return var_res;} const							//!< Getter of var_res \return var_res
+		inline UInt getN_obs (void) const {return n_obs;} 							//!< Getter of n_obs \return n_obs
+		inline UInt getN_nodes (void) const {return n_nodes;} 							//!< Getter of n_nodes \return n_nodes
+		inline UInt getp (void) const {return p;} 								//!< Getter of p \return p
+		inline Real getVar_res (void) const {return var_res;} 							//!< Getter of var_res \return var_res
 
-		inline Real getLambda (void){return lambda;} const							//!< Getter of lambda \return lambda
-		inline const MatrixXr * getWp (void){return Wp;} const							//!< Getter of Wp \return Wp
-		inline const MatrixXr * getKp (void){return Kp;} const							//!< Getter of Kp \return Kp
-		inline const SpMat * getPsip (void){return Psip;} const							//!< Getter of Psip \return Psip
-		inline const SpMat * getPsi_tp (void){return Psi_tp;} const						//!< Getter of Psi_tp \return Psi_tp
-		inline const SpMat * getR0p (void){return R0p;} const							//!< Getter of R0p \return R0p
-		inline const SpMat * getR1p (void){return R1p;} const							//!< Getter of R1p \return R1p
-		inline const MatrixXr * getPp (void){return Pp;} const							//!< Getter of Pp \return Pp
-		inline const Eigen::PartialPivLU<MatrixXr> * getWtW_decp (void){return WtW_decp;} const			//!< Getter of WtW_decp \return WtW_decp
-		inline const MatrixXr * getHp (void){return Hp;} const							//!< Getter of Hp \return Hp
-		inline const MatrixXr * getUp (void){return Up;} const							//!< Getter of Up \return Up
-		inline const MatrixXr * getVp (void){return Vp;} const							//!< Getter of Vp \return Vp
-		inline const MatrixXr * getEp (void){return Ep;} const							//!< Getter of Ep \return Ep
-		inline const Eigen::SparseLU<SpMat> * getE_decp (void){return E_decp;} const				//!< Getter of E_decp \return E_decp
-		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void){return G_decp;} const			//!< Getter of G_decp \return G_decp
-		inline const MatrixXv * getBeta_hatp (void){return beta_hatp;} const					//!< Getter of beta_hatp \return beta_hatp
-		inline const VectorXr * getZp (void){return zp;} const							//!< Getter of zp \return zp
-		inline const MatrixXr * getZ_hatp (void){return z_hatp;} const						//!< Getter of z_hatp \return z_hatp
-		inline const MatrixXr * getF_hatp (void){return f_hatp;} const						//!< Getter of f_hatp \return f_hatp
+		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
+		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
+                inline const MatrixXr * getKp (void) const {return Kp;} 						//!< Getter of Kp \return Kp
+		inline const SpMat * getPsip (void) const {return Psip;} 						//!< Getter of Psip \return Psip
+		inline const SpMat * getPsi_tp (void) const {return Psi_tp;} 						//!< Getter of Psi_tp \return Psi_tp
+		inline const SpMat * getR0p (void) const {return R0p;} 							//!< Getter of R0p \return R0p
+		inline const SpMat * getR1p (void) const {return R1p;} 							//!< Getter of R1p \return R1p
+		inline const MatrixXr * getPp (void) const {return Pp;} 						//!< Getter of Pp \return Pp
+		inline const Eigen::PartialPivLU<MatrixXr> * getWtW_decp (void) const {return WtW_decp;} 		//!< Getter of WtW_decp \return WtW_decp
+		inline const MatrixXr * getHp (void) const {return Hp;} 						//!< Getter of Hp \return Hp
+		inline const MatrixXr * getUp (void) const {return Up;} 						//!< Getter of Up \return Up
+		inline const MatrixXr * getVp (void) const {return Vp;} 						//!< Getter of Vp \return Vp
+		inline const MatrixXr * getEp (void) const {return Ep;} 						//!< Getter of Ep \return Ep
+		inline const Eigen::SparseLU<SpMat> * getE_decp (void) const {return E_decp;} 				//!< Getter of E_decp \return E_decp
+		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void) const {return G_decp;} 			//!< Getter of G_decp \return G_decp
+		inline const MatrixXv * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
+		inline const VectorXr * getZp (void) const {return zp;} 						//!< Getter of zp \return zp
+		inline const MatrixXr * getZ_hatp (void) const {return z_hatp;} 					//!< Getter of z_hatp \return z_hatp
+		inline const MatrixXr * getF_hatp (void) const {return f_hatp;} 					//!< Getter of f_hatp \return f_hatp
 
 
 
-}
+};
 
 
 

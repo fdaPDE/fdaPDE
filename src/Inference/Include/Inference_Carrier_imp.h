@@ -41,4 +41,4 @@ setVar_res(out_regression.sigma_hat_sq)
 
 //Last to be executed (needs the other elements to be set in order to work properly)
 setF_hatp();
-}
+};
