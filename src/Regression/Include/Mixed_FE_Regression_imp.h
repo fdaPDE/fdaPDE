@@ -735,19 +735,19 @@ template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
 {
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
-	switch (GCVmethod == "exact") {
-		case 1:
-		  if(!regressionData_.getFlagIterative())
-				computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
-			else
-				computeDOFExact_iterative(output_indexS, output_indexT, lambdaS, lambdaT);
-			break;
-		case 0:
-			if(!regressionData_.getFlagIterative())
-				computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT);
-			else
-				computeDOFStochastic_iterative(output_indexS, output_indexT, lambdaS, lambdaT);
-			break;
+    switch (GCVmethod == "exact") {
+        case 1:
+            if(regressionData_.getFlagIterative() & !isGAMData)
+                computeDOFExact_iterative(output_indexS, output_indexT, lambdaS, lambdaT);
+            else
+                computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
+            break;
+        case 0:
+            if(regressionData_.getFlagIterative() & !isGAMData)
+                computeDOFStochastic_iterative(output_indexS, output_indexT, lambdaS, lambdaT);
+            else
+                computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT);
+            break;
 	}
 }
 
