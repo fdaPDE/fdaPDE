@@ -134,7 +134,7 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
   
 };
 
-VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
+MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
@@ -143,7 +143,7 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
   Real alpha=inf_car.getInfData()->get_inference_level();
   Real quant=0;
   UInt q=C.rows();
-  MatrixXr result;
+  MatrixXv result;
   result.resize(1,q);
   
   
