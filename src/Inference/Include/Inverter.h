@@ -4,7 +4,7 @@
 // HEADERS
 #include "../../FdaPDE.h"
 #include "Inference_Carrier.h"
-#include "Inference_Carrriere_imp.h"
+#include "Inference_Carrrier_imp.h"
 
 // *** inverse_Base Class ***
 //! Class for the inversion of sparse matrices in inference framework
@@ -15,11 +15,12 @@
 class Inverse_Base {
 	protected:
 		MatrixXr E_inv; //!< Matrix that stores the inverse when it has been computed
+		bool inverse_computed = false;
 
 	public:
 		// Getter
-		inline const MatrixXr * getInv(void) const {return &E_inv;}; //!< Getter for the Inverse Matrix [Need to call Compute_inv before calling this]
-		virtual void Compute_inv (const inference_carrier & inf_car) = 0; //!< Virtual function for the computation of the inverse matrix, takes as imput inference Carrier /param inf_car
+		inline const MatrixXr * getInv(void) const {if(inverse_computed==false){Compute_Inv();} return &E_inv;}; //!< Getter for the Inverse Matrix [Need to call Compute_inv before calling this]
+		virtual void Compute_Inv (const Inference_Carrier & inf_car) = 0; //!< Virtual function for the computation of the inverse matrix, takes as imput inference Carrier /param inf_car
 
 }
 
@@ -30,7 +31,7 @@ class Inverse_Base {
 */
 class Inverese_Exact : public inverse_Base {
 	public:
-		void Compute_inv (const inference_carrier & inf_car) override; //!< Function for the exact computation of the inverse matrix, takes as imput inference Carrier /param inf_car
+		void Compute_Inv (const Inference_Carrier & inf_car) override; //!< Function for the exact computation of the inverse matrix, takes as imput inference Carrier /param inf_car
 }
 
 #endif 

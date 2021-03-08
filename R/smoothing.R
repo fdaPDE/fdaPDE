@@ -888,7 +888,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
     # Save p_values and intervals
     if(inferenceDataObject@definition==1){
-     if(inferenceDataObject@test_type==0){
+      if(inferenceDataObject@test_type==0){
         confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1]
         inference=list(CI=confidence_Intervals)
       }else{
@@ -902,10 +902,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         }
       }
     reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
-                     optimization  = optimization, time = time, bary.locations = bary.locations, inference=inference)
+                      optimization  = optimization, time = time, bary.locations = bary.locations, inference=inference)
     }else{
     reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
-                optimization  = optimization, time = time, bary.locations = bary.locations)
+                      optimization  = optimization, time = time, bary.locations = bary.locations)
     }
     return(reslist)
   }

@@ -44,7 +44,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	    }else{
 	      p_values=inference_Output(0);
 	      
-	      intervals=inference_Output.rightcols(inf_Data.get_coefficients().getrows());
+	      intervals=inference_Output.rightcols((inf_Data.get_coefficients()).getrows());
 	    }
 	  }
 	}
@@ -230,14 +230,14 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	SET_VECTOR_ELT(result,22,Rf_allocVector(RealSXP,p_values.size())); // P_values info (inference on betas)
 	Real *rans12=REAL(VECTOR_ELT(result,22));
 	for(UInti = 0; i<p_values.size(),i++){
-	  rans12[i]=p_values(i);
+	  	rans12[i]=p_values(i);
 	}
 	
 	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3,intervals.size())) // Confidence Intervals info (Inference on betas)
 	  Real *rans13 = REAL(VECTOR_ELT(result,23));
 	for(UInt j =0; j<intervals.size(); j++){
-	  for(UInt i=0; i<3,i++){
-	    rans13[i+3*j]=intervals(j)(i):
+	 	for(UInt i=0; i<3,i++){
+	    		rans13[i+3*j]=intervals(j)(i):
 	  }
 	}
 

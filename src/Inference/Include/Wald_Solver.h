@@ -19,29 +19,18 @@
 template<typename InputHandler>
 class Wald_Solver{
 private:
-  //!< inverter object that computes the inverse of matrixNoCov in exact/non-exact way.
-  Inverse_Base & inverter;
-  //!< inference carrier that contains all the information needed for inference. 
-  const InferenceCarrier<InputHandler> & inf_car;
-  //!< smoothing matrix. 
-  MatrixXr S;
-  // transpose of the smoothing matrix.
-  MatrixXr S_t;   
-  //!< boolean to know whether S has been computed
-  bool is_S_computed = false;
-  //!< Variance-Covariance matrix of the beta parameters
-  MatrixXr V;
-  //!< boolean to know whether V has been computed
-  bool is_V_computed = false;
-  //!< method used to compute S
-  void compute_S(void);
-  //!< method used to compute V
-  void compute_V(void);
-  //!< method to compute the pvalue of the test (they can be more than one if one-at-the-time)
-  VectorXr compute_pvalue(void);
-  //!< method to compute the confidence intervals (they can be simultaneous, one-at-the-time or bonferroni)
-  MatrixXv compute_CI(void); // To be implemented
-  
+  Inverse_Base & inverter; 				//!< Inverter object that computes the inverse of matrixNoCov in exact/non-exact way
+  const InferenceCarrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
+  MatrixXr S;						//!< Smoothing matrix 
+  MatrixXr S_t;   					//!< Transpose of the smoothing matrix
+  bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not
+  MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
+  bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
+  void compute_S(void);					//!< Method used to compute S
+  void compute_V(void);					//!< Method used to compute V
+  VectorXr compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
+  MatrixXv compute_CI(void);				//!< Method to compute the confidence intervals
+
 public:
   // CONSTUCTOR
   Wald_Solver()=delete;	//The default constructor is deleted

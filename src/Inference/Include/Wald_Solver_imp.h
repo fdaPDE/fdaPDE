@@ -10,11 +10,11 @@ using boost::math;
 
 void template<InputHandler> Wald_Solver<InputHandler>::compute_S(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  inverter.compute_inverse();
+  inverter.Compute_Inv();
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;
-  M_inv.resize(inverter.getE_inv()->rows(), inverter.getE_inv()->cols());
-  const MatrixXr * E_inv = inverter.getE_inv();
+  M_inv.resize(inverter.getInv()->rows(), inverter.getInv()->cols());
+  const MatrixXr * E_inv = inverter.getInv();
   const MatrixXr * U = inf_car.getUp();
   const MatrixXr * V = inf_car.getVp();
   const Eigen::PartialPivLU<MatrixXr> * G_decp = inf_car.getG_decp();
