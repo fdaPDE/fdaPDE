@@ -25,7 +25,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
 	regression.preapply(mesh); // preliminary apply (preapply) to store all problem matrices
 
-        std::pair<MatrixXr, output_Data> solution_bricks;	// Prepare solution to be filled
+    std::pair<MatrixXr, output_Data> solution_bricks;	// Prepare solution to be filled
 
 	// Build the Carrier according to problem type
 	if(regression.isSV())
@@ -103,7 +103,11 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 		output.z_hat.resize(carrier.get_psip()->rows(),carrier.get_opt_data()->get_size_S());
 		output.lambda_vec = carrier.get_opt_data()->get_lambda_S();
 		MatrixXr solution;
+<<<<<<< HEAD
 		MatrixXv betas;
+=======
+ 		MatrixXv betas;
+>>>>>>> master
 		betas.resize(carrier.get_opt_data()->get_size_S(),1);
 
 		for(UInt j=0; j<carrier.get_opt_data()->get_size_S(); j++)
@@ -129,9 +133,15 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 		output.time_partial = T.tv_sec + 1e-9*T.tv_nsec;
 
                 // postponed after apply in order to have betas computed
+<<<<<<< HEAD
                 output.betas = betas;
 
                 return {solution, output};
+=======
+        output.betas = betas;
+
+        return {solution, output};
+>>>>>>> master
 	}
 }
 

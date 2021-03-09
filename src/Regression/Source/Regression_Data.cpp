@@ -277,13 +277,13 @@ void RegressionData::printCovariates(std::ostream & out) const
 
 void RegressionData::printLocations(std::ostream & out) const
 {
-
 	if(locations_.ncols()==2)
 		for(UInt i=0; i<locations_.nrows(); i++)
 			out<<getLocations<2>(i)<<std::endl;
 	else
 		for(UInt i=0; i<locations_.nrows(); i++)
 			out<<getLocations<3>(i)<<std::endl;
+
 }
 
 void RegressionData::printIncidenceMatrix(std::ostream & out) const

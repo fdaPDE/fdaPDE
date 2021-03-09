@@ -666,7 +666,11 @@ R_tricoefCal = function(mesh)
 smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
+<<<<<<< HEAD
   ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,lambda=lambda, covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = NULL, lambda.selection.lossfunction=NULL)
+=======
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis, covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = NULL, lambda.selection.lossfunction=NULL,lambda=lambda)
+>>>>>>> master
   ans
 }
 
@@ -722,7 +726,11 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
+<<<<<<< HEAD
   ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,lambda=lambda,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = NULL, lambda.selection.lossfunction=NULL)
+=======
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = NULL, lambda.selection.lossfunction=NULL,lambda=lambda)
+>>>>>>> master
   ans
 }
 
@@ -786,7 +794,11 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 smooth.FEM.PDE.sv.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
+<<<<<<< HEAD
   ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,lambda=lambda,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = NULL, lambda.selection.lossfunction=NULL)
+=======
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = NULL, lambda.selection.lossfunction=NULL,lambda=lambda)
+>>>>>>> master
   ans
 }
 

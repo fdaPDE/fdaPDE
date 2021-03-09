@@ -1,3 +1,4 @@
+<<<<<<< HEAD:src/FPCA/Source/Mixed_FE_FPCA.cpp
 #include "../Include/Mixed_FE_FPCA.h"
 
 void MixedFEFPCABase::buildCoeffMatrix(const SpMat& DMat,  const SpMat& AMat,  const SpMat& MMat)

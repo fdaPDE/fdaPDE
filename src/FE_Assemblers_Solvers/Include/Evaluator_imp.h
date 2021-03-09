@@ -9,7 +9,9 @@ void Evaluator<ORDER,2,2>::eval(const Real* X, const Real *Y, UInt length, const
 	Element<Nodes,2,2> current_element;
 	Point<2> current_point;
 	Eigen::Matrix<Real,Nodes,1> coefficients;
+
 	UInt search = mesh_.getSearch();						 
+
 
 	for (int i = 0; i<length; ++i) {
 		current_point = Point<2>({X[i],Y[i]});
@@ -19,6 +21,7 @@ void Evaluator<ORDER,2,2>::eval(const Real* X, const Real *Y, UInt length, const
 				//To avoid problems with non convex mesh
 			current_element = mesh_.findLocationNaive(current_point);
 		}
+
 
 		if(current_element.getId() == Identifier::NVAL) {
 			isinside[i]=false;
@@ -41,12 +44,16 @@ void Evaluator<ORDER,2,2>::evalWithInfo(const Real* X, const Real *Y, UInt lengt
 	Element<Nodes,2,2> current_element;
 	Point<2> current_point;
 	Eigen::Matrix<Real,Nodes,1> coefficients;
+
 	Eigen::Matrix<Real,Nodes,1> bary_coeff;							  
+
 
 	for (int i = 0; i<length; ++i) {
 		current_point = Point<2>({X[i],Y[i]});
 		current_element = mesh_.getElement(element_id[i]);
+
 		
+
 		if(current_element.getId() == Identifier::NVAL) {
 			isinside[i]=false;
 		} else {
@@ -56,7 +63,9 @@ void Evaluator<ORDER,2,2>::evalWithInfo(const Real* X, const Real *Y, UInt lengt
 			}
 
 			result[i] = current_element.evaluate_point(current_point, coefficients);
+
 			
+
 		}
 	} //end of for loop
 }
@@ -71,8 +80,10 @@ void Evaluator<ORDER,2,3>::eval(const Real* X, const Real *Y,  const Real *Z, UI
 	Element<Nodes,2,3> current_element;
 	Point<3> current_point;
 	Eigen::Matrix<Real,Nodes,1> coefficients;
+
 	UInt search = mesh_.getSearch();							 
 	
+
 	for (int i = 0; i<length; ++i) {
 		current_point = Point<3>({X[i],Y[i],Z[i]});
 
@@ -100,7 +111,9 @@ void Evaluator<ORDER,2,3>::evalWithInfo(const Real* X, const Real *Y, const Real
 	Element<Nodes,2,3> current_element;
 	Point<3> current_point;
 	Eigen::Matrix<Real,Nodes,1> coefficients;
+
 	Eigen::Matrix<Real,Nodes,1> bary_coeff;							  
+
 
 	for (int i = 0; i<length; ++i) {
 		current_point = Point<3>({X[i],Y[i],Z[i]});
@@ -128,7 +141,9 @@ void Evaluator<ORDER,3,3>::eval(const Real* X, const Real *Y,  const Real *Z, UI
 	Point<3> current_point;
 	Eigen::Matrix<Real,Nodes,1> coefficients;
 	UInt search = mesh_.getSearch();
+
 							 
+
 
 	for (int i = 0; i<length; ++i) {
 		current_point = Point<3>({X[i],Y[i],Z[i]});
@@ -138,6 +153,7 @@ void Evaluator<ORDER,3,3>::eval(const Real* X, const Real *Y,  const Real *Z, UI
 			//To avoid problems with non convex mesh
 			current_element = mesh_.findLocationNaive(current_point);
 		}
+
 
 
 		if(current_element.getId() == Identifier::NVAL) {
@@ -162,12 +178,16 @@ void Evaluator<ORDER,3,3>::evalWithInfo(const Real* X, const Real *Y, const Real
 	Element<Nodes,3,3> current_element;
 	Point<3> current_point;
 	Eigen::Matrix<Real,Nodes,1> coefficients;
+
 	Eigen::Matrix<Real,Nodes,1> bary_coeff;							  
+
 
 	for (int i = 0; i<length; ++i) {
 		current_point = Point<3>({X[i],Y[i],Z[i]});
 		current_element = mesh_.getElement(element_id[i]);
+
 		
+
 		if(current_element.getId() == Identifier::NVAL) {
 			isinside[i]=false;
 		} else {
@@ -242,6 +262,8 @@ void Evaluator<ORDER, 2, 3>::integrate(UInt** incidenceMatrix, UInt nRegions, UI
 }
 
 
+
+
 template <UInt ORDER>
 void Evaluator<ORDER, 3, 3>::integrate(UInt** incidenceMatrix, UInt nRegions, UInt nElements, const Real *coef, Real* result)
 {
@@ -266,6 +288,8 @@ void Evaluator<ORDER, 3, 3>::integrate(UInt** incidenceMatrix, UInt nRegions, UI
 		}
 		result[region]=integral[region]/Delta[region];
 	}
+
+
 
 }
 

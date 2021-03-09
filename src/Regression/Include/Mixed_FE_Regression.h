@@ -32,7 +32,9 @@ class MixedFERegressionBase
 
 		const InputHandler & regressionData_;
 
+
         OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
+
 
 		// For only space problems
 		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
@@ -48,6 +50,7 @@ class MixedFERegressionBase
 		//	                | -lambdaS*(R1k^T+lambdaT*LR0k)  |        -lambdaS*R0k	          |      |         O          |  O |
 
 
+
 		SpMat 		matrixNoCov_;	//!< System matrix without
 		SpMat 		DMat_;
 		SpMat 		R1_;		//!< R1 matrix of the model
@@ -55,7 +58,7 @@ class MixedFERegressionBase
 		SpMat 		R0_lambda;
 		SpMat 		R1_lambda;
 		SpMat 		psi_;  		//!< Psi matrix of the model
-		SpMat       psi_mini;   //!< (Marti) It saves the psi_before the tensor product
+		SpMat       psi_mini;   //!< Psi only space version
 		SpMat 		psi_t_;  	//!< Psi ^T matrix of the model
 		SpMat 		Ptk_; 		//!< kron(Pt,IN) (separable version)
 		SpMat 		LR0k_; 		//!< kron(L,R0) (parabolic version)
@@ -87,9 +90,9 @@ class MixedFERegressionBase
 		MatrixXv _beta;			//!< A Eigen::MatrixXv storing the computed beta coefficients
 
 		// members for the iterative method
-        MatrixXr _solution_k_;       //!< A Eigen::MatrixXr: Stores the solution for each time instant
-        VectorXr _solution_f_old_;  //!< A Eigen::VectorXr: Stores the old system solution
-        VectorXr _rightHandSide_k_; //!< A Eigen::VectorXr: Stores the update system right hand side
+        MatrixXr _solution_k_;       //!< A Eigen::MatrixXr: Stores the solution for each time instant (iterative method)
+        VectorXr _solution_f_old_;  //!< A Eigen::VectorXr: Stores the old system solution (iterative method)
+        VectorXr _rightHandSide_k_; //!< A Eigen::VectorXr: Stores the update system right hand side (iterative method)
 
         //Flag to avoid the computation of R0, R1, Psi_ onece already performed
 
@@ -97,10 +100,10 @@ class MixedFERegressionBase
 		bool isPsiComputed = false;
 		bool isR0Computed  = false;
 		bool isR1Computed  = false;
+		bool isUVComputed  = false;
 
 		bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
 		bool isGAMData;
-
 		bool isIterative;
 
 	        // -- SETTERS --
@@ -117,6 +120,7 @@ class MixedFERegressionBase
 		//! A method which takes care of missing values setting to 0 the corresponding rows of B_
 		void addNA();
 	 	//! A member function which builds the A vector containing the areas of the regions in case of areal data
+
 
 	    template<UInt ORDER, UInt mydim, UInt ndim>
 
@@ -139,6 +143,7 @@ class MixedFERegressionBase
 		void computeDegreesOfFreedomExact(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
         //! Exact GCV: iterative method
 		void computeDOFExact_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+
 		//! A method computing dofs in case of stochastic GCV, it is called by computeDegreesOfFreedom
 		void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! Stochastic GCV: iterative method
@@ -161,8 +166,7 @@ class MixedFERegressionBase
 		template<typename Derived>
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
 
-
-        //! A function which solves the factorized system in presence of covariates
+        //! A function which solves the factorized system in presence of covariates (iterative method)
         template<typename Derived>
         MatrixXr solve_covariates_iter(const Eigen::MatrixBase<Derived>&, UInt time_index);
 
@@ -170,12 +174,12 @@ class MixedFERegressionBase
         //! A method to initialize f
         void initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index);
          //! A method to initialize g
-        void initialize_g(Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
+        void initialize_g(Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
         //! A method that stops the iterative algorithm based on difference between functionals J_k J_k+1 or n_iterations > max_num_iterations .
         bool stopping_criterion(UInt& index, Real J, Real J_old);
         //!A method that computes and return the current value of the functional J. It is divided in parametric and non parametric part.
         Real compute_J(UInt& lambdaS_index, UInt& lambdaT_index);
-        //!  A methdd that update the system rhs for each time instant
+        //!  A methdd that update the system rhs for each time instant (iterative method)
         void update_rhs(UInt& time_index, Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
 	public:
 
@@ -247,7 +251,6 @@ class MixedFERegressionBase
 		bool isSV(void) const {return this->isSpaceVarying;}
 		bool isIter(void) const {return this->isIterative;}
 
-
 		//! A function that given a vector u, performs Q*u efficiently
 		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
 
@@ -286,7 +289,6 @@ class MixedFERegression : public MixedFERegressionBase<InputHandler>
         {
             Rprintf("Option not implemented!\n");
          }
-
 };
 
 //! A class for the construction of the temporal matrices needed for the parabolic case

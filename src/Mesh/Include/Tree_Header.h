@@ -8,12 +8,14 @@
  #ifndef TREE_HEADER_H_
  #define TREE_HEADER_H_
 
+
  #include "../../FdaPDE.h"
  #include "Mesh_Objects.h"
  #include "Bounding_Box.h"
  #include "Domain.h"
  #include "Tree_Node.h"
  #include "Exception_Handling.h"
+
 
 
 
