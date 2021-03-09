@@ -8,13 +8,14 @@ using boost::math::normal;
 using boost::quantile;
 using boost::math; 
 
-void template<InputHandler> Wald_Solver<InputHandler>::compute_S(void){
+template<typename InputHandler> 
+void Wald_Solver<InputHandler>::compute_S(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
   inverter.Compute_Inv();
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;
   M_inv.resize(inverter.getInv()->rows(), inverter.getInv()->cols());
-  const MatrixXr * E_inv = inverter.getInv();
+  const MatrixXr * E_inv = inverter.getInv(inf_car.getE_decp(), inf_car.getEp());
   const MatrixXr * U = inf_car.getUp();
   const MatrixXr * V = inf_car.getVp();
   const Eigen::PartialPivLU<MatrixXr> * G_decp = inf_car.getG_decp();
@@ -37,7 +38,8 @@ void template<InputHandler> Wald_Solver<InputHandler>::compute_S(void){
   return; 
 };
 
-void template<InputHandler> Wald_Solver<InputHandler>::compute_V(){
+template<typename InputHandler> 
+void Wald_Solver<InputHandler>::compute_V(){
   // get the variance of the residuals estimators from the inference carrier
   const Real var_res = inf_car.getVar_res();
   // resize the variance-covariance matrix
@@ -54,7 +56,8 @@ void template<InputHandler> Wald_Solver<InputHandler>::compute_V(){
   return;
 };
 
-VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
+template<typename InputHandler> 
+VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
   
@@ -134,7 +137,8 @@ VectorXr template<InputHandler> Wald_Solver<InputHandler>::compute_pvalue(void){
   
 };
 
-MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
+template<typename InputHandler> 
+MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
@@ -193,7 +197,8 @@ MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
 };
 
 
-MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_inference_output(void){
+template<typename InputHandler>
+MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
   // declare the result Matrix of vectors to be returned
   MatrixXv result;
   

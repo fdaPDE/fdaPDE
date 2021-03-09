@@ -1,6 +1,6 @@
 #include"Inference_Carrier.h"
 
-template<InputHandler> Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression, const InferenceData * inf_data_){
+template<typename InputHandler> Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression, const InferenceData * inf_data_){
 
 //Setting the datasets
 setOptData(Regression_Data_);
@@ -10,8 +10,8 @@ setInfData(inf_data_);
 //Setting from Regression_Data_
 setWp(&(Regression_Data_->getCovariates()));
 setN_obs(Regression_Data_->getNumberofObservations());
-setp(Regression_Data_->getCovariates()->cols())
-if(std.:dynamic_cast<RegressionDataEllipticSpaceVarying>(Regression_Data_)!=nullptr){ //check space varying
+setp(Regression_Data_->getCovariates()->cols());
+if(dynamic_cast<RegressionDataEllipticSpaceVarying *>(Regression_Data_)!=nullptr){ //check space varying
 setKp(&(Regression_Data_->getK()));	//Otherwise it is nullptr
 }
 
@@ -36,8 +36,8 @@ setG_decp(model_->getGdec_());
 setLambda(out_regression->lambda_sol);
 setBeta_hatp(&(out_regression->betas));
 setZp(&(Regression_Data_->observations_));
-setZ_hatp(&(out_regression));
-setVar_res(out_regression.sigma_hat_sq)
+setZ_hatp(&(out_regression->z_hat));
+setVar_res(out_regression->sigma_hat_sq);
 
 //Last to be executed (needs the other elements to be set in order to work properly)
 setF_hatp();

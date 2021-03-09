@@ -20,7 +20,7 @@ template<typename InputHandler>
 class Wald_Solver{
 private:
   Inverse_Base & inverter; 				//!< Inverter object that computes the inverse of matrixNoCov in exact/non-exact way
-  const InferenceCarrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
+  const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   MatrixXr S;						//!< Smoothing matrix 
   MatrixXr S_t;   					//!< Transpose of the smoothing matrix
   bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not

@@ -1,4 +1,4 @@
-#ifndef __INFERENCE_DATA_H___
+#ifndef __INFERENCE_DATA_H__
 #define __INFERENCE_DATA_H__
 
 #include "../../FdaPDE.h"

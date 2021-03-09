@@ -58,7 +58,7 @@ extern "C"
         {
         	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
                 OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-		InferenceData inferenceData(RTestType, RIntervalType, RImplementationType, RExactInference, RCoeffInference, RBeta0, RInferenceLevel, RInferenceDefined);
+		InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RinferenceLevel, RinferenceDefined);
 
         	UInt mydim = INTEGER(Rmydim)[0];
         	UInt ndim = INTEGER(Rndim)[0];

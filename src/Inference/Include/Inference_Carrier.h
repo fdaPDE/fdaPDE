@@ -27,7 +27,7 @@ class Inference_Carrier{
 		// SYSTEM PARAMETERS
 		const UInt n_obs; 							//!< Number of observations
 		const UInt n_nodes;							//!< Number of nodes
-		const Uint p;								//!< Number of covariates
+		const UInt p;								//!< Number of covariates
 		const Real var_res; 							//!< Variance of the residuals i n the optimal model
 
 		Real lambda=0; 								//!< Optimal smothing parameter
@@ -37,7 +37,7 @@ class Inference_Carrier{
 		const SpMat * Psi_tp = nullptr; 					//!< Pointer to the transpose of the location-to-nodes matrix [size n_nodes x n_obs]	
 		const SpMat * R1p = nullptr;						//!< Pointer to R1 matrix [size n_nodes x n_nodes]
                 const SpMat * R0p = nullptr;						//!< Pointer to R0 matrix [size n_nodes x n_nodes]
-		const MtrixXr * Pp = nullptr;						//!< Pointer to P matrix [size ]
+		const MatrixXr * Pp = nullptr;						//!< Pointer to P matrix [size ]
 		const Eigen::PartialPivLU<MatrixXr> * WtW_decp = nullptr;		//!< Pointer to the LU decomposition of the WtW matrix
 		const MatrixXr * Hp = nullptr;						//!< Pointer to the hat matrix [size n_covariates x n_covariates]
 		const MatrixXr * Up = nullptr; 						//!< Pointer to the U matrix of the Woodbury decomposition of the system
@@ -57,7 +57,7 @@ class Inference_Carrier{
 		inline void setModel (const MixedFERegressionBase<InputHandler> * model_){model = model_;}		//!< Setter of model \param model_ new model
 		inline void setInfData (const InferenceData * inf_data_){inf_data = inf_data_;}				//!< Setter of inf_data \param inf_data_ new inf_data
 
-		inline void setN_obs (UInt n_obs){n_obs = n_obs_;}							//!< Setter of n_obs \param n_obs_ new n_obs
+		inline void setN_obs (UInt n_obs_){n_obs = n_obs_;}							//!< Setter of n_obs \param n_obs_ new n_obs
 		inline void setN_nodes (UInt n_nodes_){n_nodes = n_nodes_;}						//!< Setter of n_nodes \param n_nodes_ new n_nodes
 		inline void setp (UInt p_){p = p_;}									//!< Setter of p \param p_ new p
 		inline void setVar_res (Real var_res_){var_res = var_res_;}						//!< Setter of var_res \param var_res_ new var_res
@@ -80,15 +80,15 @@ class Inference_Carrier{
 		inline void setBeta_hatp (const MatrixXv * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
 		inline void setZ_hatp (const MatrixXr * z_hatp_){z_hatp = z_hatp_;}					//!< Setter of z_hatp \param z_hatp_ new z_hatp
-		inline void setF_hatp (void){f_hatp = *z_hatp - (*Wp)*(*beta_hatp (0));}				//!< Setter of f_hatp new Wp
+		inline void setF_hatp (void){f_hatp = *z_hatp - (*Wp)*((*beta_hatp)(0));}				//!< Setter of f_hatp new Wp
 
 	public:
 		// CONSTUCTORS
 		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, lambda is set to 0
-		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression, const InferenceData inf_data_*); //Main constructor of the class
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression, const InferenceData * inf_data_); //Main constructor of the class
 
 		// GETTERS
-		inline const OptimizationData * opt_data getOptData (void) const {return opt_data;}  			//!< Getter of opt_data \return opt_data
+		inline const OptimizationData * getOptData (void) const {return opt_data;}  			//!< Getter of opt_data \return opt_data
 		inline const MixedFERegressionBase<InputHandler> * getModel (void) const {return model;} 		//!< Getter of model \return model
 		inline const InferenceData * getInfData (void) const {return inf_data;}					//!< Getter of inf_data \return inf_data
 

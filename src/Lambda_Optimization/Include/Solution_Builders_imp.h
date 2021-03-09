@@ -2,7 +2,7 @@
 #define __SOLUTION_BUILDERS_IMP_H__
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MatrixXv & inference_Output, const Inference_Data & inf_Data)
+SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MatrixXv & inference_Output, const InferenceData & inf_Data)
 {
         // ---- Preparation ----
         // Prepare regresion coefficients space
@@ -44,7 +44,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	    }else{
 	      p_values=inference_Output(0);
 	      
-	      intervals=inference_Output.rightcols((inf_Data.get_coeff_inference()).rows());
+	      intervals=inference_Output.rightCols((inf_Data.get_coeff_inference()).rows());
 	    }
 	  }
 	}
@@ -227,17 +227,17 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                         rans11[i + barycenters.rows()*j] = barycenters(i,j);
         }
 
-	SET_VECTOR_ELT(result,22,Rf_allocVector(RealSXP,p_values.size())); // P_values info (inference on betas)
+	SET_VECTOR_ELT(result,22,Rf_allocVector(REALSXP,p_values.size())); // P_values info (inference on betas)
 	Real *rans12=REAL(VECTOR_ELT(result,22));
-	for(UInti = 0; i<p_values.size(),i++){
+	for(UInt i = 0; i<p_values.size(); i++){
 	  	rans12[i]=p_values(i);
 	}
 	
-	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3,intervals.size())) // Confidence Intervals info (Inference on betas)
-	  Real *rans13 = REAL(VECTOR_ELT(result,23));
+	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3,intervals.size())); // Confidence Intervals info (Inference on betas)
+	Real *rans13 = REAL(VECTOR_ELT(result,23));
 	for(UInt j =0; j<intervals.size(); j++){
-	 	for(UInt i=0; i<3,i++){
-	    		rans13[i+3*j]=intervals(j)(i):
+	  for(UInt i=0; i<3 ; i++){
+		  rans13[i+3*j]=intervals(j)(i);
 	  }
 	}
 
