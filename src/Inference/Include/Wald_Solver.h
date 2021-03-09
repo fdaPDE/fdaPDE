@@ -47,5 +47,6 @@ public:
 };
 
 
+#include "Wald_Solver_imp.h"
 
 #endif

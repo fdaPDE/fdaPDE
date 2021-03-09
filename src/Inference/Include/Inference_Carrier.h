@@ -121,6 +121,6 @@ class Inference_Carrier{
 
 };
 
-
+#include "Inference_Carrier_imp.h"
 
 #endif

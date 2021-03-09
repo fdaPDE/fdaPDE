@@ -164,6 +164,14 @@ MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
       quant = quantile(complement(distribution,alpha/(2*q)));
     }
   }
+  
+  // compute S and V if needed
+  if(!is_S_computed){
+    compute_S();
+  }
+  if(!is_V_computed){
+    compute_V();
+  }
   // for each row of C matrix
   for(Uint i=0; i<q; ++i){
     result(i).resize(3);
@@ -171,14 +179,6 @@ MatrixXv template<InputHandler> Wald_Solver<InputHandler>::compute_CI(void){
     MatrixXr col = row.transpose();
     //Central element
     result(i)(1)=row*beta_hat;
-    
-    // compute S and V if needed
-    if(!is_S_computed){
-      compute_S();
-    }
-    if(!is_V_computed){
-      compute_V();
-    }
     
     // compute the standard deviation of the linear combination and half range of the interval
     Real sd_comb = std::sqrt(row*V*col);

@@ -11,10 +11,8 @@
 #include "../../Lambda_Optimization/Include/Solution_Builders.h"
 #include "../../Inference/Include/Inference_Data.h"
 #include "../../Inference/Include/Inference_Carrier.h"
-#include "../../Inference/Include/Inference_Carrier_imp.h"
 #include "../../Inference/Include/Inverter.h"
 #include "../../Inference/Include/Wald_Solver.h"
-#include "../../Inference/Include/Wald_Solver_imp.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 
