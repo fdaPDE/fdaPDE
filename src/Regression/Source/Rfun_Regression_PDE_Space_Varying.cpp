@@ -6,6 +6,8 @@
 #include "../Include/Regression_Data.h"
 #include "../../FE_Assemblers_Solvers/Include/Integration.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
+#include "../../Inference/Include/Inference_Data.h"
+
 
 extern "C"
 {
@@ -44,27 +46,31 @@ extern "C"
         */
         SEXP regression_PDE_space_varying(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim,
                 SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
-                SEXP Rsearch, SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
+					  SEXP Rsearch, SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
+					  SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
+				SEXP Rbeta0, SEXP RinferenceLevel, SEXP RinferenceDefined)
         {
                 //Set data
         	RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Ru, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
                 OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
+		InferenceData inferenceData(RTestType, RIntervalType, RImplementationType, RExactInference, RCoeffInference, RBeta0, RInferenceLevel, RInferenceDefined);
+
 
         	UInt mydim = INTEGER(Rmydim)[0];
         	UInt ndim = INTEGER(Rndim)[0];
 
         	if(regressionData.getOrder() == 1 && ndim==2)
-        		return(regression_skeleton<RegressionDataEllipticSpaceVarying, 1, 2, 2>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataEllipticSpaceVarying, 1, 2, 2>(regressionData, optimizationData, inferenceData, Rmesh));
         	else if(regressionData.getOrder() == 2 && ndim==2)
-        		return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 2, 2>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 2, 2>(regressionData, optimizationData, inferenceData, Rmesh));
         	else if(regressionData.getOrder() == 1 && mydim==2 && ndim==3)
-        		return(regression_skeleton<RegressionDataEllipticSpaceVarying, 1, 2, 3>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataEllipticSpaceVarying, 1, 2, 3>(regressionData, optimizationData, inferenceData, Rmesh));
         	else if(regressionData.getOrder() == 2 && mydim==2 && ndim==3)
-        		return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 2, 3>(regressionData, optimizationData, Rmesh));
+		  return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 2, 3>(regressionData, optimizationData, inferenceData, Rmesh));
             else if(regressionData.getOrder() == 1 && mydim==3 && ndim==3)
-                return(regression_skeleton<RegressionDataEllipticSpaceVarying, 1, 3, 3>(regressionData, optimizationData, Rmesh));
+	      return(regression_skeleton<RegressionDataEllipticSpaceVarying, 1, 3, 3>(regressionData, optimizationData, inferenceData, Rmesh));
             else if(regressionData.getOrder() == 2 && mydim==3 && ndim==3)
-                return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 3, 3>(regressionData, optimizationData, Rmesh));
+	      return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 3, 3>(regressionData, optimizationData, inferenceData, Rmesh));
 
         	return(NILSXP);
         }

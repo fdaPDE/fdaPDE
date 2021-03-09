@@ -102,8 +102,9 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   bigsol <- .Call("regression_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, 
-                  GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE",
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined)
+                  GCV.inflation.factor, lambda.optimization.tolerance,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined,
+                  PACKAGE = "fdaPDE")
   return(bigsol)
 }
 
@@ -217,12 +218,13 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
                   mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
-                  GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE",
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined)
+                  GCV.inflation.factor, lambda.optimization.tolerance,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined,
+                  PACKAGE = "fdaPDE")
   return(bigsol)
 }
 
-CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, R_Inference_Data_Object)
 {
 
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
@@ -280,7 +282,17 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   PDE_param_eval$b = (PDE_parameters$b)(points_eval)
   PDE_param_eval$c = (PDE_parameters$c)(points_eval)
   PDE_param_eval$u = (PDE_parameters$u)(points_eval)
-
+  
+  ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reding
+  test_Type<-R_Inference_Data_Object@test
+  interval_Type<-R_Inference_Data_Object@interval
+  implementation_Type<-R_Inference_Data_Object@type
+  exact_Inference<-R_Inference_Data_Object@exact
+  coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
+  beta_0=as.vector(R_Inference_Data_Object@beta0)
+  inference_Level=R_Inference_Data_Object@level
+  inference_Defined=R_Inference_Data_Object@definition
+  
   ## Set propr type for correct C++ reading
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
@@ -313,12 +325,24 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
 
+  ## Set proper type for correct C++ reading for inference parameters
+  storage.mode(test_Type) <- "integer"
+  storage.mode(interval_Type) <- "integer"
+  storage.mode(implementation_Type) <- "integer"
+  storage.mode(exact_Inference) <- "integer"
+  storage.mode(coeff_Inference) <- "double"
+  storage.mode(beta_0) <- "double"
+  storage.mode(inference_Level) <- "double"
+  storage.mode(inference_Defined) <- "integer"
+  
   ## Call C++ function
   bigsol <- .Call("regression_PDE_space_varying", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                   mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
-                  GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                  GCV.inflation.factor, lambda.optimization.tolerance,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_Defined,
+                  PACKAGE = "fdaPDE")
   return(bigsol)
 }
 
