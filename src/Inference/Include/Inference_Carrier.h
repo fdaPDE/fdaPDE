@@ -80,7 +80,7 @@ class Inference_Carrier{
 		inline void setBeta_hatp (const MatrixXv * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
 		inline void setZ_hatp (const MatrixXr * z_hatp_){z_hatp = z_hatp_;}					//!< Setter of z_hatp \param z_hatp_ new z_hatp
-		inline void setF_hatp (void){f_hatp = *z_hatp - (*Wp)*(*beta_hatp);}					//!< Setter of f_hatp new Wp
+		inline void setF_hatp (void){f_hatp = *z_hatp - (*Wp)*(*beta_hatp (0));}				//!< Setter of f_hatp new Wp
 
 	public:
 		// CONSTUCTORS

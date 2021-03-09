@@ -44,7 +44,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	    }else{
 	      p_values=inference_Output(0);
 	      
-	      intervals=inference_Output.rightcols((inf_Data.get_coefficients()).getrows());
+	      intervals=inference_Output.rightcols((inf_Data.get_coeff_inference()).rows());
 	    }
 	  }
 	}
