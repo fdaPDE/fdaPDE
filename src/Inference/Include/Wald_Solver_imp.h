@@ -5,16 +5,15 @@
 
 using boost::math::chi_squared;
 using boost::math::normal;
-using boost::quantile;
-using boost::math; 
+using namespace boost::math; 
 
 template<typename InputHandler> 
 void Wald_Solver<InputHandler>::compute_S(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  inverter.Compute_Inv();
+  inverter.Compute_Inv(inf_car.getE_decp(), inf_car.getEp());
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;
-  M_inv.resize(inverter.getInv()->rows(), inverter.getInv()->cols());
+  M_inv.resize(inverter.getInv(inf_car.getE_decp(), inf_car.getEp()->rows(), inverter.getInv(inf_car.getE_decp(), inf_car.getEp()->cols());
   const MatrixXr * E_inv = inverter.getInv(inf_car.getE_decp(), inf_car.getEp());
   const MatrixXr * U = inf_car.getUp();
   const MatrixXr * V = inf_car.getVp();
@@ -22,15 +21,15 @@ void Wald_Solver<InputHandler>::compute_S(void){
   
   M_inv = *E_inv - (*E_inv)*(*U)*((*G_decp).solve((*V)*(*E_inv)));
   
-  Uint n_obs = inf_car.getN_obs();
-  Uint n_nodes = inf_car.getN_nodes();
+  UInt n_obs = inf_car.getN_obs();
+  UInt n_nodes = inf_car.getN_nodes();
   S.resize(n_obs, n_obs);
-  const Spmat * Psi = inf_car.getPsip();
-  const Spmat * Psi_t = inf_car.getPsi_tp();
-  Uint p = inf_car.getp(); 
+  const SpMat * Psi = inf_car.getPsip();
+  const SpMat * Psi_t = inf_car.getPsi_tp();
+  UInt p = inf_car.getp(); 
   MatrixXr Q = MatrixXr::Identity(p, p) - *(inf_car.getHp()); 
   
-  S = (*Psi)*M_inv.system.block<n_nodes, n_nodes>(0,0)*(-(*Psi_t)*Q);
+  S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*(-(*Psi_t)*Q);
   
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
@@ -43,7 +42,7 @@ void Wald_Solver<InputHandler>::compute_V(){
   // get the variance of the residuals estimators from the inference carrier
   const Real var_res = inf_car.getVar_res();
   // resize the variance-covariance matrix
-  Uint p = inf_car.getp();
+  UInt p = inf_car.getp();
   V.resize(p,p);
   
   const MatrixXr * W = inf_car.getWp();
@@ -69,10 +68,9 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = *(inf_car.getBeta_hatp());
+    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
-    MatrixXr diff_t = diff.transpose();
     
     // compute the variance-covariance matrix if needed
     if(!is_S_computed){
@@ -88,12 +86,12 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
     Sigma_dec.compute(Sigma);
     
     // compute the test statistic
-    Real stat = diff_t * Sigma_dec.solve(diff);
+    Real stat = diff.adjoint() * Sigma_dec.solve(diff);
     
     chi_squared distribution(C.rows());
     
     // compute the p-value
-    Real pval = cdf(complement(distribution), stat);
+    Real pval = cdf(complement(distribution, stat));
     
     result.resize(1);
     result(0) = pval;
@@ -109,7 +107,7 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = *(inf_car.getBeta_hatp());
+    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
     
     // compute S and V if needed
       if(!is_S_computed){
@@ -120,15 +118,15 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
       }
       
       // for each row of C matrix
-      for(Uint i=0; i<q; ++i){
-	MatrixXr row = C.row(i);
-	Real diff = row*beta_hat - beta_0(i);
-	Real sigma = row*V*col;
+      for(UInt i=0; i<q; ++i){
+	VectorXr col = C.row(i);
+	Real difference = col.adjoint()*beta_hat - beta_0(i);
+	Real sigma = col.adjoint()*V*col;
 	// compute the test statistic
-	Real stat = diff/std::sqrt(sigma);
+	Real stat = difference/std::sqrt(sigma);
 	normal distribution(0,1);
 	// compute the pvalue
-	Real pval = 2*cdf(complement(distr), fabs(stat));
+	Real pval = 2*cdf(complement(distribution, fabs(stat)));
 	result(i) = pval; 	
       }
       
@@ -142,6 +140,9 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+
+  // get the estimates of the parameters
+    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
   
   // declare the matrix that will store the p-values
   Real alpha=inf_car.getInfData()->get_inference_level();
@@ -177,15 +178,14 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
     compute_V();
   }
   // for each row of C matrix
-  for(Uint i=0; i<q; ++i){
+  for(UInt i=0; i<q; ++i){
     result(i).resize(3);
-    MatrixXr row = C.row(i);
-    MatrixXr col = row.transpose();
+    VectorXr col = C.row(i);
     //Central element
-    result(i)(1)=row*beta_hat;
+    result(i)(1)=col.adjoint()*beta_hat;
     
     // compute the standard deviation of the linear combination and half range of the interval
-    Real sd_comb = std::sqrt(row*V*col);
+    Real sd_comb = std::sqrt(col.adjoint()*V*col);
     Real half_range=sd_comb*quant;
 
     // compute the limits of the interval
@@ -219,7 +219,7 @@ MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
   }
   // else, both are required
   else{
-    Uint q = inf_car.getInfData()->get_coeff_inference().rows();
+    UInt q = inf_car.getInfData()->get_coeff_inference().rows();
     result.resize(1, q+1);
     result(0) = compute_pvalue();
     result.rightCols(q) = compute_CI();

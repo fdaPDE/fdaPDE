@@ -1,4 +1,4 @@
-#include "../Include/InferenceData.h"
+#include "../Include/Inference_Data.h"
 //! Main constructor of the class
 /*!
  \param test_Type_ parameter used to define the type of test is required (if any)
@@ -68,7 +68,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  //beta_0
  UInt size_beta_0=INTEGER(Rf_getAttrib(beta_0_, R_DimSymbol))[0]; //We need different sizes for the cases of bad definition
  beta_0.resize(size_beta_0);
- for(auto i=0;i<size;i++){
+ for(auto i=0;i<size_beta_0;i++){
    beta_0[i]=REAL(beta_0_)[i];
  }
 
@@ -79,24 +79,24 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  this->set_definition(bool(INTEGER(definition_)[0])); 
 };
 
-void print_inference_data() const{
+void Inference_Data::print_inference_data() const{
   Rprintf("\nInferenceData:\n");
   Rprintf("test_Type: %s\n", test_Type.c_str());
   Rprintf("interval_Type: %s\n", interval_Type.c_str());
-  Rprintf("implementation_Type: %s\n",inplementation_Type.c_str());
+  Rprintf("implementation_Type: %s\n",implementation_Type.c_str());
   Rprintf("exact_Inference: %d\n",exact_Inference);
   Rprintf("coeff_inference:");
-  for(i=0; i < coeff_Inference.rows(); ++i){
-    for(j=0; j < coeff_Inference.cols(); ++j){
+  for(UInt i=0; i < coeff_Inference.rows(); ++i){
+    for(UInt j=0; j < coeff_Inference.cols(); ++j){
       Rprintf(" %f",coeff_Inference(i,j));
   }
   }
   Rprintf("\n");
   Rprintf("beta_0:");
-  for(auto value : beta_0){
-    Rprintf(" %f",value);
+  for(UInt i=0; i < beta0.size(); ++i){
+    Rprintf(" %f", beta0(i));
   }
   Rprintf("\n");
   Rprintf("inference_Level: %f\n",inference_Level);
   Rprintf("definition: %d\n",definition);
-}
+};

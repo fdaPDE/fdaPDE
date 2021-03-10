@@ -20,19 +20,19 @@ template<typename InputHandler>
 class Inference_Carrier{
 	private:
 		// DATA:
-		const OptimizationData * opt_data = nullptr;                    	//!< Pointer to the optimization data needed for the method
+		const InputHandler * reg_data = nullptr;                    	        //!< Pointer to the regression data 
 		const MixedFERegressionBase<InputHandler> * model = nullptr;    	//!< Pointer to the model data
 		const InferenceData * inf_data = nullptr;				//!< Pointer to the inference data needed to perform inference
 
 		// SYSTEM PARAMETERS
-		const UInt n_obs; 							//!< Number of observations
-		const UInt n_nodes;							//!< Number of nodes
-		const UInt p;								//!< Number of covariates
-		const Real var_res; 							//!< Variance of the residuals i n the optimal model
+		UInt n_obs; 							        //!< Number of observations
+		UInt n_nodes;							        //!< Number of nodes
+		UInt p;								        //!< Number of covariates
+		Real var_res; 							        //!< Variance of the residuals i n the optimal model
 
 		Real lambda=0; 								//!< Optimal smothing parameter
   		const MatrixXr * Wp = nullptr;						//!< Pointer to the covariates matrix [size n_obs x n_covariates]
-		const Diffusion<PDEParameterOptions::SpaceVarying> * Kp = nullptr; 	//!< Pointer to the nuisance matrix K [in the cases in which inference is allowed K is always a matrix]
+		const Diffusion<PDEParameterOptions::Constant> * Kp = nullptr; 	        //!< Pointer to the nuisance matrix K [in the cases in which inference is allowed K is always a matrix]
 		const SpMat * Psip = nullptr; 						//!< Pointer to location-to-nodes matrix [size n_obs x n_nodes]	
 		const SpMat * Psi_tp = nullptr; 					//!< Pointer to the transpose of the location-to-nodes matrix [size n_nodes x n_obs]	
 		const SpMat * R1p = nullptr;						//!< Pointer to R1 matrix [size n_nodes x n_nodes]
@@ -50,10 +50,10 @@ class Inference_Carrier{
 		const MatrixXv * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
 		const VectorXr * zp = nullptr;						//!< Pointer to the observations in the locations [size n_obs]
 		const MatrixXr * z_hatp = nullptr; 					//!< Pointer to the fitted values in the locations [size n_obs]
-		const MatrixXr * f_hatp = nullptr; 					//!< Pointer to the fitted values for the nonlinear part of the model in the locations [size n_obs]
+		//MatrixXr f_hat; 					                //!< Fitted values for the nonlinear part of the model in the locations [size n_obs]
 
 		// SETTERS 								// Private because they will be used just by the constructor.
-		inline void setOptData (const OptimizationData * opt_data_){opt_data = opt_data_;}			//!< Setter of opt_data \param opt_data_ new opt_data
+		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data
 		inline void setModel (const MixedFERegressionBase<InputHandler> * model_){model = model_;}		//!< Setter of model \param model_ new model
 		inline void setInfData (const InferenceData * inf_data_){inf_data = inf_data_;}				//!< Setter of inf_data \param inf_data_ new inf_data
 
@@ -64,7 +64,7 @@ class Inference_Carrier{
 
 		inline void setLambda (Real lambda_){lambda = lambda_;}							//!< Setter of lambda \param lambda_ new lambda
 		inline void setWp (const MatrixXr * Wp_){Wp = Wp_;}							//!< Setter of Wp \param Wp_ new Wp
-		inline void setKp (const Diffusion<PDEParameterOptions::SpaceVarying> * Kp_){Kp = Kp_;}			//!< Setter of Kp \param Kp_ new Kp
+		inline void setKp (const Diffusion<PDEParameterOptions::Constant> & Kp_){Kp = &Kp_;}			//!< Setter of Kp \param Kp_ new Kp
 		inline void setPsip (const SpMat * Psip_){Psip = Psip_;}						//!< Setter of Psip \param Psip_ new Psip
 		inline void setPsi_tp (const SpMat * Psi_tp_){Psi_tp = Psi_tp_;}					//!< Setter of Psi_tp \param Psi_tp_ new Psi_tp
 		inline void setR0p (const SpMat * R0p_){R0p = R0p_;}							//!< Setter of R0p \param R0p_ new R0p
@@ -80,15 +80,15 @@ class Inference_Carrier{
 		inline void setBeta_hatp (const MatrixXv * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
 		inline void setZ_hatp (const MatrixXr * z_hatp_){z_hatp = z_hatp_;}					//!< Setter of z_hatp \param z_hatp_ new z_hatp
-		inline void setF_hatp (void){f_hatp = *z_hatp - (*Wp)*((*beta_hatp)(0));}				//!< Setter of f_hatp new Wp
+		//inline void setF_hat (void){f_hat = *z_hatp - (*Wp)*((*beta_hatp)(0));}				//!< Setter of f_hatp new Wp
 
 	public:
 		// CONSTUCTORS
 		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, lambda is set to 0
-		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression, const InferenceData * inf_data_); //Main constructor of the class
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression_, const InferenceData * inf_data_); //Main constructor of the class
 
 		// GETTERS
-		inline const OptimizationData * getOptData (void) const {return opt_data;}  			//!< Getter of opt_data \return opt_data
+		inline const InputHandler * getRegData (void) const {return reg_data;}  			        //!< Getter of reg_data \return reg_data
 		inline const MixedFERegressionBase<InputHandler> * getModel (void) const {return model;} 		//!< Getter of model \return model
 		inline const InferenceData * getInfData (void) const {return inf_data;}					//!< Getter of inf_data \return inf_data
 
@@ -99,7 +99,7 @@ class Inference_Carrier{
 
 		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
 		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
-                inline const MatrixXr * getKp (void) const {return Kp;} 						//!< Getter of Kp \return Kp
+                inline const Diffusion<PDEParameterOptions::Constant> * getKp (void) const {return Kp;} 	        //!< Getter of Kp \return Kp
 		inline const SpMat * getPsip (void) const {return Psip;} 						//!< Getter of Psip \return Psip
 		inline const SpMat * getPsi_tp (void) const {return Psi_tp;} 						//!< Getter of Psi_tp \return Psi_tp
 		inline const SpMat * getR0p (void) const {return R0p;} 							//!< Getter of R0p \return R0p
@@ -109,13 +109,13 @@ class Inference_Carrier{
 		inline const MatrixXr * getHp (void) const {return Hp;} 						//!< Getter of Hp \return Hp
 		inline const MatrixXr * getUp (void) const {return Up;} 						//!< Getter of Up \return Up
 		inline const MatrixXr * getVp (void) const {return Vp;} 						//!< Getter of Vp \return Vp
-		inline const MatrixXr * getEp (void) const {return Ep;} 						//!< Getter of Ep \return Ep
+		inline const SpMat * getEp (void) const {return Ep;} 						        //!< Getter of Ep \return Ep
 		inline const Eigen::SparseLU<SpMat> * getE_decp (void) const {return E_decp;} 				//!< Getter of E_decp \return E_decp
 		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void) const {return G_decp;} 			//!< Getter of G_decp \return G_decp
 		inline const MatrixXv * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
 		inline const VectorXr * getZp (void) const {return zp;} 						//!< Getter of zp \return zp
 		inline const MatrixXr * getZ_hatp (void) const {return z_hatp;} 					//!< Getter of z_hatp \return z_hatp
-		inline const MatrixXr * getF_hatp (void) const {return f_hatp;} 					//!< Getter of f_hatp \return f_hatp
+		//inline const MatrixXr * getF_hatp (void) const {return &f_hat;} 					//!< Getter of f_hatp \return f_hatp
 
 
 

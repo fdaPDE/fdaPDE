@@ -556,7 +556,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     warning("Inference for linear estimators is implemented only in regression-Laplace and regression-PDE non space varying cases,\nInference Data are ignored")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                                  coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1,definition=as.integer(0)))
+                                  coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1,definition=as.integer(0))
   }
 
   ################## End checking parameters, sizes and conversion #############################
@@ -897,7 +897,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     # Save p_values and intervals
     if(inferenceDataObject@definition==1){
       if(inferenceDataObject@test_type==0){
-        confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1]
+        confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1])
         inference=list(CI=confidence_Intervals)
       }else{
         if(inferenceDataObject@interval_type==0){
@@ -905,7 +905,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           inference=list(p_vals=p_values)
         }else{
           p_values=Bigsol[[23]]
-          confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1]
+          confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1])
           inference=list(p_vals=p_values, CI=Confidence_Intervals)
         }
       }
