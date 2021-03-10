@@ -895,17 +895,17 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     PDEmisfit.FEM = FEM(solution$g, FEMbasis)
 
     # Save p_values and intervals
-    if(inferenceDataObject@definition==1){
-      if(inferenceDataObject@test_type==0){
-        confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1])
+    if(R_inferenceDataObject@definition==1){
+      if(R_inferenceDataObject@test_type==0){
+        confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(R_inferenceDataObject@coefficients)[1])
         inference=list(CI=confidence_Intervals)
       }else{
-        if(inferenceDataObject@interval_type==0){
+        if(R_inferenceDataObject@interval_type==0){
           p_values=Bigsol[[23]]
           inference=list(p_vals=p_values)
         }else{
           p_values=Bigsol[[23]]
-          confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(inferenceDataObject@coefficients)[1])
+          confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(R_inferenceDataObject@coefficients)[1])
           inference=list(p_vals=p_values, CI=Confidence_Intervals)
         }
       }
