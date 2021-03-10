@@ -13,7 +13,7 @@ void Wald_Solver<InputHandler>::compute_S(void){
   inverter.Compute_Inv(inf_car.getE_decp(), inf_car.getEp());
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;
-  M_inv.resize(inverter.getInv(inf_car.getE_decp(), inf_car.getEp()->rows(), inverter.getInv(inf_car.getE_decp(), inf_car.getEp()->cols());
+  M_inv.resize(inverter.getInv(inf_car.getE_decp(), inf_car.getEp())->rows(), inverter.getInv(inf_car.getE_decp(), inf_car.getEp())->cols());
   const MatrixXr * E_inv = inverter.getInv(inf_car.getE_decp(), inf_car.getEp());
   const MatrixXr * U = inf_car.getUp();
   const MatrixXr * V = inf_car.getVp();
