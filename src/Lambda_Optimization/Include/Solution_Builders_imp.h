@@ -23,8 +23,10 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	MatrixXv intervals;
 	if (inf_Data.get_definition()==false){
 	  intervals.resize(1,1);
-	  intervals(0,0).resize(1);
+	  intervals(0,0).resize(3);
 	  intervals(0,0)(0) = 10e20;
+          intervals(0,0)(1) = 10e20; 
+          intervals(0,0)(2) = 10e20;
 	  
 	  p_values.resize(1);
 	  p_values(0)= 10e20;
@@ -37,8 +39,10 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	  }else{
 	    if(inf_Data.get_interval_type()=="not-defined"){
 	      intervals.resize(1,1);
-	      intervals(0,0).resize(1);
+	      intervals(0,0).resize(3);
 	      intervals(0,0)(0) = 10e20;
+              intervals(0,0)(1) = 10e20; 
+              intervals(0,0)(2) = 10e20;
 	      
 	      p_values=inference_Output(0);
 	    }else{
