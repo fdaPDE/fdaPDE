@@ -12,7 +12,8 @@ smooth.FEM(locations = NULL, observations, FEMbasis,
  max.steps.FPIRLS = 15, lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
- lambda.optimization.tolerance = 0.05)
+ lambda.optimization.tolerance = 0.05,
+ R_Inference_Data_Object=NULL)
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -132,6 +133,9 @@ It is advised to set it grather than 1 to avoid overfitting.}
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{R_Inference_Data_Object}{An [inferenceDataObject] that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results}
 }
 \value{
 A list with the following variables in \code{family="gaussian"} case:
@@ -179,7 +183,7 @@ This function implements a spatial regression model with differential regulariza
  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
  Laplacian of the spatial field, that induces an isotropic smoothing. When prior information about the anisotropy or
  non-stationarity is available the PDE involves a general second order linear differential operator with possibly
- space-varying coefficients.
+ space-varying coefficients. 
  The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions
  can be imposed at the domain boundaries.
 }

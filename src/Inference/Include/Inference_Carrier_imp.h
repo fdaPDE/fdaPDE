@@ -13,9 +13,9 @@ setWp(Regression_Data_->getCovariates());
 setN_obs(Regression_Data_->getNumberofObservations());
 setp(Regression_Data_->getCovariates()->cols());
 setZp(Regression_Data_->getObservations());
-if(dynamic_cast<const RegressionDataEllipticSpaceVarying *>(Regression_Data_)!=nullptr){ //check space varying
-setKp(Regression_Data_->getK());	//Otherwise it is nullptr
-}
+//if(dynamic_cast<const RegressionDataEllipticSpaceVarying *>(Regression_Data_)!=nullptr){ //check space varying
+//setKp(Regression_Data_->getK());	//Otherwise it is nullptr
+//}
 
 
 
