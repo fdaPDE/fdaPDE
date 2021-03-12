@@ -20,6 +20,7 @@ class Inverse_Base {
 		// Getter
 		inline const MatrixXr * getInv(const Eigen::SparseLU<SpMat> * E_decp, const SpMat * Ep){if(inverse_computed==false){Compute_Inv(E_decp,Ep);} return &E_inv;}; //!< Getter for the Inverse Matrix [Need to call Compute_inv before calling this]
 		virtual void Compute_Inv (const Eigen::SparseLU<SpMat> * E_decp, const SpMat * Ep) = 0; //!< Virtual function for the computation of the inverse matrix, takes as input matrixNoCov decomposition /param E_decp and matrixNoCov /param Ep
+		void print_for_debug(void) const;
 
 };
 

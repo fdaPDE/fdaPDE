@@ -43,7 +43,7 @@ public:
 
   //!< public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);
-  
+  void print_for_debug(void) const;
 };
 
 
