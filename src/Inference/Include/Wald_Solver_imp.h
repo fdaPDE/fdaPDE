@@ -239,7 +239,7 @@ MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
   }
   std::cout << "Matrix Smoothing transpose St is (only some samples): \n" << std::endl;
   for (UInt i=0; i<10; i++){
-  std::cout << "St(" << 10*i << "," << 20*i << "): " << St(10*i,20*i) << std::endl;
+  std::cout << "St(" << 10*i << "," << 20*i << "): " << S_t(10*i,20*i) << std::endl;
   } 
   }
   
@@ -248,8 +248,6 @@ MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
   if(is_V_computed==true){
   std::cout << "Matrix variance V is: \n" << S << std::endl;
   std::cout << V << std::endl;
-  std::cout << "Matrix variance transpose Vt is: \n" << St << std::endl;
-  std::cout << Vt << std::endl;
   } 
   
   return;
