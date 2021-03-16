@@ -14,7 +14,10 @@ void Inverse_Base::print_for_debug(void) const {
 };
 
 void Inverse_Exact::Compute_Inv(const Eigen::SparseLU<SpMat> * E_decp, const SpMat * Ep){
+  if(!inverse_computed){
   E_inv=E_decp->solve(MatrixXr::Identity(Ep->rows(),Ep->cols())); //Solve directly the system for an identity matrix
+  inverse_computed=true;
+  }
   return;
 };
 

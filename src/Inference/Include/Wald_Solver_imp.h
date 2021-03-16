@@ -117,6 +117,11 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
         compute_V();
       }
       
+
+      // FPOR DEBUG TEMPORARY
+      this->print_for_debug();
+      inverter.print_for_debug();
+
       // for each row of C matrix
       for(UInt i=0; i<q; ++i){
 	VectorXr col = C.row(i);
