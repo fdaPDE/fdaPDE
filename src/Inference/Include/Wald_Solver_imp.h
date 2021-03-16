@@ -52,9 +52,20 @@ void Wald_Solver<InputHandler>::compute_S(void){
 };
 
 template<typename InputHandler> 
+Real Wald_Solver<InputHandler>::compute_sigma_hat_sq(void) const {
+ VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
+ Real SS_res = eps_hat.squaredNorm();
+ UInt n = inf_car.getN_obs();
+ UInt p = inf_car.getp();
+ Real tr_S = this->S.trace();
+ Real sigma_hat_sq = SS_res/(n - (p + tr_S));
+ return sigma_hat_sq; 
+};
+
+template<typename InputHandler> 
 void Wald_Solver<InputHandler>::compute_V(){
   // get the variance of the residuals estimators from the inference carrier
-  const Real var_res = inf_car.getVar_res();
+  const Real var_res = compute_sigma_hat_sq();
   // resize the variance-covariance matrix
   UInt p = inf_car.getp();
   V.resize(p,p);

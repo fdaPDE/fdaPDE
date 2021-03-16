@@ -30,6 +30,7 @@ private:
   void compute_V(void);					//!< Method used to compute V
   VectorXr compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void);				//!< Method to compute the confidence intervals
+  Real compute_sigma_hat_sq(void) const;                //!< Method to compute the estimator of the variance of the residuals 
 
 public:
   // CONSTUCTOR

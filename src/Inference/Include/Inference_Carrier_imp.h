@@ -38,7 +38,6 @@ setG_decp(model_->getGdec_());
 setLambda(out_regression_->lambda_sol);
 setBeta_hatp(&(out_regression_->betas));
 setZ_hatp(&(out_regression_->z_hat));
-setVar_res(out_regression_->sigma_hat_sq);
 
 //Last to be executed (needs the other elements to be set in order to work properly)
 //setF_hat();

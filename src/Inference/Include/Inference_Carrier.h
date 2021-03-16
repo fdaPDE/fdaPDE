@@ -28,7 +28,6 @@ class Inference_Carrier{
 		UInt n_obs; 							        //!< Number of observations
 		UInt n_nodes;							        //!< Number of nodes
 		UInt p;								        //!< Number of covariates
-		Real var_res; 							        //!< Variance of the residuals i n the optimal model
 
 		Real lambda=0; 								//!< Optimal smothing parameter
   		const MatrixXr * Wp = nullptr;						//!< Pointer to the covariates matrix [size n_obs x n_covariates]
@@ -60,7 +59,6 @@ class Inference_Carrier{
 		inline void setN_obs (UInt n_obs_){n_obs = n_obs_;}							//!< Setter of n_obs \param n_obs_ new n_obs
 		inline void setN_nodes (UInt n_nodes_){n_nodes = n_nodes_;}						//!< Setter of n_nodes \param n_nodes_ new n_nodes
 		inline void setp (UInt p_){p = p_;}									//!< Setter of p \param p_ new p
-		inline void setVar_res (Real var_res_){var_res = var_res_;}						//!< Setter of var_res \param var_res_ new var_res
 
 		inline void setLambda (Real lambda_){lambda = lambda_;}							//!< Setter of lambda \param lambda_ new lambda
 		inline void setWp (const MatrixXr * Wp_){Wp = Wp_;}							//!< Setter of Wp \param Wp_ new Wp
@@ -95,7 +93,6 @@ class Inference_Carrier{
 		inline UInt getN_obs (void) const {return n_obs;} 							//!< Getter of n_obs \return n_obs
 		inline UInt getN_nodes (void) const {return n_nodes;} 							//!< Getter of n_nodes \return n_nodes
 		inline UInt getp (void) const {return p;} 								//!< Getter of p \return p
-		inline Real getVar_res (void) const {return var_res;} 							//!< Getter of var_res \return var_res
 
 		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
 		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
