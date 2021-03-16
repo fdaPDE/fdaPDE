@@ -1,14 +1,14 @@
 #include "../Include/Inverter.h"
 
-void Inverse_Base::print_for_debug(void) const {
 
-  std::cout << "Inverse computed: " << inverse_computed << std::endl;
+void Inverse_Base::print_for_debug(void) const {
   
+  Rprintf( "Inverse computed: %d \n ", inverse_computed);
   if(inverse_computed){
-    std::cout << "The inverse is (only some samples): \n" << std::endl;
+    Rprintf( "Inverse E_inv (only some samples): \n");
     for (UInt i=0; i<10; i++){
-      std::cout << "E_inv(" << 10*i << "," << 20*i << "): " << E_inv(10*i,20*i) << std::endl;
-    }
+      Rprintf( "E_inv( %d, %d):  %f \n", 10*i, 20*i, E_inv(10*i,20*i));
+    } 
   }
   return;
 };
