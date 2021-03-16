@@ -896,16 +896,16 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
     # Save p_values and intervals
     if(R_Inference_Data_Object@definition==1){
-      if(R_Inference_Data_Object@test_type==0){
-        confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(R_Inference_Data_Object@coefficients)[1])
+      if(R_Inference_Data_Object@test==0){
+        confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(R_Inference_Data_Object@coeff)[1])
         inference=list(CI=confidence_Intervals)
       }else{
-        if(R_Inference_Data_Object@interval_type==0){
+        if(R_Inference_Data_Object@interval==0){
           p_values=Bigsol[[23]]
           inference=list(p_vals=p_values)
         }else{
           p_values=Bigsol[[23]]
-          confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(R_Inference_Data_Object@coefficients)[1])
+          confidence_Intervals=matrix(data=Bigsol[[24]],nrow = 3,ncol =dim(R_Inference_Data_Object@coeff)[1])
           inference=list(p_vals=p_values, CI=Confidence_Intervals)
         }
       }
