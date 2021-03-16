@@ -34,6 +34,20 @@ void Wald_Solver<InputHandler>::compute_S(void){
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
   is_S_computed = true;
+  
+  Rprintf("S computed: %d \n", is_S_computed); 
+  
+  if(is_S_computed==true){
+    Rprintf("Matrix Smoothing S is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
+    }
+    Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
+    } 
+  }
+  
   return; 
 };
 
@@ -52,9 +66,20 @@ void Wald_Solver<InputHandler>::compute_V(){
   V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
   
+  Rprintf("V computed: %d \n" , is_V_computed); 
+  
+  if(is_V_computed==true){
+    Rprintf( "Matrix variance V is: \n");
+    for(UInt i=0; i < V.rows(); ++i){
+      for(UInt j=0; j < V.cols(); ++j){
+	Rprintf(" %f",V(i,j));
+      }
+    }
+  }
+  
   return;
 };
-
+  
 template<typename InputHandler> 
 VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
   // declare the vector that will store the p-values
