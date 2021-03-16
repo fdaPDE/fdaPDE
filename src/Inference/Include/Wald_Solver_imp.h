@@ -225,11 +225,13 @@ MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
     result.rightCols(q) = compute_CI();
     return result;
   }
+};
   
   template<typename InputHandler>
   void Wald_Solver<InputHandler>::print_for_debug(void) const {
 
   std::cout << "S computed: " << is_S_computed << std::endl; 
+  
   if(is_S_computed==true){
   std::cout << "Matrix Smoothing S is (only some samples): \n" << std::endl;
   for (UInt i=0; i<10; i++){
@@ -239,11 +241,16 @@ MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
   for (UInt i=0; i<10; i++){
   std::cout << "St(" << 10*i << "," << 20*i << "): " << St(10*i,20*i) << std::endl;
   } 
+  }
+  
   std::cout << "V computed: " << is_V_computed << std::endl; 
-  if(is_S_computed==true){
+  
+  if(is_V_computed==true){
   std::cout << "Matrix variance V is: \n" << S << std::endl;
+  std::cout << V << std::endl;
   std::cout << "Matrix variance transpose Vt is: \n" << St << std::endl;
+  std::cout << Vt << std::endl;
   } 
+  
   return;
-}
 };
