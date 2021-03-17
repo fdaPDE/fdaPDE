@@ -215,6 +215,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(is.null(beta0)) beta0=0 #won't be used anyway                              # If beta0 is still NULL here, no test is required, and this parameter is not considered. Set to zero in order to compel with the dataInferenceObject class.
   definition=as.integer(definition)
   
+  # Well posedeness check for coeff in simultaneous case;
+  if(test=="simultaneous" || interval=="simultaneous"){
+    if(det(coeff %*% t(coeff)) < 0.001){
+      stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
+    }
+  }
+  
+  
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
               coeff = coeff, beta0 = beta0, level = level,definition=definition)

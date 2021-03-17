@@ -34,7 +34,7 @@ void Wald_Solver<InputHandler>::compute_S(void){
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
   is_S_computed = true;
-  
+  /* // For Debug Only
   Rprintf("S computed: %d \n", is_S_computed); 
   
   if(is_S_computed==true){
@@ -47,7 +47,7 @@ void Wald_Solver<InputHandler>::compute_S(void){
       Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
     } 
   }
-  
+  */
   return; 
 };
 
@@ -76,7 +76,7 @@ void Wald_Solver<InputHandler>::compute_V(){
   
   V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
-  
+  /* //For debug only
   Rprintf("V computed: %d \n" , is_V_computed); 
   
   if(is_V_computed==true){
@@ -87,7 +87,7 @@ void Wald_Solver<InputHandler>::compute_V(){
       }
     }
   }
-  
+  */
   return;
 };
   
@@ -154,9 +154,9 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
       }
       
 
-      // FPOR DEBUG TEMPORARY
+      /* // FOR DEBUG TEMPORARY
       this->print_for_debug();
-      inverter.print_for_debug();
+      inverter.print_for_debug(); */
 
       // for each row of C matrix
       for(UInt i=0; i<q; ++i){
@@ -183,7 +183,7 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
 
   // get the estimates of the parameters
-    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+  VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
   
   // declare the matrix that will store the p-values
   Real alpha=inf_car.getInfData()->get_inference_level();
