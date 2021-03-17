@@ -216,9 +216,19 @@ inferenceDataObjectBuilder<-function(test = NULL,
   definition=as.integer(definition)
   
   # Well posedeness check for coeff in simultaneous case;
-  if(test=="simultaneous" || interval=="simultaneous"){
+  if(!is.null(test)){
+  if(test=="simultaneous"){
     if(det(coeff %*% t(coeff)) < 0.001){
       stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
+    }
+  }
+  }
+  
+  if(!is.null(interval)){
+    if(interval=="simultaneous"){
+      if(det(coeff %*% t(coeff)) < 0.001){
+        stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
+      }
     }
   }
   
