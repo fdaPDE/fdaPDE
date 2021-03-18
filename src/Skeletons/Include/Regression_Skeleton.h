@@ -65,8 +65,11 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			Carrier<InputHandler>
 				carrier = CarrierBuilder<InputHandler>::build_plain_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler>>(carrier);
-			//Inference
-			if(inferenceData.get_definition()==true){ //only if inference is actually required
+				
+		}
+
+		//Inference
+		if(inferenceData.get_definition()==true){ //only if inference is actually required
 			  	Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
 			  	if(inferenceData.get_exact_inference()==true){
 			   		Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
@@ -77,8 +80,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			  	//  Wald<regressionData> inference_Solver (&inference_Inverter, inf_car); //Class for inference resolution
 			  	//  Inference_Output = inference_Solver.compute_inference_output(); //check names
 			 	// }
- }
-		}
+                         }
 	}
 
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
