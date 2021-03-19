@@ -1,10 +1,11 @@
 ##########################################
 ############## TEST SCRIPT ###############
 ##########################################
-### Inference Tests ###
+
 library(fdaPDE)
 
-######## Test 2: c-shaped domain ########
+####### 2D ########
+#### Test 2: c-shaped domain ####
 #            locations != nodes
 #            laplacian
 #            with covariates
@@ -48,62 +49,86 @@ data = DatiEsatti + rnorm(length(DatiEsatti), mean=0, sd=0.05*abs(ran[2]-ran[1])
 # Set smoothing parameter
 lambda = 10^seq(-3,3,by=0.25)
 
-# Set inference object
-R_Inference_Object=inferenceDataObjectBuilder (test  = 'simultaneous', beta0 = c(1.8,-3.55), interval='one-at-the-time', coeff = matrix(data=c(1.5,0,0,1),nrow = 2, ncol = 2,byrow = TRUE), exact='True', dim=2, level = 0.05)
-start=Sys.time()
-#### Test 2.1: Without GCV
+
+#### Test 2.1: Without GCV, one-at-the-time tests, Wald-type, exact computation
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", exact = "True", dim = 2)
+
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda#,R_Inference_Data_Object = R_Inference_Object
-                       )
-end=Sys.time()
-end-start
-#### Test 2.2: grid with exact GCV
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
+output_CPP$inference$p_vals
+
+#### Test 2.2: Without GCV, simultaneous test, Wald-type, exact computation
+R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", exact = "True", dim = 2)
+
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda,
-                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = R_Inference_Object)
-plot(log10(lambda), output_CPP$optimization$GCV_vector)
-image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
 
-output_CPP$solution$beta
+output_CPP$inference$p_vals
 
-#### Test 2.3: grid with stochastic GCV
+#### Test 2.3: Without GCV, one-at-the-time intervals, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(interval = "one-at-the-time", exact = "True", dim = 2)
+
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda,
-                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = R_Inference_Object)
-plot(log10(lambda), output_CPP$optimization$GCV_vector)
-image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
 
-output_CPP$solution$beta
+output_CPP$inference$CI
 
-### Test 2.4: Newton exact method with exact  GCV, default initial lambda and tolerance
+#### Test 2.4: Without GCV, simultaneous intervals, Wald-type, exact computation, custom level
+R_inference_object = inferenceDataObjectBuilder(interval = "simultaneous", exact = "True", dim = 2, level = 0.1)
+
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis,
-                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV' , R_Inference_Data_Object = R_Inference_Object)
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
 
-image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+output_CPP$inference$CI
 
-output_CPP$solution$beta
+#### Test 2.5: Without GCV, one-at-the-time tests, one-at-the-time intervals, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", exact = "True", dim = 2)
 
-### Test 2.5: Newton_fd method with exact GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, 
-                       lambda.selection.criterion='newton_fd', DOF.evaluation='exact', lambda.selection.lossfunction='GCV' , R_Inference_Data_Object = R_Inference_Object)
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
 
-image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+output_CPP$inference$p_vals
+output_CPP$inference$CI
 
-output_CPP$solution$beta
+#### Test 2.6: Without GCV, one-at-the-time tests, one-at-the-time intervals, beta0, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", exact = "True", dim = 2, beta0 = c(1.9,-3.55))
 
-### Test 2.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, 
-                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = R_Inference_Object)
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
 
-image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+output_CPP$inference$p_vals #we expect to accept H0 in this case
+output_CPP$inference$CI
 
-output_CPP$solution$beta
+#### Test 2.7: Without GCV, simultaneous test, one-at-the-time intervals, linear combination, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", interval = "one-at-the-time", exact = "True", dim = 2, coeff = matrix(data = c(1,1,-1,1), nrow = 2, ncol = 2, byrow = T))
+
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
+
+output_CPP$inference$p_vals 
+output_CPP$inference$CI
+
+#### Test 2.8: Without GCV, one-at-the-time tests, bonferroni intervals, linear combination, beta0, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "bonferroni", exact = "True", dim = 2, coeff = matrix(data = c(1,0,0,1), nrow = 2, ncol = 2, byrow = T), beta0 = c(1.9, -3.55))
+
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
+
+output_CPP$inference$p_vals 
+output_CPP$inference$CI
