@@ -72,9 +72,11 @@ beta_H1_list <- seq(from = 0, by = 0.02, length.out = 11)
 covariates=S
 res1_S <- list()
 
+SEED=132244
+
 for (i in 1:length(beta_H1_list)) {
   
-  set.seed(35895389)
+  set.seed(SEED)
   rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
@@ -96,7 +98,7 @@ res1_S1 <- list()
 
 for (i in 1:length(beta_H1_list)) {
   
-  set.seed(35895389)
+  set.seed(SEED)
   rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
@@ -118,7 +120,7 @@ res1_S2 <- list()
 
 for (i in 1:length(beta_H1_list)) {
   
-  set.seed(35895389)
+  set.seed(SEED)
   rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
@@ -140,7 +142,7 @@ covariates=S3
 res1_S3 <- list()
 
 for (i in 1:length(beta_H1_list)) {
-  set.seed(35895389)
+  set.seed(SEED)
   rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
@@ -153,4 +155,35 @@ for (i in 1:length(beta_H1_list)) {
   res1_S3[[i]] <- out_CPP$inference$p_vals
   print(i)
 }
+
+
+for (i in 1:11){
+  res1_S[[i]]=1-res1_S[[i]]
+  res1_S1[[i]]=1-res1_S1[[i]]
+  res1_S2[[i]]=1-res1_S2[[i]]
+  res1_S3[[i]]=1-res1_S3[[i]]
+}
+
+#x11()
+par(mfrow=c(2,2))
+plot(beta_H1_list, res1_S, main="a. Gaussian random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+grid()
+abline(h=0.05, type='l', lty=2)
+
+plot(beta_H1_list, res1_S1, main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+grid()
+abline(h=0.05, type='l', lty=2)
+
+plot(beta_H1_list, res1_S2, main="c. Exponential random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+grid()
+abline(h=0.05, type='l', lty=2)
+
+plot(beta_H1_list, res1_S3, main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+grid()
+abline(h=0.05, type='l', lty=2)
+
+graphics.off()
+
+
+
 
