@@ -48,7 +48,7 @@ sol_exact=f(SpaceTimePoints[,1],SpaceTimePoints[,2],SpaceTimePoints[,3])
 # Add error to simulate data
 set.seed(7893475)
 ran = range(sol_exact)
-data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
+data = sol_exact + rnorm(length(sol_exact), mean=0, sd=0.05*abs(ran[2]-ran[1]))
 observations=matrix(data,nrow(SpacePoints),NumTimePoints)
 
 # Set smoothing parameter
@@ -150,7 +150,7 @@ cov1 = rnorm(ndata, mean = 1, sd = 2)
 # Add error to simulate data
 set.seed(7893475)
 data = sol_exact + 2*cov1 
-data = data + rnorm(length(sol_exact), mean = 0, sd =  0.05*diff(range(sol_exact)))
+data = data + rnorm(ndata, mean = 0, sd =  0.05*diff(range(sol_exact)))
 observations = matrix(data,nrow(locations),NumTimeInstants)
 
 # Set smoothing parameter
@@ -238,7 +238,7 @@ sol_exact=f(SpaceTimePoints[,1],SpaceTimePoints[,2],SpaceTimePoints[,3])
 # Add error to simulate data
 set.seed(7893475)
 ran = range(sol_exact)
-data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
+data = sol_exact + rnorm(length(sol_exact), mean=0, sd=0.05*abs(ran[2]-ran[1]))
 observations=matrix(data,nrow(SpacePoints),NumTimePoints)
 
 # Set PDE parameters
@@ -520,10 +520,10 @@ ran=range(func_evaluation)
 plot(FEM.time(coeff=array(W%*%beta_exact + func_evaluation, dim = c(nnodes*length(TimeNodes),1,1)),FEMbasis=FEMbasis,time_mesh = TimeNodes,FLAG_PARABOLIC = T),TimeNodes)
 
 ran = range(func_evaluation)
-data = func_evaluation +rnorm(nnodes,mean=0,sd=0.05*(ran[2]-ran[1]))
+data = func_evaluation +rnorm(nnodes*length(TimeNodes),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 ran = range(func_evaluation+ W%*%beta_exact)
-datacov=func_evaluation+ W%*%beta_exact +rnorm(nnodes,mean=0,sd=0.05*(ran[2]-ran[1]))
+datacov=func_evaluation+ W%*%beta_exact +rnorm(nnodes*length(TimeNodes),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 data = matrix(data,nrow(mesh$nodes),length(TimeNodes))
 datacov = matrix(datacov,nrow(mesh$nodes),length(TimeNodes))
@@ -708,13 +708,13 @@ lambdaT_par2=10^seq(1.4, 1.8, 0.1)
 
 beta_exact= c(0.7,2.0)
 ran = range(func_evaluation)
-data = func_evaluation +rnorm(nrow(Locations),mean=0,sd=0.05*(ran[2]-ran[1]))
+data = func_evaluation +rnorm(length(func_evaluation),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 ran = range(func_evaluation2)
-data_noloc = func_evaluation2 +rnorm(nrow(loc),mean=0,sd=0.05*(ran[2]-ran[1]))
+data_noloc = func_evaluation2 +rnorm(length(func_evaluation2),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 ran = range(func_evaluation+ W%*%beta_exact)
-datacov=func_evaluation+ W%*%beta_exact +rnorm(nrow(Locations),mean=0,sd=0.05*(ran[2]-ran[1]))
+datacov=func_evaluation+ W%*%beta_exact +rnorm(length(func_evaluation),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 data = matrix(data,nnodes,length(TimeLocations))
 data_noloc = matrix(data_noloc,nloc,length(timeloc))
