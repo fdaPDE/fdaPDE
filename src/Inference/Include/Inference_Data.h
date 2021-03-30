@@ -14,7 +14,7 @@ class InferenceData
 		// Type of analysis required
   		std::string test_Type            	= "not-defined";			//!< Values: not-defined [default], one-at-the-time, simultaneous
   		std::string interval_Type		= "not-defined";			//!< Values: not-defined [default], one-at-the-time, simultaneous, bonferroni
-  		std::string implementation_Type		= "wald"; 				//!< Values: wald [default], sandwich, permutational
+  		std::string implementation_Type		= "wald"; 				//!< Values: wald [default], speckman, permutational
   		bool exact_Inference			= false;				//!< If true the inverse of E matrix of woodbury decomposition of the system is computed exactly
 		// Parameters needed
                 MatrixXr coeff_Inference;	        					//!< If position j is true, the j-th covariate is taken into account in the inferential analysis

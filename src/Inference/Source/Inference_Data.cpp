@@ -41,7 +41,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
     this->set_implementation_type("wald");
 
   else if(INTEGER(implementation_Type_)[0]==2)
-    this->set_implementation_type("sandwich");
+    this->set_implementation_type("speckman");
 
   else if(INTEGER(implementation_Type_)[0]==3)
     this->set_implementation_type("permutational");

@@ -4,7 +4,7 @@
 #'in the third a simultaneous test is performed.
 #'@slot interval An integer taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 #'in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.
-#'@slot type An integer taking value 1, 2 or 3, corresponding to Wald, sandwich or permutational implementation 
+#'@slot type An integer taking value 1, 2 or 3, corresponding to Wald, speckman or permutational implementation 
 #'of the inference analysis.
 #'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistic will be performed,
 #'whereas if 2 an approximated computation will be carried out.
@@ -45,7 +45,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'If the value is NULL, no interval will be computed, and the \code{test} parameter needs to be set. Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed.
 #'If it is not NULL, the parameter \code{level} will be taken into account. Up to now, confidence intervals can be computed only in the Wald implementation.
 #'@param type A string defining the type of implementation for the inferential analysis. The possible values are three:
-#''wald'(default), 'sandwich' or 'permutational', corresponding to the three possible methods developed in Ferraccioli....
+#''wald'(default), 'speckman' or 'permutational', corresponding to the three possible methods developed in Ferraccioli....
 #'@param exact A string used to decide the method used to estimate the statistics variance.
 #'The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally very expensive.
 #'In the second case an approximate method is used, leading to a lower accuracy, but faster computation.
@@ -100,9 +100,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   if(type!="wald"){
     if(class(type)!="character")
-      stop("'type' should be a character: choose one among 'wald', 'sandwich' or 'permutational'" )
+      stop("'type' should be a character: choose one among 'wald', 'speckman' or 'permutational'" )
     if(length(type)==0)
-      stop("'type' is zero dimensional, should be one among 'wald', 'sandwich' or 'permutational'")
+      stop("'type' is zero dimensional, should be one among 'wald', 'speckman' or 'permutational'")
   }
   
   if(exact!="False"){
@@ -168,10 +168,10 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }
   
-  if(type!="wald" && type!="sandwich" && type!="permutational"){
-    stop("type should be choosen between 'wald', 'sandwich' and 'permutational'")}else{
+  if(type!="wald" && type!="speckman" && type!="permutational"){
+    stop("type should be choosen between 'wald', 'speckman' and 'permutational'")}else{
       if(type=="wald") type_numeric=as.integer(1)
-      if(type=="sandwich") type_numeric=as.integer(2)
+      if(type=="speckman") type_numeric=as.integer(2)
       if(type=="permutational") type_numeric=as.integer(3)
     }
   

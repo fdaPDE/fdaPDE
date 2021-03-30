@@ -72,9 +72,16 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		if(inferenceData.get_definition()==true){ //only if inference is actually required
 			  	Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
 			  	if(inferenceData.get_exact_inference()==true){
+					if(inferenceData.get_implementation_type()=="wald"){
 			   		Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
 			    		Wald_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
-			    		inference_Output = inference_Solver.compute_inference_output(); //check names
+			    		inference_Output = inference_Solver.compute_inference_output();
+					}
+					if(inferenceData.get_implementation_type()=="speckman"){
+					Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
+			    		Speckman_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			    		inference_Output = inference_Solver.compute_inference_output();
+					}
 			  	}// else{
 			  	//  Inverse_Non_Exact inference_Inverter; // Inverter for the noCovMatrix
 			  	//  Wald<regressionData> inference_Solver (&inference_Inverter, inf_car); //Class for inference resolution
