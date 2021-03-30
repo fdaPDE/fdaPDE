@@ -54,7 +54,6 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. If \code{test} is set and \code{beta0} is NULL,
 #'will be set to a vector of zeros.
 #'@param level Level of significance, defaulted to 0.05. It is taken into account only if \code{intrval} is set.
-#'@param definition A 0-1 integer. If it is set, and the procedure outcomes a valid inferenceDataObject, some checks will be avoided inside [smooth.FEM].
 #'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
 #'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
@@ -66,8 +65,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'dim = NULL, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
-#'level = 0.05,
-#'definition=1)
+#'level = 0.05)
 #' @export
 #' 
 #' 
@@ -83,8 +81,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 dim = NULL, 
                                 coeff = NULL, 
                                 beta0 = NULL, 
-                                level = 0.05,
-                                definition=1){
+                                level = 0.05){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -145,11 +142,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'level' should be numeric")
     if(length(level)==0)
       stop("'level' is zerodimensional, should be a positive number between 0 and 1")
-  }
-  
-  if(definition!=1){
-    if(class(definition)!="numeric" || definition!=0)
-      definition = 1
   }
   
   # Check of consistency of parameters. Translation into numeric representation.
@@ -213,7 +205,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   
   if(is.null(beta0)) beta0=0 #won't be used anyway                              # If beta0 is still NULL here, no test is required, and this parameter is not considered. Set to zero in order to compel with the dataInferenceObject class.
-  definition=as.integer(definition)
   
   # Well posedeness check for coeff in simultaneous case;
   if(!is.null(test)){
@@ -232,6 +223,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }
   
+  definition=1
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
