@@ -21,7 +21,7 @@ void Speckman_Solver<InputHandler>::compute_Lambda(void){
   const SpMat * Psi_t = inf_car.getPsi_tp();
   UInt p = inf_car.getp(); 
   
-  B = (*Psi)*E_inv.block(0,0, n_nodes, n_nodes)*(*Psi_t);
+  B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
   
   Lambda = MatrixXr::Identity(B.rows(),B.cols()) - B;
   is_Lambda_computed = true;
@@ -51,7 +51,7 @@ void Speckman_Solver<InputHandler>::compute_V(){
   const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
   
-  V = (*WtW_decp).solve((*W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)* (*WtW_decp).solve(MatrixXr::Identity(p,p)));
+  V = (*WtW_decp).solve((W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)* (*WtW_decp).solve(MatrixXr::Identity(p,p)));
   is_V_computed = true;
   //For debug only
   Rprintf("V computed: %d \n" , is_V_computed); 
@@ -246,7 +246,7 @@ MatrixXv Speckman_Solver<InputHandler>::compute_inference_output(void){
 
 
 template<typename InputHandler>
-void Wald_Solver<InputHandler>::print_for_debug(void) const {
+void Speckman_Solver<InputHandler>::print_for_debug(void) const {
   int aaaa=1;
   return;
 };
