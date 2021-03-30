@@ -70,14 +70,19 @@ sd <- 0.25
 beta_H1_list <- seq(from = 0, by = 0.02, length.out = 11)
 
 covariates=S
+covariates = scale(covariates)
+
 res1_S <- list()
 
-SEED=132244
+SEED=15061997
+set.seed(SEED)
+rand= rnorm(n, 0, sd = sd)
 
+init = Sys.time()
 for (i in 1:length(beta_H1_list)) {
   
-  set.seed(SEED)
-  rand= rnorm(n, 0, sd = sd)
+  #set.seed(SEED)
+  #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
   out_CPP <- smooth.FEM(locations = locations, observations=observations, 
@@ -94,12 +99,14 @@ for (i in 1:length(beta_H1_list)) {
 beta_H1_list <- seq(from = 0, by = 0.02, length.out = 11)
 
 covariates=S1
+covariates = scale(covariates)
+
 res1_S1 <- list()
 
 for (i in 1:length(beta_H1_list)) {
   
-  set.seed(SEED)
-  rand= rnorm(n, 0, sd = sd)
+  #set.seed(SEED)
+  #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
   out_CPP <- smooth.FEM(locations = locations, observations=observations, 
@@ -116,12 +123,14 @@ for (i in 1:length(beta_H1_list)) {
 beta_H1_list <- seq(from = 0, by = 0.02, length.out = 11)
 
 covariates=S2
+covariates = scale(covariates)
+
 res1_S2 <- list()
 
 for (i in 1:length(beta_H1_list)) {
   
-  set.seed(SEED)
-  rand= rnorm(n, 0, sd = sd)
+  #set.seed(SEED)
+  #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
   out_CPP <- smooth.FEM(locations = locations, observations=observations, 
@@ -139,23 +148,25 @@ for (i in 1:length(beta_H1_list)) {
 beta_H1_list <- seq(from = 0, by = 0.02, length.out = 11)
 
 covariates=S3
+covariates = scale(covariates)
+
 res1_S3 <- list()
 
 for (i in 1:length(beta_H1_list)) {
-  set.seed(SEED)
-  rand= rnorm(n, 0, sd = sd)
+  #set.seed(SEED)
+  #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
   out_CPP <- smooth.FEM(locations = locations, observations=observations, 
                         covariates = covariates,
                         FEMbasis=FEMbasis, lambda=lambda,
-                        lambda.selection.criterion='grid',
                         R_Inference_Data_Object = R_Inference_Object)
   
   res1_S3[[i]] <- out_CPP$inference$p_vals
   print(i)
 }
-
+end = Sys.time()
+timing = end - init
 
 for (i in 1:11){
   res1_S[[i]]=1-res1_S[[i]]

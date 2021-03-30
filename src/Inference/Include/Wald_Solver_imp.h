@@ -34,7 +34,7 @@ void Wald_Solver<InputHandler>::compute_S(void){
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
   is_S_computed = true;
-  /* // For Debug Only
+  // For Debug Only
   Rprintf("S computed: %d \n", is_S_computed); 
   
   if(is_S_computed==true){
@@ -47,7 +47,6 @@ void Wald_Solver<InputHandler>::compute_S(void){
       Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
     } 
   }
-  */
   return; 
 };
 
@@ -76,7 +75,7 @@ void Wald_Solver<InputHandler>::compute_V(){
   
   V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
-  /* //For debug only
+  //For debug only
   Rprintf("V computed: %d \n" , is_V_computed); 
   
   if(is_V_computed==true){
@@ -87,7 +86,6 @@ void Wald_Solver<InputHandler>::compute_V(){
       }
     }
   }
-  */
   return;
 };
   
