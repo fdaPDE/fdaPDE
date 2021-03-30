@@ -29,7 +29,7 @@ void Wald_Solver<InputHandler>::compute_S(void){
   UInt p = inf_car.getp(); 
   MatrixXr Q = MatrixXr::Identity(p, p) - *(inf_car.getHp()); 
   
-  S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*(-(*Psi_t)*Q);
+  S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
   
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
@@ -54,10 +54,17 @@ template<typename InputHandler>
 Real Wald_Solver<InputHandler>::compute_sigma_hat_sq(void) const {
  VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
  Real SS_res = eps_hat.squaredNorm();
- UInt n = inf_car.getN_obs();
+ 
+Rprintf( "SS_res is: \n");
+ Rprintf( "%f", SS_res);
+ 
+UInt n = inf_car.getN_obs();
  UInt p = inf_car.getp();
  Real tr_S = this->S.trace();
  Real sigma_hat_sq = SS_res/(n - (p + tr_S));
+ 
+ Rprintf( "sigma_hat_sq is: \n");
+ Rprintf( "%f", sigma_hat_sq);
  return sigma_hat_sq; 
 };
 
