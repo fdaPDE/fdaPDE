@@ -13,6 +13,7 @@
 #include "../../Inference/Include/Inference_Carrier.h"
 #include "../../Inference/Include/Inverter.h"
 #include "../../Inference/Include/Wald_Solver.h"
+#include "../../Inference/Include/Speckman_Solver.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 
