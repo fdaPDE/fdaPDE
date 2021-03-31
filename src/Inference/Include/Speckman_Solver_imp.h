@@ -93,7 +93,7 @@ VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
  const MatrixXr W_t = W->transpose();
  
  Eigen::PartialPivLU<MatrixXr> WLW_decp; 
- WLW_decp.compute(Wt*Lambda*Lambda*(*W));
+ WLW_decp.compute(W_t*Lambda*Lambda*(*W));
  
  VectorXr beta = WLW_decp.solve(W_t*Lambda*Lambda*(*inf_car.getZp()));
  
