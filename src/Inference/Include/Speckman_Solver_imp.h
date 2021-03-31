@@ -8,7 +8,7 @@ using boost::math::normal;
 using namespace boost::math; 
 
 template<typename InputHandler> 
-void Speckman_Solver<InputHandler>::compute_Lambda(void){
+void Speckman_Solver<InputHandler>::compute_Lambda2(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
   inverter.Compute_Inv(inf_car.getE_decp(), inf_car.getEp());
   // extract the inverse of E
@@ -23,15 +23,15 @@ void Speckman_Solver<InputHandler>::compute_Lambda(void){
   
   B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
   
-  Lambda = MatrixXr::Identity(B.rows(),B.cols()) - B;
-  is_Lambda_computed = true;
+  Lambda2 = (MatrixXr::Identity(B.rows(),B.cols()) - B)*(MatrixXr::Identity(B.rows(),B.cols()) - B);
+  is_Lambda2_computed = true;
   // For Debug Only
-  Rprintf("Lambda computed: %d \n", is_Lambda_computed); 
+  Rprintf("Lambda2 computed: %d \n", is_Lambda2_computed); 
   
-  if(is_Lambda_computed==true){
-    Rprintf("Matrix Lambda is (only some samples): \n");
+  if(is_Lambda2_computed==true){
+    Rprintf("Matrix Lambda2 is (only some samples): \n");
     for (UInt i=0; i<10; i++){
-      Rprintf( "Lambda( %d, %d):  %f \n", 10*i, 20*i, Lambda(10*i,20*i));
+      Rprintf( "Lambda2( %d, %d):  %f \n", 10*i, 20*i, Lambda2(10*i,20*i));
     }
   }
   return; 
@@ -44,18 +44,17 @@ void Speckman_Solver<InputHandler>::compute_V(){
   // build squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
   
-    Rprintf("Vector Res2 is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "Res2( %d):  %f \n", 10*i, Res2(10*i));
-    }
-    
-    // resize the variance-covariance matrix
-    UInt p = inf_car.getp();
-    V.resize(p,p);
-    
-    const MatrixXr * W = inf_car.getWp();
+  Rprintf("Vector Res2 is (only some samples): \n");
+  for (UInt i=0; i<10; i++){
+    Rprintf( "Res2( %d):  %f \n", 10*i, Res2(10*i));
+  }
+  
+  // resize the variance-covariance matrix
+  UInt p = inf_car.getp();
+  V.resize(p,p);
+  
+  const MatrixXr * W = inf_car.getWp();
     const MatrixXr W_t = W->transpose();
-    const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
     
     MatrixXr diag = Res2.asDiagonal();
     
@@ -66,8 +65,8 @@ void Speckman_Solver<InputHandler>::compute_V(){
     Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20));
     
     
-  
-    V = (*WtW_decp).solve((W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p)));
+    
+    V = (WLW_dec).solve((W_t)*Lambda2*Res2.asDiagonal()*Lambda2*(*W)*(WLW_dec).solve(MatrixXr::Identity(p,p)));
     is_V_computed = true;
     //For debug only
     Rprintf("V computed: %d \n" , is_V_computed); 
@@ -83,22 +82,30 @@ void Speckman_Solver<InputHandler>::compute_V(){
     return;
 };
 
+template<typename InputHandler>
+void Speckman_Solver<InputHandler>::compute_WLW_dec(void){
+  if(!is_Lambda2_computed){
+    compute_Lambda2();
+  }
+  
+  // compute the decomposition of W^T*Lambda^2*W
+  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr W_t = W->transpose();
+  
+  WLW_dec.compute(W_t*Lambda2*(*W));
+ is_WLW_computed=true;
+};
+
 template<typename InputHandler> 
 VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
- if(!is_Lambda_computed){
-   compute_Lambda();
- }
- // compute the decomposition of W^T*Lambda^2*W
- const MatrixXr * W = inf_car.getWp();
- const MatrixXr W_t = W->transpose();
- 
- Eigen::PartialPivLU<MatrixXr> WLW_decp; 
- WLW_decp.compute(W_t*Lambda*Lambda*(*W));
- 
- VectorXr beta = WLW_decp.solve(W_t*Lambda*Lambda*(*inf_car.getZp()));
- 
- return beta; 
- 
+  if(!is_WLW_computed){
+    compute_WLW_dec();
+  }
+  
+  VectorXr beta = WLW_dec.solve(W_t*Lambda2*(*inf_car.getZp()));
+  
+  return beta; 
+  
 };
 
 template<typename InputHandler> 
@@ -119,8 +126,8 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     VectorXr diff = C*beta_hat - beta_0; 
     
     // compute the variance-covariance matrix if needed
-    if(!is_Lambda_computed){
-      compute_Lambda();
+    if(!is_Lambda2_computed){
+      compute_Lambda2();
     }
     if(!is_V_computed){
       compute_V();
@@ -161,9 +168,9 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
       Rprintf( "beta_hat( %d):  %f \n", i, beta_hat(i));
     }
     
-    // compute Lambda and V if needed
-    if(!is_Lambda_computed){
-      compute_Lambda();
+    // compute Lambda2 and V if needed
+    if(!is_Lambda2_computed){
+      compute_Lambda2();
     }
     if(!is_V_computed){
       compute_V();
@@ -227,9 +234,9 @@ MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
     }
   }
   
-  // compute Lambda and V if needed
-  if(!is_Lambda_computed){
-    compute_Lambda();
+  // compute Lambda2 and V if needed
+  if(!is_Lambda2_computed){
+    compute_Lambda2();
   }
   if(!is_V_computed){
     compute_V();

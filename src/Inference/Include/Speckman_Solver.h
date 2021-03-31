@@ -22,13 +22,16 @@ private:
   Inverse_Base & inverter; 				//!< Inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   MatrixXr B;						//!< Matrix Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t 
-  MatrixXr Lambda;   					//!< I - B
-  bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
+  MatrixXr Lambda2;   					//!< I - B
+  bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
-  bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
-  void compute_Lambda(void);				//!< Method used to compute Lambda
+  bool is_V_computed = false;				//!< Boolean that tells whether WLW has been computed or not
+  Eigen::PartialPivLU<MatrixXr> WLW_dec; 		//!< Decomposition of [W^t * Lambda^2 * W] 
+  bool is_WLW_computed=false; 				//!< Boolean that tells whether Lambda has been computed or not
+  void compute_Lambda2(void);				//!< Method used to compute Lambda
   void compute_V(void);					//!< Method used to compute V
-  VectorXr compute_beta_hat(void);                //!< Method used to compute beta estimates for the Speckman test
+  void compute_WLW_dec(void); 				//!< Method that computes the decomposition for WLW
+  VectorXr compute_beta_hat(void);               	//!< Method used to compute beta estimates for the Speckman test
   VectorXr compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void);				//!< Method to compute the confidence intervals
   
