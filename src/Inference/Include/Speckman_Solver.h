@@ -28,7 +28,7 @@ private:
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
   void compute_Lambda(void);				//!< Method used to compute Lambda
   void compute_V(void);					//!< Method used to compute V
-  VectorXr compute_beta_hat(void) const;                //!< Method used to compute beta estimates for the Speckman test
+  VectorXr compute_beta_hat(void);                //!< Method used to compute beta estimates for the Speckman test
   VectorXr compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void);				//!< Method to compute the confidence intervals
   

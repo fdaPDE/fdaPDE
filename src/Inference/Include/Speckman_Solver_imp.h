@@ -43,44 +43,62 @@ void Speckman_Solver<InputHandler>::compute_V(){
   VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
   // build squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
-
+  
     Rprintf("Vector Res2 is (only some samples): \n");
     for (UInt i=0; i<10; i++){
       Rprintf( "Res2( %d):  %f \n", 10*i, Res2(10*i));
     }
-
-  // resize the variance-covariance matrix
-  UInt p = inf_car.getp();
-  V.resize(p,p);
-  
-  const MatrixXr * W = inf_car.getWp();
-  const MatrixXr W_t = W->transpose();
-  const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
-
-  MatrixXr diag = Res2.asDiagonal();
-
-  Rprintf("Vector diag is (only some samples): \n");
+    
+    // resize the variance-covariance matrix
+    UInt p = inf_car.getp();
+    V.resize(p,p);
+    
+    const MatrixXr * W = inf_car.getWp();
+    const MatrixXr W_t = W->transpose();
+    const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
+    
+    MatrixXr diag = Res2.asDiagonal();
+    
+    Rprintf("Vector diag is (only some samples): \n");
     for (UInt i=0; i<10; i++){
       Rprintf( "diag( %d, %d):  %f \n", 10*i, 10*i, diag(10*i, 10*i));
     }
-   Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20);
-
+    Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20));
+    
+    
   
-  
-  V = (*WtW_decp).solve((W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p)));
-  is_V_computed = true;
-  //For debug only
-  Rprintf("V computed: %d \n" , is_V_computed); 
-  
-  if(is_V_computed==true){
-    Rprintf( "Matrix variance V is: \n");
-    for(UInt i=0; i < V.rows(); ++i){
-      for(UInt j=0; j < V.cols(); ++j){
-	Rprintf(" %f",V(i,j));
+    V = (*WtW_decp).solve((W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p)));
+    is_V_computed = true;
+    //For debug only
+    Rprintf("V computed: %d \n" , is_V_computed); 
+    
+    if(is_V_computed==true){
+      Rprintf( "Matrix variance V is: \n");
+      for(UInt i=0; i < V.rows(); ++i){
+	for(UInt j=0; j < V.cols(); ++j){
+	  Rprintf(" %f",V(i,j));
+	}
       }
     }
-  }
-  return;
+    return;
+};
+
+template<typename InputHandler> 
+VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
+ if(!is_Lambda_computed){
+   compute_Lambda();
+ }
+ // compute the decomposition of W^T*Lambda^2*W
+ const MatrixXr * W = inf_car.getWp();
+ const MatrixXr W_t = W->transpose();
+ 
+ Eigen::PartialPivLU<MatrixXr> WLW_decp; 
+ WLW_decp.compute(Wt*Lambda*Lambda*(*W));
+ 
+ VectorXr beta = WLW_decp.solve(W_t*Lambda*Lambda*(*inf_car.getZp()));
+ 
+ return beta; 
+ 
 };
 
 template<typename InputHandler> 
@@ -172,24 +190,6 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     return result;
   }
   
-};
-
-template<typename InputHandler> 
-VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void) const{
- if(!is_Lambda_computed){
-      compute_Lambda();
-    }
-    // compute the decomposition of W^T*Lambda^2*W
-    const MatrixXr * W = inf_car.getWp();
-    const MatrixXr W_t = W->transpose();
-
-    Eigen::PartialPivLU<MatrixXr> * WLW_decp; 
-    WLW_decp.compute(Wt*Lambda*Lambda*(*W));
-
-    VectorXr beta = WLW_decp.solve(W_t*Lambda*Lambda*(*inf_car.getZp()));
-
-    return beta; 
-
 };
 
 template<typename InputHandler> 
