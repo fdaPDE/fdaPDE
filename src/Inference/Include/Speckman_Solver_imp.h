@@ -54,32 +54,32 @@ void Speckman_Solver<InputHandler>::compute_V(){
   V.resize(p,p);
   
   const MatrixXr * W = inf_car.getWp();
-    const MatrixXr W_t = W->transpose();
-    
-    MatrixXr diag = Res2.asDiagonal();
-    
-    Rprintf("Vector diag is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "diag( %d, %d):  %f \n", 10*i, 10*i, diag(10*i, 10*i));
-    }
-    Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20));
-    
-    
-    
-    V = (WLW_dec).solve((W_t)*Lambda2*Res2.asDiagonal()*Lambda2*(*W)*(WLW_dec).solve(MatrixXr::Identity(p,p)));
-    is_V_computed = true;
-    //For debug only
-    Rprintf("V computed: %d \n" , is_V_computed); 
-    
-    if(is_V_computed==true){
-      Rprintf( "Matrix variance V is: \n");
-      for(UInt i=0; i < V.rows(); ++i){
-	for(UInt j=0; j < V.cols(); ++j){
-	  Rprintf(" %f",V(i,j));
-	}
+  const MatrixXr W_t = W->transpose();
+  
+  MatrixXr diag = Res2.asDiagonal();
+  
+  Rprintf("Vector diag is (only some samples): \n");
+  for (UInt i=0; i<10; i++){
+    Rprintf( "diag( %d, %d):  %f \n", 10*i, 10*i, diag(10*i, 10*i));
+  }
+  Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20));
+  
+  
+  
+  V = (WLW_dec).solve((W_t)*Lambda2*Res2.asDiagonal()*Lambda2*(*W)*(WLW_dec).solve(MatrixXr::Identity(p,p)));
+  is_V_computed = true;
+  //For debug only
+  Rprintf("V computed: %d \n" , is_V_computed); 
+  
+  if(is_V_computed==true){
+    Rprintf( "Matrix variance V is: \n");
+    for(UInt i=0; i < V.rows(); ++i){
+      for(UInt j=0; j < V.cols(); ++j){
+	Rprintf(" %f",V(i,j));
       }
     }
-    return;
+  }
+  return;
 };
 
 template<typename InputHandler>
@@ -93,7 +93,7 @@ void Speckman_Solver<InputHandler>::compute_WLW_dec(void){
   const MatrixXr W_t = W->transpose();
   
   WLW_dec.compute(W_t*Lambda2*(*W));
- is_WLW_computed=true;
+  is_WLW_computed=true;
 };
 
 template<typename InputHandler> 
@@ -101,6 +101,8 @@ VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
   if(!is_WLW_computed){
     compute_WLW_dec();
   }
+  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr W_t = W->transpose();
   
   VectorXr beta = WLW_dec.solve(W_t*Lambda2*(*inf_car.getZp()));
   
