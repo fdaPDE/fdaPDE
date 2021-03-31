@@ -63,8 +63,12 @@ image(FEM(coeff = S1, FEMbasis = FEMbasis))
 
 #Setting Parameters for smoothing.R
 lambda<-0.1
-R_Inference_Object <- inferenceDataObjectBuilder(test='one-at-the-time', exact='True', dim=1)
 sd <- 0.25
+#inference object for Wald test
+R_Inference_Object_Wald <- inferenceDataObjectBuilder(test='one-at-the-time', exact='True', dim=1)
+#inference object for Speckman test
+R_Inference_Object_Speckman <- inferenceDataObjectBuilder(test='one-at-the-time', type = 'speckman', exact='True', dim=1)
+
 
 # Real simulations: 1
 beta_H1_list <- seq(from = 0, by = 0.02, length.out = 11)
@@ -85,13 +89,19 @@ for (i in 1:length(beta_H1_list)) {
   #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
-  out_CPP <- smooth.FEM(locations = locations, observations=observations, 
+  out_CPP_Wald <- smooth.FEM(locations = locations, observations=observations, 
                         covariates = covariates,
                         FEMbasis=FEMbasis, lambda=lambda,
                         lambda.selection.criterion='grid',
-                        R_Inference_Data_Object = R_Inference_Object)
+                        R_Inference_Data_Object = R_Inference_Object_Wald)
   
-  res1_S[[i]] <- out_CPP$inference$p_vals
+  out_CPP_Speckman <- smooth.FEM(locations = locations, observations=observations, 
+                             covariates = covariates,
+                             FEMbasis=FEMbasis, lambda=lambda,
+                             lambda.selection.criterion='grid',
+                             R_Inference_Data_Object = R_Inference_Object_Speckman)
+  
+  res1_S[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
   print(i)
 }
 
@@ -109,13 +119,19 @@ for (i in 1:length(beta_H1_list)) {
   #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
-  out_CPP <- smooth.FEM(locations = locations, observations=observations, 
-                        covariates = covariates,
-                        FEMbasis=FEMbasis, lambda=lambda,
-                        lambda.selection.criterion='grid',
-                        R_Inference_Data_Object = R_Inference_Object)
+  oout_CPP_Wald <- smooth.FEM(locations = locations, observations=observations, 
+                              covariates = covariates,
+                              FEMbasis=FEMbasis, lambda=lambda,
+                              lambda.selection.criterion='grid',
+                              R_Inference_Data_Object = R_Inference_Object_Wald)
   
-  res1_S1[[i]] <- out_CPP$inference$p_vals
+  out_CPP_Speckman <- smooth.FEM(locations = locations, observations=observations, 
+                                 covariates = covariates,
+                                 FEMbasis=FEMbasis, lambda=lambda,
+                                 lambda.selection.criterion='grid',
+                                 R_Inference_Data_Object = R_Inference_Object_Speckman)
+  
+  res1_S1[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
   print(i)
 }
 
@@ -133,13 +149,19 @@ for (i in 1:length(beta_H1_list)) {
   #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
-  out_CPP <- smooth.FEM(locations = locations, observations=observations, 
-                        covariates = covariates,
-                        FEMbasis=FEMbasis, lambda=lambda,
-                        lambda.selection.criterion='grid',
-                        R_Inference_Data_Object = R_Inference_Object)
+  out_CPP_Wald <- smooth.FEM(locations = locations, observations=observations, 
+                             covariates = covariates,
+                             FEMbasis=FEMbasis, lambda=lambda,
+                             lambda.selection.criterion='grid',
+                             R_Inference_Data_Object = R_Inference_Object_Wald)
   
-  res1_S2[[i]] <- out_CPP$inference$p_vals
+  out_CPP_Speckman <- smooth.FEM(locations = locations, observations=observations, 
+                                 covariates = covariates,
+                                 FEMbasis=FEMbasis, lambda=lambda,
+                                 lambda.selection.criterion='grid',
+                                 R_Inference_Data_Object = R_Inference_Object_Speckman)
+  
+  res1_S2[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
   print(i)
 }
 
@@ -157,39 +179,56 @@ for (i in 1:length(beta_H1_list)) {
   #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
-  out_CPP <- smooth.FEM(locations = locations, observations=observations, 
-                        covariates = covariates,
-                        FEMbasis=FEMbasis, lambda=lambda,
-                        R_Inference_Data_Object = R_Inference_Object)
+  out_CPP_Wald <- smooth.FEM(locations = locations, observations=observations, 
+                             covariates = covariates,
+                             FEMbasis=FEMbasis, lambda=lambda,
+                             lambda.selection.criterion='grid',
+                             R_Inference_Data_Object = R_Inference_Object_Wald)
   
-  res1_S3[[i]] <- out_CPP$inference$p_vals
+  out_CPP_Speckman <- smooth.FEM(locations = locations, observations=observations, 
+                                 covariates = covariates,
+                                 FEMbasis=FEMbasis, lambda=lambda,
+                                 lambda.selection.criterion='grid',
+                                 R_Inference_Data_Object = R_Inference_Object_Speckman)
+  
+  res1_S3[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
   print(i)
 }
 end = Sys.time()
 timing = end - init
 
+plot_res1_S <-  matrix(data = NA, ncol=2, nrow=11)
+plot_res1_S1 <- matrix(data = NA, ncol=2, nrow=11)
+plot_res1_S2 <- matrix(data = NA, ncol=2, nrow=11)
+plot_res1_S3 <- matrix(data = NA, ncol=2, nrow=11)
+
 for (i in 1:11){
-  res1_S[[i]]=1-res1_S[[i]]
-  res1_S1[[i]]=1-res1_S1[[i]]
-  res1_S2[[i]]=1-res1_S2[[i]]
-  res1_S3[[i]]=1-res1_S3[[i]]
+  plot_res1_S[i,]=c(1-res1_S[[i]][1], 1-res1_S[[i]][2])
+  plot_res1_S1[i,]=c(1-res1_S1[[i]][1], 1-res1_S1[[i]][2])
+  plot_res1_S2[i,]=c(1-res1_S2[[i]][1], 1-res1_S2[[i]][2])
+  plot_res1_S3[i,]=c(1-res1_S3[[i]][1], 1-res1_S3[[i]][2])
 }
 
-#x11()
+x11()
 par(mfrow=c(2,2))
-plot(beta_H1_list, res1_S, main="a. Gaussian random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+plot(beta_H1_list, res1_S[,1], main="a. Gaussian random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, res1_S[,2], type = 'b', pch = 15, col = 'g')
 grid()
 abline(h=0.05, type='l', lty=2)
 
+
 plot(beta_H1_list, res1_S1, main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, res1_S1[,2], type = 'b', pch = 15, col = 'g')
 grid()
 abline(h=0.05, type='l', lty=2)
 
 plot(beta_H1_list, res1_S2, main="c. Exponential random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, res1_S2[,2], type = 'b', pch = 15, col = 'g')
 grid()
 abline(h=0.05, type='l', lty=2)
 
 plot(beta_H1_list, res1_S3, main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, res1_S3[,2], type = 'b', pch = 15, col = 'g')
 grid()
 abline(h=0.05, type='l', lty=2)
 

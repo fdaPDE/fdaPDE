@@ -223,7 +223,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }
   
-  definition=1
+  definition=as.integer(1)
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 

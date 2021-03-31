@@ -43,6 +43,12 @@ void Speckman_Solver<InputHandler>::compute_V(){
   VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
   // build squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
+
+    Rprintf("Vector Res2 is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "Res2( %d):  %f \n", 10*i, Res2(10*i));
+    }
+
   // resize the variance-covariance matrix
   UInt p = inf_car.getp();
   V.resize(p,p);
@@ -50,8 +56,18 @@ void Speckman_Solver<InputHandler>::compute_V(){
   const MatrixXr * W = inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
+
+  MatrixXr diag = Res2.asDiagonal();
+
+  Rprintf("Vector diag is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "diag( %d, %d):  %f \n", 10*i, 10*i, diag(10*i, 10*i));
+    }
+   Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20);
+
   
-  V = (*WtW_decp).solve((W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)* (*WtW_decp).solve(MatrixXr::Identity(p,p)));
+  
+  V = (*WtW_decp).solve((W_t)*Lambda*Lambda*Res2.asDiagonal()*Lambda*Lambda*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p)));
   is_V_computed = true;
   //For debug only
   Rprintf("V computed: %d \n" , is_V_computed); 
@@ -80,7 +96,7 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = compute_beta_hat();
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
     
@@ -116,10 +132,16 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     MatrixXr C = inf_car.getInfData()->get_coeff_inference();
     Real q = C.rows();
     result.resize(q);
+    
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = compute_beta_hat(); 
+    
+    Rprintf("Vector beta_hat: \n");
+    for (UInt i=0; i<beta_hat.size(); i++){
+      Rprintf( "beta_hat( %d):  %f \n", i, beta_hat(i));
+    }
     
     // compute Lambda and V if needed
     if(!is_Lambda_computed){
@@ -153,13 +175,31 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
 };
 
 template<typename InputHandler> 
+VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void) const{
+ if(!is_Lambda_computed){
+      compute_Lambda();
+    }
+    // compute the decomposition of W^T*Lambda^2*W
+    const MatrixXr * W = inf_car.getWp();
+    const MatrixXr W_t = W->transpose();
+
+    Eigen::PartialPivLU<MatrixXr> * WLW_decp; 
+    WLW_decp.compute(Wt*Lambda*Lambda*(*W));
+
+    VectorXr beta = WLW_decp.solve(W_t*Lambda*Lambda*(*inf_car.getZp()));
+
+    return beta; 
+
+};
+
+template<typename InputHandler> 
 MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
   
   // get the estimates of the parameters
-  VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+  VectorXr beta_hat = compute_beta_hat();
   
   // declare the matrix that will store the p-values
   Real alpha=inf_car.getInfData()->get_inference_level();
