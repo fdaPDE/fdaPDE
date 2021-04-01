@@ -200,8 +200,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("level should be a positive value smaller or equal to 1")
   }
   
-  if(!is.null(interval) && type!="wald"){
-    stop("confidence intervals are implemented only in the Wald case")
+  if(!is.null(interval) && type=="permutational"){
+    stop("confidence intervals are not implemented in the permutational case")
     }
   
   if(is.null(beta0)) beta0=0 #won't be used anyway                              # If beta0 is still NULL here, no test is required, and this parameter is not considered. Set to zero in order to compel with the dataInferenceObject class.
