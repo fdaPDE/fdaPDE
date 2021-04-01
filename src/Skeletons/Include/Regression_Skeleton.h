@@ -69,7 +69,8 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				
 		}
 
-		//Inference
+	}
+                //Inference
 		if(inferenceData.get_definition()==true){ //only if inference is actually required
 			  	Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
 			  	if(inferenceData.get_exact_inference()==true){
@@ -89,7 +90,6 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			  	//  Inference_Output = inference_Solver.compute_inference_output(); //check names
 			 	// }
                          }
-	}
 
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }

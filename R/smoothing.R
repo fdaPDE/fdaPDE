@@ -552,9 +552,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
 
-  if(R_Inference_Data_Object@definition==1 & (family!= "gaussian" || space_varying==T))
+  if(R_Inference_Data_Object@definition==1 & (family!= "gaussian"))
   {
-    warning("Inference for linear estimators is implemented only in regression-Laplace and regression-PDE non space varying cases,\nInference Data are ignored")
+    warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                   coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1,definition=as.integer(0))
   }
@@ -597,7 +597,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         search=search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
-        R_Inference_Data_Object=R_Inference_Data_Object) #here we pass the inference object just for consistency in the expected number of parameters, but it won't be used
+        R_Inference_Data_Object=R_Inference_Data_Object) # further check for inference consistency will be performed deeper in the code
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
     {
@@ -647,7 +647,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
         R_Inference_Data_Object=R_Inference_Data_Object
-        ) #here we pass the inference object just for consistency in the expected number of parameters, but it won't be used
+        ) # further check for inference consistency will be performed deeper in the code
       numnodes = nrow(FEMbasis$mesh$nodes)
   	}
   } else

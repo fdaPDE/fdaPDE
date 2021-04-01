@@ -78,7 +78,7 @@ covariates = scale(covariates)
 
 res1_S <- list()
 
-SEED=15061997
+SEED=30101952
 set.seed(SEED)
 rand= rnorm(n, 0, sd = sd)
 
@@ -101,7 +101,7 @@ for (i in 1:length(beta_H1_list)) {
                              lambda.selection.criterion='grid',
                              R_Inference_Data_Object = R_Inference_Object_Speckman)
   
-  res1_S[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
+  res1_S[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$inference$p_vals)
   print(i)
 }
 
@@ -119,7 +119,7 @@ for (i in 1:length(beta_H1_list)) {
   #rand= rnorm(n, 0, sd = sd)
   observations <- covariates * beta_H1_list[i] + diag(n) %*% c_true + rand # Build observations in H1
   
-  oout_CPP_Wald <- smooth.FEM(locations = locations, observations=observations, 
+  out_CPP_Wald <- smooth.FEM(locations = locations, observations=observations, 
                               covariates = covariates,
                               FEMbasis=FEMbasis, lambda=lambda,
                               lambda.selection.criterion='grid',
@@ -131,7 +131,7 @@ for (i in 1:length(beta_H1_list)) {
                                  lambda.selection.criterion='grid',
                                  R_Inference_Data_Object = R_Inference_Object_Speckman)
   
-  res1_S1[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
+  res1_S1[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$inference$p_vals)
   print(i)
 }
 
@@ -161,7 +161,7 @@ for (i in 1:length(beta_H1_list)) {
                                  lambda.selection.criterion='grid',
                                  R_Inference_Data_Object = R_Inference_Object_Speckman)
   
-  res1_S2[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
+  res1_S2[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$inference$p_vals)
   print(i)
 }
 
@@ -191,7 +191,7 @@ for (i in 1:length(beta_H1_list)) {
                                  lambda.selection.criterion='grid',
                                  R_Inference_Data_Object = R_Inference_Object_Speckman)
   
-  res1_S3[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$p_vals)
+  res1_S3[[i]] <- c(out_CPP_Wald$inference$p_vals, out_CPP_Speckman$inference$p_vals)
   print(i)
 }
 end = Sys.time()
@@ -211,26 +211,30 @@ for (i in 1:11){
 
 x11()
 par(mfrow=c(2,2))
-plot(beta_H1_list, res1_S[,1], main="a. Gaussian random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
-lines(beta_H1_list, res1_S[,2], type = 'b', pch = 15, col = 'g')
+plot(beta_H1_list, plot_res1_S[,1], main="a. Gaussian random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, plot_res1_S[,2], type = 'b', pch = 16, col = 'green')
 grid()
 abline(h=0.05, type='l', lty=2)
+legend(x=0.10, y=0.4, legend = c("Wald", "Speckman"), pch = c(15, 16), col = c('red', 'green'))
 
 
-plot(beta_H1_list, res1_S1, main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
-lines(beta_H1_list, res1_S1[,2], type = 'b', pch = 15, col = 'g')
+plot(beta_H1_list, plot_res1_S1[,1], main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, plot_res1_S1[,2], type = 'b', pch = 16, col = 'green')
 grid()
 abline(h=0.05, type='l', lty=2)
+legend(x=0.10, y=0.4, legend = c("Wald", "Speckman"), pch = c(15, 16), col = c('red', 'green'))
 
-plot(beta_H1_list, res1_S2, main="c. Exponential random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
-lines(beta_H1_list, res1_S2[,2], type = 'b', pch = 15, col = 'g')
+plot(beta_H1_list, plot_res1_S2[,1], main="c. Exponential random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, plot_res1_S2[,2], type = 'b', pch = 16, col = 'green')
 grid()
 abline(h=0.05, type='l', lty=2)
+legend(x=0.10, y=0.4, legend = c("Wald", "Speckman"), pch = c(15, 16), col = c('red', 'green'))
 
-plot(beta_H1_list, res1_S3, main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
-lines(beta_H1_list, res1_S3[,2], type = 'b', pch = 15, col = 'g')
+plot(beta_H1_list, plot_res1_S3[,1], main="b. Matern random field", type='b', pch=15, col='red',xlab=expression(beta),ylab="Power",ylim=c(0,1))
+lines(beta_H1_list, plot_res1_S3[,2], type = 'b', pch = 16, col = 'green')
 grid()
 abline(h=0.05, type='l', lty=2)
+legend(x=0.10, y=0.4, legend = c("Wald", "Speckman"), pch = c(15, 16), col = c('red', 'green'))
 
 graphics.off()
 
