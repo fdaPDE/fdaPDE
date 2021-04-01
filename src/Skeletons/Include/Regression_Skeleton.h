@@ -14,6 +14,7 @@
 #include "../../Inference/Include/Inverter.h"
 #include "../../Inference/Include/Wald_Solver.h"
 #include "../../Inference/Include/Speckman_Solver.h"
+#include "../../Inference/Include/Eigen_Sign_Flip_Solver.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 
@@ -82,6 +83,11 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 					if(inferenceData.get_implementation_type()=="speckman"){
 					Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
 			    		Speckman_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			    		inference_Output = inference_Solver.compute_inference_output();
+					}
+					if(inferenceData.get_implementation_type()=="permutational"){
+					Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
+			    		Eigen_Sign_Flip_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
 			    		inference_Output = inference_Solver.compute_inference_output();
 					}
 			  	}// else{

@@ -79,7 +79,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  this->set_definition(bool(INTEGER(definition_)[0]));
 
  //n_perm
- this->set_n_perm(INTEGER(n_perm_)[0])
+ this->set_n_perm(INTEGER(n_perm_)[0]);
 };
 
 void InferenceData::print_inference_data() const{

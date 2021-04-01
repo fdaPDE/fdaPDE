@@ -32,9 +32,9 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   dim = "integer",
                                                                   coeff = "matrix",
                                                                   beta0 = "numeric",
-                                                                 level = "numeric",
-                                                                 n_perm = "integer"
-                                                                 definition="integer")
+                                                                  level = "numeric",
+                                                                  n_perm = "integer",
+                                                                  definition="integer")
                               )
 
 #'Constructor for inferenceDataObject class
