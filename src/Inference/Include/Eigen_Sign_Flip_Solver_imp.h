@@ -64,11 +64,11 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   
   
   // compute the partial residuals
-  Partial_res_H0 = *(inf_car->getZp()) - (*W) * (beta_0);
+  Partial_res_H0 = *(inf_car.getZp()) - (*W) * (beta_0);
   
   // compute the vectors needed for the statistic
   MatrixXr TildeX = W_t * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-  VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_HO;   			// V^t * partial_res_H0
+  VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			// V^t * partial_res_H0
   
   // Observed statistic
   VectorXr stat=TildeX*Tilder;
