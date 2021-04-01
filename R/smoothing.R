@@ -556,7 +556,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                                  coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1,definition=as.integer(0))
+                                  coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1, n_perm = as.integer(1000), definition=as.integer(0))
   }
 
   ################## End checking parameters, sizes and conversion #############################

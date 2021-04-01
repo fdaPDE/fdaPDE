@@ -13,6 +13,7 @@
 #' estimated via confidence interval. 
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
 #'@slot level Level of significance for the confidence intervals. Needs to be between 0 and 1. Used only if interval is not 0.
+#'@slot n_perm An integer representing the number of permutations in the case of permutational test.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
@@ -32,6 +33,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   coeff = "matrix",
                                                                   beta0 = "numeric",
                                                                  level = "numeric",
+                                                                 n_perm = "integer"
                                                                  definition="integer")
                               )
 
@@ -53,7 +55,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@param coeff A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL, it will be defaulted to an identity matrix. 
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. If \code{test} is set and \code{beta0} is NULL,
 #'will be set to a vector of zeros.
-#'@param level Level of significance, defaulted to 0.05. It is taken into account only if \code{intrval} is set.
+#'@param level Level of significance, defaulted to 0.05. It is taken into account only if \code{interval} is set.
+#'@param n_perm Number of permutations, defaulted to 1000. It is taken into account only if \code{type} is set to "permutational".
 #'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
 #'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
@@ -65,7 +68,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'dim = NULL, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
-#'level = 0.05)
+#'level = 0.05,
+#'n_perm = 1000)
 #' @export
 #' 
 #' 
@@ -81,7 +85,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 dim = NULL, 
                                 coeff = NULL, 
                                 beta0 = NULL, 
-                                level = 0.05){
+                                level = 0.05,
+                                n_perm = 1000){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -119,7 +124,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   
   if(!is.null(dim)){
-    if(class(dim)!="numeric")
+    if(class(dim)!="numeric" && class(dim)!="integer")
       stop("'dim' should be an integer or convertible to integer type")
     dim=as.integer(dim)
   }
@@ -142,6 +147,12 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'level' should be numeric")
     if(length(level)==0)
       stop("'level' is zerodimensional, should be a positive number between 0 and 1")
+  }
+  
+  if(!is.null(n_perm)){
+    if(class(n_perm)!="numeric" && class(n_perm)!="integer")
+      stop("'n_perm' should be an integer or convertible to integer type")
+    n_perm=as.integer(n_perm)
   }
   
   # Check of consistency of parameters. Translation into numeric representation.
@@ -189,20 +200,40 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }
   
-  if(!is.null(interval) && type=="wald"){
+  if(!is.null(interval) && (type=="wald" || type=="speckman")){
     if(interval!="one-at-the-time" && interval!="simultaneous" && interval!="bonferroni"){
       stop("interval should be either 'one-at-the-time' 'simultaneous' or 'bonferroni'")}else{
         if(interval=="one-at-the-time") interval_numeric=as.integer(1)
         if(interval=="simultaneous") interval_numeric=as.integer(2)
         if(interval=="bonferroni") interval_numeric=as.integer(3)
       }
+    
     if(level <= 0 || level > 1)                                                
       stop("level should be a positive value smaller or equal to 1")
   }
   
+  if(!is.null(n_perm)){
+  if(n_perm <= 0)                                                
+    stop("number of permutations must be a positive value")
+  }
+  
+  else {
+    n_perm <- as.integer(1000)
+  }
+  
+  
   if(!is.null(interval) && type=="permutational"){
     stop("confidence intervals are not implemented in the permutational case")
-    }
+  }
+  
+  if(type == "permutational"){
+    if(test == "one-at-the-time")
+      stop("one-at-the-time tests are not implemented in the permutational case")
+    if(dim(coeff)[1]!=dim)
+      stop("linear combinations are not allowed in the permutational case")
+    if(sum(coeff==diag(1, nrow=dim, ncol=dim))!=dim^2)
+      stop("linear combinations are not allowed in the permutational case")
+  }
   
   if(is.null(beta0)) beta0=0 #won't be used anyway                              # If beta0 is still NULL here, no test is required, and this parameter is not considered. Set to zero in order to compel with the dataInferenceObject class.
   
@@ -227,7 +258,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
-              coeff = coeff, beta0 = beta0, level = level,definition=definition)
+              coeff = coeff, beta0 = beta0, level = level, n_perm = n_perm, definition=definition)
   
   return(result)
 }
