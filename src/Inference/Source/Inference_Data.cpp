@@ -12,7 +12,7 @@
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
 			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,
-			     SEXP inference_Level_, SEXP definition_){
+			     SEXP inference_Level_, SEXP n_perm_, SEXP definition_){
   //test_Type
   if(INTEGER(test_Type_)[0]==0)
     this->set_test_type("not-defined");
@@ -76,7 +76,10 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  this->set_inference_level(REAL(inference_Level_)[0]);
 
  //definition
- this->set_definition(bool(INTEGER(definition_)[0])); 
+ this->set_definition(bool(INTEGER(definition_)[0]));
+
+ //n_perm
+ this->set_n_perm(INTEGER(n_perm_)[0])
 };
 
 void InferenceData::print_inference_data() const{
@@ -98,5 +101,6 @@ void InferenceData::print_inference_data() const{
   }
   Rprintf("\n");
   Rprintf("inference_Level: %f\n",inference_Level);
+  Rprintf("n_perm: %d\n", n_perm);
   Rprintf("definition: %d\n",definition);
 };

@@ -45,7 +45,7 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   result.resize(1);
   
   // one-at-the-time tests
-  unsigned long int n_perm=100000;
+  unsigned long int n_perm=inf_car.getInfData()->get_n_perm();
   
   // get the value of the parameters under the null hypothesis
   VectorXr beta_0 = inf_car.getInfData()->get_beta_0(); 
