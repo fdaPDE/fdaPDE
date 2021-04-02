@@ -21,7 +21,7 @@ class Eigen_Sign_Flip_Solver{
 private:
   Inverse_Base & inverter; 				//!< Inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference
-  VectorXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
+  MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
   MatrixXr B;						//!< Matrix Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t 
   MatrixXr Lambda;   					//!< I - B
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not

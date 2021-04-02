@@ -227,12 +227,16 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(type == "permutational"){
-    if(test == "one-at-the-time")
-      stop("one-at-the-time tests are not implemented in the permutational case")
-    if(dim(coeff)[1]!=dim)
-      stop("linear combinations are not allowed in the permutational case")
-    if(sum(coeff==diag(1, nrow=dim, ncol=dim))!=dim^2)
-      stop("linear combinations are not allowed in the permutational case")
+    for(i in 1:dim(coeff)[1]){
+      count=0
+      for(j in 1:dim(coeff)[2]){
+        if(coeff[i,j]!= 0|| coeff[i,j]!=1)
+          stop("linear combinations are not allowed in the permutational case")
+        count = count + coeff[i,j]
+      }
+      if(count != 1)
+        stop("linear combinations are not allowed in the permutational case")
+    }
   }
   
   if(is.null(beta0)) beta0=0 #won't be used anyway                              # If beta0 is still NULL here, no test is required, and this parameter is not considered. Set to zero in order to compel with the dataInferenceObject class.
