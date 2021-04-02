@@ -116,3 +116,18 @@ void Eigen_Sign_Flip_Solver<InputHandler>::print_for_debug(void) const {
   int aaaa=1;
   return;
 };
+
+// Da spostare in utility E CONSISTENZA DA AGGIUNGERE
+bool operator > (VectorXr v, VectorXr u){
+  q=v.size();
+  if(u.size!=q){
+    Rprinf("Errore: dimensioni non combacianao");
+    return false;
+  }
+  for (UInt i=0; i< q; i++){
+    if(fabs(v(i))<=fabs(u(i))){
+      return false;
+    }
+  }
+  return true;
+};

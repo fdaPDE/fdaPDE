@@ -42,6 +42,7 @@ public:
   void print_for_debug(void) const;
 };
 
+bool operator > (VectorXr v, VectorXr u);
 
 #include "Eigen_Sign_Flip_Solver_imp.h"
 
