@@ -129,7 +129,7 @@ else{
   for(unsigned long int i=0;i<n_perm;i++){
     for(unsigned long int j=0;j<TildeX.cols();j++){
       UInt flip=2*distr(eng)-1;
-      Tilder_perm.col(j)=Tilder.col(j)*flip;
+      Tilder_perm.row(j)=Tilder.row(j)*flip;
     }
     stat_perm=TildeX*Tilder_perm; // Flipped statistic
     
