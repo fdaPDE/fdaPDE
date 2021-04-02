@@ -31,7 +31,7 @@ private:
   VectorXr compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void);				//!< Method to compute the confidence intervals
   Real compute_sigma_hat_sq(void) const;                //!< Method to compute the estimator of the variance of the residuals 
-
+  
 public:
   // CONSTUCTOR
   Wald_Solver()=delete;	//The default constructor is deleted
@@ -41,7 +41,7 @@ public:
   inline const MatrixXr * getSp (void) const {return &this->S;}      //!< Getter of Sp \return Sp
   inline const MatrixXr * getS_tp (void) const {return &this->S_t;}  //!< Getter of Sp_tp \return Sp_tp
   inline const MatrixXr * getVp (void) const {return &this->V;}      //!< Getter of Vp \ return Vp
-
+  
   //!< public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);
   void print_for_debug(void) const;

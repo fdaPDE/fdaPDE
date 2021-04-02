@@ -34,38 +34,22 @@ void Wald_Solver<InputHandler>::compute_S(void){
   S_t.resize(n_obs, n_obs);
   S_t = this->S.transpose();
   is_S_computed = true;
-  // For Debug Only
-  Rprintf("S computed: %d \n", is_S_computed); 
   
-  if(is_S_computed==true){
-    Rprintf("Matrix Smoothing S is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
-    }
-    Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
-    } 
-  }
   return; 
 };
 
 template<typename InputHandler> 
 Real Wald_Solver<InputHandler>::compute_sigma_hat_sq(void) const {
- VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
- Real SS_res = eps_hat.squaredNorm();
- 
-Rprintf( "SS_res is: \n");
- Rprintf( "%f", SS_res);
- 
-UInt n = inf_car.getN_obs();
- UInt p = inf_car.getp();
- Real tr_S = this->S.trace();
- Real sigma_hat_sq = SS_res/(n - (p + tr_S));
- 
- Rprintf( "sigma_hat_sq is: \n");
- Rprintf( "%f", sigma_hat_sq);
- return sigma_hat_sq; 
+  VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
+  Real SS_res = eps_hat.squaredNorm();
+  
+  UInt n = inf_car.getN_obs();
+  UInt p = inf_car.getp();
+  Real tr_S = this->S.trace();
+  Real sigma_hat_sq = SS_res/(n - (p + tr_S));
+  
+  
+  return sigma_hat_sq; 
 };
 
 template<typename InputHandler> 
@@ -82,20 +66,10 @@ void Wald_Solver<InputHandler>::compute_V(){
   
   V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
-  //For debug only
-  Rprintf("V computed: %d \n" , is_V_computed); 
   
-  if(is_V_computed==true){
-    Rprintf( "Matrix variance V is: \n");
-    for(UInt i=0; i < V.rows(); ++i){
-      for(UInt j=0; j < V.cols(); ++j){
-	Rprintf(" %f",V(i,j));
-      }
-    }
-  }
   return;
 };
-  
+
 template<typename InputHandler> 
 VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
   // declare the vector that will store the p-values
@@ -151,18 +125,13 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
     VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
     
     // compute S and V if needed
-      if(!is_S_computed){
-        compute_S();
-      }
+    if(!is_S_computed){
+      compute_S();
+    }
       if(!is_V_computed){
         compute_V();
       }
       
-
-      /* // FOR DEBUG TEMPORARY
-      this->print_for_debug();
-      inverter.print_for_debug(); */
-
       // for each row of C matrix
       for(UInt i=0; i<q; ++i){
 	VectorXr col = C.row(i);
@@ -186,7 +155,7 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
-
+  
   // get the estimates of the parameters
   VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
   
@@ -233,7 +202,7 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
     // compute the standard deviation of the linear combination and half range of the interval
     Real sd_comb = std::sqrt(col.adjoint()*V*col);
     Real half_range=sd_comb*quant;
-
+    
     // compute the limits of the interval
     result(i)(0) = result(i)(1) - half_range; 
     result(i)(2) = result(i)(1) + half_range; 	
@@ -276,18 +245,18 @@ MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
 
 template<typename InputHandler>
 void Wald_Solver<InputHandler>::print_for_debug(void) const {
-
+  
   Rprintf("S computed: %d \n", is_S_computed); 
   
   if(is_S_computed==true){
     Rprintf("Matrix Smoothing S is (only some samples): \n");
-  for (UInt i=0; i<10; i++){
+    for (UInt i=0; i<10; i++){
     Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
-  }
-  Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
-  for (UInt i=0; i<10; i++){
-    Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
-  } 
+    }
+    Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
+    } 
   }
   
   Rprintf("V computed: %d \n" , is_V_computed); 

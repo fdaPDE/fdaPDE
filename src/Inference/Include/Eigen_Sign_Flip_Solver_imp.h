@@ -26,21 +26,13 @@ void Eigen_Sign_Flip_Solver<InputHandler>::compute_Lambda(void){
   
   Lambda = (MatrixXr::Identity(B.rows(),B.cols()) - B);
   is_Lambda_computed = true;
-  // For Debug Only
-  Rprintf("Lambda computed: %d \n", is_Lambda_computed); 
   
-  if(is_Lambda_computed==true){
-    Rprintf("Matrix Lambda is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "Lambda( %d, %d):  %f \n", 10*i, 20*i, Lambda(10*i,20*i));
-    }
-  }
   return; 
 };
 
 template<typename InputHandler> 
 VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
-   
+  
   // extract matrix C  
   MatrixXr C = inf_car.getInfData()->get_coeff_inference();
   MatrixXr C_t = C.transpose();
@@ -69,82 +61,82 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   
   // simultaneous test
   if(inf_car.getInfData()->get_test_type() == "simultaneous"){
-  
-  // compute the partial residuals
-  Partial_res_H0 = *(inf_car.getZp()) - (*W) * (C_t) * (beta_0);
-  
-  // compute the vectors needed for the statistic
-  MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-  VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        // V^t * partial_res_H0
-  
-  // Observed statistic
-  VectorXr stat=TildeX*Tilder;
-  VectorXr stat_perm=stat;
-  std::default_random_engine eng;
-  std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-  Real count=0;
-  VectorXr Pi; // Sign flip matrix preallocation
-  Pi.resize(TildeX.cols());
-  VectorXr Tilder_perm=Tilder;
-  
-  
-  
-  for(unsigned long int i=0;i<n_perm;i++){
-    for(unsigned long int j=0;j<TildeX.cols();j++){
-      UInt flip=2*distr(eng)-1;
-      Tilder_perm(j)=Tilder(j)*flip;
-    }
-    stat_perm=TildeX*Tilder_perm; // Flipped statistic
-    if(stat_perm > stat){ ++count; } 
-  }
-  
-
-  Real pval = count/n_perm;
-
-  result.resize(1);
-  result(0) = pval;
-}
-else{
-
-  // one-at-the-time tests
-  
-  Partial_res_H0.resize(Lambda.cols(), q);
-  for(UInt i=0; i<q; ++i){
-  // compute the partial residuals
-  Partial_res_H0.col(i) = *(inf_car.getZp()) - (*W) * (C_t.col(i)) * (beta_0);
-  }
-  // compute the vectors needed for the statistic
-  MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-  MatrixXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        // V^t * partial_res_H0
-  
-  // Observed statistic
-  MatrixXr stat=TildeX*Tilder;
-  MatrixXr stat_perm=stat;
-  std::default_random_engine eng;
-  std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-  VectorXr count = VectorXr::Zero(q);
-  
-  MatrixXr Tilder_perm=Tilder;
     
-  for(unsigned long int i=0;i<n_perm;i++){
-    for(unsigned long int j=0;j<TildeX.cols();j++){
-      UInt flip=2*distr(eng)-1;
-      Tilder_perm.row(j)=Tilder.row(j)*flip;
-    }
-    stat_perm=TildeX*Tilder_perm; // Flipped statistic
+    // compute the partial residuals
+    Partial_res_H0 = *(inf_car.getZp()) - (*W) * (C_t) * (beta_0);
     
-    for(UInt k=0; k<q; ++k){
-      if(fabs(stat_perm(k,k)) > fabs(stat(k,k))){
-         ++count(k);
-       } 
-    } 
+    // compute the vectors needed for the statistic
+    MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
+    VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        // V^t * partial_res_H0
+    
+    // Observed statistic
+    VectorXr stat=TildeX*Tilder;
+    VectorXr stat_perm=stat;
+    std::default_random_engine eng;
+    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+    Real count=0;
+    VectorXr Pi; // Sign flip matrix preallocation
+    Pi.resize(TildeX.cols());
+    VectorXr Tilder_perm=Tilder;
+    
+    
+    
+    for(unsigned long int i=0;i<n_perm;i++){
+      for(unsigned long int j=0;j<TildeX.cols();j++){
+	UInt flip=2*distr(eng)-1;
+	Tilder_perm(j)=Tilder(j)*flip;
+      }
+      stat_perm=TildeX*Tilder_perm; // Flipped statistic
+      if(stat_perm > stat){ ++count; } 
+    }
+    
+    
+    Real pval = count/n_perm;
+    
+    result.resize(1);
+    result(0) = pval;
   }
-  
-  VectorXr pval = count/n_perm;
-
-  result.resize(q);
-  result = pval;
-} 
+  else{
+    
+    // one-at-the-time tests
+    
+    Partial_res_H0.resize(Lambda.cols(), q);
+    for(UInt i=0; i<q; ++i){
+      // compute the partial residuals
+      Partial_res_H0.col(i) = *(inf_car.getZp()) - (*W) * (C_t.col(i)) * (beta_0);
+    }
+    // compute the vectors needed for the statistic
+    MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
+    MatrixXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        // V^t * partial_res_H0
+    
+    // Observed statistic
+    MatrixXr stat=TildeX*Tilder;
+    MatrixXr stat_perm=stat;
+    std::default_random_engine eng;
+    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+    VectorXr count = VectorXr::Zero(q);
+    
+    MatrixXr Tilder_perm=Tilder;
+    
+    for(unsigned long int i=0;i<n_perm;i++){
+      for(unsigned long int j=0;j<TildeX.cols();j++){
+	UInt flip=2*distr(eng)-1;
+	Tilder_perm.row(j)=Tilder.row(j)*flip;
+      }
+      stat_perm=TildeX*Tilder_perm; // Flipped statistic
+      
+      for(UInt k=0; k<q; ++k){
+	if(fabs(stat_perm(k,k)) > fabs(stat(k,k))){
+	  ++count(k);
+	} 
+      } 
+    }
+    
+    VectorXr pval = count/n_perm;
+    
+    result.resize(q);
+    result = pval;
+  } 
   return result;
   
 };

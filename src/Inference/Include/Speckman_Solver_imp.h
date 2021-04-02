@@ -25,15 +25,7 @@ void Speckman_Solver<InputHandler>::compute_Lambda2(void){
   
   Lambda2 = (MatrixXr::Identity(B.rows(),B.cols()) - B)*(MatrixXr::Identity(B.rows(),B.cols()) - B);
   is_Lambda2_computed = true;
-  // For Debug Only
-  Rprintf("Lambda2 computed: %d \n", is_Lambda2_computed); 
   
-  if(is_Lambda2_computed==true){
-    Rprintf("Matrix Lambda2 is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "Lambda2( %d, %d):  %f \n", 10*i, 20*i, Lambda2(10*i,20*i));
-    }
-  }
   return; 
 };
 
@@ -44,11 +36,6 @@ void Speckman_Solver<InputHandler>::compute_V(){
   // build squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
   
-  Rprintf("Vector Res2 is (only some samples): \n");
-  for (UInt i=0; i<10; i++){
-    Rprintf( "Res2( %d):  %f \n", 10*i, Res2(10*i));
-  }
-  
   // resize the variance-covariance matrix
   UInt p = inf_car.getp();
   V.resize(p,p);
@@ -58,27 +45,9 @@ void Speckman_Solver<InputHandler>::compute_V(){
   
   MatrixXr diag = Res2.asDiagonal();
   
-  Rprintf("Vector diag is (only some samples): \n");
-  for (UInt i=0; i<10; i++){
-    Rprintf( "diag( %d, %d):  %f \n", 10*i, 10*i, diag(10*i, 10*i));
-  }
-  Rprintf("diag( %d, %d):  %f \n", 10, 20, diag(10, 20));
-  
-  
-  
   V = (WLW_dec).solve((W_t)*Lambda2*Res2.asDiagonal()*Lambda2*(*W)*(WLW_dec).solve(MatrixXr::Identity(p,p)));
   is_V_computed = true;
-  //For debug only
-  Rprintf("V computed: %d \n" , is_V_computed); 
   
-  if(is_V_computed==true){
-    Rprintf( "Matrix variance V is: \n");
-    for(UInt i=0; i < V.rows(); ++i){
-      for(UInt j=0; j < V.cols(); ++j){
-	Rprintf(" %f",V(i,j));
-      }
-    }
-  }
   return;
 };
 
@@ -164,11 +133,6 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
     VectorXr beta_hat = compute_beta_hat(); 
-    
-    Rprintf("Vector beta_hat: \n");
-    for (UInt i=0; i<beta_hat.size(); i++){
-      Rprintf( "beta_hat( %d):  %f \n", i, beta_hat(i));
-    }
     
     // compute Lambda2 and V if needed
     if(!is_Lambda2_computed){
