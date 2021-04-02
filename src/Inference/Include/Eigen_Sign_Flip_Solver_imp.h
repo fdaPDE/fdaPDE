@@ -103,7 +103,7 @@ MatrixXv Eigen_Sign_Flip_Solver<InputHandler>::compute_inference_output(void){
   // declare the result Matrix of vectors to be returned
   MatrixXv result;
   
-  // prepare the space for the output (just one-at-the-time p_value case)
+  // prepare the space for the output (just simultaneous p_value case)
   result.resize(1,1);
   result(0) = compute_pvalue(); 
   return result;
@@ -117,17 +117,4 @@ void Eigen_Sign_Flip_Solver<InputHandler>::print_for_debug(void) const {
   return;
 };
 
-// Da spostare in utility E CONSISTENZA DA AGGIUNGERE
-bool operator > (VectorXr v, VectorXr u){
-  q=v.size();
-  if(u.size!=q){
-    Rprinf("Errore: dimensioni non combacianao");
-    return false;
-  }
-  for (UInt i=0; i< q; i++){
-    if(fabs(v(i))<=fabs(u(i))){
-      return false;
-    }
-  }
-  return true;
-};
+

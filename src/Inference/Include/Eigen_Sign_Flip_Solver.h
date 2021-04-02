@@ -42,8 +42,19 @@ public:
   void print_for_debug(void) const;
 };
 
-bool operator > (VectorXr v, VectorXr u);
-
+inline bool operator > (VectorXr v, VectorXr u){
+  UInt q=v.size();
+  if(u.size()!=q){
+    Rprintf("Errore: dimensioni non combaciano");
+    return false;
+  }
+  for (UInt i=0; i< q; i++){
+    if(fabs(v(i))<=fabs(u(i))){
+      return false;
+    }
+  }
+  return true;
+};
 #include "Eigen_Sign_Flip_Solver_imp.h"
 
 #endif
