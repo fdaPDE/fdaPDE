@@ -134,7 +134,7 @@ else{
     stat_perm=TildeX*Tilder_perm; // Flipped statistic
     
     for(UInt k=0; k<q; ++k){
-      if(fabs(stat_perm(k,k) > fabs(stat(k,k)){
+      if(fabs(stat_perm(k,k)) > fabs(stat(k,k))){
          ++count(k);
        } 
     } 

@@ -230,7 +230,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     for(i in 1:dim(coeff)[1]){
       count=0
       for(j in 1:dim(coeff)[2]){
-        if(coeff[i,j]!= 0|| coeff[i,j]!=1)
+        if(coeff[i,j]!= 0 && coeff[i,j]!=1)
           stop("linear combinations are not allowed in the permutational case")
         count = count + coeff[i,j]
       }
