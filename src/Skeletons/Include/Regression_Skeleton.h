@@ -43,6 +43,15 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			Carrier<InputHandler,Forced,Areal>
 				carrier = CarrierBuilder<InputHandler>::build_forced_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler, Forced,Areal>>(carrier);
+                        
+                          if(inferenceData.get_definition()==true){
+                          Real lambda_inference; 
+                          if(optimizationData.get_criterion()!="unused")
+                             lambda_inference = solution_bricks.second.lambda_sol;
+                          else
+                             lambda_inference = solution_bricks.second.lambda_vec[solution_bricks.second.lambda_pos];
+                          regression.build_regression_inference(lambda_inference); //to be defined in Mixed_FE_Regression.h as public member that calls buildsystemMatrix(lambda)
+                        }
 		}
 		else
 		{
@@ -50,6 +59,15 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			Carrier<InputHandler,Forced>
 				carrier = CarrierBuilder<InputHandler>::build_forced_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Forced>>(carrier);
+
+                          if(inferenceData.get_definition()==true){
+                          Real lambda_inference; 
+                          if(optimizationData.get_criterion()!="unused")
+                             lambda_inference = solution_bricks.second.lambda_sol;
+                          else
+                             lambda_inference = solution_bricks.second.lambda_vec[solution_bricks.second.lambda_pos];
+                          regression.build_regression_inference(lambda_inference); //to be defined in Mixed_FE_Regression.h as public member that calls buildsystemMatrix(lambda)
+                        }
 		}
 	}
 	else
@@ -60,6 +78,15 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			Carrier<InputHandler,Areal>
 				carrier = CarrierBuilder<InputHandler>::build_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Areal>>(carrier);
+
+                          if(inferenceData.get_definition()==true){
+                          Real lambda_inference; 
+                          if(optimizationData.get_criterion()!="unused")
+                             lambda_inference = solution_bricks.second.lambda_sol;
+                          else
+                             lambda_inference = solution_bricks.second.lambda_vec[solution_bricks.second.lambda_pos];
+                          regression.build_regression_inference(lambda_inference); //to be defined in Mixed_FE_Regression.h as public member that calls buildsystemMatrix(lambda)
+                        }
 		}
 		else
 		{
@@ -67,6 +94,15 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			Carrier<InputHandler>
 				carrier = CarrierBuilder<InputHandler>::build_plain_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler>>(carrier);
+
+                          if(inferenceData.get_definition()==true){
+                          Real lambda_inference; 
+                          if(optimizationData.get_criterion()!="unused")
+                             lambda_inference = solution_bricks.second.lambda_sol;
+                          else
+                             lambda_inference = solution_bricks.second.lambda_vec[solution_bricks.second.lambda_pos];
+                          regression.build_regression_inference(lambda_inference); //to be defined in Mixed_FE_Regression.h as public member that calls buildsystemMatrix(lambda)
+                        }
 				
 		}
 
