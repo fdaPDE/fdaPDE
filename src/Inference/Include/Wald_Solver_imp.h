@@ -10,24 +10,24 @@ using namespace boost::math;
 template<typename InputHandler> 
 void Wald_Solver<InputHandler>::compute_S(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  inverter.Compute_Inv(inf_car.getE_decp(), inf_car.getEp());
+  this->inverter.Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;
-  M_inv.resize(inverter.getInv(inf_car.getE_decp(), inf_car.getEp())->rows(), inverter.getInv(inf_car.getE_decp(), inf_car.getEp())->cols());
-  const MatrixXr * E_inv = inverter.getInv(inf_car.getE_decp(), inf_car.getEp());
-  const MatrixXr * U = inf_car.getUp();
-  const MatrixXr * V = inf_car.getVp();
-  const Eigen::PartialPivLU<MatrixXr> * G_decp = inf_car.getG_decp();
+  M_inv.resize(this->inverter.getInv(this->inf_car.getE_decp(), this->inf_car.getEp())->rows(), this->inverter.getInv(this->inf_car.getE_decp(), this->inf_car.getEp())->cols());
+  const MatrixXr * E_inv = this->inverter.getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
+  const MatrixXr * U = this->inf_car.getUp();
+  const MatrixXr * V = this->inf_car.getVp();
+  const Eigen::PartialPivLU<MatrixXr> * G_decp = this->inf_car.getG_decp();
   
   M_inv = *E_inv - (*E_inv)*(*U)*((*G_decp).solve((*V)*(*E_inv)));
   
-  UInt n_obs = inf_car.getN_obs();
-  UInt n_nodes = inf_car.getN_nodes();
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
   S.resize(n_obs, n_obs);
-  const SpMat * Psi = inf_car.getPsip();
-  const SpMat * Psi_t = inf_car.getPsi_tp();
-  UInt p = inf_car.getp(); 
-  MatrixXr Q = MatrixXr::Identity(p, p) - *(inf_car.getHp()); 
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  UInt p = this->inf_car.getp(); 
+  MatrixXr Q = MatrixXr::Identity(p, p) - *(this->inf_car.getHp()); 
   
   S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
   
@@ -40,11 +40,11 @@ void Wald_Solver<InputHandler>::compute_S(void){
 
 template<typename InputHandler> 
 Real Wald_Solver<InputHandler>::compute_sigma_hat_sq(void) const {
-  VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
   Real SS_res = eps_hat.squaredNorm();
   
-  UInt n = inf_car.getN_obs();
-  UInt p = inf_car.getp();
+  UInt n = this->inf_car.getN_obs();
+  UInt p = this->inf_car.getp();
   Real tr_S = this->S.trace();
   Real sigma_hat_sq = SS_res/(n - (p + tr_S));
   
@@ -57,12 +57,12 @@ void Wald_Solver<InputHandler>::compute_V(){
   // get the variance of the residuals estimators from the inference carrier
   const Real var_res = compute_sigma_hat_sq();
   // resize the variance-covariance matrix
-  UInt p = inf_car.getp();
+  UInt p = this->inf_car.getp();
   V.resize(p,p);
   
-  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
-  const Eigen::PartialPivLU<MatrixXr> * WtW_decp = inf_car.getWtW_decp();
+  const Eigen::PartialPivLU<MatrixXr> * WtW_decp = this->inf_car.getWtW_decp();
   
   V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
@@ -76,14 +76,14 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
   VectorXr result;
   
   // simultaneous test
-  if(inf_car.getInfData()->get_test_type() == "simultaneous"){
+  if(this->inf_car.getInfData()->get_test_type() == "simultaneous"){
     // get the matrix of coefficients for the test
-    MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+    MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
     MatrixXr C_t = C.transpose();
     // get the value of the parameters under the null hypothesis
-    VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
+    VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
     
@@ -116,13 +116,13 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
   // one-at-the-time tests
   else{
     // get the matrix of coefficients for the tests
-    MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+    MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
     Real q = C.rows();
     result.resize(q);
     // get the value of the parameters under the null hypothesis
-    VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
+    VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
     
     // compute S and V if needed
     if(!is_S_computed){
@@ -154,13 +154,13 @@ template<typename InputHandler>
 MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
-  MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   
   // get the estimates of the parameters
-  VectorXr beta_hat = (*(inf_car.getBeta_hatp()))(0);
+  VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
   
   // declare the matrix that will store the p-values
-  Real alpha=inf_car.getInfData()->get_inference_level();
+  Real alpha=this->inf_car.getInfData()->get_inference_level();
   Real quant=0;
   UInt q=C.rows();
   MatrixXv result;
@@ -168,13 +168,13 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   
   
   // simultaneous confidence interval (overall confidence aplha)
-  if(inf_car.getInfData()->get_interval_type() == "simultaneous"){
+  if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
     chi_squared distribution(q);
     quant =std::sqrt(quantile(complement(distribution,alpha)));
   }
   else{
     // one-at-the-time confidence intervals (each interval has confidence alpha)
-    if(inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
+    if(this->inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
       normal distribution(0,1);
       quant = quantile(complement(distribution,alpha/2));
     }
@@ -209,37 +209,6 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
   }
   
   return result;
-};
-
-
-template<typename InputHandler>
-MatrixXv Wald_Solver<InputHandler>::compute_inference_output(void){
-  // declare the result Matrix of vectors to be returned
-  MatrixXv result;
-  
-  // get the test_type and interval_type
-  std::string test_type = inf_car.getInfData()->get_test_type();
-  std::string interval_type = inf_car.getInfData()->get_interval_type();
-  
-  // if test_type is not defined, only intervals are required
-  if(test_type == "not-defined"){
-    result = compute_CI();
-    return result;
-  }
-  // if interval_type is not defined, only test is required
-  if(interval_type == "not-defined"){
-    result.resize(1,1);
-    result(0) = compute_pvalue(); 
-    return result;
-  }
-  // else, both are required
-  else{
-    UInt q = inf_car.getInfData()->get_coeff_inference().rows();
-    result.resize(1, q+1);
-    result(0) = compute_pvalue();
-    result.rightCols(q) = compute_CI();
-    return result;
-  }
 };
 
 

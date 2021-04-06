@@ -5,16 +5,16 @@
 template<typename InputHandler> 
 void Eigen_Sign_Flip_Solver<InputHandler>::compute_Lambda(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  inverter.Compute_Inv(inf_car.getE_decp(), inf_car.getEp());
+  this->inverter.Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // extract the inverse of E
-  const MatrixXr * E_inv = inverter.getInv(inf_car.getE_decp(), inf_car.getEp());
+  const MatrixXr * E_inv = this->inverter.getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
   
-  UInt n_obs = inf_car.getN_obs();
-  UInt n_nodes = inf_car.getN_nodes();
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
   B.resize(n_obs, n_obs);
-  const SpMat * Psi = inf_car.getPsip();
-  const SpMat * Psi_t = inf_car.getPsi_tp();
-  UInt p = inf_car.getp(); 
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  UInt p = this->inf_car.getp(); 
   
   B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
   
@@ -28,7 +28,7 @@ template<typename InputHandler>
 VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   
   // extract matrix C  
-  MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   MatrixXr C_t = C.transpose();
   UInt q = C.rows(); 
   
@@ -36,10 +36,10 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   VectorXr result;
   
   // get the number of permutations
-  unsigned long int n_perm=inf_car.getInfData()->get_n_perm();
+  unsigned long int n_perm=this->inf_car.getInfData()->get_n_perm();
   
   // get the value of the parameters under the null hypothesis
-  VectorXr beta_0 = inf_car.getInfData()->get_beta_0(); 
+  VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0(); 
   
   // compute Lambda
   if(!is_Lambda_computed){
@@ -50,14 +50,14 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   Eigen::SelfAdjointEigenSolver<MatrixXr> Lambda_dec(Lambda);
   
   // extract covariates matrices
-  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   
   // simultaneous test
-  if(inf_car.getInfData()->get_test_type() == "simultaneous"){
+  if(this->inf_car.getInfData()->get_test_type() == "simultaneous"){
     
     // compute the partial residuals
-    Partial_res_H0 = *(inf_car.getZp()) - (*W) * (C_t) * (beta_0);
+    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C_t) * (beta_0);
     
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
@@ -97,7 +97,7 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
     Partial_res_H0.resize(Lambda.cols(), q);
     for(UInt i=0; i<q; ++i){
       // compute the partial residuals
-      Partial_res_H0.col(i) = *(inf_car.getZp()) - (*W) * (C_t.col(i)) * (beta_0);
+      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (C_t.col(i)) * (beta_0);
     }
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D

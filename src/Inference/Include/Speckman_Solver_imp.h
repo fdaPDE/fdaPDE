@@ -10,16 +10,16 @@ using namespace boost::math;
 template<typename InputHandler> 
 void Speckman_Solver<InputHandler>::compute_Lambda2(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  inverter.Compute_Inv(inf_car.getE_decp(), inf_car.getEp());
+  this->inverter.Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // extract the inverse of E
-  const MatrixXr * E_inv = inverter.getInv(inf_car.getE_decp(), inf_car.getEp());
+  const MatrixXr * E_inv = this->inverter.getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
   
-  UInt n_obs = inf_car.getN_obs();
-  UInt n_nodes = inf_car.getN_nodes();
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
   B.resize(n_obs, n_obs);
-  const SpMat * Psi = inf_car.getPsip();
-  const SpMat * Psi_t = inf_car.getPsi_tp();
-  UInt p = inf_car.getp(); 
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  UInt p = this->inf_car.getp(); 
   
   B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
   
@@ -32,15 +32,15 @@ void Speckman_Solver<InputHandler>::compute_Lambda2(void){
 template<typename InputHandler> 
 void Speckman_Solver<InputHandler>::compute_V(){
   // get the residuals needed
-  VectorXr eps_hat = (*inf_car.getZp()) - (*inf_car.getZ_hatp());
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
   // build squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
   
   // resize the variance-covariance matrix
-  UInt p = inf_car.getp();
+  UInt p = this->inf_car.getp();
   V.resize(p,p);
   
-  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   
   MatrixXr diag = Res2.asDiagonal();
@@ -58,7 +58,7 @@ void Speckman_Solver<InputHandler>::compute_WLW_dec(void){
   }
   
   // compute the decomposition of W^T*Lambda^2*W
-  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   
   WLW_dec.compute(W_t*Lambda2*(*W));
@@ -70,10 +70,10 @@ VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
   if(!is_WLW_computed){
     compute_WLW_dec();
   }
-  const MatrixXr * W = inf_car.getWp();
+  const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   
-  VectorXr beta = WLW_dec.solve(W_t*Lambda2*(*inf_car.getZp()));
+  VectorXr beta = WLW_dec.solve(W_t*Lambda2*(*(this->inf_car.getZp())));
   
   return beta; 
   
@@ -85,12 +85,12 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
   VectorXr result;
   
   // simultaneous test
-  if(inf_car.getInfData()->get_test_type() == "simultaneous"){
+  if(this->inf_car.getInfData()->get_test_type() == "simultaneous"){
     // get the matrix of coefficients for the test
-    MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+    MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
     MatrixXr C_t = C.transpose();
     // get the value of the parameters under the null hypothesis
-    VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
+    VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
     VectorXr beta_hat = compute_beta_hat();
     // compute the difference
@@ -125,12 +125,12 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
   // one-at-the-time tests
   else{
     // get the matrix of coefficients for the tests
-    MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+    MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
     Real q = C.rows();
     result.resize(q);
     
     // get the value of the parameters under the null hypothesis
-    VectorXr beta_0 = inf_car.getInfData()->get_beta_0();
+    VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
     VectorXr beta_hat = compute_beta_hat(); 
     
@@ -169,13 +169,13 @@ template<typename InputHandler>
 MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
-  MatrixXr C = inf_car.getInfData()->get_coeff_inference();
+  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   
   // get the estimates of the parameters
   VectorXr beta_hat = compute_beta_hat();
   
   // declare the matrix that will store the p-values
-  Real alpha=inf_car.getInfData()->get_inference_level();
+  Real alpha=this->inf_car.getInfData()->get_inference_level();
   Real quant=0;
   UInt q=C.rows();
   MatrixXv result;
@@ -183,13 +183,13 @@ MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
   
   
   // simultaneous confidence interval (overall confidence aplha)
-  if(inf_car.getInfData()->get_interval_type() == "simultaneous"){
+  if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
     chi_squared distribution(q);
     quant =std::sqrt(quantile(complement(distribution,alpha)));
   }
   else{
     // one-at-the-time confidence intervals (each interval has confidence alpha)
-    if(inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
+    if(this->inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
       normal distribution(0,1);
       quant = quantile(complement(distribution,alpha/2));
     }

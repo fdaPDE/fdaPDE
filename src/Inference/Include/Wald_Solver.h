@@ -18,7 +18,7 @@
   This class performes hypothesis testing and/or computes confidence intervals using a Wald-type approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
 template<typename InputHandler>
-class Wald_Solver:public Solver_Base<InputHanlder>{
+class Wald_Solver:public Solver_Base<InputHandler>{
 private:
   MatrixXr S;						//!< Smoothing matrix 
   MatrixXr S_t;   					//!< Transpose of the smoothing matrix
