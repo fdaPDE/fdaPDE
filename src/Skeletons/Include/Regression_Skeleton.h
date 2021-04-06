@@ -44,7 +44,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_forced_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler, Forced,Areal>>(carrier);
                         
-                          if(inferenceData.get_definition()==true && optimizationData.get_criterion()!="unused"){
+                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
                              regression.build_regression_inference(lambda_inference);
                         }
@@ -56,7 +56,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_forced_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Forced>>(carrier);
 
-                          if(inferenceData.get_definition()==true && optimizationData.get_criterion()!="unused"){
+                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
                              regression.build_regression_inference(lambda_inference);
                         }
@@ -71,7 +71,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Areal>>(carrier);
 
-                          if(inferenceData.get_definition()==true && optimizationData.get_criterion()!="unused"){
+                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
                              regression.build_regression_inference(lambda_inference);
                         }
@@ -83,7 +83,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_plain_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler>>(carrier);
 
-                          if(inferenceData.get_definition()==true && optimizationData.get_criterion()!="unused"){
+                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
                              regression.build_regression_inference(lambda_inference);
                         }
