@@ -97,7 +97,7 @@ class Inference_Carrier{
 		inline UInt getp (void) const {return p;} 								//!< Getter of p \return p
 
 		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
-		inline UInt getOptimal_Position const {return optimal_position;}					//!< Getter of the optimal_position \return optimal_position
+		inline UInt getOptimal_Position(void) const {return optimal_position;}					//!< Getter of the optimal_position \return optimal_position
 		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
                 inline const Diffusion<PDEParameterOptions::Constant> * getKp (void) const {return Kp;} 	        //!< Getter of Kp \return Kp
 		inline const SpMat * getPsip (void) const {return Psip;} 						//!< Getter of Psip \return Psip
