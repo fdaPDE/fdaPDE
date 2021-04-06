@@ -10,6 +10,7 @@
 #include "Inference_Data.h"
 #include "Inference_Carrier.h"
 #include "Inverter.h"
+#include "Solver_Base.h"
 
 // *** Speckman_Solver Class ***
 //! Hypothesis testing and confidence intervals using Speckman implementation
@@ -17,10 +18,8 @@
   This class performes hypothesis testing and/or computes confidence intervals using a Speckman approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
 template<typename InputHandler>
-class Speckman_Solver{
+class Speckman_Solver:public Solver_Base<InputHandler>{
 private:
-  Inverse_Base & inverter; 				//!< Inverter object that computes the inverse of matrixNoCov in exact/non-exact way
-  const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   MatrixXr B;						//!< Matrix Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t 
   MatrixXr Lambda2;   					//!< (I - B)^2
   bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda^2 has been computed or not
@@ -32,21 +31,19 @@ private:
   void compute_V(void);					//!< Method used to compute V
   void compute_WLW_dec(void); 				//!< Method that computes the decomposition for WLW
   VectorXr compute_beta_hat(void);               	//!< Method used to compute beta estimates for the Speckman test
-  VectorXr compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
-  MatrixXv compute_CI(void);				//!< Method to compute the confidence intervals
+  VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
+  MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
   
 public:
   // CONSTUCTOR
   Speckman_Solver()=delete;	//The default constructor is deleted
-  Speckman_Solver(Inverse_Base & inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(inverter_), inf_car(inf_car_){}; 
+  Speckman_Solver(Inverse_Base & inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(inverter_, inf_car_){}; 
   
   // GETTERS
   inline const MatrixXr * getLambda2p (void) const {return &this->Lambda2;}     //!< Getter of Lambda2p \return Lambda2p
   inline const MatrixXr * getBp (void) const {return &this->B;}  		//!< Getter of Bp \return Bp
   inline const MatrixXr * getVp (void) const {return &this->V;}     	 	//!< Getter of Vp \ return Vp
   
-  //!< public method that calls the requested functions according to test_type and interval_type
-  MatrixXv compute_inference_output (void);
   void print_for_debug(void) const;
 };
 

@@ -50,17 +50,17 @@ data = DatiEsatti + rnorm(length(DatiEsatti), mean=0, sd=0.05*abs(ran[2]-ran[1])
 lambda = 10^seq(-3,3,by=0.25)
 
 
-#### Test 2.1.1: Without GCV, one-at-the-time tests, Wald-type, exact computation
+#### Test 2.1.1: grid with stochastic GCV, one-at-the-time tests, Wald-type, exact computation
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+                       FEMbasis=FEMbasis, lambda=lambda, lambda.selection.lossfunction = "GCV",
+                       R_Inference_Data_Object = R_inference_object
 )
 output_CPP$inference$p_vals
-output_CPP$optimization$lambda_vector
 
-#### Test 2.1.2: Without GCV, one-at-the-time tests, Speckman-type, exact computation
+#### Test 2.1.2: grid with stochastic GCV, one-at-the-time tests, Speckman-type, exact computation
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", exact = "True", type = "speckman", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
@@ -69,87 +69,87 @@ output_CPP<-smooth.FEM(locations = locations, observations=data,
 )
 output_CPP$inference$p_vals
 
-#### Test 2.1.3: Without GCV, one-at-the-time tests, Speckman-type, exact computation
+#### Test 2.1.3: grid with stochastic GCV, one-at-the-time tests, Permutational-type, exact computation
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", exact = "True", type = "permutational", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 output_CPP$inference$p_vals
 
-#### Test 2.2.1: Without GCV, simultaneous test, Wald-type, exact computation
+#### Test 2.2.1: grid with stochastic GCV, simultaneous test, Wald-type, exact computation
 R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$p_vals
 
-#### Test 2.2.2: Without GCV, simultaneous test, Wald-type, exact computation
+#### Test 2.2.2: grid with stochastic GCV, simultaneous test, Speckman-type, exact computation
 R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", exact = "True", type = "speckman", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$p_vals
 
-#### Test 2.2.3: Without GCV, simultaneous test, Wald-type, exact computation
+#### Test 2.2.3: grid with stochastic GCV, simultaneous test, Permutational-type, exact computation
 R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", exact = "True", type = "permutational", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$p_vals
 
-#### Test 2.3.1: Without GCV, one-at-the-time intervals, Wald-type, exact computation, default level
+#### Test 2.3.1: grid with stochastic GCV, one-at-the-time intervals, Wald-type, exact computation, default level
 R_inference_object = inferenceDataObjectBuilder(interval = "one-at-the-time", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$CI
 
-#### Test 2.3.2: Without GCV, one-at-the-time intervals, Wald-type, exact computation, default level
+#### Test 2.3.2: grid with stochastic GCV, one-at-the-time intervals, Speckman-type, exact computation, default level
 R_inference_object = inferenceDataObjectBuilder(interval = "one-at-the-time", exact = "True", type = "speckman", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$CI
 
 
-#### Test 2.4.1: Without GCV, simultaneous intervals, Wald-type, exact computation, custom level
+#### Test 2.4.1: grid with stochastic GCV, simultaneous intervals, Wald-type, exact computation, custom level
 R_inference_object = inferenceDataObjectBuilder(interval = "simultaneous", exact = "True", dim = 2, level = 0.1)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$CI
 
-#### Test 2.4.2: Without GCV, simultaneous intervals, Speckman-type, exact computation, custom level
+#### Test 2.4.2: grid with stochastic GCV, simultaneous intervals, Speckman-type, exact computation, custom level
 R_inference_object = inferenceDataObjectBuilder(interval = "simultaneous", exact = "True", type = "speckman" , dim = 2, level = 0.1)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$CI
 
-#### Test 2.5.1: Without GCV, one-at-the-time tests, one-at-the-time intervals, Wald-type, exact computation, default level
+#### Test 2.5.1: grid with stochastic GCV, one-at-the-time tests, one-at-the-time intervals, Wald-type, exact computation, default level
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
@@ -160,7 +160,7 @@ output_CPP<-smooth.FEM(locations = locations, observations=data,
 output_CPP$inference$p_vals
 output_CPP$inference$CI
 
-#### Test 2.5.2: Without GCV, one-at-the-time tests, one-at-the-time intervals, Speckman-type, exact computation, default level
+#### Test 2.5.2: grid with stochastic GCV, one-at-the-time tests, one-at-the-time intervals, Speckman-type, exact computation, default level
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", type = "speckman", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 

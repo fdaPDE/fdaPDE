@@ -1,12 +1,6 @@
 #include "Eigen_Sign_Flip_Solver.h"
-#include <boost/math/distributions/chi_squared.hpp>
-#include <boost/math/distributions/normal.hpp>
 #include <cmath>
 #include <random>
-
-using boost::math::chi_squared;
-using boost::math::normal;
-using namespace boost::math; 
 
 template<typename InputHandler> 
 void Eigen_Sign_Flip_Solver<InputHandler>::compute_Lambda(void){
@@ -142,13 +136,11 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
 };
 
 template<typename InputHandler>
-MatrixXv Eigen_Sign_Flip_Solver<InputHandler>::compute_inference_output(void){
-  // declare the result Matrix of vectors to be returned
+MatrixXv Eigen_Sign_Flip_Solver<InputHandler>::compute_CI(void){
   MatrixXv result;
-  
-  // prepare the space for the output (just simultaneous p_value case)
-  result.resize(1,1);
-  result(0) = compute_pvalue(); 
+
+  // Not implemented yet //
+
   return result;
   
 };
