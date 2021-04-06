@@ -30,6 +30,7 @@ class Inference_Carrier{
 		UInt p;								        //!< Number of covariates
 
 		Real lambda=0; 								//!< Optimal smothing parameter
+		UInt optimal_position=0; 						//!< Position of the predicted values in the case of optimal lambda
   		const MatrixXr * Wp = nullptr;						//!< Pointer to the covariates matrix [size n_obs x n_covariates]
 		const Diffusion<PDEParameterOptions::Constant> * Kp = nullptr; 	        //!< Pointer to the nuisance matrix K [in the cases in which inference is allowed K is always a matrix]
 		const SpMat * Psip = nullptr; 						//!< Pointer to location-to-nodes matrix [size n_obs x n_nodes]	
@@ -61,6 +62,7 @@ class Inference_Carrier{
 		inline void setp (UInt p_){p = p_;}									//!< Setter of p \param p_ new p
 
 		inline void setLambda (Real lambda_){lambda = lambda_;}							//!< Setter of lambda \param lambda_ new lambda
+		inline void setOptimal_position(UInt optimal_position_){optimal_position_=optimal_position_;} 			//!< Setter of optima_position \param optimal_position_ new optimal_position
 		inline void setWp (const MatrixXr * Wp_){Wp = Wp_;}							//!< Setter of Wp \param Wp_ new Wp
 		inline void setKp (const Diffusion<PDEParameterOptions::Constant> & Kp_){Kp = &Kp_;}			//!< Setter of Kp \param Kp_ new Kp
 		inline void setPsip (const SpMat * Psip_){Psip = Psip_;}						//!< Setter of Psip \param Psip_ new Psip
@@ -95,6 +97,7 @@ class Inference_Carrier{
 		inline UInt getp (void) const {return p;} 								//!< Getter of p \return p
 
 		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
+		inline UInt getOptimal_Position const {return optimal_position;}					//!< Getter of the optimal_position \return optimal_position
 		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
                 inline const Diffusion<PDEParameterOptions::Constant> * getKp (void) const {return Kp;} 	        //!< Getter of Kp \return Kp
 		inline const SpMat * getPsip (void) const {return Psip;} 						//!< Getter of Psip \return Psip

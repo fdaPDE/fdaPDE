@@ -152,6 +152,8 @@ class MixedFERegressionBase
 		void computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method that set WTW flag to false, in order to recompute the matrix WTW.
 		inline void recomputeWTW(void){ this->isWTWfactorized_ = false;}
+		//! A method used to reset the system matrix to the value obtained for a given lambda (used for inference)
+		inline void build_regression_inference(Real lambda_inference_) {this->buildSystemMatrix(lambda_inference_); this->system_factorize();}; // Since inference is not implemente in time-varying case, up to now only one lambda value method is provided
 
 		// -- GETTERS --
 		//! A function returning the computed barycenters of the locationss

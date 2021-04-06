@@ -511,6 +511,13 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
   R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency
   
+  # Chek that GCV is set for inference
+  if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
+    warning("Inference is not defined when lambda grid is provided without GCV")
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
+                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1, n_perm = as.integer(1000), definition=as.integer(0))
+  }
+  
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying == FALSE)
   {

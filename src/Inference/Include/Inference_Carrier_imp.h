@@ -35,7 +35,11 @@ setE_decp(model_->getmatrixNoCovdec_());
 setG_decp(model_->getGdec_());
 
 //Setting from Output
-setLambda(out_regression_->lambda_sol);
+//setOptimal_position(out_regression_->solution_bricks.second.lambda_pos);
+if(optimizationData.get_criterion()!="unused")
+	setLambda(out_regression_->lambda_sol);
+else
+        setLambda(out_regression_->lambda_vec[solution_bricks.second.lambda_pos]);
 setBeta_hatp(&(out_regression_->betas));
 setZ_hatp(&(out_regression_->z_hat));
 
