@@ -153,7 +153,7 @@ output_CPP$inference$CI
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
@@ -164,42 +164,73 @@ output_CPP$inference$CI
 R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", type = "speckman", exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$p_vals
 output_CPP$inference$CI
 
-output_CPP$solution$beta
-output_CPP$optimization$lambda_position
-#### Test 2.6: Without GCV, one-at-the-time tests, one-at-the-time intervals, beta0, Wald-type, exact computation, default level
-R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", exact = "True", dim = 2, beta0 = c(1.9,-3.55))
+#### Test 2.6.1: grid with stochastic GCV, one-at-the-time tests, one-at-the-time intervals, beta0, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", exact = "True", dim = 2, beta0 = c(1.93,-0.8))
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$p_vals #we expect to accept H0 in this case
 output_CPP$inference$CI
 
-#### Test 2.7: Without GCV, simultaneous test, one-at-the-time intervals, linear combination, Wald-type, exact computation, default level
+#### Test 2.6.2: grid with stochastic GCV, one-at-the-time tests, one-at-the-time intervals, beta0, Speckman-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "one-at-the-time", type = "speckman", exact = "True", dim = 2, beta0 = c(1.93,-0.8))
+
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
+                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+)
+
+output_CPP$inference$p_vals #we expect to accept H0 in this case
+output_CPP$inference$CI
+
+#### Test 2.7.1: newton with exact GCV, simultaneous test, one-at-the-time intervals, linear combination, Wald-type, exact computation, default level
 R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", interval = "one-at-the-time", exact = "True", dim = 2, coeff = matrix(data = c(1,1,-1,1), nrow = 2, ncol = 2, byrow = T))
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.criterion = "newton", lambda.selection.lossfunction = "GCV",
+                       FEMbasis=FEMbasis, R_Inference_Data_Object = R_inference_object
+)
+
+output_CPP$inference$p_vals 
+output_CPP$inference$CI
+
+#### Test 2.7.2: newton_fd with exact GCV, simultaneous test, one-at-the-time intervals, linear combination, Speckman-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "simultaneous", interval = "one-at-the-time", type = "speckman", exact = "True", dim = 2, coeff = matrix(data = c(1,1,-1,1), nrow = 2, ncol = 2, byrow = T))
+
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2), lambda.selection.criterion = "newton", lambda.selection.lossfunction = "GCV",
+                       FEMbasis=FEMbasis, R_Inference_Data_Object = R_inference_object
+)
+
+output_CPP$inference$p_vals 
+output_CPP$inference$CI
+
+#### Test 2.8.1: grid with exacr GCV, one-at-the-time tests, bonferroni intervals, linear combination, beta0, Wald-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "bonferroni", exact = "True", dim = 2, coeff = matrix(data = c(1,1,-1,1), nrow = 2, ncol = 2, byrow = T), beta0 = c(1, -2.5))
+
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV", DOF.evaluation = "exact",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
 output_CPP$inference$p_vals 
 output_CPP$inference$CI
 
-#### Test 2.8: Without GCV, one-at-the-time tests, bonferroni intervals, linear combination, beta0, Wald-type, exact computation, default level
-R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "bonferroni", exact = "True", dim = 2, coeff = matrix(data = c(1,0,0,1), nrow = 2, ncol = 2, byrow = T), beta0 = c(1.9, -3.55))
+#### Test 2.8.2: grid with stochastic GCV, one-at-the-time tests, bonferroni intervals, linear combination, beta0, Speckman-type, exact computation, default level
+R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", interval = "bonferroni", type = "speckman", exact = "True", dim = 2, coeff = matrix(data = c(1,1,-1,1), nrow = 2, ncol = 2, byrow = T), beta0 = c(1, -2.5))
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
-                       covariates = cbind(cov1, cov2),
+                       covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
                        FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
 )
 
