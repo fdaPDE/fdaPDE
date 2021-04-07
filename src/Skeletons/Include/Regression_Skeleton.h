@@ -16,6 +16,7 @@
 #include "../../Inference/Include/Speckman_Solver.h"
 #include "../../Inference/Include/Eigen_Sign_Flip_Solver.h"
 #include "../../Inference/Include/Inverter_Factory.h"
+#include "../../Inference/Include/Inference_Solver_Factory.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 
@@ -97,19 +98,11 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
 
 		// Factory instantiation: using factory provided in Inverse_Factory.h
-		std::unique_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inferenceData.get_exact_inference()) // Select the right policy for inversion of MatrixNoCov
-		if(inferenceData.get_implementation_type()=="wald"){
-			Wald_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
-			inference_Output = inference_Solver.compute_inference_output();
-		}
-		if(inferenceData.get_implementation_type()=="speckman"){
-			Speckman_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
-			inference_Output = inference_Solver.compute_inference_output();
-		}
-		if(inferenceData.get_implementation_type()=="permutational"){
-			Eigen_Sign_Flip_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
-			inference_Output = inference_Solver.compute_inference_output();
-		}
+		std::unique_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inferenceData.get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
+		
+		std::unique_ptr<Solver_Base> inference_Solver = Inference_Solver_Factory<InputHandler>::create_inference_solver_method(inferenceData.get_implementation_type(), 			   std::move(inference_Inverter), inf_car); // Class for inference resoution		
+		
+		inference_Output = inference_Solver.compute_inference_output();
          }
 
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
