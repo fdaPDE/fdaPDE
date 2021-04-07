@@ -23,18 +23,18 @@ class Inference_Solver_Factory
     \param inf_car_ inference carrier object
     \return std::unique_ptr to the chosen solver
   */
-  static std::unique_ptr<Solver_Base<InputHandler>> create_inference_solver_method(const std::string & implementation_type, std::unique_ptr<Inverse_Base> inverter_, Inference_Carrier<InputHandler> inf_car_)
+  static std::unique_ptr<Solver_Base<InputHandler>> create_inference_solver_method(const std::string & implementation_type, std::unique_ptr<Inverse_Base> inf_inverter_, Inference_Carrier<InputHandler> inf_car_)
   {
     if(implementation_type=="wald")
-      return make_unique<Wald_Solver<InputHandler>>(std::move(inverter_), inf_car_);
+      return make_unique<Wald_Solver<InputHandler>>(std::move(inf_inverter_), inf_car_);
     if(implementation_type=="speckman")
-      return make_unique<Speckman_Solver<InputHandler>>(std::move(inverter_), inf_car_);
+      return make_unique<Speckman_Solver<InputHandler>>(std::move(inf_inverter_), inf_car_);
     if(implementation_type=="permutational")
-      return make_unique<Eigen_Sign_Flip_Solver<InputHandler>>(std::move(inverter_), inf_car_);
+      return make_unique<Eigen_Sign_Flip_Solver<InputHandler>>(std::move(inf_inverter_), inf_car_);
     else // deafult Wald
       {
 	Rprintf("Method not found, using Newton_fd");
-	return make_unique<Wald_Solver<InputHandler>>(std::move(inverter_), inf_car_);
+	return make_unique<Wald_Solver<InputHandler>>(std::move(inf_inverter_), inf_car_);
       }
   }
 };
