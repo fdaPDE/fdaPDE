@@ -100,7 +100,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		auto& Inverter_Factory = GenericFactory::Factory<Inverse_Base, std::string>::Instance();
 		Inverter_Factory.add("exact", std::function<std::unique_ptr<Inverse_Exact>()>());
 
-		std::unique_ptr<Inverse_Base> inference_Inverter = Inverter_Factory.create(inferenceData.get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
+		std::unique_ptr<Inverse_Base> inference_Inverter = std::move(Inverter_Factory.create(inferenceData.get_exact_inference())); // Select the right policy for inversion of MatrixNoCov
 		if(inferenceData.get_implementation_type()=="wald"){
 			Wald_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
 			inference_Output = inference_Solver.compute_inference_output();
