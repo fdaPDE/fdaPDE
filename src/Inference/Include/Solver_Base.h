@@ -28,7 +28,7 @@ protected:
 public:
   // CONSTUCTOR
   Solver_Base()=delete;	//The default constructor is deleted
-  Solver_Base(std::unique_ptr<Inverse_Base> & inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(inverter_), inf_car(inf_car_){}; 
+  Solver_Base(std::unique_ptr<Inverse_Base> & inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(std::move(inverter_)), inf_car(inf_car_){}; 
   
   //!< public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);
