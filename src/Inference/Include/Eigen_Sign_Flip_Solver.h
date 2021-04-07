@@ -32,7 +32,7 @@ private:
 public:
   // CONSTUCTOR
   Eigen_Sign_Flip_Solver()=delete;	//The default constructor is deleted
-  Eigen_Sign_Flip_Solver(std::unique_ptr<Inverse_Base> && inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Eigen_Sign_Flip_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
   
   // GETTERS
   inline const MatrixXr * getLambdap (void) const {return &this->Lambda;}      	//!< Getter of Lambdap \return Lambdap

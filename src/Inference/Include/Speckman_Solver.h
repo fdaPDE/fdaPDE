@@ -38,7 +38,7 @@ private:
 public:
   // CONSTUCTOR
   Speckman_Solver()=delete;	//The default constructor is deleted
-  Speckman_Solver(std::unique_ptr<Inverse_Base> && inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Speckman_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
   
   // GETTERS
   inline const MatrixXr * getLambda2p (void) const {return &this->Lambda2;}     //!< Getter of Lambda2p \return Lambda2p
