@@ -15,9 +15,9 @@
 #include "../../Inference/Include/Wald_Solver.h"
 #include "../../Inference/Include/Speckman_Solver.h"
 #include "../../Inference/Include/Eigen_Sign_Flip_Solver.h"
+#include "../../Inference/Include/Inverter_Factory.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
-#include "../../Global_Utilities/Include/Factory.h"
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -96,11 +96,8 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	if(inferenceData.get_definition()==true){ //only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
 
-		// Factory instantiation: using factory provided in Global_Utilities
-		auto& Inverter_Factory = GenericFactory::Factory<Inverse_Base, std::string>::Instance();
-		Inverter_Factory.add("exact", std::function<std::unique_ptr<Inverse_Exact>()>());
-
-		std::unique_ptr<Inverse_Base> inference_Inverter = std::move(Inverter_Factory.create(inferenceData.get_exact_inference())); // Select the right policy for inversion of MatrixNoCov
+		// Factory instantiation: using factory provided in Inverse_Factory.h
+		std::unique_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inferenceData.get_exact_inference()) // Select the right policy for inversion of MatrixNoCov
 		if(inferenceData.get_implementation_type()=="wald"){
 			Wald_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
 			inference_Output = inference_Solver.compute_inference_output();
