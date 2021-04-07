@@ -102,15 +102,15 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
 		std::unique_ptr<Inverse_Base> inference_Inverter = Inverter_Factory.create(inferenceData.get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
 		if(inferenceData.get_implementation_type()=="wald"){
-			Wald_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			Wald_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
 			inference_Output = inference_Solver.compute_inference_output();
 		}
 		if(inferenceData.get_implementation_type()=="speckman"){
-			Speckman_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			Speckman_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
 			inference_Output = inference_Solver.compute_inference_output();
 		}
 		if(inferenceData.get_implementation_type()=="permutational"){
-			Eigen_Sign_Flip_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			Eigen_Sign_Flip_Solver<InputHandler> inference_Solver(std::move(inference_Inverter), inf_car); //Class for inference resolution
 			inference_Output = inference_Solver.compute_inference_output();
 		}
          }
