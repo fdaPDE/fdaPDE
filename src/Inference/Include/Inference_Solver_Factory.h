@@ -23,7 +23,7 @@ class Inference_Solver_Factory
     \param inf_car inference carrier object
     \return std::unique_ptr to the chosen solver
   */
-  static std::unique_ptr<Solver_Base<InputHandler>> create_Inference_Solver_method(const std::string & implementation_type, std::unique_ptr<Inverse_Base> inverter, Inference_Carrier<InputHandler> inf_car)
+  static std::unique_ptr<Solver_Base<InputHandler>> create_inference_solver_method(const std::string & implementation_type, std::unique_ptr<Inverse_Base> inverter, Inference_Carrier<InputHandler> inf_car)
   {
     if(implementation_type=="wald")
       return make_unique<Wald_Solver<InputHandler>>(std::move(inverter), inf_car);
