@@ -35,7 +35,7 @@ private:
 public:
   // CONSTUCTOR
   Wald_Solver()=delete;	//The default constructor is deleted
-  Wald_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(inverter_, inf_car_){}; 
+  Wald_Solver(std::unique_ptr<Inverse_Base> & inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(inverter_, inf_car_){}; 
   
   // GETTERS
   inline const MatrixXr * getSp (void) const {return &this->S;}      //!< Getter of Sp \return Sp
