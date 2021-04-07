@@ -17,7 +17,7 @@
 #include "../../Inference/Include/Eigen_Sign_Flip_Solver.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
-//#include "../../Global_Utilities/Include/Factory.h"
+#include "../../Global_Utilities/Include/Factory.h"
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
