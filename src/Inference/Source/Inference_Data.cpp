@@ -48,10 +48,10 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 
    //exact_Inference
    if(INTEGER(exact_Inference_)[0]==1)
-    this->set_exact_inference(true);
+    this->set_exact_inference("exact");
 
   else
-    this->set_exact_inference(false);
+    this->set_exact_inference("non-exact");
 
  //coeff_Inference
   UInt n_ = INTEGER(Rf_getAttrib(coeff_Inference_, R_DimSymbol))[0]; // #Rows

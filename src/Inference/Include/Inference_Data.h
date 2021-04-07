@@ -15,7 +15,7 @@ class InferenceData
   		std::string test_Type            	= "not-defined";			//!< Values: not-defined [default], one-at-the-time, simultaneous
   		std::string interval_Type		= "not-defined";			//!< Values: not-defined [default], one-at-the-time, simultaneous, bonferroni
   		std::string implementation_Type		= "wald"; 				//!< Values: wald [default], speckman, permutational
-  		bool exact_Inference			= false;				//!< If true the inverse of E matrix of woodbury decomposition of the system is computed exactly
+  		std::string exact_Inference		= "non-exact";				//!< Values: non-exact [default], exact 
 		// Parameters needed
                 MatrixXr coeff_Inference;	        					//!< If position j is true, the j-th covariate is taken into account in the inferential analysis
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
@@ -35,7 +35,7 @@ class InferenceData
   		inline void set_test_type(const std::string && test_Type_){test_Type = test_Type_;};				//!< Setter for test_Type \param test_Type_ new test_Type
   		inline void set_interval_type(const std::string && interval_Type_){interval_Type = interval_Type_;};		//!< Setter for interval_Type \param interval_Type_ new interval_Type
   		inline void set_implementation_type(const std::string && implementation_Type_){implementation_Type = implementation_Type_;};	//!< Setter for implementation_Type \param implementation_Type_ new implementation_Type	
-  		inline void set_exact_inference(const bool & exact_Inference_){exact_Inference = exact_Inference_;};		//!< Setter for exact_Inference \param exact_Inference_ new exact_Inference
+  		inline void set_exact_inference(const std::string && exact_Inference_){exact_Inference = exact_Inference_;};	//!< Setter for exact_Inference \param exact_Inference_ new exact_Inference
   		inline void set_coeff_inference(const MatrixXr & coeff_inf){coeff_Inference = coeff_inf;};		        //!< Setter for coeff_Inference \param coeff_Inference_ new coeff_Inference
   		inline void set_beta_0(const VectorXr & beta_0_){beta_0 = beta_0_;};					        //!< Setter for beta0 \param beta0_ new beta0
   		inline void set_inference_level(const Real & inference_Level_){inference_Level = inference_Level_;};		//!< Setter for inference_level \param inference_level_ new inference_level
@@ -46,7 +46,7 @@ class InferenceData
   		inline std::string get_test_type() const{return this->test_Type;}; 				//!< Getter for test_Type \return test_Type
   		inline std::string get_interval_type() const{return this->interval_Type;};			//!< Getter for interval_Type \return interval_Type
   		inline std::string get_implementation_type() const{return this->implementation_Type;};		//!< Getter for implementation_Type \return implementation_Tupe
- 		inline bool get_exact_inference() const{return this->exact_Inference;};				//!< Getter for exact_Inference \return exact_Inference
+ 		inline std::string get_exact_inference() const{return this->exact_Inference;};			//!< Getter for exact_Inference \return exact_Inference
  		inline MatrixXr get_coeff_inference() const{return this->coeff_Inference;};		        //!< Getter for coeff_Inference \return coeff_Inference
   		inline VectorXr get_beta_0() const{return this->beta_0;};				        //!< Getter for beta0 \return beta0
   		inline Real get_inference_level() const{return this->inference_Level;};				//!< Getter for inference_Level \return inference_Level

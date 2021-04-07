@@ -10,6 +10,7 @@
 #include "Inference_Data.h"
 #include "Inference_Carrier.h"
 #include "Inverter.h"
+#include <memory>
 
 // *** Solver_Base Class ***
 //! Hypothesis testing and confidence intervals base class
@@ -19,7 +20,7 @@
 template<typename InputHandler>
 class Solver_Base{
 protected:
-  Inverse_Base & inverter; 				//!< Inverter object that computes the inverse of matrixNoCov in exact/non-exact way
+  std::unique_ptr<Inverse_Base> inverter; 		//!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   virtual VectorXr compute_pvalue(void) = 0;		//!< Pure virtual method used to compute the pvalues of the tests 
   virtual MatrixXv compute_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals
@@ -27,7 +28,7 @@ protected:
 public:
   // CONSTUCTOR
   Solver_Base()=delete;	//The default constructor is deleted
-  Solver_Base(Inverse_Base & inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(inverter_), inf_car(inf_car_){}; 
+  Solver_Base(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(std::move(inverter_)), inf_car(inf_car_){}; 
   
   //!< public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);

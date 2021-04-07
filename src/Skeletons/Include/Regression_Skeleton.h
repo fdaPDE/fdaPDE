@@ -17,6 +17,7 @@
 #include "../../Inference/Include/Eigen_Sign_Flip_Solver.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
+//#include "../../Global_Utilities/Include/Factory.h"
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -91,31 +92,28 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		}
 
 	}
-                //Inference
-		if(inferenceData.get_definition()==true){ //only if inference is actually required
-			  	Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
-			  	if(inferenceData.get_exact_inference()==true){
-					if(inferenceData.get_implementation_type()=="wald"){
-			   		Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
-			    		Wald_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
-			    		inference_Output = inference_Solver.compute_inference_output();
-					}
-					if(inferenceData.get_implementation_type()=="speckman"){
-					Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
-			    		Speckman_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
-			    		inference_Output = inference_Solver.compute_inference_output();
-					}
-					if(inferenceData.get_implementation_type()=="permutational"){
-					Inverse_Exact inference_Inverter; // Inverter for the noCovMatrix
-			    		Eigen_Sign_Flip_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
-			    		inference_Output = inference_Solver.compute_inference_output();
-					}
-			  	}// else{
-			  	//  Inverse_Non_Exact inference_Inverter; // Inverter for the noCovMatrix
-			  	//  Wald<regressionData> inference_Solver (&inference_Inverter, inf_car); //Class for inference resolution
-			  	//  Inference_Output = inference_Solver.compute_inference_output(); //check names
-			 	// }
-                         }
+        //Inference
+	if(inferenceData.get_definition()==true){ //only if inference is actually required
+		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
+
+		// Factory instantiation: using factory provided in Global_Utilities
+		auto& Inverter_Factory = GenericFactory::Factory<Inverse_Base, std::string>::Instance();
+		Inverter_Factory.add("exact",std::function<std::unique_ptr<Inverse_Exact>()>);
+
+		std::unique_ptr<Inverse_Base> inference_inverter = Inverter_Factory.create(inferenceData.get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
+		if(inferenceData.get_implementation_type()=="wald"){
+			Wald_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			inference_Output = inference_Solver.compute_inference_output();
+		}
+		if(inferenceData.get_implementation_type()=="speckman"){
+			Speckman_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			inference_Output = inference_Solver.compute_inference_output();
+		}
+		if(inferenceData.get_implementation_type()=="permutational"){
+			Eigen_Sign_Flip_Solver<InputHandler> inference_Solver(inference_Inverter, inf_car); //Class for inference resolution
+			inference_Output = inference_Solver.compute_inference_output();
+		}
+         }
 
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }

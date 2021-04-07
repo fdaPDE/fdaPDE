@@ -10,9 +10,9 @@ using namespace boost::math;
 template<typename InputHandler> 
 void Speckman_Solver<InputHandler>::compute_Lambda2(void){
   // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  this->inverter.Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
+  this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // extract the inverse of E
-  const MatrixXr * E_inv = this->inverter.getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
+  const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
@@ -141,11 +141,6 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     if(!is_V_computed){
       compute_V();
     }
-    
-    
-    /* // FOR DEBUG TEMPORARY
-       this->print_for_debug();
-       inverter.print_for_debug(); */
     
     // for each row of C matrix
     for(UInt i=0; i<q; ++i){
