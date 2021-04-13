@@ -100,7 +100,11 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		// Factory instantiation: using factory provided in Inverse_Factory.h
 		std::unique_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inferenceData.get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
 		
-		std::unique_ptr<Solver_Base<InputHandler>> inference_Solver = Inference_Solver_Factory<InputHandler>::create_inference_solver_method(inferenceData.get_implementation_type(), 			   std::move(inference_Inverter), inf_car); // Class for inference resoution		
+		std::unique_ptr<Solver_Base<InputHandler>> inference_Solver = Inference_Solver_Factory<InputHandler>::create_inference_solver_method(inferenceData.get_implementation_type(), 			   std::move(inference_Inverter), inf_car); // Class for inference resoution	
+
+                //For debug only
+                if(inference_Solver == nullptr)
+                    Rprintf("inference solver is null");	
 		
 		inference_Output = inference_Solver->compute_inference_output();
          }

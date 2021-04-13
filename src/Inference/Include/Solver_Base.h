@@ -24,13 +24,13 @@ protected:
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   virtual VectorXr compute_pvalue(void) = 0;		//!< Pure virtual method used to compute the pvalues of the tests 
   virtual MatrixXv compute_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals
-  
+  virtual void print_for_debug(void) const = 0;  
 public:
   // CONSTUCTOR
   Solver_Base()=delete;	//The default constructor is deleted
   Solver_Base(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(std::move(inverter_)), inf_car(inf_car_){}; 
-  Solver_Base & Solver_Base(Solver_Base & rhs) = delete; //The default copy constructor is deleted
-  Solver_Base & Solver_Base(Solver_Base && rhs):inverter(std::move(rhs.inverter), inf_car(rhs.inf_car){}; //Definition of the move constructor
+  Solver_Base(Solver_Base & rhs) = delete; //The default copy constructor is deleted
+  Solver_Base(Solver_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car){}; //Definition of the move constructor
   Solver_Base & operator=(Solver_Base && rhs) = delete; //The move assignment operator is deleted
  
   //!< public method that calls the requested functions according to test_type and interval_type

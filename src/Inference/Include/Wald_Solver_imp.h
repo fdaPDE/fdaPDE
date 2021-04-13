@@ -215,30 +215,12 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
 template<typename InputHandler>
 void Wald_Solver<InputHandler>::print_for_debug(void) const {
   
-  Rprintf("S computed: %d \n", is_S_computed); 
-  
-  if(is_S_computed==true){
-    Rprintf("Matrix Smoothing S is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-    Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
-    }
-    Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
-    } 
-  }
-  
-  Rprintf("V computed: %d \n" , is_V_computed); 
-  
-  if(is_V_computed==true){
-    Rprintf( "Matrix variance V is: \n");
-    for(UInt i=0; i < V.rows(); ++i){
-      for(UInt j=0; j < V.cols(); ++j){
-	Rprintf(" %f",V(i,j));
+  if (this->inverter == nullptr)
+      Rprintf("Inverter is null");
+  else{
+      Rprintf("Inverter is not null");
+      this->inverter->print_for_debug();
       }
-    }
-    
-  } 
   
   return;
 };
