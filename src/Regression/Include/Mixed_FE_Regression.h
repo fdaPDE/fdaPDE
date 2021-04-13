@@ -13,7 +13,7 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "Regression_Data.h"
-#include "System_solver.h"
+//#include "System_solver.h"
 
 /*! A base class for the smooth regression.
 */
@@ -28,8 +28,8 @@ class MixedFERegressionBase
 		const InputHandler & regressionData_;
                 OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
 		// For only space problems
-		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
-		//	                |     R1        | R0	      |      |         O             |  O |
+		//  system matrix= 	|psi^T * A *psi |  R1^T  |   +   |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
+		//	                |    R1        |lambda *R0|      |         O             |  O |
 
 		//For space time problems
 		// Separable case:
@@ -83,10 +83,6 @@ class MixedFERegressionBase
 		MatrixXr _GCV;			//!< A Eigen::MatrixXr storing the computed GCV
 		MatrixXv _beta;			//!< A Eigen::MatrixXv storing the computed beta coefficients
 
-		VectorXr preconditioner;
-		bool     colPrecondition = false;
-		bool	 blockPrecondition = true;
-
 		//Flag to avoid the computation of R0, R1, Psi_ onece already performed
 		bool isAComputed   = false;
 		bool isPsiComputed = false;
@@ -95,6 +91,12 @@ class MixedFERegressionBase
 
 		bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
 		bool isGAMData;
+
+		//preconditioner choice
+		bool diagPreconditioned = false;
+		bool JacobiPreconditioned = false;
+		bool massLumping = false;
+		bool blockPreconditioned = false;
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
@@ -130,20 +132,11 @@ class MixedFERegressionBase
 		//! A method computing GCV from the dofs
 		void computeGeneralizedCrossValidation(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 
-		//template<typename MatrixType>
-		template<typename MatrixType>
-		SpVec computeLumpedMatrix(const MatrixType& matrixInit);
-
 		// -- BUILD SYSTEM --
 		 //! Spatial version
 		void buildSystemMatrix(Real lambda);
 		//! Space-time version
 		void buildSystemMatrix(Real lambdaS, Real lambdaT);
-
-		// -- PRECONDITIONER --
-		//void computeConditionNumber();
-		void system_precondition();
-		void system_precondition(Real lambdaS, Real lambdaT);
 
 		// -- FACTORIZER --
 	  	//! A function to factorize the system, using Woodbury decomposition when there are covariates
@@ -154,27 +147,30 @@ class MixedFERegressionBase
 		template<typename Derived>
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
 
+		// -- PRECONDITION --
+		template<typename Derived>
+		MatrixXr solveSystem(const Eigen::MatrixBase<Derived>&);
+		void buildMatrix(const SpMat& NWblock, const SpMat& NEblock, const SpMat& SWblock, const SpMat& SEblock);
+		void preconditionSystemMatrix();
+		MatrixXr preconditionRHS(const MatrixXr& b);
+		VectorXr preconditioner;
+		SpMat NW, SE;
+		Eigen::SparseLU<SpMat> NWdec, SEdec;
+
+		// -- MASS LUMPING --
+		void computeLumpedMass();
+		VectorXr lumpedMass;
+
 	public:
 		//!A Constructor.
 		MixedFERegressionBase( const InputHandler & regressionData, OptimizationData & optimizationData,  UInt nnodes_) :
 			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
-		/*MixedFERegressionBase(const InputHandler& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
-			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix())
-		{
-			isGAMData = regressionData.getisGAM();
-			preconditioner = VectorXr::Ones(2*M_*N_);
-		};*/
+
 
 		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree) :
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()+spline_degree-1),
 			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
-		/*MixedFERegressionBase(const std::vector<Real>& mesh_time, const InputHandler& regressionData, OptimizationData& optimizationData, UInt nnodes_, UInt spline_degree) :
-			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size() - 1 : mesh_time.size() + spline_degree - 1),
-			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix())
-		{
-			isGAMData = regressionData.getisGAM();
-			preconditioner = VectorXr::Ones(2*M_*N_);
-		};*/
+
 
 		//! A member function computing the dofs for external calls
 		//template<typename A>

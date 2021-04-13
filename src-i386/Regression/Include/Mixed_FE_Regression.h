@@ -13,6 +13,7 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "Regression_Data.h"
+#include "System_solver.h"
 
 /*! A base class for the smooth regression.
 */
@@ -27,8 +28,8 @@ class MixedFERegressionBase
 		const InputHandler & regressionData_;
                 OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
 		// For only space problems
-		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
-		//	                |     R1        | R0	      |      |         O             |  O |
+		//  system matrix= 	|psi^T * A *psi |  R1^T  |   +   |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
+		//	                |    R1        |lambda *R0|      |         O             |  O |
 
 		//For space time problems
 		// Separable case:
@@ -59,6 +60,8 @@ class MixedFERegressionBase
 		VectorXi 	element_ids_; 	//!< elements id information
 
 		// Factorizations
+		//Eigen::BiCGSTAB<SpMat, Eigen::IncompleteLUT<Real>> matrixNoCovdec_; //NaN ?????
+		//Eigen::ConjugateGradient<SpMat> matrixNoCovdec_; //very high error, not deprending on lambda
 		Eigen::SparseLU<SpMat> matrixNoCovdec_; //!< Stores the factorization of matrixNoCov_
 		//std::unique_ptr<Eigen::PartialPivLU<MatrixXr>>  matrixNoCovdec_{new Eigen::PartialPivLU<MatrixXr>}; //!< Stores the factorization of matrixNoCov_
 		Eigen::PartialPivLU<MatrixXr> Gdec_;	//!< Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
@@ -66,7 +69,11 @@ class MixedFERegressionBase
 		Eigen::PartialPivLU<MatrixXr> WTW_;	//!< Stores the factorization of W^T * W
 		bool isWTWfactorized_ = false;
 		bool isRcomputed_ = false;
+		//Eigen::IncompleteLUT<Real> R0dec_;
 		Eigen::SparseLU<SpMat> R0dec_; 		//!< Stores the factorization of R0_
+		Eigen::SparseLU<SpMat> DMatdec_;
+		bool isR0factorized = false;
+		bool isDMatfactorized = false;
 
 		VectorXr rhs_ft_correction_;	//!< right hand side correction for the forcing term:
 		VectorXr rhs_ic_correction_;	//!< Initial condition correction (parabolic case)
@@ -75,6 +82,10 @@ class MixedFERegressionBase
 		MatrixXr _dof;      		//!< A Eigen::MatrixXr storing the computed dofs
 		MatrixXr _GCV;			//!< A Eigen::MatrixXr storing the computed GCV
 		MatrixXv _beta;			//!< A Eigen::MatrixXv storing the computed beta coefficients
+
+		VectorXr preconditioner;
+		bool     colPrecondition = false;
+		bool	 blockPrecondition = true;
 
 		//Flag to avoid the computation of R0, R1, Psi_ onece already performed
 		bool isAComputed   = false;
@@ -119,11 +130,21 @@ class MixedFERegressionBase
 		//! A method computing GCV from the dofs
 		void computeGeneralizedCrossValidation(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 
+		//template<typename MatrixType>
+		template<typename MatrixType>
+		SpVec computeLumpedMatrix(const MatrixType& matrixInit);
+
 		// -- BUILD SYSTEM --
 		 //! Spatial version
 		void buildSystemMatrix(Real lambda);
 		//! Space-time version
 		void buildSystemMatrix(Real lambdaS, Real lambdaT);
+
+		// -- PRECONDITIONER --
+		//void computeConditionNumber();
+		void system_precondition();
+		void system_precondition(Real lambdaS, Real lambdaT);
+		SystemSolver solver;
 
 		// -- FACTORIZER --
 	  	//! A function to factorize the system, using Woodbury decomposition when there are covariates
@@ -138,10 +159,23 @@ class MixedFERegressionBase
 		//!A Constructor.
 		MixedFERegressionBase( const InputHandler & regressionData, OptimizationData & optimizationData,  UInt nnodes_) :
 			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
+		/*MixedFERegressionBase(const InputHandler& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix())
+		{
+			isGAMData = regressionData.getisGAM();
+			preconditioner = VectorXr::Ones(2*M_*N_);
+		};*/
 
 		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree) :
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()+spline_degree-1),
 			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
+		/*MixedFERegressionBase(const std::vector<Real>& mesh_time, const InputHandler& regressionData, OptimizationData& optimizationData, UInt nnodes_, UInt spline_degree) :
+			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size() - 1 : mesh_time.size() + spline_degree - 1),
+			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix())
+		{
+			isGAMData = regressionData.getisGAM();
+			preconditioner = VectorXr::Ones(2*M_*N_);
+		};*/
 
 		//! A member function computing the dofs for external calls
 		//template<typename A>

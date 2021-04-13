@@ -531,84 +531,159 @@ void MixedFERegressionBase<InputHandler>::getRightHandData(VectorXr& rightHandDa
 }
 
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock)
+void MixedFERegressionBase<InputHandler>::buildMatrixNoCov(const SpMat& NWblock, const SpMat& SWblock, const SpMat& SEblock)
 {
-	UInt nnodes = N_*M_; // Note that is only space M_=1
-	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
-	std::vector<coeff> tripletAll;
-	tripletAll.reserve(NWblock.nonZeros() + 2*SWblock.nonZeros() + SEblock.nonZeros());
+	//UInt nnodes = N_*M_; // Note that is only space M_=1
+	//// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
+	//std::vector<coeff> tripletAll;
+	//tripletAll.reserve(NWblock.nonZeros() + 2*SWblock.nonZeros() + SEblock.nonZeros());
 
-	// Parsing all matrices, reading the values to be put inside _coeffmatrix, coordinates according to the rules
-	if (!(this->blockPrecondition))
+	//// Parsing all matrices, reading the values to be put inside _coeffmatrix, coordinates according to the rules
+	//for (UInt k = 0; k < NWblock.outerSize(); ++k)
+	//	for (SpMat::InnerIterator it(NWblock, k); it; ++it)
+	//	{
+	//		tripletAll.push_back(coeff(it.row(), it.col(), it.value()));
+	//	}
+	//for (UInt k = 0; k < SEblock.outerSize(); ++k)
+	//	for (SpMat::InnerIterator it(SEblock, k); it; ++it)
+	//	{
+	//		tripletAll.push_back(coeff(it.row() + nnodes, it.col() + nnodes, it.value()));
+	//	}
+	//for (UInt k = 0; k < SWblock.outerSize(); ++k)
+	//	for (SpMat::InnerIterator it(SWblock, k); it; ++it)
+	//	{
+	//		tripletAll.push_back(coeff(it.col(), it.row() + nnodes, it.value()));
+	//	}
+	//for (UInt k = 0; k < SWblock.outerSize(); ++k)
+	//	for (SpMat::InnerIterator it(SWblock, k); it; ++it)
+	//	{
+	//		tripletAll.push_back(coeff(it.row() + nnodes, it.col(), it.value()));
+	//	}
+
+	//// Define, resize, fill and compress
+	//matrixNoCov_.setZero();
+	//matrixNoCov_.resize(2*nnodes,2*nnodes);
+	//matrixNoCov_.setFromTriplets(tripletAll.begin(),tripletAll.end());
+	//matrixNoCov_.makeCompressed();
+
+	SpMat NEblock(SWblock.transpose());
+
+	if (blockPreconditioned)
 	{
-		for (UInt k = 0; k < NWblock.outerSize(); ++k)
-			for (SpMat::InnerIterator it(NWblock, k); it; ++it)
-			{
-				tripletAll.push_back(coeff(it.row(), it.col(), it.value()));
-			}
-		for (UInt k = 0; k < SEblock.outerSize(); ++k)
-			for (SpMat::InnerIterator it(SEblock, k); it; ++it)
-			{
-				tripletAll.push_back(coeff(it.row() + nnodes, it.col() + nnodes, it.value()));
-			}
-		for (UInt k = 0; k < SWblock.outerSize(); ++k)
-			for (SpMat::InnerIterator it(SWblock, k); it; ++it)
-			{
-				tripletAll.push_back(coeff(it.col(), it.row() + nnodes, it.value()));
-			}
-		for (UInt k = 0; k < SWblock.outerSize(); ++k)
-			for (SpMat::InnerIterator it(SWblock, k); it; ++it)
-			{
-				tripletAll.push_back(coeff(it.row() + nnodes, it.col(), it.value()));
-			}
+		NW = NWblock;
+		SE = SEblock;
+
+		NWdec.compute(NWblock);
+		SEdec.compute(SEblock);
+
+		SpMat Id;
+		Id.resize(NWblock.outerSize(), NWblock.outerSize());
+		Id.setIdentity();
+
+		MatrixXr xx = NWdec.solve(NEblock);
+		MatrixXr yy = SEdec.solve(SWblock);
+
+		buildMatrix(Id, xx.sparseView(), yy.sparseView(), Id);
 	}
 
 	else
 	{
-		if (!isDMatfactorized)
-		{
-			DMatdec_.compute(DMat_);
-			isDMatfactorized = true;
-		}
-		if (!isR0factorized)
-		{
-			R0dec_.compute(R0_);
-			isR0factorized = true;
-		}
-
-		for (UInt k = 0; k < nnodes; ++k)
-			tripletAll.push_back(coeff(k, k, 1));
-
-		for (UInt k = 0; k < SEblock.outerSize(); ++k)
-			for (SpMat::InnerIterator it(SEblock, k); it; ++it)
-			{
-				tripletAll.push_back(coeff(it.row() + nnodes, it.col() + nnodes, it.value()));
-			}
-
-		MatrixXr NE = DMatdec_.solve(SWblock);
-		for (UInt k = 0; k < NE.cols(); ++k)
-			for (UInt j = 0; j < NE.rows(); ++j)
-			{
-				Real val = NE(j,k);
-				if (val != 0)
-					tripletAll.push_back(coeff(j, k + nnodes, val));
-			}
-
-		MatrixXr SW = R0dec_.solve(SWblock);
-		for (UInt k = 0; k < SW.cols(); ++k)
-			for (UInt j = 0; j < SW.rows(); ++j)
-			{
-				Real val = SW(j,k);
-				if (val != 0)
-					tripletAll.push_back(coeff(j + nnodes, k, val));
-			}
+		buildMatrix(NWblock, NEblock, SWblock, SEblock);
 	}
+
+	if (massLumping)
+		computeLumpedMass();
+}
+
+template<typename InputHandler>
+void MixedFERegressionBase<InputHandler>::buildMatrix(const SpMat& NWblock, const SpMat& NEblock, const SpMat& SWblock, const SpMat& SEblock)
+{
+	UInt nnodes = N_ * M_; // Note that is only space M_=1
+	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
+	std::vector<coeff> tripletAll;
+	tripletAll.reserve(NWblock.nonZeros() + NEblock.nonZeros() + SWblock.nonZeros() + SEblock.nonZeros());
+
+	// Parsing all matrices, reading the values to be put inside _coeffmatrix, coordinates according to the rules
+	for (UInt k = 0; k < NWblock.outerSize(); ++k)
+		for (SpMat::InnerIterator it(NWblock, k); it; ++it)
+		{
+			tripletAll.push_back(coeff(it.row(), it.col(), it.value()));
+		}
+	for (UInt k = 0; k < SEblock.outerSize(); ++k)
+		for (SpMat::InnerIterator it(SEblock, k); it; ++it)
+		{
+			tripletAll.push_back(coeff(it.row() + nnodes, it.col() + nnodes, it.value()));
+		}
+	for (UInt k = 0; k < NEblock.outerSize(); ++k)
+		for (SpMat::InnerIterator it(NEblock, k); it; ++it)
+		{
+			tripletAll.push_back(coeff(it.col(), it.row() + nnodes, it.value()));
+		}
+	for (UInt k = 0; k < SWblock.outerSize(); ++k)
+		for (SpMat::InnerIterator it(SWblock, k); it; ++it)
+		{
+			tripletAll.push_back(coeff(it.row() + nnodes, it.col(), it.value()));
+		}
 
 	// Define, resize, fill and compress
 	matrixNoCov_.setZero();
-	matrixNoCov_.resize(2*nnodes,2*nnodes);
-	matrixNoCov_.setFromTriplets(tripletAll.begin(),tripletAll.end());
+	matrixNoCov_.resize(2 * nnodes, 2 * nnodes);
+	matrixNoCov_.setFromTriplets(tripletAll.begin(), tripletAll.end());
 	matrixNoCov_.makeCompressed();
+}
+
+template<typename InputHandler>
+void MixedFERegressionBase<InputHandler>::computeLumpedMass()
+{
+	lumpedMass.resize(matrixNoCov_.outerSize());
+
+	for (UInt k = 0; k < matrixNoCov_.outerSize(); ++k)
+	{
+		Real val = 0.0;
+		for (SpMat::InnerIterator it(matrixNoCov_, k); it; ++it)
+			val += it.value();
+		lumpedMass(k) = val;
+	}
+}
+
+template<typename InputHandler>
+void MixedFERegressionBase<InputHandler>::preconditionSystemMatrix()
+{
+	if (diagPreconditioned || JacobiPreconditioned)
+	{
+		if (JacobiPreconditioned)
+		{
+			preconditioner.resize(matrixNoCov_.outerSize());
+
+			for (UInt k = 0; k < matrixNoCov_.outerSize(); ++k)
+			{
+				Real val = 0.0;
+				for (SpMat::InnerIterator it(matrixNoCov_, k); it; ++it)
+					val += pow(it.value(), 2);
+				preconditioner(k) = 1 / val;
+			}
+		}
+		matrixNoCov_ = preconditioner.asDiagonal() * matrixNoCov_;
+	}
+}
+
+template<typename InputHandler>
+MatrixXr MixedFERegressionBase<InputHandler>::preconditionRHS(const MatrixXr& b)
+{
+	if (diagPreconditioned || JacobiPreconditioned)
+		return preconditioner.asDiagonal() * b;
+
+	else if (blockPreconditioned)
+	{
+		UInt nnodes = NW.outerSize();
+		MatrixXr rhs(b.rows(), b.cols());
+		rhs.topRows(nnodes) = NWdec.solve(b.topRows(nnodes));
+		rhs.bottomRows(nnodes) = SEdec.solve(b.bottomRows(nnodes));
+		return rhs;
+	}
+
+	else
+		return b;
 }
 
 //----------------------------------------------------------------------------//
@@ -621,8 +696,8 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 	const VectorXr * P = regressionData_.getWeightsMatrix(); // Matrix of weights for GAM
 
 	// First phase: Factorization of matrixNoCov
+	preconditionSystemMatrix();
 	matrixNoCovdec_.compute(matrixNoCov_);
-	//matrixNoCovdec_.preconditioner().compute(matrixNoCov_);;
 
 	if(regressionData_.getCovariates()->rows() != 0)
 	{ // Needed only if there are covariates, else we can stop before
@@ -630,8 +705,6 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 		// Definition of matrix U = [ psi^T * A * W | 0 ]^T and V= [ W^T*psi| 0]
 
 		MatrixXr W(*(this->regressionData_.getCovariates()));
-
-
 		U_ = MatrixXr::Zero(2*nnodes,W.cols());
 		V_ = MatrixXr::Zero(W.cols(),2*nnodes);
 
@@ -660,30 +733,10 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 				U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*P->asDiagonal()*W;
     	}
 
-		if (this->blockPrecondition)
-		{
-			if (!isDMatfactorized)
-			{
-				DMatdec_.compute(DMat_);
-				isDMatfactorized = true;
-			}
-			if (!isR0factorized)
-			{
-				R0dec_.compute(R0_);
-				isR0factorized = true;
-			}
-			U_.topRows(nnodes) = DMatdec_.solve(U_.topRows(nnodes));
-			U_.bottomRows(nnodes) = R0dec_.solve(U_.bottomRows(nnodes));
-		}
-		else
-		{
-			U_ = preconditioner.asDiagonal() * U_;
-		}
-
-		MatrixXr y = matrixNoCovdec_.solve(U_);
-		if (this->colPrecondition)
-			y = y.cwiseProduct(preconditioner);
-		MatrixXr D = V_*y;
+		//MatrixXr y = solver.system_solve(U_);
+		//MatrixXr y = matrixNoCovdec_.solve(U_);
+		MatrixXr y = solveSystem(U_);
+		MatrixXr D = V_*y; 
 
 		// G = C + D
 		MatrixXr G;
@@ -702,13 +755,20 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 
 template<typename InputHandler>
 template<typename Derived>
+MatrixXr MixedFERegressionBase<InputHandler>::solveSystem(const Eigen::MatrixBase<Derived>& b)
+{
+	if (massLumping)
+		return (lumpedMass.cwiseInverse().asDiagonal() * b);
+
+	MatrixXr bp(b);
+	return matrixNoCovdec_.solve(preconditionRHS(bp));
+}
+
+template<typename InputHandler>
+template<typename Derived>
 MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBase<Derived> & b)
 {
-	
-	// Resolution of the system matrixNoCov * x1 = b --- used for preconditioned system or original version
-	MatrixXr x1 = matrixNoCovdec_.solve(b);
-	if (this->colPrecondition)
-		x1 = x1.cwiseProduct(preconditioner);
+	MatrixXr x1 = solveSystem(b);
 
 	if (regressionData_.getCovariates()->rows() != 0)
 	{
@@ -716,11 +776,53 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBa
 		MatrixXr x2 = Gdec_.solve(V_ * x1);
 
 		// Resolution of the system matrixNoCov * x3 = U * x2
-		MatrixXr x3 = matrixNoCovdec_.solve(U_ * x2);
-		if (this->colPrecondition)
-			x3 = x3.cwiseProduct(preconditioner);
+		MatrixXr x3 = solveSystem(U_*x2);
+		//MatrixXr x3 = solver.system_solve(U_ * x2);
 		x1 -= x3;
 	}
+	
+	//if (massLumping)
+	//	MatrixXr x1 = lumpedMass.cwiseInverse().asDiagonal() * b;
+
+	//else
+	//{
+	//	MatrixXr bp(b);
+	//	MatrixXr x1 = matrixNoCovdec_.solve(preconditionRHS(bp));
+	//}
+
+
+	//if (regressionData_.getCovariates()->rows() != 0)
+	//{
+	//	// Resolution of G * x2 = V * x1
+	//	MatrixXr x2 = Gdec_.solve(V_ * x1);
+
+	//	// Resolution of the system matrixNoCov * x3 = U * x2
+	//	if (massLumping)
+	//		MatrixXr x3 = lumpedMass.cwiseInverse().asDiagonal() * (U_ * x2);
+
+	//	else
+	//	{
+	//		MatrixXr bp(U_*x2);
+	//		MatrixXr x3 = matrixNoCovdec_.solve(preconditionRHS(bp));
+	//	}
+	//	//MatrixXr x3 = solver.system_solve(U_ * x2);
+	//	x1 -= x3;
+	//}
+
+	//// Resolution of the system matrixNoCov * x1 = b --- used for preconditioned system or original version
+	//MatrixXr x1 = matrixNoCovdec_.solve(b);
+	////MatrixXr x1 = solver.system_solve(b);
+
+	//if (regressionData_.getCovariates()->rows() != 0)
+	//{
+	//	// Resolution of G * x2 = V * x1
+	//	MatrixXr x2 = Gdec_.solve(V_ * x1);
+
+	//	// Resolution of the system matrixNoCov * x3 = U * x2
+	//	MatrixXr x3 = matrixNoCovdec_.solve(U_ * x2);
+	//	//MatrixXr x3 = solver.system_solve(U_ * x2);
+	//	x1 -= x3;
+	//}
 
 	//// Mass lumping on MatrixNoCov_ only
 	//SpVec matrixDiag_ = computeLumpedMatrix(matrixNoCov_).cwiseInverse();
@@ -1040,157 +1142,38 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 //----------------------------------------------------------------------------//
 // Composed operations
 
-template<typename InputHandler>
-template<typename MatrixType>
-SpVec MixedFERegressionBase<InputHandler>::computeLumpedMatrix(const MatrixType & matrixInit)
-{
-	SpMat diag_;
-	diag_.resize(matrixInit.rows(),1);
-	std::vector<coeff> coefficients;
-	coefficients.reserve(matrixInit.outerSize());
-
-	Real c = matrixInit.diagonal().sum() / matrixInit.sum();
-
-	for (UInt k = 0; k < matrixInit.cols(); ++k)
-	{
-		coefficients.push_back(coeff(k,0, matrixInit.col(k).sum()));
-	}
-
-	diag_.setFromTriplets(coefficients.begin(), coefficients.end());
-
-	return SpVec(diag_);
-}
-
-//template<typename InputHandler>
-//void MixedFERegressionBase<InputHandler>::computeConditionNumber()
-//{
-//	Eigen::JacobiSVD<SpMat> svd(matrixNoCov_);
-//	Real k = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
-//	Rprintf("k_init: %d", k);
-//}
-
-
-template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::system_precondition()
-{
-	//Rprintf("preconditioning phase started\n");
-
-	std::vector<coeff> coefficients;
-	coefficients.reserve(matrixNoCov_.outerSize());
-
-	for (UInt k = 0; k < matrixNoCov_.outerSize(); ++k)
-	{
-		Real val = 0.0;
-		for (SpMat::InnerIterator it(matrixNoCov_, k); it; ++it)
-			val += pow(it.value(), 2);
-			coefficients.push_back(coeff(k,0,sqrt(val)));
-	}
-
-	SpMat prec(matrixNoCov_.rows(),1);
-	prec.setFromTriplets(coefficients.begin(),coefficients.end());
-	prec.makeCompressed();
-
-	VectorXr precond(prec.cwiseInverse());
-	matrixNoCov_ = precond.asDiagonal() * matrixNoCov_;
-	_rightHandSide = _rightHandSide.cwiseProduct(precond);
-
-	//Rprintf("preconditioning phase completed\n");
-
-	this->preconditioner = precond;
-	this->colPrecondition = false;
-}
-
-template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::system_precondition(Real lambdaS, Real lambdaT)
-{
-	Rprintf("preconditioning phase started\n");
-
-	std::vector<coeff> tripletList;
-	tripletList.reserve(matrixNoCov_.outerSize());
-
-	SpMat prec;
-	prec.resize(matrixNoCov_.rows(), 1);
-
-	for (UInt k = 0; k < matrixNoCov_.outerSize(); ++k)
-	{
-		Real val = 1;
-		if (k < (matrixNoCov_.outerSize() / 2))
-			val = sqrt(lambdaS);
-		tripletList.push_back(coeff(k,0,val));
-	}
-
-	prec.setFromTriplets(tripletList.begin(), tripletList.end());
-	prec.makeCompressed();
-
-	VectorXr precond(prec);
-	matrixNoCov_ = precond.asDiagonal() * matrixNoCov_ * precond.asDiagonal();
-	_rightHandSide = _rightHandSide.cwiseProduct(precond);
-	
-	/*if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
-	{
-		preconditioner /= sqrt(lambdaT);
-		matrixNoCov_ = preconditioner.asDiagonal() * matrixNoCov_ * preconditioner.asDiagonal();
-	}*/
-
-	Rprintf("preconditioning phase completed\n");
-
-	this->preconditioner = precond;
-	this->colPrecondition = true;
-}
-
-
 // To be general, it takes in input the value of lambda
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S)
 {
-	if (this->blockPrecondition)
-	{
-		this->R1_lambda = (-sqrt(lambda_S)) * (R1_);
-		this->R0_lambda = (-1) * (R0_);
-	}
-	else
-	{
-		this->R1_lambda = (-lambda_S) * (R1_);
-		this->R0_lambda = (-lambda_S) * (R0_);
-	}
-
-	//preconditioner->buildSystemMatrix(this->DMat_, this->R0_lambda, this->R1_lambda, (this->R1_lambda).transpose());
-        this->buildMatrixNoCov(this->DMat_, this->R1_lambda, this->R0_lambda);
+	this->R1_lambda = (-lambda_S) * (R1_);
+	this->R0_lambda = (-lambda_S) * (R0_);
+		
+	this->buildMatrixNoCov(this->DMat_, this->R1_lambda, this->R0_lambda);
 }
 
 
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real lambdaT)
 {
-	if (this->blockPrecondition)
-	{
-		this->R0_lambda = (-1) * R0_;
-		this->R1_lambda = (-sqrt(lambdaS)) * R1_;
-	}
-	else
-	{
-		this->R0_lambda = (-lambdaS) * R0_; // build the SouthEast block of the matrix
-		this->R1_lambda = (-lambdaS) * R1_;
-	}
-
+	
+	this->R0_lambda = (-lambdaS) * R0_; // build the SouthEast block of the matrix
+	this->R1_lambda = (-lambdaS) * R1_;
+	
 	// Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
 	if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic())
 	{
-		if (this->blockPrecondition)
-			this->R1_lambda -= sqrt(lambdaS) * (lambdaT * LR0k_);
-		else
-			this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
+		this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
 	}
 
 	// Update NorthWest block of matrix if separable problem
 	if(regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
 	{
 		this->buildMatrixNoCov(this->DMat_+lambdaT*Ptk_, R1_lambda, R0_lambda);
-		//prec->buildSystemMatrix(this->DMat_+lambdaT*Ptk, this->R0_lambda, this->R1_lambda, (this->R1_lambda).transpose());
+
 	}
 	else
 	{
-		//prec->buildSystemMatrix(this->DMat_, this->R0_lambda, this->R1_lambda, (this->R1_lambda).transpose())
 		this->buildMatrixNoCov(this->DMat_, R1_lambda, R0_lambda);
 	}
 
@@ -1211,31 +1194,12 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 		{
 			this->addDirichletBC_matrix();
 		}
-				//this->system_precondition(lambda_,1);
 
                 this->system_factorize();
         }
 
 	optimizationData_.set_last_lS_used(lambda_);
 
-	/*if (this->blockPrecondition)
-	{
-		if (!isDMatfactorized)
-		{
-			DMatdec_.compute(DMat_);
-			isDMatfactorized = true;
-		}
-		b.topRows(N_*M_) = DMatdec_.solve(b.topRows(N_*M_));
-		if (b.bottomRows(N_ * M_) != MatrixXr::Zero(N_ * M_, b.cols()))
-		{
-			if (!isR0factorized)
-			{
-				R0dec_.compute(R0_);
-				isR0factorized = true;
-			}
-			b.bottomRows(N_ * M_) = R0dec_.solve(b.bottomRows(N_ * M_));
-		}
-	}*/
     
 	return this->template system_solve(b);
 }
@@ -1263,16 +1227,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	}
 
 	VectorXr rhs = _rightHandSide; // Save rhs for modification
-
-	if (this->blockPrecondition)
-	{
-		if (!isDMatfactorized)
-		{
-			DMatdec_.compute(DMat_);
-			isDMatfactorized = true;
-		}
-		rhs.topRows(nnodes) = DMatdec_.solve(rhs.topRows(nnodes));
-	}
 
 	for(UInt s=0; s<sizeLambdaS; ++s)
 	{
@@ -1305,16 +1259,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			if(this->isSpaceVarying)
 			{
 			    _rightHandSide.bottomRows(nnodes)= (-sqrt(lambdaS))*rhs_ft_correction_;
-
-				if (this->blockPrecondition)
-				{
-					if (!isR0factorized)
-					{
-						R0dec_.compute(R0_);
-						isR0factorized = true;
-					}
-					_rightHandSide.bottomRows(nnodes) = R0dec_.solve(_rightHandSide.bottomRows(nnodes));
-				}
 			}
 
 			// Right-hand side correction for initial condition in parabolic case
@@ -1323,16 +1267,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				for(UInt i=0; i<regressionData_.getInitialValues()->rows(); i++)
 				{
 					_rightHandSide(nnodes+i) -= sqrt(lambdaS)*rhs_ic_correction_(i);
-				}
-
-				if (this->blockPrecondition)
-				{
-					if (!isR0factorized)
-					{
-						R0dec_.compute(R0_);
-						isR0factorized = true;
-					}
-					_rightHandSide.bottomRows(nnodes) = R0dec_.solve(_rightHandSide.bottomRows(nnodes));
 				}
 			}
 
