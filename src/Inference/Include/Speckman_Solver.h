@@ -38,9 +38,9 @@ private:
 public:
   // CONSTUCTOR
   Speckman_Solver()=delete;	//The default constructor is deleted
-  Speckman_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Speckman_Solver(const std::string & exact_inference_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(exact_inference_, inf_car_){}; 
   Speckman_Solver(Speckman_Solver & rhs) = delete; //The default copy constructor is deleted
-  inline Speckman_Solver(Speckman_Solver && rhs):B(std::move(rhs.B)), Lambda2(std::move(rhs.Lambda2)), is_Lambda2_computed(rhs.is_Lambda2_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed), WLW_dec(std::move(rhs.WLW_dec)), is_WLW_computed(rhs.is_WLW_computed){this->inverter = std::move(rhs.inverter); this->inf_car = rhs.inf_car;}; //Definition of the move constructor
+  inline Speckman_Solver(Speckman_Solver && rhs):B(std::move(rhs.B)), Lambda2(std::move(rhs.Lambda2)), is_Lambda2_computed(rhs.is_Lambda2_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed), WLW_dec(std::move(rhs.WLW_dec)), is_WLW_computed(rhs.is_WLW_computed){this->inverter = std::move(rhs.inverter); this->inf_car = rhs.inf_car; this->exact_inference = rhs.exact_inference;}; //Definition of the move constructor
   Speckman_Solver & operator=(Speckman_Solver && rhs) = delete; //The move assignment operator is deleted
   
   // GETTERS

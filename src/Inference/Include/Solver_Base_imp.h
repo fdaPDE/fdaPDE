@@ -29,3 +29,9 @@ MatrixXv Solver_Base<InputHandler>::compute_inference_output(void){
     return result;
   }
 };
+
+
+template<typename InputHandler>
+void Solver_Base<InputHandler>::build_inverter(void){
+this->inverter = Inverter_Factory::create_inverter_method(this->exact_inference);
+};
