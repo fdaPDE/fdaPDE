@@ -32,9 +32,9 @@ protected:
 public:
   // CONSTUCTOR
   Solver_Base()=delete;	//The default constructor is deleted
-  Solver_Base(const std::string & exact_inference_, const Inference_Carrier<InputHandler> & inf_car_):exact_inference(exact_inference_)), inf_car(inf_car_){}; 
+  Solver_Base(const std::string & exact_inference_, const Inference_Carrier<InputHandler> & inf_car_):exact_inference(exact_inference_), inf_car(inf_car_){}; 
   Solver_Base(Solver_Base & rhs) = delete; //The default copy constructor is deleted
-  Solver_Base(Solver_Base && rhs):inverter(std::move(rhs.inverter)), implementation_type(rhs.implementation_type), inf_car(rhs.inf_car){}; //Definition of the move constructor
+  Solver_Base(Solver_Base && rhs):inverter(std::move(rhs.inverter)), exact_inference(rhs.exact_inference), inf_car(rhs.inf_car){}; //Definition of the move constructor
   Solver_Base & operator=(Solver_Base && rhs) = delete; //The move assignment operator is deleted
  
   //!< public method that calls the requested functions according to test_type and interval_type
