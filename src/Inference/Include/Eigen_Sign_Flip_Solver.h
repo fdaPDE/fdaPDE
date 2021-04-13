@@ -33,6 +33,10 @@ public:
   // CONSTUCTOR
   Eigen_Sign_Flip_Solver()=delete;	//The default constructor is deleted
   Eigen_Sign_Flip_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Eigen_Sign_Flip_Solver & Eigen_Sign_Flip_Solver(Eigen_Sign_Flip_Solver & rhs) = delete; //The default copy constructor is deleted
+  Eigen_Sign_Flip_Solver & Eigen_Sign_Flip_Solver(Eigen_Sign_Flip_Solver && rhs):inverter(std::move(rhs.inverter), inf_car(rhs.inf_car), Partial_res_H0(std::move(rhs.Partial_res_H0)), B(std::move(rhs.B)), Lambda(std::move(rhs.Lambda)), is_Lambda_computed(rhs.is_Lambda_computed){}; //Definition of the move constructor
+  Eigen_Sign_Flip_Solver & operator=(Eigen_Sign_Flip_Solver && rhs) = delete; //The move assignment operator is deleted
+  
   
   // GETTERS
   inline const MatrixXr * getLambdap (void) const {return &this->Lambda;}      	//!< Getter of Lambdap \return Lambdap

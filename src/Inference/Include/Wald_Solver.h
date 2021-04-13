@@ -36,6 +36,11 @@ public:
   // CONSTUCTOR
   Wald_Solver()=delete;	//The default constructor is deleted
   Wald_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Wald_Solver & Wald_Solver(Wald_Solver & rhs) = delete; //The default copy constructor is deleted
+  Wald_Solver & Wald_Solver(Wald_Solver && rhs):inverter(std::move(rhs.inverter), inf_car(rhs.inf_car), S(std::move(rhs.S)), S_t(std::move(rhs.S_t)), is_S_computed(rhs.is_S_computed), 
+   V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed){}; //Definition of the move constructor
+  Wald_Solver & operator=(Wald_Solver && rhs) = delete; //The move assignment operator is deleted
+ 
   
   // GETTERS
   inline const MatrixXr * getSp (void) const {return &this->S;}      //!< Getter of Sp \return Sp
