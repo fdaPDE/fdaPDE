@@ -9,8 +9,6 @@ using namespace boost::math;
 
 template<typename InputHandler> 
 void Wald_Solver<InputHandler>::compute_S(void){
-  // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  this->build_inverter();
   this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;

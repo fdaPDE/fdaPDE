@@ -4,8 +4,6 @@
 
 template<typename InputHandler> 
 void Eigen_Sign_Flip_Solver<InputHandler>::compute_Lambda(void){
-  // call the inverter to compute the inverse of the sparse matrix E of the Woodbury decomposition
-  this->build_inverter();
   this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // extract the inverse of E
   const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());

@@ -21,7 +21,6 @@ template<typename InputHandler>
 class Solver_Base{
 protected:
   std::unique_ptr<Inverse_Base> inverter = nullptr;     //!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
-  std::string exact_inference;                          //!< String that stores the method for the computation of matrixNoCov 
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   virtual VectorXr compute_pvalue(void) = 0;		//!< Pure virtual method used to compute the pvalues of the tests 
   virtual MatrixXv compute_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals
