@@ -92,11 +92,17 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   else{
     
     // one-at-the-time tests
+
+    // Store beta_hat
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
     
     Partial_res_H0.resize(Lambda.cols(), q);
     for(UInt i=0; i<q; ++i){
+      // Build auxiliary vector for residuals computation
+      VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C_t.col(i);
+
       // compute the partial residuals
-      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (C_t.col(i)) * (beta_0);
+      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C_t.col(i)) * (beta_0); // (z-W*beta_hat(non in test)-W*beta_0(in test))
     }
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
