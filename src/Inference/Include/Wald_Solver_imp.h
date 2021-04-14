@@ -129,24 +129,24 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
     if(!is_S_computed){
       compute_S();
     }
-      if(!is_V_computed){
-        compute_V();
-      }
+    if(!is_V_computed){
+      compute_V();
+    }
       
-      // for each row of C matrix
-      for(UInt i=0; i<q; ++i){
-	VectorXr col = C.row(i);
-	Real difference = col.adjoint()*beta_hat - beta_0(i);
-	Real sigma = col.adjoint()*V*col;
-	// compute the test statistic
-	Real stat = difference/std::sqrt(sigma);
-	normal distribution(0,1);
-	// compute the pvalue
-	Real pval = 2*cdf(complement(distribution, fabs(stat)));
-	result(i) = pval; 	
-      }
+    // for each row of C matrix
+    for(UInt i=0; i<q; ++i){
+      VectorXr col = C.row(i);
+      Real difference = col.adjoint()*beta_hat - beta_0(i);
+      Real sigma = col.adjoint()*V*col;
+      // compute the test statistic
+      Real stat = difference/std::sqrt(sigma);
+      normal distribution(0,1);
+      // compute the pvalue
+      Real pval = 2*cdf(complement(distribution, fabs(stat)));
+      result(i) = pval; 	
+    }
       
-      return result;
+    return result;
   }
   
 };
@@ -216,12 +216,30 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
 template<typename InputHandler>
 void Wald_Solver<InputHandler>::print_for_debug(void) const {
   
-  if (this->inverter == nullptr)
-      Rprintf("Inverter is null");
-  else{
-      Rprintf("Inverter is not null");
-      this->inverter->print_for_debug();
+  Rprintf("S computed: %d \n", is_S_computed); 
+  
+  if(is_S_computed==true){
+    Rprintf("Matrix Smoothing S is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
+    }
+    Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
+    for (UInt i=0; i<10; i++){
+      Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
+    } 
+  }
+  
+  Rprintf("V computed: %d \n" , is_V_computed); 
+  
+  if(is_V_computed==true){
+    Rprintf( "Matrix variance V is: \n");
+    for(UInt i=0; i < V.rows(); ++i){
+      for(UInt j=0; j < V.cols(); ++j){
+	Rprintf(" %f",V(i,j));
       }
+    }
+    
+  } 
   
   return;
 };
