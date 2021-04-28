@@ -54,9 +54,24 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
   
   // simultaneous test
   if(this->inf_car.getInfData()->get_test_type() == "simultaneous"){
+    // Store beta_hat
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+    
+    // Build auxiliary matrix for residuals computation
+    MatrixXr C_out = MatrixXr::Zero(C.cols(), C.cols());
+    
+    for(UInt j = 0; j < C.cols(); ++j){
+    	UInt count = 0; 
+        for(UInt i = 0; i < q; ++i){
+		if(C(i,j) == 1)
+			count++;
+	}
+	if(count == 0)
+		C_out(j,j) = 1; 
+    }
     
     // compute the partial residuals
-    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C_t) * (beta_0);
+    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C_t) * (beta_0) - (*W) * (C_out) * beta_hat;
     
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D

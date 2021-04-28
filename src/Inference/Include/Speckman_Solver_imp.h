@@ -1,11 +1,11 @@
 #include "Speckman_Solver.h"
-#include <boost/math/distributions/chi_squared.hpp>
-#include <boost/math/distributions/normal.hpp>
+//#include <boost/math/distributions/chi_squared.hpp>
+//#include <boost/math/distributions/normal.hpp>
 #include <cmath>
 
-using boost::math::chi_squared;
-using boost::math::normal;
-using namespace boost::math; 
+//using boost::math::chi_squared;
+//using boost::math::normal;
+//using namespace boost::math; 
 
 template<typename InputHandler> 
 void Speckman_Solver<InputHandler>::compute_Lambda2(void){
@@ -111,13 +111,14 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
     // compute the test statistic
     Real stat = diff.adjoint() * Sigma_dec.solve(diff);
     
-    chi_squared distribution(C.rows());
+    //chi_squared distribution(C.rows());
     
     // compute the p-value
-    Real pval = cdf(complement(distribution, stat));
+    //Real pval = cdf(complement(distribution, stat));
     
     result.resize(1);
-    result(0) = pval;
+    //result(0) = pval;
+    result(0) = stat; 
     return result;
   }
   
@@ -148,10 +149,11 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
       Real sigma = col.adjoint()*V*col;
       // compute the test statistic
       Real stat = difference/std::sqrt(sigma);
-      normal distribution(0,1);
+      //normal distribution(0,1);
       // compute the pvalue
-      Real pval = 2*cdf(complement(distribution, fabs(stat)));
-      result(i) = pval; 	
+      //Real pval = 2*cdf(complement(distribution, fabs(stat)));
+      //result(i) = pval; 
+      result(i) = stat;	
     }
     
     return result;
