@@ -29,11 +29,11 @@ public:
       return make_unique<Wald<InputHandler>>(std::move(inverter_), inf_car_);
     if(implementation_type_=="speckman")
       return make_unique<Speckman<InputHandler>>(std::move(inverter_), inf_car_);
-    if(implementation_type_=="permutational")
+    if(implementation_type_=="eigen-sign-flip")
       return make_unique<Eigen_Sign_Flip<InputHandler>>(std::move(inverter_), inf_car_);
     else // deafult Wald
       {
-	Rprintf("Method not found, using Newton_fd");
+	Rprintf("Implementation not found, using wald");
 	return make_unique<Wald<InputHandler>>(std::move(inverter_), inf_car_);
       }
   }
