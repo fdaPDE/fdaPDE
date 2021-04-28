@@ -38,7 +38,7 @@ void Wald<InputHandler>::compute_S(void){
 };
 
 template<typename InputHandler> 
-void Wald<InputHandler>::compute_sigma_hat_sq(void) const {
+void Wald<InputHandler>::compute_sigma_hat_sq(void){
   if(is_S_computed==true){
     VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
     Real SS_res = eps_hat.squaredNorm();
@@ -55,8 +55,6 @@ void Wald<InputHandler>::compute_sigma_hat_sq(void) const {
 
 template<typename InputHandler> 
 void Wald<InputHandler>::compute_V(){
-  // get the variance of the residuals estimators from the inference carrier
-  const Real var_res = compute_sigma_hat_sq();
   // resize the variance-covariance matrix
   UInt p = this->inf_car.getp();
   V.resize(p,p);
@@ -65,7 +63,7 @@ void Wald<InputHandler>::compute_V(){
   const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = this->inf_car.getWtW_decp();
   
-  V = var_res*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
+  V = this->sigma_hat_sq*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
   is_V_computed = true;
   
   return;
@@ -84,9 +82,9 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);compute_sigma_hat_sq
-							       // compute the difference
-							       VectorXr diff = C*beta_hat - beta_0; 
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+    // compute the difference
+    VectorXr diff = C*beta_hat - beta_0; 
     
     // compute the variance-covariance matrix if needed
     if(!is_S_computed){
@@ -217,6 +215,16 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
   return result;
 };
 
+template<typename InputHandler>
+Real Wald<InputHandler>::compute_GCV_from_inference(void) const {
+  UInt n_obs =this->inf_car.getN_obs();
+  UInt q = this->inf_car.getp();
+  if(this->is_S_computed==true){
+    return sigma_hat_sq * n_obs /(n_obs - q - tr_S);
+  } else{
+    return -1; // S has not been computed, returning default value
+  }
+};
 
 template<typename InputHandler>
 void Wald<InputHandler>::print_for_debug(void) const {
@@ -249,13 +257,4 @@ void Wald<InputHandler>::print_for_debug(void) const {
   return;
 };
 
-template<typename InputHandler>
-Real Wald<InputHandler>::compute_GCV_from_Wald(void) const {
-  UInt n_obs =this->inf_car.getN_obs();
-  UInt q = this->inf_car.getp();
-  if(this->is_S_computed==true){
-    return sigma_hat_sq * n_obs /(n_obs - q - tr_S);
-  } else{
-    return -1; // S has not been computed, returning default value
-  }
-};
+

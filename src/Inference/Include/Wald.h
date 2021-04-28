@@ -32,7 +32,7 @@ private:
   void compute_V(void);					//!< Method used to compute V
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
-  void compute_sigma_hat_sq(void) const;                //!< Method to compute the estimator of the variance of the residuals 
+  void compute_sigma_hat_sq(void);                      //!< Method to compute the estimator of the variance of the residuals 
   
 public:
   // CONSTUCTOR
@@ -43,7 +43,7 @@ public:
 
   Wald & operator=(Wald && rhs) = delete; //The move assignment operator is deleted
 
-  Real compute_GCV_from_Wald(void) const; //!< Needed to compute exact GCV in case Wald test is required and GCV exact is not provided by lambda optimization (Run after S computation)
+  Real compute_GCV_from_inference(void) const override; //!< Needed to compute exact GCV in case Wald test is required and GCV exact is not provided by lambda optimization (Run after S computation)
   
   
   // GETTERS

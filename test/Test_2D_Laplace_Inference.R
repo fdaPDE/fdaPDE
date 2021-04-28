@@ -55,7 +55,7 @@ R_inference_object = inferenceDataObjectBuilder(test = "one-at-the-time", exact 
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda, lambda.selection.lossfunction = "GCV",
+                       FEMbasis=FEMbasis, lambda=lambda, #lambda.selection.lossfunction = "GCV",
                        R_Inference_Data_Object = R_inference_object
 )
 output_CPP$inference$p_vals

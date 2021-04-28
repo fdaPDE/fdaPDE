@@ -105,8 +105,8 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		
 		inference_Output = inference_Solver->compute_inference_output();
 
-		if(inferenceData.get_implementation_type()=="wald" && optimizationData.get_loss_function()=="unused" && optimizationData.get_size_s()==1){
-			(solution_bricks.second).GCV_opt=inference_Solver->compute_GCV_from_Wald(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
+		if(inferenceData.get_implementation_type()=="wald" && optimizationData.get_loss_function()=="unused" && optimizationData.get_size_S()==1){
+			(solution_bricks.second).GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
 		}
          }
 

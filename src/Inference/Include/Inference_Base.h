@@ -35,6 +35,9 @@ public:
  
   //!< public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);
+  
+  //!< virtual public method that computes exact GCV, implemented only for Wald 
+  inline virtual Real compute_GCV_from_inference(void) const {return 0;};
 
   // DESTRUCTOR
   virtual ~Inference_Base(){};
