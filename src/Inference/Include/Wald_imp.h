@@ -1,4 +1,4 @@
-#include "Wald_Solver.h"
+#include "Wald.h"
 //#include <boost/math/distributions/chi_squared.hpp>
 //#include <boost/math/distributions/normal.hpp>
 #include <cmath>
@@ -8,7 +8,7 @@
 //using namespace boost::math; 
 
 template<typename InputHandler> 
-void Wald_Solver<InputHandler>::compute_S(void){
+void Wald<InputHandler>::compute_S(void){
   this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   MatrixXr M_inv;
@@ -38,7 +38,7 @@ void Wald_Solver<InputHandler>::compute_S(void){
 };
 
 template<typename InputHandler> 
-Real Wald_Solver<InputHandler>::compute_sigma_hat_sq(void) const {
+Real Wald<InputHandler>::compute_sigma_hat_sq(void) const {
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
   Real SS_res = eps_hat.squaredNorm();
   
@@ -52,7 +52,7 @@ Real Wald_Solver<InputHandler>::compute_sigma_hat_sq(void) const {
 };
 
 template<typename InputHandler> 
-void Wald_Solver<InputHandler>::compute_V(){
+void Wald<InputHandler>::compute_V(){
   // get the variance of the residuals estimators from the inference carrier
   const Real var_res = compute_sigma_hat_sq();
   // resize the variance-covariance matrix
@@ -70,7 +70,7 @@ void Wald_Solver<InputHandler>::compute_V(){
 };
 
 template<typename InputHandler> 
-VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
+VectorXr Wald<InputHandler>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
   
@@ -152,7 +152,7 @@ VectorXr Wald_Solver<InputHandler>::compute_pvalue(void){
 };
 
 template<typename InputHandler> 
-MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
+MatrixXv Wald<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -217,7 +217,7 @@ MatrixXv Wald_Solver<InputHandler>::compute_CI(void){
 
 
 template<typename InputHandler>
-void Wald_Solver<InputHandler>::print_for_debug(void) const {
+void Wald<InputHandler>::print_for_debug(void) const {
   
   Rprintf("S computed: %d \n", is_S_computed); 
   

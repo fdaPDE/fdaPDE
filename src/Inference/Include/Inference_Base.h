@@ -1,5 +1,5 @@
-#ifndef __SOLVER_BASE_H__
-#define __SOLVER_BASE_H__
+#ifndef __INFERENCE_BASE_H__
+#define __INFERENCE_BASE_H__
 
 // HEADERS
 #include "../../FdaPDE.h"
@@ -12,13 +12,13 @@
 #include "Inverter.h"
 #include <memory>
 
-// *** Solver_Base Class ***
+// *** Inference_Base Class ***
 //! Hypothesis testing and confidence intervals base class
 /*!
   This class provides the basic tools to perform hypothesis testing and/or compute confidence intervals. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
 template<typename InputHandler>
-class Solver_Base{
+class Inference_Base{
 protected:
   std::unique_ptr<Inverse_Base> inverter = nullptr;     //!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
@@ -27,20 +27,20 @@ protected:
   
 public:
   // CONSTUCTOR
-  Solver_Base()=delete;	//The default constructor is deleted
-  Solver_Base(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(std::move(inverter_)), inf_car(inf_car_){}; 
-  Solver_Base(Solver_Base & rhs) = delete; //The default copy constructor is deleted
-  Solver_Base(Solver_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car){}; //Definition of the move constructor
-  Solver_Base & operator=(Solver_Base && rhs) = delete; //The move assignment operator is deleted
+  Inference_Base()=delete;	//The default constructor is deleted
+  Inference_Base(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(std::move(inverter_)), inf_car(inf_car_){}; 
+  Inference_Base(Inference_Base & rhs) = delete; //The default copy constructor is deleted
+  Inference_Base(Inference_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car){}; //Definition of the move constructor
+  Inference_Base & operator=(Inference_Base && rhs) = delete; //The move assignment operator is deleted
  
   //!< public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);
 
   // DESTRUCTOR
-  virtual ~Solver_Base(){};
+  virtual ~Inference_Base(){};
 };
 
 
-#include "Solver_Base_imp.h"
+#include "Inference_Base_imp.h"
 
 #endif

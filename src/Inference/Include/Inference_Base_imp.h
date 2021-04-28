@@ -1,7 +1,7 @@
-#include "Solver_Base.h"
+#include "Inference_Base.h"
 
 template<typename InputHandler>
-MatrixXv Solver_Base<InputHandler>::compute_inference_output(void){
+MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
   // declare the result Matrix of vectors to be returned
   MatrixXv result;
   

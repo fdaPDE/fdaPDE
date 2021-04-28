@@ -1,5 +1,5 @@
-#ifndef __WALD_SOLVER_H__
-#define __WALD_SOLVER_H__
+#ifndef __WALD_H__
+#define __WALD_H__
 
 // HEADERS
 #include "../../FdaPDE.h"
@@ -10,16 +10,16 @@
 #include "Inference_Data.h"
 #include "Inference_Carrier.h"
 #include "Inverter.h"
-#include "Solver_Base.h"
+#include "Inference_Base.h"
 #include <memory>
 
-// *** Wald_Solver Class ***
+// *** Wald Class ***
 //! Hypothesis testing and confidence intervals using Wald implementation
 /*!
   This class performes hypothesis testing and/or computes confidence intervals using a Wald-type approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
 template<typename InputHandler>
-class Wald_Solver:public Solver_Base<InputHandler>{
+class Wald:public Inference_Base<InputHandler>{
 private:
   MatrixXr S;						//!< Smoothing matrix 
   MatrixXr S_t;   					//!< Transpose of the smoothing matrix
@@ -34,12 +34,12 @@ private:
   
 public:
   // CONSTUCTOR
-  Wald_Solver()=delete;	//The default constructor is deleted
-  Wald_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
-  Wald_Solver(Wald_Solver & rhs) = delete; //The default copy constructor is deleted
-  inline Wald_Solver(Wald_Solver && rhs):S(std::move(rhs.S)), S_t(std::move(rhs.S_t)), is_S_computed(rhs.is_S_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition of the move constructor
+  Wald()=delete;	//The default constructor is deleted
+  Wald(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Wald(Wald & rhs) = delete; //The default copy constructor is deleted
+  inline Wald(Wald && rhs):S(std::move(rhs.S)), S_t(std::move(rhs.S_t)), is_S_computed(rhs.is_S_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition of the move constructor
 
-  Wald_Solver & operator=(Wald_Solver && rhs) = delete; //The move assignment operator is deleted
+  Wald & operator=(Wald && rhs) = delete; //The move assignment operator is deleted
   
   
   // GETTERS
