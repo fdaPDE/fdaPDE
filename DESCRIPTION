@@ -33,8 +33,7 @@ Depends:
     stats, grDevices, graphics, geometry,
     rgl, Matrix, plot3D, plot3Drgl, shiny
 LinkingTo: 
-	RcppEigen,
-        BH
+	RcppEigen
 Suggests: 
     MASS,
     testthat

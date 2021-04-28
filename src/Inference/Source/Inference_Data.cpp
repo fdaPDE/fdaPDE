@@ -44,7 +44,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
     this->set_implementation_type("speckman");
 
   else if(INTEGER(implementation_Type_)[0]==3)
-    this->set_implementation_type("permutational");
+    this->set_implementation_type("eigen-sign-flip");
 
    //exact_Inference
    if(INTEGER(exact_Inference_)[0]==1)
