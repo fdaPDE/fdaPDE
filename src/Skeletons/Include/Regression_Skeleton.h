@@ -104,6 +104,10 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inferenceData.get_implementation_type(), 			   std::move(inference_Inverter), inf_car); // Selects the right implementation and solves the inferential problems		
 		
 		inference_Output = inference_Solver->compute_inference_output();
+
+		if(inferenceData.get_implementation_type()=="wald" && optimizationData.get_loss_function()=="unused" && optimizationData.get_size_s()==1){
+			(solution_bricks.second).GCV_opt=inference_Solver->compute_GCV_from_Wald(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
+		}
          }
 
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);

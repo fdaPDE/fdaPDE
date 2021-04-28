@@ -38,17 +38,19 @@ void Wald<InputHandler>::compute_S(void){
 };
 
 template<typename InputHandler> 
-Real Wald<InputHandler>::compute_sigma_hat_sq(void) const {
-  VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
-  Real SS_res = eps_hat.squaredNorm();
+void Wald<InputHandler>::compute_sigma_hat_sq(void) const {
+  if(is_S_computed==true){
+    VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
+    Real SS_res = eps_hat.squaredNorm();
   
-  UInt n = this->inf_car.getN_obs();
-  UInt p = this->inf_car.getp();
-  Real tr_S = this->S.trace();
-  Real sigma_hat_sq = SS_res/(n - (p + tr_S));
+    UInt n = this->inf_car.getN_obs();
+    UInt p = this->inf_car.getp();
+    tr_S = this->S.trace();
+    sigma_hat_sq = SS_res/(n - (p + tr_S));
+  }
   
   
-  return sigma_hat_sq; 
+  return; 
 };
 
 template<typename InputHandler> 
@@ -82,9 +84,9 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
-    // compute the difference
-    VectorXr diff = C*beta_hat - beta_0; 
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);compute_sigma_hat_sq
+							       // compute the difference
+							       VectorXr diff = C*beta_hat - beta_0; 
     
     // compute the variance-covariance matrix if needed
     if(!is_S_computed){
@@ -245,4 +247,15 @@ void Wald<InputHandler>::print_for_debug(void) const {
   } 
   
   return;
+};
+
+template<typename InputHandler>
+Real Wald<InputHandler>::compute_GCV_from_Wald(void) const {
+  UInt n_obs =this->inf_car.getN_obs();
+  UInt q = this->inf_car.getp();
+  if(this->is_S_computed==true){
+    return sigma_hat_sq * n_obs /(n_obs - q - tr_S);
+  } else{
+    return -1; // S has not been computed, returning default value
+  }
 };

@@ -23,6 +23,8 @@ class Wald:public Inference_Base<InputHandler>{
 private:
   MatrixXr S;						//!< Smoothing matrix 
   MatrixXr S_t;   					//!< Transpose of the smoothing matrix
+  Real tr_S=0; 						//!< Trace of smoothing matrix, needed for the variance-covariance matrix (V) and eventually GCV computation
+  Real sigma_hat_sq; 					//!< Estimator for the variance of the residuals (SSres/(n_obs-(q+tr_S)))
   bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
@@ -30,7 +32,7 @@ private:
   void compute_V(void);					//!< Method used to compute V
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
-  Real compute_sigma_hat_sq(void) const;                //!< Method to compute the estimator of the variance of the residuals 
+  void compute_sigma_hat_sq(void) const;                //!< Method to compute the estimator of the variance of the residuals 
   
 public:
   // CONSTUCTOR
@@ -40,6 +42,8 @@ public:
   inline Wald(Wald && rhs):S(std::move(rhs.S)), S_t(std::move(rhs.S_t)), is_S_computed(rhs.is_S_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition of the move constructor
 
   Wald & operator=(Wald && rhs) = delete; //The move assignment operator is deleted
+
+  Real compute_GCV_from_Wald(void) const; //!< Needed to compute exact GCV in case Wald test is required and GCV exact is not provided by lambda optimization (Run after S computation)
   
   
   // GETTERS
