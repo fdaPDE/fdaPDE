@@ -7,12 +7,12 @@
  \param exact_Inference_ parameter for the method used to invert E matrix in Woodbury decomposition for inference
  \param coeff_Inference_ vector that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals. 
  \param beta_0_ vector for the null hypotesis (if test is defined)
- \param inference_level_ parameter used to set the significance level of the confidence intervals (if interval_type is set)
+ \param inference_Quantile_ parameter used to set the significance level of the confidence intervals (if interval_type is set)
  \param definition_ parameter used to set definition of the InferenceData object. 
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
 			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,
-			     SEXP inference_Level_, SEXP n_perm_, SEXP definition_){
+			     SEXP inference_Quantile_, SEXP n_perm_, SEXP definition_){
   //test_Type
   if(INTEGER(test_Type_)[0]==0)
     this->set_test_type("not-defined");
@@ -72,8 +72,8 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
    beta_0[i]=REAL(beta_0_)[i];
  }
 
- //inference_Level
- this->set_inference_level(REAL(inference_Level_)[0]);
+ //inference_Quantile
+ this->set_inference_quantile(REAL(inference_Quantile_)[0]);
 
  //definition
  this->set_definition(bool(INTEGER(definition_)[0]));
@@ -100,7 +100,7 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %f", beta_0(i));
   }
   Rprintf("\n");
-  Rprintf("inference_Level: %f\n",inference_Level);
+  Rprintf("inference_Quantile: %f\n",inference_Quantile);
   Rprintf("n_perm: %d\n", n_perm);
   Rprintf("definition: %d\n",definition);
 };

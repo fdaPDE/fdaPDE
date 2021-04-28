@@ -171,35 +171,38 @@ MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
   VectorXr beta_hat = compute_beta_hat();
   
   // declare the matrix that will store the p-values
-  Real alpha=this->inf_car.getInfData()->get_inference_level();
-  Real quant=0;
+  //Real alpha=this->inf_car.getInfData()->get_inference_level(); //deprecated
+  //Real quant=0;
   UInt q=C.rows();
   MatrixXv result;
   result.resize(1,q);
   
+  // Now all of this is done in R
+  //// simultaneous confidence interval (overall confidence aplha)
+  //if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
+  //  chi_squared distribution(q);
+  //  quant =std::sqrt(quantile(complement(distribution,alpha)));
+  //}
+  //else{
+  //  // one-at-the-time confidence intervals (each interval has confidence alpha)
+  //  if(this->inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
+  //    normal distribution(0,1);
+  //    quant = quantile(complement(distribution,alpha/2));
+  //  }
+  //  // Bonferroni confidence intervals (overall confidence approximately alpha)
+  //  else{
+  //    normal distribution(0,1);
+  //    quant = quantile(complement(distribution,alpha/(2*q)));
+  //  }
+  //}
+
+  // Extract the quantile needed for the computation of upper and lower bounds
+  Real quant = this->inf_car.getInfeData()->get_inference_quatile()
   
-  // simultaneous confidence interval (overall confidence aplha)
-  if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
-    chi_squared distribution(q);
-    quant =std::sqrt(quantile(complement(distribution,alpha)));
-  }
-  else{
-    // one-at-the-time confidence intervals (each interval has confidence alpha)
-    if(this->inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
-      normal distribution(0,1);
-      quant = quantile(complement(distribution,alpha/2));
+    // compute Lambda2 and V if needed
+    if(!is_Lambda2_computed){
+      compute_Lambda2();
     }
-    // Bonferroni confidence intervals (overall confidence approximately alpha)
-    else{
-      normal distribution(0,1);
-      quant = quantile(complement(distribution,alpha/(2*q)));
-    }
-  }
-  
-  // compute Lambda2 and V if needed
-  if(!is_Lambda2_computed){
-    compute_Lambda2();
-  }
   if(!is_V_computed){
     compute_V();
   }
