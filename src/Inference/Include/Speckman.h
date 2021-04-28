@@ -1,5 +1,5 @@
-#ifndef __SPECKMAN_SOLVER_H__
-#define __SPECKMAN_SOLVER_H__
+#ifndef __SPECKMAN_H__
+#define __SPECKMAN_H__
 
 // HEADERS
 #include "../../FdaPDE.h"
@@ -10,16 +10,16 @@
 #include "Inference_Data.h"
 #include "Inference_Carrier.h"
 #include "Inverter.h"
-#include "Solver_Base.h"
+#include "Inference_Base.h"
 #include <memory>
 
-// *** Speckman_Solver Class ***
+// *** Speckman Class ***
 //! Hypothesis testing and confidence intervals using Speckman implementation
 /*!
   This class performes hypothesis testing and/or computes confidence intervals using a Speckman approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
 template<typename InputHandler>
-class Speckman_Solver:public Solver_Base<InputHandler>{
+class Speckman:public Inference_Base<InputHandler>{
 private:
   MatrixXr B;						//!< Matrix Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t 
   MatrixXr Lambda2;   					//!< (I - B)^2
@@ -37,11 +37,11 @@ private:
   
 public:
   // CONSTUCTOR
-  Speckman_Solver()=delete;	//The default constructor is deleted
-  Speckman_Solver(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Solver_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
-  Speckman_Solver(Speckman_Solver & rhs) = delete; //The default copy constructor is deleted
-  inline Speckman_Solver(Speckman_Solver && rhs): B(std::move(rhs.B)), Lambda2(std::move(rhs.Lambda2)), is_Lambda2_computed(rhs.is_Lambda2_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed), WLW_dec(std::move(rhs.WLW_dec)), is_WLW_computed(rhs.is_WLW_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition move constructor
-  Speckman_Solver & operator=(Speckman_Solver && rhs) = delete; //The move assignment operator is deleted
+  Speckman()=delete;	//The default constructor is deleted
+  Speckman(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Inference_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Speckman(Speckman & rhs) = delete; //The default copy constructor is deleted
+  inline Speckman(Speckman && rhs): B(std::move(rhs.B)), Lambda2(std::move(rhs.Lambda2)), is_Lambda2_computed(rhs.is_Lambda2_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed), WLW_dec(std::move(rhs.WLW_dec)), is_WLW_computed(rhs.is_WLW_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition move constructor
+  Speckman & operator=(Speckman && rhs) = delete; //The move assignment operator is deleted
   
   // GETTERS
   inline const MatrixXr * getLambda2p (void) const {return &this->Lambda2;}     //!< Getter of Lambda2p \return Lambda2p
@@ -52,6 +52,6 @@ public:
 };
 
 
-#include "Speckman_Solver_imp.h"
+#include "Speckman_imp.h"
 
 #endif

@@ -1,9 +1,9 @@
-#include "Eigen_Sign_Flip_Solver.h"
+#include "Eigen_Sign_Flip.h"
 #include <cmath>
 #include <random>
 
 template<typename InputHandler> 
-void Eigen_Sign_Flip_Solver<InputHandler>::compute_Lambda(void){
+void Eigen_Sign_Flip<InputHandler>::compute_Lambda(void){
   this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // extract the inverse of E
   const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
@@ -24,7 +24,7 @@ void Eigen_Sign_Flip_Solver<InputHandler>::compute_Lambda(void){
 };
 
 template<typename InputHandler> 
-VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
+VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
   
   // extract matrix C  
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -156,7 +156,7 @@ VectorXr Eigen_Sign_Flip_Solver<InputHandler>::compute_pvalue(void){
 };
 
 template<typename InputHandler>
-MatrixXv Eigen_Sign_Flip_Solver<InputHandler>::compute_CI(void){
+MatrixXv Eigen_Sign_Flip<InputHandler>::compute_CI(void){
   MatrixXv result;
 
   // Not implemented yet //
@@ -167,7 +167,7 @@ MatrixXv Eigen_Sign_Flip_Solver<InputHandler>::compute_CI(void){
 
 
 template<typename InputHandler>
-void Eigen_Sign_Flip_Solver<InputHandler>::print_for_debug(void) const {
+void Eigen_Sign_Flip<InputHandler>::print_for_debug(void) const {
   int aaaa=1;
   return;
 };

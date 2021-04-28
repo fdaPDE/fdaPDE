@@ -1,4 +1,4 @@
-#include "Speckman_Solver.h"
+#include "Speckman.h"
 //#include <boost/math/distributions/chi_squared.hpp>
 //#include <boost/math/distributions/normal.hpp>
 #include <cmath>
@@ -8,7 +8,7 @@
 //using namespace boost::math; 
 
 template<typename InputHandler> 
-void Speckman_Solver<InputHandler>::compute_Lambda2(void){
+void Speckman<InputHandler>::compute_Lambda2(void){
   this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // extract the inverse of E
   const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
@@ -29,7 +29,7 @@ void Speckman_Solver<InputHandler>::compute_Lambda2(void){
 };
 
 template<typename InputHandler> 
-void Speckman_Solver<InputHandler>::compute_V(){
+void Speckman<InputHandler>::compute_V(){
   // get the residuals needed
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
   // build squared residuals
@@ -51,7 +51,7 @@ void Speckman_Solver<InputHandler>::compute_V(){
 };
 
 template<typename InputHandler>
-void Speckman_Solver<InputHandler>::compute_WLW_dec(void){
+void Speckman<InputHandler>::compute_WLW_dec(void){
   if(!is_Lambda2_computed){
     compute_Lambda2();
   }
@@ -65,7 +65,7 @@ void Speckman_Solver<InputHandler>::compute_WLW_dec(void){
 };
 
 template<typename InputHandler> 
-VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
+VectorXr Speckman<InputHandler>::compute_beta_hat(void){
   if(!is_WLW_computed){
     compute_WLW_dec();
   }
@@ -79,7 +79,7 @@ VectorXr Speckman_Solver<InputHandler>::compute_beta_hat(void){
 };
 
 template<typename InputHandler> 
-VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
+VectorXr Speckman<InputHandler>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
   
@@ -162,7 +162,7 @@ VectorXr Speckman_Solver<InputHandler>::compute_pvalue(void){
 };
 
 template<typename InputHandler> 
-MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
+MatrixXv Speckman<InputHandler>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -227,7 +227,7 @@ MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
 
 
 template<typename InputHandler>
-void Speckman_Solver<InputHandler>::print_for_debug(void) const {
+void Speckman<InputHandler>::print_for_debug(void) const {
   int aaaa=1;
   return;
 };
