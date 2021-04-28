@@ -263,24 +263,26 @@ inferenceDataObjectBuilder<-function(test = NULL,
   # Build the quantile for Confidence intervals if needed
   quantile=0
   if(level > 0){
-    if(interval == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
+    if(interval_numeric == 1){ # Simultaneous CI -> Chi-Squared (q) law for statistic
       # C++
       #chi_squared distribution(q);
       #quant =std::sqrt(quantile(complement(distribution,alpha)))
       quantile=qchisq(1-level, dim(coeff)[1])
     }
     else{
-      if(interval ==  "one-at-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
+      if(interval_numeric ==  2 ){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
         # C++
         #normal distribution(0,1);
         #quant = quantile(complement(distribution,alpha/2));
         quantile=qnorm((1-level/2),0,1)
       }
-      else{ # One at the time CI (overall confidence alpha) -> Gaussian law for statistic
+      else{ 
+        if(interval_numeric == 3){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
         #C++
         #normal distribution(0,1);
         #quant = quantile(complement(distribution,alpha/(2*q)));
-        quantile=qnorm((1-level/(2*dim(coeff)[1]),0,1)
+        quantile=qnorm((1-level/(2*dim(coeff)[1])),0,1)
+        }
       }
     }
   }

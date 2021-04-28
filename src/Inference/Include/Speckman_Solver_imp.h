@@ -197,7 +197,7 @@ MatrixXv Speckman_Solver<InputHandler>::compute_CI(void){
   //}
 
   // Extract the quantile needed for the computation of upper and lower bounds
-  Real quant = this->inf_car.getInfeData()->get_inference_quatile()
+  Real quant = this->inf_car.getInfData()->get_inference_quantile();
   
     // compute Lambda2 and V if needed
     if(!is_Lambda2_computed){
