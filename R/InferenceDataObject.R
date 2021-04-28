@@ -4,7 +4,7 @@
 #'in the third a simultaneous test is performed.
 #'@slot interval An integer taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 #'in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.
-#'@slot type An integer taking value 1, 2 or 3, corresponding to Wald, speckman or permutational implementation 
+#'@slot type An integer taking value 1, 2 or 3, corresponding to Wald, speckman or eigen-sign-flip implementation 
 #'of the inference analysis.
 #'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistic will be performed,
 #'whereas if 2 an approximated computation will be carried out.
@@ -13,7 +13,7 @@
 #' estimated via confidence interval. 
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
 #'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
-#'@slot n_perm An integer representing the number of permutations in the case of permutational test.
+#'@slot n_perm An integer representing the number of permutations in the case of eigen-sign-flip test.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
@@ -47,7 +47,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'If the value is NULL, no interval will be computed, and the \code{test} parameter needs to be set. Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed.
 #'If it is not NULL, the parameter \code{level} will be taken into account. Up to now, confidence intervals can be computed only in the Wald implementation.
 #'@param type A string defining the type of implementation for the inferential analysis. The possible values are three:
-#''wald'(default), 'speckman' or 'permutational', corresponding to the three possible methods developed in Ferraccioli....
+#''wald'(default), 'speckman' or 'eigen-sign-flip', corresponding to the three possible methods developed in Ferraccioli....
 #'@param exact A string used to decide the method used to estimate the statistics variance.
 #'The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally very expensive.
 #'In the second case an approximate method is used, leading to a lower accuracy, but faster computation.
@@ -56,7 +56,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. If \code{test} is set and \code{beta0} is NULL,
 #'will be set to a vector of zeros.
 #'@param level Level of significance, defaulted to 0.05. It is taken into account only if \code{interval} is set.
-#'@param n_perm Number of permutations, defaulted to 1000. It is taken into account only if \code{type} is set to "permutational".
+#'@param n_perm Number of permutations, defaulted to 1000. It is taken into account only if \code{type} is set to "eigen-sign-flip".
 #'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
 #'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
@@ -105,9 +105,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   if(type!="wald"){
     if(class(type)!="character")
-      stop("'type' should be a character: choose one among 'wald', 'speckman' or 'permutational'" )
+      stop("'type' should be a character: choose one among 'wald', 'speckman' or 'eigen-sign-flip'" )
     if(length(type)==0)
-      stop("'type' is zero dimensional, should be one among 'wald', 'speckman' or 'permutational'")
+      stop("'type' is zero dimensional, should be one among 'wald', 'speckman' or 'eigen-sign-flip'")
   }
   
   if(exact!="False"){
@@ -179,11 +179,11 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }
   
-  if(type!="wald" && type!="speckman" && type!="permutational"){
-    stop("type should be choosen between 'wald', 'speckman' and 'permutational'")}else{
+  if(type!="wald" && type!="speckman" && type!="eigen-sign-flip"){
+    stop("type should be choosen between 'wald', 'speckman' and 'eigen-sign-flip'")}else{
       if(type=="wald") type_numeric=as.integer(1)
       if(type=="speckman") type_numeric=as.integer(2)
-      if(type=="permutational") type_numeric=as.integer(3)
+      if(type=="eigen-sign-flip") type_numeric=as.integer(3)
     }
   
   if(!is.null(test)){
@@ -222,20 +222,20 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   
-  if(!is.null(interval) && type=="permutational"){
-    stop("confidence intervals are not implemented in the permutational case")
+  if(!is.null(interval) && type=="eigen-sign-flip"){
+    stop("confidence intervals are not implemented in the eigen-sign-flip case")
   }
   
-  if(type == "permutational"){
+  if(type == "eigen-sign-flip"){
     for(i in 1:dim(coeff)[1]){
       count=0
       for(j in 1:dim(coeff)[2]){
         if(coeff[i,j]!= 0 && coeff[i,j]!=1)
-          stop("linear combinations are not allowed in the permutational case")
+          stop("linear combinations are not allowed in the eigen-sign-flip case")
         count = count + coeff[i,j]
       }
       if(count != 1)
-        stop("linear combinations are not allowed in the permutational case")
+        stop("linear combinations are not allowed in the eigen-sign-flip case")
     }
   }
   
