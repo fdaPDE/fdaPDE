@@ -13,7 +13,7 @@ void Eigen_Sign_Flip<InputHandler>::compute_Lambda(void){
   B.resize(n_obs, n_obs);
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  UInt p = this->inf_car.getp(); 
+  UInt q = this->inf_car.getq(); 
   
   B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
   
@@ -29,7 +29,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
   // extract matrix C  
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   MatrixXr C_t = C.transpose();
-  UInt q = C.rows(); 
+  UInt p = C.rows(); 
   
   // declare the vector that will store the p-values
   VectorXr result;
@@ -62,7 +62,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     
     for(UInt j = 0; j < C.cols(); ++j){
     	UInt count = 0; 
-        for(UInt i = 0; i < q; ++i){
+        for(UInt i = 0; i < p; ++i){
 		if(C(i,j) == 1)
 			count++;
 	}
@@ -111,8 +111,8 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     // Store beta_hat
     VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
     
-    Partial_res_H0.resize(Lambda.cols(), q);
-    for(UInt i=0; i<q; ++i){
+    Partial_res_H0.resize(Lambda.cols(), p);
+    for(UInt i=0; i<p; ++i){
       // Build auxiliary vector for residuals computation
       VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C_t.col(i);
 
@@ -128,7 +128,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     MatrixXr stat_perm=stat;
     std::default_random_engine eng;
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-    VectorXr count = VectorXr::Zero(q);
+    VectorXr count = VectorXr::Zero(p);
     
     MatrixXr Tilder_perm=Tilder;
     
@@ -139,7 +139,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
       }
       stat_perm=TildeX*Tilder_perm; // Flipped statistic
       
-      for(UInt k=0; k<q; ++k){
+      for(UInt k=0; k<p; ++k){
 	if(fabs(stat_perm(k,k)) > fabs(stat(k,k))){
 	  ++count(k);
 	} 
@@ -148,7 +148,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     
     VectorXr pval = count/n_perm;
     
-    result.resize(q);
+    result.resize(p);
     result = pval;
   } 
   return result;

@@ -27,7 +27,7 @@ class Inference_Carrier{
 		// SYSTEM PARAMETERS
 		UInt n_obs; 							        //!< Number of observations
 		UInt n_nodes;							        //!< Number of nodes
-		UInt p;								        //!< Number of covariates
+		UInt q;								        //!< Number of covariates
 
 		Real lambda=0; 								//!< Optimal smothing parameter
 		UInt optimal_position=0; 						//!< Position of the predicted values in the case of optimal lambda
@@ -59,7 +59,7 @@ class Inference_Carrier{
 
 		inline void setN_obs (UInt n_obs_){n_obs = n_obs_;}							//!< Setter of n_obs \param n_obs_ new n_obs
 		inline void setN_nodes (UInt n_nodes_){n_nodes = n_nodes_;}						//!< Setter of n_nodes \param n_nodes_ new n_nodes
-		inline void setp (UInt p_){p = p_;}									//!< Setter of p \param p_ new p
+		inline void setq (UInt q_){q = q_;}									//!< Setter of q \param q_ new q
 
 		inline void setLambda (Real lambda_){lambda = lambda_;}							//!< Setter of lambda \param lambda_ new lambda
 		inline void setOptimal_position(UInt optimal_position_){optimal_position_=optimal_position_;} 			//!< Setter of optima_position \param optimal_position_ new optimal_position
@@ -94,7 +94,7 @@ class Inference_Carrier{
 
 		inline UInt getN_obs (void) const {return n_obs;} 							//!< Getter of n_obs \return n_obs
 		inline UInt getN_nodes (void) const {return n_nodes;} 							//!< Getter of n_nodes \return n_nodes
-		inline UInt getp (void) const {return p;} 								//!< Getter of p \return p
+		inline UInt getq (void) const {return q;} 								//!< Getter of q \return q
 
 		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
 		inline UInt getOptimal_Position(void) const {return optimal_position;}					//!< Getter of the optimal_position \return optimal_position

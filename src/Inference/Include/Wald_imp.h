@@ -9,10 +9,12 @@
 
 template<typename InputHandler> 
 void Wald<InputHandler>::compute_S(void){
-  this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
+  this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
+
   MatrixXr M_inv;
   M_inv.resize(this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp())->rows(), this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp())->cols());
+
   const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
   const MatrixXr * U = this->inf_car.getUp();
   const MatrixXr * V = this->inf_car.getVp();
@@ -25,8 +27,8 @@ void Wald<InputHandler>::compute_S(void){
   S.resize(n_obs, n_obs);
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  UInt p = this->inf_car.getp(); 
-  MatrixXr Q = MatrixXr::Identity(p, p) - *(this->inf_car.getHp()); 
+  UInt q = this->inf_car.getq(); 
+  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
   
   S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
   
@@ -44,9 +46,9 @@ void Wald<InputHandler>::compute_sigma_hat_sq(void){
     Real SS_res = eps_hat.squaredNorm();
   
     UInt n = this->inf_car.getN_obs();
-    UInt p = this->inf_car.getp();
+    UInt q = this->inf_car.getq();
     tr_S = this->S.trace();
-    sigma_hat_sq = SS_res/(n - (p + tr_S));
+    sigma_hat_sq = SS_res/(n - (q + tr_S));
   }
   
   
@@ -56,14 +58,14 @@ void Wald<InputHandler>::compute_sigma_hat_sq(void){
 template<typename InputHandler> 
 void Wald<InputHandler>::compute_V(){
   // resize the variance-covariance matrix
-  UInt p = this->inf_car.getp();
-  V.resize(p,p);
+  UInt q = this->inf_car.getq();
+  V.resize(q,q);
   
   const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = this->inf_car.getWtW_decp();
   
-  V = this->sigma_hat_sq*((*WtW_decp).solve(MatrixXr::Identity(p,p)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(p,p))));
+  V = this->sigma_hat_sq*((*WtW_decp).solve(MatrixXr::Identity(q,q)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(q,q))));
   is_V_computed = true;
   
   return;
@@ -117,8 +119,8 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
   else{
     // get the matrix of coefficients for the tests
     MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
-    Real q = C.rows();
-    result.resize(q);
+    Real p = C.rows();
+    result.resize(p);
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
@@ -133,7 +135,7 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
     }
       
     // for each row of C matrix
-    for(UInt i=0; i<q; ++i){
+    for(UInt i=0; i<p; ++i){
       VectorXr col = C.row(i);
       Real difference = col.adjoint()*beta_hat - beta_0(i);
       Real sigma = col.adjoint()*V*col;
@@ -163,14 +165,14 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
   // declare the matrix that will store the p-values
   //Real alpha=this->inf_car.getInfData()->get_inference_level(); // deprecated
   //Real quant=0;
-  UInt q=C.rows();
+  UInt p=C.rows();
   MatrixXv result;
-  result.resize(1,q);
+  result.resize(1,p);
   
   // Now all of this is done in R
   //// simultaneous confidence interval (overall confidence aplha)
   //if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
-  //  chi_squared distribution(q);
+  //  chi_squared distribution(p);
   //  quant =std::sqrt(quantile(complement(distribution,alpha)));
   //}
   //else{
@@ -182,7 +184,7 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
   //  // Bonferroni confidence intervals (overall confidence approximately alpha)
   //  else{
   //    normal distribution(0,1);
-  //    quant = quantile(complement(distribution,alpha/(2*q)));
+  //    quant = quantile(complement(distribution,alpha/(2*p)));
   //  }
   //}
 
@@ -197,7 +199,7 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
     compute_V();
   }
   // for each row of C matrix
-  for(UInt i=0; i<q; ++i){
+  for(UInt i=0; i<p; ++i){
     result(i).resize(3);
     VectorXr col = C.row(i);
     //Central element
@@ -218,7 +220,7 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
 template<typename InputHandler>
 Real Wald<InputHandler>::compute_GCV_from_inference(void) const {
   UInt n_obs =this->inf_car.getN_obs();
-  UInt q = this->inf_car.getp();
+  UInt q = this->inf_car.getq();
   if(this->is_S_computed==true){
     return sigma_hat_sq * n_obs /(n_obs - q - tr_S);
   } else{

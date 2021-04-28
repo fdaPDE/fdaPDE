@@ -22,10 +22,10 @@ MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
   }
   // else, both are required
   else{
-    UInt q = inf_car.getInfData()->get_coeff_inference().rows();
-    result.resize(1, q+1);
+    UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+    result.resize(1, p+1);
     result(0) = this->compute_pvalue();
-    result.rightCols(q) = this->compute_CI();
+    result.rightCols(p) = this->compute_CI();
     return result;
   }
 };
