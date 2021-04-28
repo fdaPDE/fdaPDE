@@ -57,7 +57,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  inference_Level=R_Inference_Data_Object@level
+  inference_Quantile=R_Inference_Data_Object@quantile
   inference_n_perm=R_Inference_Data_Object@n_perm
   inference_Defined=R_Inference_Data_Object@definition
   
@@ -96,7 +96,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
-  storage.mode(inference_Level) <- "double"
+  storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_perm) <- "integer"
   storage.mode(inference_Defined) <- "integer"
   
@@ -105,7 +105,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, 
                   GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_n_perm, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm, inference_Defined,
                   PACKAGE = "fdaPDE")
   return(bigsol)
 }
@@ -170,7 +170,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  inference_Level=R_Inference_Data_Object@level
+  inference_Quantile=R_Inference_Data_Object@quantile
   inference_n_perm=R_Inference_Data_Object@n_perm
   inference_Defined=R_Inference_Data_Object@definition
 
@@ -213,7 +213,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
-  storage.mode(inference_Level) <- "double"
+  storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_perm) <- "integer"
   storage.mode(inference_Defined) <- "integer"
 
@@ -223,7 +223,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
                   GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_n_perm,inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm,inference_Defined,
                   PACKAGE = "fdaPDE")
   return(bigsol)
 }
@@ -290,7 +290,7 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   if(PDE_param_eval$u == rep(0, nrow(points_eval))){
     warning("Inference for linear estimators is implemented only if reaction term is zero, \nInference Data are ignored")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, level = -1, n_perm = as.integer(1000), definition=as.integer(0))
+                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, quantile = -1, n_perm = as.integer(1000), definition=as.integer(0))
   }
   
   ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reding
@@ -300,7 +300,7 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  inference_Level=R_Inference_Data_Object@level
+  inference_Quantile=R_Inference_Data_Object@quantile
   inference_n_perm=R_Inference_Data_Object@n_perm
   inference_Defined=R_Inference_Data_Object@definition
   
@@ -343,7 +343,7 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
-  storage.mode(inference_Level) <- "double"
+  storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_perm) <- "integer"
   storage.mode(inference_Defined) <- "integer"
   
@@ -353,7 +353,7 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
                   GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Level,inference_n_perm, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm, inference_Defined,
                   PACKAGE = "fdaPDE")
   return(bigsol)
 }

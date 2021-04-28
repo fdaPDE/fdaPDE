@@ -12,7 +12,7 @@
 #'@slot coeff A matrix of numeric coefficients with columns of dimension \code{dim} and each row represents a linear combination of the linear parameters to be tested and/or to be
 #' estimated via confidence interval. 
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
-#'@slot level Level of significance for the confidence intervals. Needs to be between 0 and 1. Used only if interval is not 0.
+#'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
 #'@slot n_perm An integer representing the number of permutations in the case of permutational test.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
@@ -32,7 +32,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   dim = "integer",
                                                                   coeff = "matrix",
                                                                   beta0 = "numeric",
-                                                                  level = "numeric",
+                                                                  quantile = "numeric",
                                                                   n_perm = "integer",
                                                                   definition="integer")
                               )
@@ -260,9 +260,34 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   definition=as.integer(1)
   
+  # Build the quantile for Confidence intervals if needed
+  quantile=0
+  if(level > 0){
+    if(interval == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
+      # C++
+      #chi_squared distribution(q);
+      #quant =std::sqrt(quantile(complement(distribution,alpha)))
+      quantile=qchisq(1-level, dim(coeff)[1])
+    }
+    else{
+      if(interval ==  "one-at-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
+        # C++
+        #normal distribution(0,1);
+        #quant = quantile(complement(distribution,alpha/2));
+        quantile=qnorm((1-level/2),0,1)
+      }
+      else{ # One at the time CI (overall confidence alpha) -> Gaussian law for statistic
+        #C++
+        #normal distribution(0,1);
+        #quant = quantile(complement(distribution,alpha/(2*q)));
+        quantile=qnorm((1-level/(2*dim(coeff)[1]),0,1)
+      }
+    }
+  }
+  
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
-              coeff = coeff, beta0 = beta0, level = level, n_perm = n_perm, definition=definition)
+              coeff = coeff, beta0 = beta0, quantile = quantile, n_perm = n_perm, definition=definition)
   
   return(result)
 }
