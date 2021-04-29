@@ -65,6 +65,7 @@ void Wald<InputHandler>::compute_V(){
   const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = this->inf_car.getWtW_decp();
   
+  this->compute_sigma_hat_sq();
   V = this->sigma_hat_sq*((*WtW_decp).solve(MatrixXr::Identity(q,q)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(q,q))));
   is_V_computed = true;
   
