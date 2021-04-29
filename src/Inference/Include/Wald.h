@@ -37,7 +37,7 @@ private:
 public:
   // CONSTUCTOR
   Wald()=delete;	//The default constructor is deleted
-  Wald(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Inference_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Wald(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Inference_Base<InputHandler>(inverter_, inf_car_){}; 
   Wald(Wald & rhs) = delete; //The default copy constructor is deleted
   inline Wald(Wald && rhs):S(std::move(rhs.S)), S_t(std::move(rhs.S_t)), is_S_computed(rhs.is_S_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition of the move constructor
 

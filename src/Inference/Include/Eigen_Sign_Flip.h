@@ -32,7 +32,7 @@ private:
 public:
   // CONSTUCTOR
   Eigen_Sign_Flip()=delete;	//The default constructor is deleted
-  Eigen_Sign_Flip(std::unique_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Inference_Base<InputHandler>(std::move(inverter_), inf_car_){}; 
+  Eigen_Sign_Flip(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Inference_Base<InputHandler>(inverter_, inf_car_){}; 
   Eigen_Sign_Flip(Eigen_Sign_Flip & rhs) = delete; //The default copy constructor is deleted
   inline Eigen_Sign_Flip(Eigen_Sign_Flip && rhs): Partial_res_H0(std::move(rhs.Partial_res_H0)), B(std::move(rhs.B)), Lambda(std::move(rhs.Lambda)), is_Lambda_computed(rhs.is_Lambda_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition of the move constructor
   Eigen_Sign_Flip & operator=(Eigen_Sign_Flip && rhs) = delete; //The move assignment operator is deleted
