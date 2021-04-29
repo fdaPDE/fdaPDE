@@ -921,7 +921,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           }
           else{
             # simultaneous tests
-            p_values = 2*pnorm(-abs(statistics[1]))
+            p = dim(R_Inference_Data_Object@coeff)[1]
+            p_values = 1-pchisq(statistics[1], p)
           }
         }
         if(R_Inference_Data_Object@interval==0){
