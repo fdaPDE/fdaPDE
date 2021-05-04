@@ -24,18 +24,18 @@ public:
     \param inf_car_ inference carrier object
     \return std::unique_ptr to the chosen solver
   */
-  static std::unique_ptr<Inference_Base<InputHandler>> create_inference_method(const std::string & implementation_type_, std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_)
+  static std::unique_ptr<Inference_Base<InputHandler>> create_inference_method(const std::string & implementation_type_, std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_)
   {
     if(implementation_type_=="wald")
-      return make_unique<Wald<InputHandler>>(inverter_, inf_car_);
+      return make_unique<Wald<InputHandler>>(inverter_, inf_car_, pos_impl_);
     if(implementation_type_=="speckman")
-      return make_unique<Speckman<InputHandler>>(inverter_, inf_car_);
+      return make_unique<Speckman<InputHandler>>(inverter_, inf_car_, pos_impl_);
     if(implementation_type_=="eigen-sign-flip")
-      return make_unique<Eigen_Sign_Flip<InputHandler>>(inverter_, inf_car_);
+      return make_unique<Eigen_Sign_Flip<InputHandler>>(inverter_, inf_car_, pos_impl_);
     else // deafult Wald
       {
 	Rprintf("Implementation not found, using wald");
-	return make_unique<Wald<InputHandler>>(inverter_, inf_car_);
+	return make_unique<Wald<InputHandler>>(inverter_, inf_car_, pos_impl_);
       }
   }
 };

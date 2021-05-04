@@ -38,7 +38,7 @@ private:
 public:
   // CONSTUCTOR
   Speckman()=delete;	//The default constructor is deleted
-  Speckman(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):Inference_Base<InputHandler>(inverter_, inf_car_){}; 
+  Speckman(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler>(inverter_, inf_car_, pos_impl_){}; 
   Speckman(Speckman & rhs) = delete; //The default copy constructor is deleted
   inline Speckman(Speckman && rhs): B(std::move(rhs.B)), Lambda2(std::move(rhs.Lambda2)), is_Lambda2_computed(rhs.is_Lambda2_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed), WLW_dec(std::move(rhs.WLW_dec)), is_WLW_computed(rhs.is_WLW_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition move constructor
   Speckman & operator=(Speckman && rhs) = delete; //The move assignment operator is deleted

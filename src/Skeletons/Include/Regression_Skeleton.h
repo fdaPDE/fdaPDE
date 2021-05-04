@@ -285,7 +285,7 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 
   for(UInt i=0; i<n_implementations; ++i){
   // Factory instantiation for solver: using factory provided in Inference_Factory.h
-  std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData->get_implementation_type()[i], inference_Inverter, inf_car); // Selects the right implementation and solves the inferential problems		
+  std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
   inference_output.row(i) = inference_Solver->compute_inference_output();
 

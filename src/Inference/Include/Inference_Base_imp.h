@@ -6,27 +6,34 @@ MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
   MatrixXv result;
   
   // get the test_type and interval_type
-  std::string test_type = inf_car.getInfData()->get_test_type();
-  std::string interval_type = inf_car.getInfData()->get_interval_type();
+  std::string test_type = inf_car.getInfData()->get_test_type()[pos_impl];
+  std::string interval_type = inf_car.getInfData()->get_interval_type()[pos_impl];
+
+  // Preallocate space for any case
+  UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+  result.resize(1, p+1);
   
   // if test_type is not defined, only intervals are required
   if(test_type == "not-defined"){
-    result = this->compute_CI();
-    return result;
+    result(0).resize(1);
+    result(0)(0) = 10e20; // Default value (unfeasible)
+    result.rightCols(p) = this->compute_CI();
   }
   // if interval_type is not defined, only test is required
   if(interval_type == "not-defined"){
-    result.resize(1,1);
-    result(0) = this->compute_pvalue(); 
-    return result;
+    result(0) = this->compute_pvalue();
+    for(UInt k=0;k<p;k++){
+    result(k+1).resize(3);
+    result(k+1)(0)=10e20;  // default value (unfeasible)
+    result(k+1)(1)=10e20;  // default value (unfeasible)
+    result(k+1)(2)=10e20;  // default value (unfeasible)
+    } 
   }
   // else, both are required
   else{
-    UInt p = inf_car.getInfData()->get_coeff_inference().rows();
-    result.resize(1, p+1);
     result(0) = this->compute_pvalue();
     result.rightCols(p) = this->compute_CI();
-    return result;
   }
+return result;
 };
 

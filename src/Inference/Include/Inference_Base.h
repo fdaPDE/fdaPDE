@@ -22,15 +22,17 @@ class Inference_Base{
 protected:
   std::shared_ptr<Inverse_Base> inverter = nullptr;     //!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
+  UInt pos_impl;					//!< Index that gives the position in all the vectors in infecenceData object
   virtual VectorXr compute_pvalue(void) = 0;		//!< Pure virtual method used to compute the pvalues of the tests 
   virtual MatrixXv compute_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals
   
+
 public:
   // CONSTUCTOR
   Inference_Base()=delete;	//The default constructor is deleted
-  Inference_Base(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_):inverter(inverter_), inf_car(inf_car_){}; 
+  Inference_Base(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):inverter(inverter_), inf_car(inf_car_), pos_impl(pos_impl_){}; 
   Inference_Base(Inference_Base & rhs) = delete; //The default copy constructor is deleted
-  Inference_Base(Inference_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car){}; //Definition of the move constructor
+  Inference_Base(Inference_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car), pso_impl(rhs.pos_impl){}; //Definition of the move constructor
   Inference_Base & operator=(Inference_Base && rhs) = delete; //The move assignment operator is deleted
  
   //!< public method that calls the requested functions according to test_type and interval_type
