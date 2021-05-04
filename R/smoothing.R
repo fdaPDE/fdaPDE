@@ -903,35 +903,62 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
     # Save statistics and intervals
     if(R_Inference_Data_Object@definition==1){
-      if(R_Inference_Data_Object@test==0){
-        confidence_Intervals=t(matrix(data=bigsol[[24]],nrow = 3,ncol =dim(R_Inference_Data_Object@coeff)[1]))
-        inference=list(CI=confidence_Intervals)
-      }else{
-        statistics=bigsol[[23]]
-        if(R_Inference_Data_Object@type==3){
-          p_values = statistics
+      inference = {}
+      confidence_intervals = matrix(data = bigsol[[24]], nrow = 3*length(R_Inference_Data_Object@type, ncol = dim(R_Inference_Data_Object@coeff)[1])
+      p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type)
+  
+      for(i in 1:length(R_Inference_Data_Object@type)){
+        if(R_Inference_Data_Object@interval[i]!=0){
+          ci=t(confidence_intervals[i:(i+2),])
+          
+          if(R_Inference_Data_Object@type[i]==1){
+            inference$CI$wald = ci
+          }
+          else if(R_Inference_Data_Object@type[i]==2){
+            inference$CI$speckman = ci
+          }
+          else if(R_Inference_Data_Object@type[i]==3){
+            inference$CI$eigen_sign_flip = ci
+          }
+        }
+        
+        if(R_Inference_Data_Object@test[i]!=0){
+        statistics=p_val[,i]
+        p_values = numeric()
+        if(R_Inference_Data_Object@type[i]==3){
+          if(R_Inference_Data_Object@test[i]==1){
+             p_values = statistics
+          }
+          else if(R_Inference_Data_Object@test[i]==2){
+            p_values = statistics[1]
+          }
         }else{
           # Compute p-values
-          if(R_Inference_Data_Object@test==1){
+          if(R_Inference_Data_Object@test[i]==1){
             # one-at-the-time-tests
             p_values = numeric(length(statistics))
             for(i in 1:length(statistics)){
               p_values[i] = 2*pnorm(-abs(statistics[i]))
             }
           }
-          else{
+          else if(R_Inference_Data_Object@test[i]==2{
             # simultaneous tests
             p = dim(R_Inference_Data_Object@coeff)[1]
             p_values = 1-pchisq(statistics[1], p)
           }
         }
-        if(R_Inference_Data_Object@interval==0){
-            inference=list(p_vals=p_values)
-        }else{
-          confidence_Intervals=t(matrix(data=bigsol[[24]],nrow = 3,ncol =dim(R_Inference_Data_Object@coeff)[1]))
-          inference=list(p_vals=p_values, CI=confidence_Intervals)
+        if(R_Inference_Data_Object@type[i]==1){
+          inference$p_values$wald = p_values
         }
-      }
+        else if(R_Inference_Data_Object@type[i]==2){
+          inference$p_values$speckman = p_values
+        }
+        else if(R_Inference_Data_Object@type[i]==3){
+          inference$p_values$eigen_sign_flip = p_values
+        }
+        }
+       }
+  
     reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
                       optimization  = optimization, time = time, bary.locations = bary.locations, inference=inference)
     }else{
