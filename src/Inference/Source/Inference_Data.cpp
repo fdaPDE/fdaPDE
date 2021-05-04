@@ -14,38 +14,42 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,
 			     SEXP inference_Quantile_, SEXP n_perm_, SEXP definition_){
   //test_Type
-  if(INTEGER(test_Type_)[0]==0)
-    this->set_test_type("not-defined");
-
-  else if(INTEGER(test_Type_)[0]==1)
-    this->set_test_type("one-at-the-time");
-
-  else if(INTEGER(test_Type_)[0]==2)
-    this->set_test_type("simultaneous");
+  UInt size_test_Type=Rf_length(test_Type_);
+  test_Type.resize(size_test_Type);
+  for(UInt i=0; i<size_test_Type; i++){
+  if(INTEGER(test_Type_[i])[0]==0)
+    test_Type[i]="not-defined";
+  else if(INTEGER(test_Type_[i])[0]==1)
+    test_Type[i] = "one-at-the-time";
+  else if(INTEGER(test_Type_[i])[0]==2)
+    test_Type = "simultaneous";
+  }
   
   //interval_Type
-  if(INTEGER(interval_Type_)[0]==0)
-    this->set_interval_type("not-defined");
-
-  else if(INTEGER(interval_Type_)[0]==1)
-    this->set_interval_type("one-at-the-time");
-
-  else if(INTEGER(interval_Type_)[0]==2)
-    this->set_interval_type("simultaneous");
-
-  else if(INTEGER(interval_Type_)[0]==3)
-    this->set_interval_type("bonferroni");
+  UInt size_interval_Type=Rf_length(interval_Type_);
+  interval_Type.resize(size_interval_Type);
+  for(UInt i=0; i<size_interval_Type; i++){
+  if(INTEGER(interval_Type_[i])[0]==0)
+    interval_Type[i] = "not-defined";
+  else if(INTEGER(interval_Type_[i])[0]==1)
+    interval_Type[i] = "one-at-the-time";
+  else if(INTEGER(interval_Type_[i])[0]==2)
+   interval_Type[i] = "simultaneous";
+  else if(INTEGER(interval_Type_[i])[0]==3)
+   interval_Type[i] = "bonferroni";
+  }
 
   //implementation_Type
-  if(INTEGER(implementation_Type_)[0]==1)
-    this->set_implementation_type("wald");
-
-  else if(INTEGER(implementation_Type_)[0]==2)
-    this->set_implementation_type("speckman");
-
-  else if(INTEGER(implementation_Type_)[0]==3)
-    this->set_implementation_type("eigen-sign-flip");
-
+  UInt size_implementation_Type=Rf_length(implementation_Type_);
+  implementation_Type.resize(size_implementation_Type);
+  for(UInt i=0; i<size_implementation_Type; i++){
+  if(INTEGER(implementation_Type_[i])[0]==1)
+    implementation_Type[i] = "wald";
+  else if(INTEGER(implementation_Type_[i])[0]==2)
+    implementation_Type[i] = "speckman";
+  else if(INTEGER(implementation_Type_[i])[0]==3)
+    implementation_Type = "eigen-sign-flip";
+  }
    //exact_Inference
    if(INTEGER(exact_Inference_)[0]==1)
     this->set_exact_inference("exact");
@@ -73,7 +77,11 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  }
 
  //inference_Quantile
- this->set_inference_quantile(REAL(inference_Quantile_)[0]);
+ UInt size_inference_Quantile=Rf_length(inference_Quantile_);
+ inference_Quantile.resize(size_inference_Quantile);
+ for(UInt i=0;i<size_inference_Quantile;i++){
+   inference_Quantile(i)=REAL(inference_Quantile_[i]);
+ }
 
  //definition
  this->set_definition(bool(INTEGER(definition_)[0]));
@@ -84,9 +92,21 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 
 void InferenceData::print_inference_data() const{
   Rprintf("\nInferenceData:\n");
-  Rprintf("test_Type: %s\n", test_Type.c_str());
-  Rprintf("interval_Type: %s\n", interval_Type.c_str());
-  Rprintf("implementation_Type: %s\n",implementation_Type.c_str());
+  Rprintf("test_Type:");
+  for(UInt i=0; i < test_Type.size(); ++i){
+    Rprintf(" %s", test_Type[i].c_str());
+  }
+  Rprintf("\n");
+  Rprintf("interval_Type:");
+  for(UInt i=0; i < interval_Type.size(); ++i){
+    Rprintf(" %s", interval_Type[i].c_str());
+  }
+  Rprintf("\n");
+  Rprintf("implementation_Type:");
+  for(UInt i=0; i < implementation_Type.size(); ++i){
+    Rprintf(" %s", implementation_Type[i].c_str());
+  }
+  Rprintf("\n");
   Rprintf("exact_Inference: %d\n",exact_Inference);
   Rprintf("coeff_inference:");
   for(UInt i=0; i < coeff_Inference.rows(); ++i){
@@ -100,7 +120,11 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %f", beta_0(i));
   }
   Rprintf("\n");
-  Rprintf("inference_Quantile: %f\n",inference_Quantile);
+  Rprintf("inference_Quantile:",inference_Quantile);
+  for(UInt i=0; i < inference_Quantile.size(); ++i){
+    Rprintf(" %f", inference_Quantile(i));
+  }
+  Rprintf("\n");
   Rprintf("n_perm: %d\n", n_perm);
   Rprintf("definition: %d\n",definition);
 };

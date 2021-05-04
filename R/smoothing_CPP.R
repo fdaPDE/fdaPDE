@@ -51,13 +51,13 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   }
 
   ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reding
-  test_Type<-R_Inference_Data_Object@test
-  interval_Type<-R_Inference_Data_Object@interval
-  implementation_Type<-R_Inference_Data_Object@type
+  test_Type<-as.vector(R_Inference_Data_Object@test)
+  interval_Type<-as.vector(R_Inference_Data_Object@interval)
+  implementation_Type<-as.vector(R_Inference_Data_Object@type)
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  inference_Quantile=R_Inference_Data_Object@quantile
+  inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_perm=R_Inference_Data_Object@n_perm
   inference_Defined=R_Inference_Data_Object@definition
   
@@ -164,13 +164,13 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   }
   
   ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reding
-  test_Type<-R_Inference_Data_Object@test
-  interval_Type<-R_Inference_Data_Object@interval
-  implementation_Type<-R_Inference_Data_Object@type
+  test_Type<-as.vector(R_Inference_Data_Object@test)
+  interval_Type<-as.vector(R_Inference_Data_Object@interval)
+  implementation_Type<-as.vector(R_Inference_Data_Object@type)
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  inference_Quantile=R_Inference_Data_Object@quantile
+  inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_perm=R_Inference_Data_Object@n_perm
   inference_Defined=R_Inference_Data_Object@definition
 
@@ -294,13 +294,13 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   }
   
   ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reding
-  test_Type<-R_Inference_Data_Object@test
-  interval_Type<-R_Inference_Data_Object@interval
-  implementation_Type<-R_Inference_Data_Object@type
+  test_Type<-as.vector(R_Inference_Data_Object@test)
+  interval_Type<-as.vector(R_Inference_Data_Object@interval)
+  implementation_Type<-as.vector(R_Inference_Data_Object@type)
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
-  inference_Quantile=R_Inference_Data_Object@quantile
+  inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_perm=R_Inference_Data_Object@n_perm
   inference_Defined=R_Inference_Data_Object@definition
   
