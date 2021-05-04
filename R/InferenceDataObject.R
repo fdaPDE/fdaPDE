@@ -77,6 +77,9 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 4);
 #' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.01);
 
+##### VERY IMPORTANT REMARK: ate the moment one can call a vector of tests/CI; however, the cmputations are optimized only if
+##### the elemnts of the vectors are different in type, especially in the case of WALD (if you call it two times, matrixnocov
+##### is saved, but not the system inverse).
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
@@ -91,23 +94,23 @@ inferenceDataObjectBuilder<-function(test = NULL,
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
     if(class(test)!="character")
-      stop("'test'should be a character: choose one between 'one-at-the-time' or 'simultaneous'")
+      stop("'test'should be a character: choose one between 'one-at-the-time', 'simultaneous', 'none'")
     if(length(test)==0)
-      stop("'test' is zero dimensional, should be one between 'ont-at-the-time' or 'simultaneous'")
+      stop("'test' is zero dimensional, should be a vector taking values among 'ont-at-the-time', 'simultaneous', 'none'")
   }else{test_numeric=as.integer(0)}
   
   if(!is.null(interval)){
     if(class(interval)!="character")
-      stop("'interval'should be a character: choose one between 'one-at-the-time' , 'simultaneous' or 'bonferroni'")
+      stop("'interval'should be a character: choose one between 'one-at-the-time' , 'simultaneous', 'bonferroni', 'none'")
     if(length(interval)==0)
-      stop("'interval' is zero dimensional, should be one between 'one-at-the-time', 'simultaneous' or 'bonferroni'")
+      stop("'interval' is zero dimensional, should be a vector taking values among 'one-at-the-time', 'simultaneous', 'bonferroni', 'none'")
   }else{interval_numeric=as.integer(0)}
   
   if(type!="wald"){
     if(class(type)!="character")
-      stop("'type' should be a character: choose one among 'wald', 'speckman' or 'eigen-sign-flip'" )
+      stop("'type' should be character: choose one among 'wald', 'speckman' or 'eigen-sign-flip'" )
     if(length(type)==0)
-      stop("'type' is zero dimensional, should be one among 'wald', 'speckman' or 'eigen-sign-flip'")
+      stop("'type' is zero dimensional, should be a vector taking values among 'wald', 'speckman' or 'eigen-sign-flip'")
   }
   
   if(exact!="False"){
@@ -121,7 +124,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }else{
     exact_numeric=as.integer(2)
   }
-  
   
   if(!is.null(dim)){
     if(class(dim)!="numeric" && class(dim)!="integer")
@@ -155,7 +157,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
     n_perm=as.integer(n_perm)
   }
   
-  # Check of consistency of parameters. Translation into numeric representation.
+  # Check of consistency of parameters. Translation into numeric representation. The checks are repeated for each element of the vectors test, interval and type
+  
   if(is.null(test) && is.null(interval))                                        # However, they can be both set
     stop("at least one between 'test' and 'interval' should be not NULL")
   
@@ -179,113 +182,129 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }
   
-  if(type!="wald" && type!="speckman" && type!="eigen-sign-flip"){
-    stop("type should be choosen between 'wald', 'speckman' and 'eigen-sign-flip'")}else{
-      if(type=="wald") type_numeric=as.integer(1)
-      if(type=="speckman") type_numeric=as.integer(2)
-      if(type=="eigen-sign-flip") type_numeric=as.integer(3)
-    }
-  
-  if(!is.null(test)){
-    if(test!="one-at-the-time" && test!="simultaneous"){
-      stop("test should be either 'one-at-the-time' or 'simultaneous'")}else{
-        if(test=="one-at-the-time") test_numeric=as.integer(1)
-        if(test=="simultaneous") test_numeric=as.integer(2)
-       }
-    if(is.null(beta0))                                                          # If it left to NULL, beta0 is set to a vector of zeros.
-      beta0<-rep(0, dim(coeff)[1])
-    else{
-      if(length(beta0)!=dim(coeff)[1])
-        stop("dimension of 'coeff' and 'beta0' are not consistent")
+  # Consistency check for number of imlementations required (default values assigned in case of NULL)
+  n_of_implementations=length(type);
+  if(is.null(test)){
+    if(length(interval)!=n_of_implementations)
+      stop("Intervals vector length is not consistent whith the number of implementation provided")
+    test=rep('none',n_of_implementations)
+  }else{
+    if(is.null(interval)){
+      if(length(test)!=n_of_implementations)
+        stop("Test vector length is not consistent whith the number of implementation provided")
+        interval=rep('none',n_of_implementations)
+    }else{
+      if(length(interval)!=n_of_implementations)
+        stop("Intervals vector length is not consistent whith the number of implementation provided")
+      if(length(test)!=n_of_implementations)
+        stop("Test vector length is not consistent whith the number of implementation provided")
     }
   }
   
-  if(!is.null(interval) && (type=="wald" || type=="speckman")){
-    if(interval!="one-at-the-time" && interval!="simultaneous" && interval!="bonferroni"){
-      stop("interval should be either 'one-at-the-time' 'simultaneous' or 'bonferroni'")}else{
-        if(interval=="one-at-the-time") interval_numeric=as.integer(1)
-        if(interval=="simultaneous") interval_numeric=as.integer(2)
-        if(interval=="bonferroni") interval_numeric=as.integer(3)
+  # Preallocation of space
+  test_numeric=rep(0, n_of_implementations)
+  interval_numeric=rep(0, n_of_implementations)
+  type_numeric=rep(0, n_of_implementations)
+  quantile=rep(0, n_of_implementations)
+  
+  for (index in 1:n_of_implementations){
+    
+      if(type[index]!="wald" && type[index]!="speckman" && type[index]!="eigen-sign-flip"){
+        stop("type should be choosen between 'wald', 'speckman' and 'eigen-sign-flip'")}else{
+          if(type[index]=="wald") type_numeric[index]=as.integer(1)
+          if(type[index]=="speckman") type_numeric[index]=as.integer(2)
+          if(type[index]=="eigen-sign-flip") type_numeric[index]=as.integer(3)
+        }
+      
+      if(test[index]=='none' && interval[index]=='none'){
+        stop("At least one between test and interval should be required for each implementation in")
       }
     
-    if(level <= 0 || level > 1)                                                
-      stop("level should be a positive value smaller or equal to 1")
+      if(test[index]!="one-at-the-time" && test[index]!="simultaneous" &&  test[index]!="none"){
+        stop("test should be either 'one-at-the-time', 'simultaneous' or 'none'")}else{
+          if(test[index]=="none") test_numeric=as.integer(0)
+          if(test[index]=="one-at-the-time") test_numeric=as.integer(1)
+          if(test[index]=="simultaneous") test_numeric=as.integer(2)
+       }
+      
+      if(interval[index]!="none" && (type[index]=="wald" || type[index]=="speckman")){
+        if(interval[index]!="one-at-the-time" && interval[index]!="simultaneous" && interval[index]!="bonferroni" && interval[index]!="none"){
+          stop("interval should be either 'one-at-the-time' 'simultaneous', 'bonferroni' or 'none'")}else{
+            if(interval[index]=="none") interval_numeric=as.integer(0)
+            if(interval[index]=="one-at-the-time") interval_numeric=as.integer(1)
+            if(interval[index]=="simultaneous") interval_numeric=as.integer(2)
+            if(interval[index]=="bonferroni") interval_numeric=as.integer(3)
+          }
+        if(level <= 0 || level > 1)                                                
+          stop("level should be a positive value smaller or equal to 1")
+      }
+      
+      if(interval[index]!="none" && type[index]=="eigen-sign-flip"){
+        stop("confidence intervals are not implemented in the eigen-sign-flip case")
+      }
+      
+      if(type[index] == "eigen-sign-flip"){
+        for(i in 1:dim(coeff)[1]){
+          count=0
+          for(j in 1:dim(coeff)[2]){
+            if(coeff[i,j]!= 0 && coeff[i,j]!=1)
+              stop("linear combinations are not allowed in the eigen-sign-flip case")
+            count = count + coeff[i,j]
+          }
+          if(count != 1)
+            stop("linear combinations are not allowed in the eigen-sign-flip case")
+        }
+      }
+      
+      # Well posedeness check for coeff in simultaneous case;
+      if(test[index]=="simultaneous"){
+        if(det(coeff %*% t(coeff)) < 0.001){
+          stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
+        }
+      }
+        
+      if(interval[index]=="simultaneous"){
+        if(det(coeff %*% t(coeff)) < 0.001){
+          stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
+        }
+      }
+      
+      # Build the quantile for Confidence intervals if needed
+      if(intervals[index]=="none"){
+         quantile[index]=0
+        }else{
+          if(level > 0){
+              if(interval[index] == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
+                quantile[index]=qchisq(1-level, dim(coeff)[1])
+              }else{
+                if(interval=="one-ate-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
+                  quantile[index]=qnorm((1-level/2),0,1)
+              }else{ 
+                  if(interval[index]== "bonferroni"){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
+                  quantile[index]=qnorm((1-level/(2*dim(coeff)[1])),0,1)
+                  }
+              }
+            }
+          }
+      }
+      
+  } # End of for cycle over the different implementation
+  
+  if(is.null(beta0))                 # If it left to NULL, beta0 is set to a vector of zeros.
+    beta0<-rep(0, dim(coeff)[1])
+  else{
+    if(length(beta0)!=dim(coeff)[1])
+      stop("dimension of 'coeff' and 'beta0' are not consistent")
   }
   
   if(!is.null(n_perm)){
-  if(n_perm <= 0)                                                
-    stop("number of permutations must be a positive value")
-  }
-  
-  else {
+    if(n_perm <= 0)                                                
+      stop("number of permutations must be a positive value")
+  }else {
     n_perm <- as.integer(1000)
   }
   
-  
-  if(!is.null(interval) && type=="eigen-sign-flip"){
-    stop("confidence intervals are not implemented in the eigen-sign-flip case")
-  }
-  
-  if(type == "eigen-sign-flip"){
-    for(i in 1:dim(coeff)[1]){
-      count=0
-      for(j in 1:dim(coeff)[2]){
-        if(coeff[i,j]!= 0 && coeff[i,j]!=1)
-          stop("linear combinations are not allowed in the eigen-sign-flip case")
-        count = count + coeff[i,j]
-      }
-      if(count != 1)
-        stop("linear combinations are not allowed in the eigen-sign-flip case")
-    }
-  }
-  
-  if(is.null(beta0)) beta0=0 #won't be used anyway                              # If beta0 is still NULL here, no test is required, and this parameter is not considered. Set to zero in order to compel with the dataInferenceObject class.
-  
-  # Well posedeness check for coeff in simultaneous case;
-  if(!is.null(test)){
-  if(test=="simultaneous"){
-    if(det(coeff %*% t(coeff)) < 0.001){
-      stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
-    }
-  }
-  }
-  
-  if(!is.null(interval)){
-    if(interval=="simultaneous"){
-      if(det(coeff %*% t(coeff)) < 0.001){
-        stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
-      }
-    }
-  }
-  
   definition=as.integer(1)
-  
-  # Build the quantile for Confidence intervals if needed
-  quantile=0
-  if(level > 0){
-    if(interval_numeric == 1){ # Simultaneous CI -> Chi-Squared (q) law for statistic
-      # C++
-      #chi_squared distribution(q);
-      #quant =std::sqrt(quantile(complement(distribution,alpha)))
-      quantile=qchisq(1-level, dim(coeff)[1])
-    }
-    else{
-      if(interval_numeric ==  2 ){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
-        # C++
-        #normal distribution(0,1);
-        #quant = quantile(complement(distribution,alpha/2));
-        quantile=qnorm((1-level/2),0,1)
-      }
-      else{ 
-        if(interval_numeric == 3){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
-        #C++
-        #normal distribution(0,1);
-        #quant = quantile(complement(distribution,alpha/(2*q)));
-        quantile=qnorm((1-level/(2*dim(coeff)[1])),0,1)
-        }
-      }
-    }
-  }
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
