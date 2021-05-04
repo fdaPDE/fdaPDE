@@ -106,9 +106,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'interval' is zero dimensional, should be a vector taking values among 'one-at-the-time', 'simultaneous', 'bonferroni', 'none'")
   }else{interval_numeric=as.integer(0)}
   
-  if(type!="wald"){
+  if(!is.null(type)){
     if(class(type)!="character")
-      stop("'type' should be character: choose one among 'wald', 'speckman' or 'eigen-sign-flip'" )
+      stop("'type' should be a vector of characters: choose among 'wald', 'speckman' or 'eigen-sign-flip'" )
     if(length(type)==0)
       stop("'type' is zero dimensional, should be a vector taking values among 'wald', 'speckman' or 'eigen-sign-flip'")
   }
@@ -222,18 +222,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
     
       if(test[index]!="one-at-the-time" && test[index]!="simultaneous" &&  test[index]!="none"){
         stop("test should be either 'one-at-the-time', 'simultaneous' or 'none'")}else{
-          if(test[index]=="none") test_numeric=as.integer(0)
-          if(test[index]=="one-at-the-time") test_numeric=as.integer(1)
-          if(test[index]=="simultaneous") test_numeric=as.integer(2)
+          if(test[index]=="none") test_numeric[index]=as.integer(0)
+          if(test[index]=="one-at-the-time") test_numeric[index]=as.integer(1)
+          if(test[index]=="simultaneous") test_numeric[index]=as.integer(2)
        }
       
       if(interval[index]!="none" && (type[index]=="wald" || type[index]=="speckman")){
         if(interval[index]!="one-at-the-time" && interval[index]!="simultaneous" && interval[index]!="bonferroni" && interval[index]!="none"){
           stop("interval should be either 'one-at-the-time' 'simultaneous', 'bonferroni' or 'none'")}else{
-            if(interval[index]=="none") interval_numeric=as.integer(0)
-            if(interval[index]=="one-at-the-time") interval_numeric=as.integer(1)
-            if(interval[index]=="simultaneous") interval_numeric=as.integer(2)
-            if(interval[index]=="bonferroni") interval_numeric=as.integer(3)
+            if(interval[index]=="none") interval_numeric[index]=as.integer(0)
+            if(interval[index]=="one-at-the-time") interval_numeric[index]=as.integer(1)
+            if(interval[index]=="simultaneous") interval_numeric[index]=as.integer(2)
+            if(interval[index]=="bonferroni") interval_numeric[index]=as.integer(3)
           }
         if(level <= 0 || level > 1)                                                
           stop("level should be a positive value smaller or equal to 1")
@@ -270,14 +270,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
       
       # Build the quantile for Confidence intervals if needed
-      if(intervals[index]=="none"){
+      if(interval[index]=="none"){
          quantile[index]=0
         }else{
           if(level > 0){
               if(interval[index] == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
                 quantile[index]=qchisq(1-level, dim(coeff)[1])
               }else{
-                if(interval=="one-ate-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
+                if(interval[index]=="one-at-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
                   quantile[index]=qnorm((1-level/2),0,1)
               }else{ 
                   if(interval[index]== "bonferroni"){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
@@ -307,7 +307,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   definition=as.integer(1)
   
   # Building the output object, returning it
-  result<-new("inferenceDataObject", test = test_numeric, interval =interval_numeric, type = type_numeric, exact = exact_numeric, dim = dim, 
+  result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), exact = exact_numeric, dim = dim, 
               coeff = coeff, beta0 = beta0, quantile = quantile, n_perm = n_perm, definition=definition)
   
   return(result)

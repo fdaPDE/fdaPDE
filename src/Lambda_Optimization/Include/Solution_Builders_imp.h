@@ -19,8 +19,11 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
         }
 
 	// Prepare the inference output space
-	VectorXr p_values;
+	MatrixXv p_values;
 	MatrixXv intervals;
+	UInt n_inf_implementations = inf_Data.get_test_type().size();
+	UInt p_inf = inf_Data.get_coeff_inference().rows();
+
 	if (inf_Data.get_definition()==false){
 	  intervals.resize(1,1);
 	  intervals(0,0).resize(3);
@@ -28,28 +31,34 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
           intervals(0,0)(1) = 10e20; 
           intervals(0,0)(2) = 10e20;
 	  
-	  p_values.resize(1);
+	  p_values.resize(1,1);
 	  p_values(0)= 10e20;
 	}else{
-	  if(inf_Data.get_test_type()=="not-defined"){
-	    p_values.resize(1);
-	    p_values(0)= 10e20;
+	  
+	  p_values.resize(1, n_inf_implementations);
+	  intervals.resize(n_inf_implementations, p_inf);
+
+	  for(UInt i=0; i<n_inf_implementations; ++i){
+	    //if(inf_Data.get_test_type()[i]=="not-defined"){
+	    //p_values(i).resize(p_inf);
+	    //p_values(i)=inference_Output.row(i)(0);
 	    
-	    intervals=inference_Output;
-	  }else{
-	    if(inf_Data.get_interval_type()=="not-defined"){
-	      intervals.resize(1,1);
-	      intervals(0,0).resize(3);
-	      intervals(0,0)(0) = 10e20;
-              intervals(0,0)(1) = 10e20; 
-              intervals(0,0)(2) = 10e20;
+	    //intervals.row(i)=inference_Output.row(i).rightCols(p_inf); 
+	    //}else{
+	    //if(inf_Data.get_interval_type()[i]=="not-defined"){
+	    //  for(UInt j=0; j<p_inf; ++j){
+	    //	intervals.row(i)(j).resize(3);
+	    //  intervals.row(i)(j)(0) = 10e20;
+	    //intervals.row(i)(j)(1) = 10e20;
+	    //intervals.row(i)(j)(2) = 10e20;
+	    // }
+	    // p_values(i)=inference_Output.row(i)(0); 
+	    //}else{
+	      p_values=inference_Output.row(i)(0);
 	      
-	      p_values=inference_Output(0);
-	    }else{
-	      p_values=inference_Output(0);
-	      
-	      intervals=inference_Output.rightCols((inf_Data.get_coeff_inference()).rows());
-	    }
+	      intervals=inference_Output.row(i).rightCols(p_inf);
+	      // }
+	      //}
 	  }
 	}
 	
@@ -231,20 +240,24 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                         rans11[i + barycenters.rows()*j] = barycenters(i,j);
         }
 
-	SET_VECTOR_ELT(result,22,Rf_allocVector(REALSXP,p_values.size())); // P_values info (inference on betas)
+	// We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
+	SET_VECTOR_ELT(result,22,Rf_allocMatrix(REALSXP,p_values(0).size(),p_values.cols())); // P_values info (inference on betas)
 	Real *rans12=REAL(VECTOR_ELT(result,22));
-	for(UInt i = 0; i<p_values.size(); i++){
-	  	rans12[i]=p_values(i);
-	}
-	
-	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3,intervals.size())); // Confidence Intervals info (Inference on betas)
-	Real *rans13 = REAL(VECTOR_ELT(result,23));
-	for(UInt j =0; j<intervals.size(); j++){
-	  for(UInt i=0; i<3 ; i++){
-		  rans13[i+3*j]=intervals(j)(i);
+	for(UInt j = 0; j<p_values.cols(); j++){
+	  for(UInt i = 0; i<p_values(0).size(); i++){
+	    rans12[i+p_values(0).size()*j]=p_values(j)(i);
 	  }
 	}
-
+	
+	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (Inference on betas)
+	Real *rans13 = REAL(VECTOR_ELT(result,23));
+	for(UInt j = 0; j<intervals.cols(); j++){
+	  for(UInt k = 0; k<intervals.rows(); k++){
+	    for(UInt i = 0; i<3 ; i++){
+	      rans13[k*3+i+intervals.rows()*3*j]=intervals(k,j)(i);
+	    } 
+	  }
+	}
 	
         UNPROTECT(1);
 
