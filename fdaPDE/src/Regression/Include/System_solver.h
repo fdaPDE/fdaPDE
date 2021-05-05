@@ -8,7 +8,7 @@
 // Base class for a generic SparseLU solver of a system Mx=b
 // with M square matrix composed of four blocks: M = | NW | NE |
 //													 | SW | SE |
-
+//
 class BaseSolver
 {
 protected:
