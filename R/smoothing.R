@@ -909,7 +909,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   
       for(i in 1:length(R_Inference_Data_Object@type)){
         if(R_Inference_Data_Object@interval[i]!=0){
-          ci=t(confidence_intervals[i:(i+2),])
+          ci=t(confidence_intervals[3*i:(3*i+2),])
           
           if(R_Inference_Data_Object@type[i]==1){
             inference$CI$wald = ci
@@ -937,8 +937,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           if(R_Inference_Data_Object@test[i]==1){
             # one-at-the-time-tests
             p_values = numeric(length(statistics))
-            for(i in 1:length(statistics)){
-              p_values[i] = 2*pnorm(-abs(statistics[i]))
+            for(l in 1:length(statistics)){
+              p_values[l] = 2*pnorm(-abs(statistics[l]))
             }
           }
           else if(R_Inference_Data_Object@test[i]==2){
