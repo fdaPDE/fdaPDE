@@ -912,13 +912,13 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           ci=t(confidence_intervals[(3*(i-1)+1):(3*(i-1)+3),])
           
           if(R_Inference_Data_Object@type[i]==1){
-            inference$CI$wald = ci
+            inference$CI$wald[[length(inference$CI$wald)+1]] = ci
           }
           else if(R_Inference_Data_Object@type[i]==2){
-            inference$CI$speckman = ci
+            inference$CI$speckman[[length(inference$CI$speckman)+1]] = ci
           }
           else if(R_Inference_Data_Object@type[i]==3){
-            inference$CI$eigen_sign_flip = ci
+            inference$CI$eigen_sign_flip[[length(inference$CI$eigen_sign_flip)+1]] = ci
           }
         }
         
@@ -948,13 +948,13 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           }
         }
         if(R_Inference_Data_Object@type[i]==1){
-          inference$p_values$wald = p_values
+          inference$p_values$wald[[length(inference$p_values$wald)]] = p_values
         }
         else if(R_Inference_Data_Object@type[i]==2){
-          inference$p_values$speckman = p_values
+          inference$p_values$speckman[[length(inference$p_values$speckman)]] = p_values
         }
         else if(R_Inference_Data_Object@type[i]==3){
-          inference$p_values$eigen_sign_flip = p_values
+          inference$p_values$eigen_sign_flip[[length(inference$p_values$eigen_sign_flip)]] = p_values
         }
         }
        }
