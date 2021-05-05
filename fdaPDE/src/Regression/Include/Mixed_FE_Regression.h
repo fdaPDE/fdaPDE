@@ -98,6 +98,7 @@ class MixedFERegressionBase
 		bool lambdaPreconditioned = false;
 		BaseSolver solver;
 
+
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
 	    void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);

@@ -600,7 +600,6 @@ void MixedFERegressionBase<InputHandler>::buildMatrix(const SpMat& NWblock, cons
 		{
 			tripletAll.push_back(coeff(it.row() + nnodes, it.col(), it.value()));
 		}
-
 	// Define, resize, fill and compress
 	matrixNoCov_.setZero();
 	matrixNoCov_.resize(2 * nnodes, 2 * nnodes);

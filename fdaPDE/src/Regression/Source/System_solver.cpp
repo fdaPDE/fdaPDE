@@ -1,6 +1,6 @@
 #include "../Include/System_solver.h"
 
-// ---------- Base Solver methods ------------
+// ---------- Base Solver methods ----------
 
 SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
 {
