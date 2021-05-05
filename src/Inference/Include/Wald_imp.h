@@ -1,11 +1,5 @@
 #include "Wald.h"
-//#include <boost/math/distributions/chi_squared.hpp>
-//#include <boost/math/distributions/normal.hpp>
 #include <cmath>
-
-//using boost::math::chi_squared;
-//using boost::math::normal;
-//using namespace boost::math; 
 
 template<typename InputHandler> 
 void Wald<InputHandler>::compute_S(void){
@@ -32,8 +26,6 @@ void Wald<InputHandler>::compute_S(void){
   
   S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
   
-  S_t.resize(n_obs, n_obs);
-  S_t = this->S.transpose();
   is_S_computed = true;
   
   return; 
@@ -62,11 +54,10 @@ void Wald<InputHandler>::compute_V(){
   V.resize(q,q);
   
   const MatrixXr * W = this->inf_car.getWp();
-  const MatrixXr W_t = W->transpose();
   const Eigen::PartialPivLU<MatrixXr> * WtW_decp = this->inf_car.getWtW_decp();
   
   this->compute_sigma_hat_sq();
-  V = this->sigma_hat_sq*((*WtW_decp).solve(MatrixXr::Identity(q,q)) + (*WtW_decp).solve(W_t*S*S_t*(*W)*(*WtW_decp).solve(MatrixXr::Identity(q,q))));
+  V = this->sigma_hat_sq*((*WtW_decp).solve(MatrixXr::Identity(q,q)) + (*WtW_decp).solve(W->transpose()*S*S.transpose()*(*W)*(*WtW_decp).solve(MatrixXr::Identity(q,q))));
   is_V_computed = true;
   
   return;
@@ -81,7 +72,6 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
   if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
     // get the matrix of coefficients for the test
     MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
-    MatrixXr C_t = C.transpose();
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
@@ -97,7 +87,7 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
       compute_V();
     }
     
-    MatrixXr Sigma = C*V*C_t;
+    MatrixXr Sigma = C*V*C.transpose();
     // compute the LU factorization of Sigma
     Eigen::PartialPivLU<MatrixXr> Sigma_dec;
     Sigma_dec.compute(Sigma);
@@ -145,10 +135,6 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
       Real sigma = col.adjoint()*V*col;
       // compute the test statistic
       Real stat = difference/std::sqrt(sigma);
-      //normal distribution(0,1);
-      // compute the pvalue
-      //Real pval = 2*cdf(complement(distribution, fabs(stat)));
-      //result(i) = pval; 
       result(i) = stat;	
     }
       
@@ -167,30 +153,9 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
   VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
   
   // declare the matrix that will store the p-values
-  //Real alpha=this->inf_car.getInfData()->get_inference_level(); // deprecated
-  //Real quant=0;
   UInt p=C.rows();
   MatrixXv result;
   result.resize(1,p);
-  
-  // Now all of this is done in R
-  //// simultaneous confidence interval (overall confidence aplha)
-  //if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
-  //  chi_squared distribution(p);
-  //  quant =std::sqrt(quantile(complement(distribution,alpha)));
-  //}
-  //else{
-  //  // one-at-the-time confidence intervals (each interval has confidence alpha)
-  //  if(this->inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
-  //    normal distribution(0,1);
-  //    quant = quantile(complement(distribution,alpha/2));
-  //  }
-  //  // Bonferroni confidence intervals (overall confidence approximately alpha)
-  //  else{
-  //    normal distribution(0,1);
-  //    quant = quantile(complement(distribution,alpha/(2*p)));
-  //  }
-  //}
 
   // Extract the quantile needed for computing the upper and lower bounds
   Real quant = this->inf_car.getInfData()->get_inference_quantile()[this->pos_impl];

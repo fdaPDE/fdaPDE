@@ -239,7 +239,7 @@ output_CPP$inference$CI
 
 
 #######
-R_inference_object = inferenceDataObjectBuilder(test = c("one-at-the-time", "one-at-the-time", "simultaneous"), interval = c("one-at-the-time", "simultaneous", "none"), type = c("wald", "speckman", "eigen-sign-flip"), exact = "True", dim = 2)
+R_inference_object = inferenceDataObjectBuilder(test = c("one-at-the-time", "one-at-the-time", "simultaneous", "simultaneous"), interval = c("one-at-the-time", "simultaneous", "none", "simultaneous"), type = c("wald", "speckman", "eigen-sign-flip", "wald"), exact = "True", dim = 2)
 
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",

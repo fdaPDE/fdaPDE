@@ -22,8 +22,7 @@ template<typename InputHandler>
 class Eigen_Sign_Flip:public Inference_Base<InputHandler>{
 private:
   MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
-  MatrixXr B;						//!< Matrix Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t 
-  MatrixXr Lambda;   					//!< I - B
+  MatrixXr Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
   void compute_Lambda(void);				//!< Method used to compute Lambda
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
@@ -33,14 +32,10 @@ public:
   // CONSTUCTOR
   Eigen_Sign_Flip()=delete;	//The default constructor is deleted
   Eigen_Sign_Flip(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler>(inverter_, inf_car_, pos_impl_){}; 
-  Eigen_Sign_Flip(Eigen_Sign_Flip & rhs) = delete; //The default copy constructor is deleted
-  inline Eigen_Sign_Flip(Eigen_Sign_Flip && rhs): Partial_res_H0(std::move(rhs.Partial_res_H0)), B(std::move(rhs.B)), Lambda(std::move(rhs.Lambda)), is_Lambda_computed(rhs.is_Lambda_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition of the move constructor
-  Eigen_Sign_Flip & operator=(Eigen_Sign_Flip && rhs) = delete; //The move assignment operator is deleted
-  
-  
+    
   // GETTERS
-  inline const MatrixXr * getLambdap (void) const {return &this->Lambda;}      	//!< Getter of Lambdap \return Lambdap
-  inline const MatrixXr * getBp (void) const {return &this->B;}  		//!< Getter of Bp \return Bp
+  inline const MatrixXr * getLambdap (void) const {return &this->Lambda;}      	                        //!< Getter of Lambdap \return Lambdap
+  inline const MatrixXr * getPartial_res_H0p (void) const {return &this->Partial_res_H0;}  		//!< Getter of Partial_res_H0p \return Partial_res_H0p
   
   void print_for_debug(void) const;
 };

@@ -15,13 +15,12 @@ void Speckman<InputHandler>::compute_Lambda2(void){
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
-  B.resize(n_obs, n_obs);
+  
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
-  B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
-  
-  Lambda2 = (MatrixXr::Identity(B.rows(),B.cols()) - B)*(MatrixXr::Identity(B.rows(),B.cols()) - B);
+  Lambda2.resize(n_obs, n_obs);
+  Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
   is_Lambda2_computed = true;
   
   return; 
@@ -57,9 +56,8 @@ void Speckman<InputHandler>::compute_WLW_dec(void){
   
   // compute the decomposition of W^T*Lambda^2*W
   const MatrixXr * W = this->inf_car.getWp();
-  const MatrixXr W_t = W->transpose();
   
-  WLW_dec.compute(W_t*Lambda2*(*W));
+  WLW_dec.compute(W->transpose()*Lambda2*(*W));
   is_WLW_computed=true;
 };
 
@@ -69,9 +67,8 @@ VectorXr Speckman<InputHandler>::compute_beta_hat(void){
     compute_WLW_dec();
   }
   const MatrixXr * W = this->inf_car.getWp();
-  const MatrixXr W_t = W->transpose();
   
-  VectorXr beta = WLW_dec.solve(W_t*Lambda2*(*(this->inf_car.getZp())));
+  VectorXr beta = WLW_dec.solve(W->transpose()*Lambda2*(*(this->inf_car.getZp())));
   
   return beta; 
   
@@ -86,7 +83,6 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
   if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
     // get the matrix of coefficients for the test
     MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
-    MatrixXr C_t = C.transpose();
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
@@ -102,7 +98,7 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
       compute_V();
     }
     
-    MatrixXr Sigma = C*V*C_t;
+    MatrixXr Sigma = C*V*C.transpose();
     // compute the LU factorization of Sigma
     Eigen::PartialPivLU<MatrixXr> Sigma_dec;
     Sigma_dec.compute(Sigma);
@@ -110,13 +106,7 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
     // compute the test statistic
     Real stat = diff.adjoint() * Sigma_dec.solve(diff);
     
-    //chi_squared distribution(C.rows());
-    
-    // compute the p-value
-    //Real pval = cdf(complement(distribution, stat));
-    
     result.resize(C.rows()); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
-    //result(0) = pval;
     result(0) = stat;
     for(UInt k=1;k<C.rows();k++){
     result(k)==10e20;
@@ -151,10 +141,7 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
       Real sigma = col.adjoint()*V*col;
       // compute the test statistic
       Real stat = difference/std::sqrt(sigma);
-      //normal distribution(0,1);
-      // compute the pvalue
-      //Real pval = 2*cdf(complement(distribution, fabs(stat)));
-      //result(i) = pval; 
+      
       result(i) = stat;	
     }
     
@@ -173,30 +160,9 @@ MatrixXv Speckman<InputHandler>::compute_CI(void){
   VectorXr beta_hat = compute_beta_hat();
   
   // declare the matrix that will store the p-values
-  //Real alpha=this->inf_car.getInfData()->get_inference_level(); //deprecated
-  //Real quant=0;
   UInt p=C.rows();
   MatrixXv result;
   result.resize(1,p);
-  
-  // Now all of this is done in R
-  //// simultaneous confidence interval (overall confidence aplha)
-  //if(this->inf_car.getInfData()->get_interval_type() == "simultaneous"){
-  //  chi_squared distribution(p);
-  //  quant =std::sqrt(quantile(complement(distribution,alpha)));
-  //}
-  //else{
-  //  // one-at-the-time confidence intervals (each interval has confidence alpha)
-  //  if(this->inf_car.getInfData()->get_interval_type() == "one-at-the-time"){
-  //    normal distribution(0,1);
-  //    quant = quantile(complement(distribution,alpha/2));
-  //  }
-  //  // Bonferroni confidence intervals (overall confidence approximately alpha)
-  //  else{
-  //    normal distribution(0,1);
-  //    quant = quantile(complement(distribution,alpha/(2*p)));
-  //  }
-  //}
 
   // Extract the quantile needed for the computation of upper and lower bounds
   Real quant = this->inf_car.getInfData()->get_inference_quantile()[this->pos_impl];
@@ -230,6 +196,5 @@ MatrixXv Speckman<InputHandler>::compute_CI(void){
 
 template<typename InputHandler>
 void Speckman<InputHandler>::print_for_debug(void) const {
-  int aaaa=1;
   return;
 };

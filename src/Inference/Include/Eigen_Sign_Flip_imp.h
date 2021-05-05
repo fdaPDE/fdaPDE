@@ -10,14 +10,11 @@ void Eigen_Sign_Flip<InputHandler>::compute_Lambda(void){
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
-  B.resize(n_obs, n_obs);
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
   UInt q = this->inf_car.getq(); 
   
-  B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
-  
-  Lambda = (MatrixXr::Identity(B.rows(),B.cols()) - B);
+  Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
   is_Lambda_computed = true;
   
   return; 
@@ -28,7 +25,6 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
   
   // extract matrix C  
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
-  MatrixXr C_t = C.transpose();
   UInt p = C.rows(); 
   
   // declare the vector that will store the p-values
@@ -50,7 +46,6 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
   
   // extract covariates matrices
   const MatrixXr * W = this->inf_car.getWp();
-  const MatrixXr W_t = W->transpose();
   
   // simultaneous test
   if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
@@ -71,11 +66,11 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     }
     
     // compute the partial residuals
-    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C_t) * (beta_0) - (*W) * (C_out) * beta_hat;
+    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C->transpose()) * (beta_0) - (*W) * (C->transpose()) * beta_hat;
     
     // compute the vectors needed for the statistic
-    MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-    VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        // V^t * partial_res_H0
+    MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
+    VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        		// V^t * partial_res_H0
     
     // Observed statistic
     VectorXr stat=TildeX*Tilder;
@@ -117,14 +112,14 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     Partial_res_H0.resize(Lambda.cols(), p);
     for(UInt i=0; i<p; ++i){
       // Build auxiliary vector for residuals computation
-      VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C_t.col(i);
+      VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
 
       // compute the partial residuals
-      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C_t.col(i)) * (beta_0); // (z-W*beta_hat(non in test)-W*beta_0(in test))
+      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (beta_0); // (z-W*beta_hat(non in test)-W*beta_0(in test))
     }
     // compute the vectors needed for the statistic
-    MatrixXr TildeX = (C * W_t) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-    MatrixXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        // V^t * partial_res_H0
+    MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
+    MatrixXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        		// V^t * partial_res_H0
     
     // Observed statistic
     MatrixXr stat=TildeX*Tilder;
@@ -171,7 +166,6 @@ MatrixXv Eigen_Sign_Flip<InputHandler>::compute_CI(void){
 
 template<typename InputHandler>
 void Eigen_Sign_Flip<InputHandler>::print_for_debug(void) const {
-  int aaaa=1;
   return;
 };
 

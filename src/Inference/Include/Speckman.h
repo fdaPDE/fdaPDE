@@ -20,9 +20,8 @@
 */
 template<typename InputHandler>
 class Speckman:public Inference_Base<InputHandler>{
-private:
-  MatrixXr B;						//!< Matrix Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t 
-  MatrixXr Lambda2;   					//!< (I - B)^2
+private: 
+  MatrixXr Lambda2;   					//!< (I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t)^2
   bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda^2 has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether WLW has been computed or not
@@ -39,13 +38,9 @@ public:
   // CONSTUCTOR
   Speckman()=delete;	//The default constructor is deleted
   Speckman(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler>(inverter_, inf_car_, pos_impl_){}; 
-  Speckman(Speckman & rhs) = delete; //The default copy constructor is deleted
-  inline Speckman(Speckman && rhs): B(std::move(rhs.B)), Lambda2(std::move(rhs.Lambda2)), is_Lambda2_computed(rhs.is_Lambda2_computed), V(std::move(rhs.V)), is_V_computed(rhs.is_V_computed), WLW_dec(std::move(rhs.WLW_dec)), is_WLW_computed(rhs.is_WLW_computed){this->inverter=std::move(rhs.inverter); this->inf_car=rhs.inf_car;}; //Definition move constructor
-  Speckman & operator=(Speckman && rhs) = delete; //The move assignment operator is deleted
-  
+
   // GETTERS
   inline const MatrixXr * getLambda2p (void) const {return &this->Lambda2;}     //!< Getter of Lambda2p \return Lambda2p
-  inline const MatrixXr * getBp (void) const {return &this->B;}  		//!< Getter of Bp \return Bp
   inline const MatrixXr * getVp (void) const {return &this->V;}     	 	//!< Getter of Vp \ return Vp
   
   void print_for_debug(void) const;

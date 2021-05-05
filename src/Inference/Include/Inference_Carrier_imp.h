@@ -13,19 +13,11 @@ setWp(Regression_Data_->getCovariates());
 setN_obs(Regression_Data_->getNumberofObservations());
 setq(Regression_Data_->getCovariates()->cols());
 setZp(Regression_Data_->getObservations());
-//if(dynamic_cast<const RegressionDataEllipticSpaceVarying *>(Regression_Data_)!=nullptr){ //check space varying
-//setKp(Regression_Data_->getK());	//Otherwise it is nullptr
-//}
-
-
 
 //Setting from MixedFERegressionBase
 setN_nodes(model_->getnnodes_());
 setPsip (model_->getpsi_());
 setPsi_tp (model_->getpsi_t_());
-setR0p (model_->getR0_());
-setR1p (model_->getR1_());
-setPp(model_->getR_());
 setWtW_decp(model_->getWTW_());
 setHp(model_->getH_());
 setUp(model_->getU_());
@@ -38,6 +30,4 @@ setG_decp(model_->getGdec_());
 setBeta_hatp(&(out_regression_->betas));
 setZ_hatp(&(out_regression_->z_hat));
 
-//Last to be executed (needs the other elements to be set in order to work properly)
-//setF_hat();
 };

@@ -29,15 +29,9 @@ class Inference_Carrier{
 		UInt n_nodes;							        //!< Number of nodes
 		UInt q;								        //!< Number of covariates
 
-		Real lambda=0; 								//!< Optimal smothing parameter
-		UInt optimal_position=0; 						//!< Position of the predicted values in the case of optimal lambda
   		const MatrixXr * Wp = nullptr;						//!< Pointer to the covariates matrix [size n_obs x n_covariates]
-		const Diffusion<PDEParameterOptions::Constant> * Kp = nullptr; 	        //!< Pointer to the nuisance matrix K [in the cases in which inference is allowed K is always a matrix]
 		const SpMat * Psip = nullptr; 						//!< Pointer to location-to-nodes matrix [size n_obs x n_nodes]	
 		const SpMat * Psi_tp = nullptr; 					//!< Pointer to the transpose of the location-to-nodes matrix [size n_nodes x n_obs]	
-		const SpMat * R1p = nullptr;						//!< Pointer to R1 matrix [size n_nodes x n_nodes]
-                const SpMat * R0p = nullptr;						//!< Pointer to R0 matrix [size n_nodes x n_nodes]
-		const MatrixXr * Pp = nullptr;						//!< Pointer to P matrix [size ]
 		const Eigen::PartialPivLU<MatrixXr> * WtW_decp = nullptr;		//!< Pointer to the LU decomposition of the WtW matrix
 		const MatrixXr * Hp = nullptr;						//!< Pointer to the hat matrix [size n_covariates x n_covariates]
 		const MatrixXr * Up = nullptr; 						//!< Pointer to the U matrix of the Woodbury decomposition of the system
@@ -50,7 +44,6 @@ class Inference_Carrier{
 		const MatrixXv * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
 		const VectorXr * zp = nullptr;						//!< Pointer to the observations in the locations [size n_obs]
 		const MatrixXr * z_hatp = nullptr; 					//!< Pointer to the fitted values in the locations [size n_obs]
-		//MatrixXr f_hat; 					                //!< Fitted values for the nonlinear part of the model in the locations [size n_obs]
 
 		// SETTERS 								// Private because they will be used just by the constructor.
 		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data
@@ -61,15 +54,9 @@ class Inference_Carrier{
 		inline void setN_nodes (UInt n_nodes_){n_nodes = n_nodes_;}						//!< Setter of n_nodes \param n_nodes_ new n_nodes
 		inline void setq (UInt q_){q = q_;}									//!< Setter of q \param q_ new q
 
-		inline void setLambda (Real lambda_){lambda = lambda_;}							//!< Setter of lambda \param lambda_ new lambda
-		inline void setOptimal_position(UInt optimal_position_){optimal_position_=optimal_position_;} 			//!< Setter of optima_position \param optimal_position_ new optimal_position
 		inline void setWp (const MatrixXr * Wp_){Wp = Wp_;}							//!< Setter of Wp \param Wp_ new Wp
-		inline void setKp (const Diffusion<PDEParameterOptions::Constant> & Kp_){Kp = &Kp_;}			//!< Setter of Kp \param Kp_ new Kp
 		inline void setPsip (const SpMat * Psip_){Psip = Psip_;}						//!< Setter of Psip \param Psip_ new Psip
 		inline void setPsi_tp (const SpMat * Psi_tp_){Psi_tp = Psi_tp_;}					//!< Setter of Psi_tp \param Psi_tp_ new Psi_tp
-		inline void setR0p (const SpMat * R0p_){R0p = R0p_;}							//!< Setter of R0p \param R0p_ new R0p
-		inline void setR1p (const SpMat * R1p_){R1p = R1p_;}							//!< Setter of R1p \param R1p_ new R1p
-		inline void setPp (const MatrixXr * Pp_){Pp = Pp_;}							//!< Setter of Pp \param Pp_ new Pp
 		inline void setWtW_decp (const Eigen::PartialPivLU<MatrixXr> * WtW_decp_){WtW_decp = WtW_decp_;}	//!< Setter of  WtW_decp \param  WtW_decp_ new  WtW_decp
 		inline void setHp (const MatrixXr * Hp_){Hp = Hp_;}							//!< Setter of Hp \param Hp_ new Hp
 		inline void setUp (const MatrixXr * Up_){Up = Up_;}							//!< Setter of Up \param Up_ new Up
@@ -80,7 +67,6 @@ class Inference_Carrier{
 		inline void setBeta_hatp (const MatrixXv * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
 		inline void setZ_hatp (const MatrixXr * z_hatp_){z_hatp = z_hatp_;}					//!< Setter of z_hatp \param z_hatp_ new z_hatp
-		//inline void setF_hat (void){f_hat = *z_hatp - (*Wp)*((*beta_hatp)(0));}				//!< Setter of f_hatp new Wp
 
 	public:
 		// CONSTUCTORS
@@ -96,15 +82,9 @@ class Inference_Carrier{
 		inline UInt getN_nodes (void) const {return n_nodes;} 							//!< Getter of n_nodes \return n_nodes
 		inline UInt getq (void) const {return q;} 								//!< Getter of q \return q
 
-		inline Real getLambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda
-		inline UInt getOptimal_Position(void) const {return optimal_position;}					//!< Getter of the optimal_position \return optimal_position
 		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
-                inline const Diffusion<PDEParameterOptions::Constant> * getKp (void) const {return Kp;} 	        //!< Getter of Kp \return Kp
 		inline const SpMat * getPsip (void) const {return Psip;} 						//!< Getter of Psip \return Psip
 		inline const SpMat * getPsi_tp (void) const {return Psi_tp;} 						//!< Getter of Psi_tp \return Psi_tp
-		inline const SpMat * getR0p (void) const {return R0p;} 							//!< Getter of R0p \return R0p
-		inline const SpMat * getR1p (void) const {return R1p;} 							//!< Getter of R1p \return R1p
-		inline const MatrixXr * getPp (void) const {return Pp;} 						//!< Getter of Pp \return Pp
 		inline const Eigen::PartialPivLU<MatrixXr> * getWtW_decp (void) const {return WtW_decp;} 		//!< Getter of WtW_decp \return WtW_decp
 		inline const MatrixXr * getHp (void) const {return Hp;} 						//!< Getter of Hp \return Hp
 		inline const MatrixXr * getUp (void) const {return Up;} 						//!< Getter of Up \return Up
@@ -115,7 +95,6 @@ class Inference_Carrier{
 		inline const MatrixXv * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
 		inline const VectorXr * getZp (void) const {return zp;} 						//!< Getter of zp \return zp
 		inline const MatrixXr * getZ_hatp (void) const {return z_hatp;} 					//!< Getter of z_hatp \return z_hatp
-		//inline const MatrixXr * getF_hatp (void) const {return &f_hat;} 					//!< Getter of f_hatp \return f_hatp
 
 
 
