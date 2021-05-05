@@ -909,7 +909,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   
       for(i in 1:length(R_Inference_Data_Object@type)){
         if(R_Inference_Data_Object@interval[i]!=0){
-          ci=t(confidence_intervals[3*i:(3*i+2),])
+          ci=t(confidence_intervals[3*(i-1)+1:(3*(i-1)+3),])
           
           if(R_Inference_Data_Object@type[i]==1){
             inference$CI$wald = ci
