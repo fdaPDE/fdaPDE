@@ -913,12 +913,15 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           
           if(R_Inference_Data_Object@type[i]==1){
             inference$CI$wald[[length(inference$CI$wald)+1]] = ci
+            inference$CI$wald=as.list(inference$CI$wald)
           }
           else if(R_Inference_Data_Object@type[i]==2){
             inference$CI$speckman[[length(inference$CI$speckman)+1]] = ci
+            inference$CI$speckman=as.list(inference$CI$speckman)
           }
           else if(R_Inference_Data_Object@type[i]==3){
             inference$CI$eigen_sign_flip[[length(inference$CI$eigen_sign_flip)+1]] = ci
+            inference$CI$eigen_sign_flip=as.list(inference$CI$eigen_sign_flip)
           }
         }
         
@@ -949,12 +952,15 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         }
         if(R_Inference_Data_Object@type[i]==1){
           inference$p_values$wald[[length(inference$p_values$wald)+1]] = p_values
+          inference$p_values$wald=as.list(inference$p_values$wald)
         }
         else if(R_Inference_Data_Object@type[i]==2){
           inference$p_values$speckman[[length(inference$p_values$speckman)+1]] = p_values
+          inference$p_values$speckman=as.list(inference$p_values$speckman)
         }
         else if(R_Inference_Data_Object@type[i]==3){
           inference$p_values$eigen_sign_flip[[length(inference$p_values$eigen_sign_flip)+1]] = p_values
+          inference$p_values$eigen_sign_flip=as.list(inference$p_values$eigen_sign_flip)
         }
         }
        }
