@@ -32,7 +32,7 @@ public:
   Inference_Base()=delete;	//The default constructor is deleted
   Inference_Base(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):inverter(inverter_), inf_car(inf_car_), pos_impl(pos_impl_){}; 
   Inference_Base(Inference_Base & rhs) = delete; //The default copy constructor is deleted
-  Inference_Base(Inference_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car), pso_impl(rhs.pos_impl){}; //Definition of the move constructor
+  Inference_Base(Inference_Base && rhs):inverter(std::move(rhs.inverter)), inf_car(rhs.inf_car), pos_impl(rhs.pos_impl){}; //Definition of the move constructor
   Inference_Base & operator=(Inference_Base && rhs) = delete; //The move assignment operator is deleted
  
   //!< public method that calls the requested functions according to test_type and interval_type

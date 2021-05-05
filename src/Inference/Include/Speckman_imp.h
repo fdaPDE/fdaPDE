@@ -83,7 +83,7 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
   VectorXr result;
   
   // simultaneous test
-  if(this->inf_car.getInfData()->get_test_type()[pos_impl] == "simultaneous"){
+  if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
     // get the matrix of coefficients for the test
     MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
     MatrixXr C_t = C.transpose();
@@ -118,7 +118,7 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
     result.resize(C.rows()); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
     //result(0) = pval;
     result(0) = stat;
-    for(k=1;k<C.rows();k++){
+    for(UInt k=1;k<C.rows();k++){
     result(k)==10e20;
     } 
     return result;
@@ -199,7 +199,7 @@ MatrixXv Speckman<InputHandler>::compute_CI(void){
   //}
 
   // Extract the quantile needed for the computation of upper and lower bounds
-  Real quant = this->inf_car.getInfData()->get_inference_quantile()[pos_impl];
+  Real quant = this->inf_car.getInfData()->get_inference_quantile()[this->pos_impl];
   
   // compute Lambda2 and V if needed
   if(!is_Lambda2_computed){

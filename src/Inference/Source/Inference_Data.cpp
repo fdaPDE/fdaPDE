@@ -17,25 +17,25 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   UInt size_test_Type=Rf_length(test_Type_);
   test_Type.resize(size_test_Type);
   for(UInt i=0; i<size_test_Type; i++){
-  if(INTEGER(test_Type_[i])[0]==0)
+  if(INTEGER(test_Type_)[i]==0)
     test_Type[i]="not-defined";
-  else if(INTEGER(test_Type_[i])[0]==1)
+  else if(INTEGER(test_Type_)[i]==1)
     test_Type[i] = "one-at-the-time";
-  else if(INTEGER(test_Type_[i])[0]==2)
-    test_Type = "simultaneous";
+  else if(INTEGER(test_Type_)[i]==2)
+    test_Type[i] = "simultaneous";
   }
   
   //interval_Type
   UInt size_interval_Type=Rf_length(interval_Type_);
   interval_Type.resize(size_interval_Type);
   for(UInt i=0; i<size_interval_Type; i++){
-  if(INTEGER(interval_Type_[i])[0]==0)
+  if(INTEGER(interval_Type_)[i]==0)
     interval_Type[i] = "not-defined";
-  else if(INTEGER(interval_Type_[i])[0]==1)
+  else if(INTEGER(interval_Type_)[i]==1)
     interval_Type[i] = "one-at-the-time";
-  else if(INTEGER(interval_Type_[i])[0]==2)
+  else if(INTEGER(interval_Type_)[i]==2)
    interval_Type[i] = "simultaneous";
-  else if(INTEGER(interval_Type_[i])[0]==3)
+  else if(INTEGER(interval_Type_)[i]==3)
    interval_Type[i] = "bonferroni";
   }
 
@@ -43,12 +43,12 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   UInt size_implementation_Type=Rf_length(implementation_Type_);
   implementation_Type.resize(size_implementation_Type);
   for(UInt i=0; i<size_implementation_Type; i++){
-  if(INTEGER(implementation_Type_[i])[0]==1)
+  if(INTEGER(implementation_Type_)[i]==1)
     implementation_Type[i] = "wald";
-  else if(INTEGER(implementation_Type_[i])[0]==2)
+  else if(INTEGER(implementation_Type_)[i]==2)
     implementation_Type[i] = "speckman";
-  else if(INTEGER(implementation_Type_[i])[0]==3)
-    implementation_Type = "eigen-sign-flip";
+  else if(INTEGER(implementation_Type_)[i]==3)
+    implementation_Type[i] = "eigen-sign-flip";
   }
    //exact_Inference
    if(INTEGER(exact_Inference_)[0]==1)
@@ -80,7 +80,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  UInt size_inference_Quantile=Rf_length(inference_Quantile_);
  inference_Quantile.resize(size_inference_Quantile);
  for(UInt i=0;i<size_inference_Quantile;i++){
-   inference_Quantile(i)=REAL(inference_Quantile_[i]);
+   inference_Quantile(i)=REAL(inference_Quantile_)[i];
  }
 
  //definition

@@ -13,16 +13,16 @@ class InferenceData
 {
 	private:
 		// Type of analysis required
-  		std::vector<std::string> test_Type(1,"not-defined");	                        //!< Values: not-defined [default], one-at-the-time, simultaneous
-  		std::vector<std::string> interval_Type(1,"not-defined");	                //!< Values: not-defined [default], one-at-the-time, simultaneous, bonferroni
-  		std::vector<std::string> implementation_Type(1,"wald"); 	                //!< Values: wald [default], speckman, eigen-sign-flip
-  		std::string exact_Inference		= "non-exact";		                //!< Values: non-exact [default], exact 
+  		std::vector<std::string> test_Type		= {"not-defined"};	        //!< Values: not-defined [default], one-at-the-time, simultaneous
+  		std::vector<std::string> interval_Type  	= {"not-defined"};	        //!< Values: not-defined [default], one-at-the-time, simultaneous, bonferroni
+  		std::vector<std::string> implementation_Type  	= {"wald"}; 	                //!< Values: wald [default], speckman, eigen-sign-flip
+  		std::string exact_Inference			= "non-exact";		        //!< Values: non-exact [default], exact 
 		// Parameters needed
                 MatrixXr coeff_Inference;	        					//!< If position j is true, the j-th covariate is taken into account in the inferential analysis
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
   		VectorXr inference_Quantile;		 					//!< Quantile needed for confidence intervals if interval_Type != not-defined
-  		bool definition				= false;				//!< Defines whether the inference analysis needs to be carried out or not
-                long int n_perm 			= 1000; 				//!< Number of permutations if permutatinal tests are required
+  		bool definition					= false;			//!< Defines whether the inference analysis needs to be carried out or not
+                long int n_perm 				= 1000; 			//!< Number of permutations if permutatinal tests are required
 
 	public:
   	//Constructors

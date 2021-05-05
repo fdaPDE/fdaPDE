@@ -53,7 +53,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
   const MatrixXr W_t = W->transpose();
   
   // simultaneous test
-  if(this->inf_car.getInfData()->get_test_type()[pos_impl] == "simultaneous"){
+  if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
     // Store beta_hat
     VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
     
@@ -103,7 +103,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     
     result.resize(p); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
     result(0) = pval;
-    for(k=1;k<p;k++){
+    for(UInt k=1;k<p;k++){
     result(k)==10e20;
     }
   }

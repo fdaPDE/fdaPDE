@@ -32,13 +32,13 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
           intervals(0,0)(2) = 10e20;
 	  
 	  p_values.resize(1,1);
-	  p_values(0)= 10e20;
+	  p_values(0,0)(0)= 10e20;
 	}else{
 	  
 	  p_values.resize(1, n_inf_implementations);
 	  intervals.resize(n_inf_implementations, p_inf);
 
-	  for(UInt i=0; i<n_inf_implementations; ++i){
+	  //for(UInt i=0; i<n_inf_implementations; ++i){
 	    //if(inf_Data.get_test_type()[i]=="not-defined"){
 	    //p_values(i).resize(p_inf);
 	    //p_values(i)=inference_Output.row(i)(0);
@@ -54,12 +54,14 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	    // }
 	    // p_values(i)=inference_Output.row(i)(0); 
 	    //}else{
-	      p_values=inference_Output.row(i)(0);
+	      //p_values(0,i)=inference_Output.row(i)(0);
 	      
-	      intervals=inference_Output.row(i).rightCols(p_inf);
+	      //intervals.row(i)=inference_Output.row(i).rightCols(p_inf);
 	      // }
 	      //}
-	  }
+	  //}
+	  p_values=(inference_Output.col(0)).transpose();
+          intervals=inference_Output.rightCols(p_inf);
 	}
 	
 	

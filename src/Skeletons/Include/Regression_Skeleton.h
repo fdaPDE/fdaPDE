@@ -24,7 +24,7 @@ template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
 template<typename EvaluationType, typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier);
-template<InputHandler>
+template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
@@ -272,24 +272,24 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
  \param inference_output the object to be filled with inference output 
  \return void
 */
-template<InputHandler>
+template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
   // Factory instantiation: using factory provided in Inverse_Factory.h
-  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inf_car.getInfData->get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
+  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inf_car.getInfData()->get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
 
-  UInt n_implementations = inf_car.getInfData->get_implementation_type().size();
-  UInt p = inf_car.getInfData->get_coeff_inference().rows();
+  UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
+  UInt p = inf_car.getInfData()->get_coeff_inference().rows();
 
   inference_output.resize(n_implementations, p+1);
 
   for(UInt i=0; i<n_implementations; ++i){
   // Factory instantiation for solver: using factory provided in Inference_Factory.h
-  std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
+  std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
   inference_output.row(i) = inference_Solver->compute_inference_output();
 
-  if(inf_car.getInfData->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
+  if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
 			output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
 		}
   }
