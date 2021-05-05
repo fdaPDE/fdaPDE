@@ -14,6 +14,7 @@ void Eigen_Sign_Flip<InputHandler>::compute_Lambda(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
   UInt q = this->inf_car.getq(); 
   
+  Lambda.resize(n_obs,n_obs);
   Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
   is_Lambda_computed = true;
   
@@ -66,7 +67,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     }
     
     // compute the partial residuals
-    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C.transpose()) * (beta_0) - (*W) * (C.transpose()) * beta_hat;
+    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C.transpose()) * (beta_0) - (*W) * (C_out) * beta_hat;
     
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
@@ -99,7 +100,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     result.resize(p); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
     result(0) = pval;
     for(UInt k=1;k<p;k++){
-    result(k)==10e20;
+    result(k)=10e20;
     }
   }
   else{
