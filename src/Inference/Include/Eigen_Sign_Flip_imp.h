@@ -66,7 +66,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     }
     
     // compute the partial residuals
-    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C->transpose()) * (beta_0) - (*W) * (C->transpose()) * beta_hat;
+    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C.transpose()) * (beta_0) - (*W) * (C.transpose()) * beta_hat;
     
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D

@@ -207,10 +207,6 @@ void Wald<InputHandler>::print_for_debug(void) const {
     for (UInt i=0; i<10; i++){
       Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
     }
-    Rprintf( "Matrix Smoothing transpose S_t is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "S_t( %d, %d):  %f \n", 10*i, 20*i, S_t(10*i,20*i));
-    } 
   }
   
   Rprintf("V computed: %d \n" , is_V_computed); 
