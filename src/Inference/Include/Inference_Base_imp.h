@@ -16,7 +16,7 @@ MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
   // if test_type is not defined, only intervals are required
   if(test_type == "not-defined"){
     result(0).resize(p);
-    for(k=0;k<p;k++){
+    for(UInt k=0;k<p;k++){
     result(0)(k) = 10e20; // Default value (unfeasible)
     }
     result.rightCols(p) = this->compute_CI();

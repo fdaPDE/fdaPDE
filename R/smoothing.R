@@ -904,8 +904,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     # Save statistics and intervals
     if(R_Inference_Data_Object@definition==1){
       inference = {}
-      confidence_intervals = matrix(data = bigsol[[24]], nrow = 3*length(R_Inference_Data_Object@type, ncol = dim(R_Inference_Data_Object@coeff)[1]))
-      p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type)
+      confidence_intervals = matrix(data = bigsol[[24]], nrow = 3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1])
+      p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type))
   
       for(i in 1:length(R_Inference_Data_Object@type)){
         if(R_Inference_Data_Object@interval[i]!=0){
@@ -941,7 +941,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
               p_values[i] = 2*pnorm(-abs(statistics[i]))
             }
           }
-          else if(R_Inference_Data_Object@test[i]==2{
+          else if(R_Inference_Data_Object@test[i]==2){
             # simultaneous tests
             p = dim(R_Inference_Data_Object@coeff)[1]
             p_values = 1-pchisq(statistics[1], p)
