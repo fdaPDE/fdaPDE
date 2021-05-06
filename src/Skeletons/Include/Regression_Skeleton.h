@@ -96,21 +96,11 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
 	}
         //Inference
-	if(inferenceData.get_definition()==true){ //only if inference is actually required
+	if(inferenceData.get_definition()==true){ 
+		//only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
 		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output); 
 
-		// Factory instantiation: using factory provided in Inverse_Factory.h
-		//std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inferenceData.get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
-		
-    		// Factory instantiation for solver: using factory provided in Inference_Factory.h
-		//std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inferenceData.get_implementation_type(), 			   std::move(inference_Inverter), inf_car); // Selects the right implementation and solves the inferential problems		
-		
-		//inference_Output = inference_Solver->compute_inference_output();
-
-		//if(inferenceData.get_implementation_type()=="wald" && optimizationData.get_loss_function()=="unused" && optimizationData.get_size_S()==1){
-		//	(solution_bricks.second).GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
-		//}
          }
 
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);

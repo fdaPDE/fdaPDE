@@ -240,11 +240,12 @@ output_CPP$inference$CI
 
 #######
 R_inference_object = inferenceDataObjectBuilder(test = c("one-at-the-time", "one-at-the-time", "simultaneous", "simultaneous"), interval = c("one-at-the-time", "simultaneous", "none", "simultaneous"), type = c("wald", "speckman", "eigen-sign-flip", "wald"), exact = "True", dim = 2)
-
+begin=Sys.time()
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2), lambda.selection.lossfunction = "GCV",
-                       FEMbasis=FEMbasis, lambda=lambda, R_Inference_Data_Object = R_inference_object
+                       FEMbasis=FEMbasis, lambda=lambda #R_Inference_Data_Object = R_inference_object
 )
-
+end=Sys.time()
+diff_time=end-begin
 output_CPP$inference$p_values
 output_CPP$inference$CI
