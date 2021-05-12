@@ -25,7 +25,7 @@ void Inverse_Exact::Compute_Inv(){
 void Inverse_Non_Exact::Compute_Inv(){
   if(!this->inverse_computed){
     
-    Eigen::BiCGSTAB<SpMat> Iterative_Solver();
+    Eigen::BiCGSTAB<SpMat> Iterative_Solver;
     Iterative_Solver.compute(*(this->Ep));
     E_inv=Iterative_Solver.solve(MatrixXr::Identity(this->Ep->rows(),this->Ep->cols())); //Solve directly the system for an identity matrix (Iterative solution)
     
