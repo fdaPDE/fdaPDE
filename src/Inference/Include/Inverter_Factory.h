@@ -24,7 +24,7 @@ public:
     if(policy=="exact")
       return make_shared<Inverse_Exact>(Ep,E_decp);
     if(policy=="non-exact")
-      return make_shared<Inverse_Non_Exact>(Ep));
+      return make_shared<Inverse_Non_Exact>(Ep);
     else // default is fd
       {
 	Rprintf("Method not found, using non-exact");
