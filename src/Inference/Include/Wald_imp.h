@@ -4,12 +4,12 @@
 template<typename InputHandler> 
 void Wald<InputHandler>::compute_S(void){
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
-  this->inverter->Compute_Inv();
+  this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
 
   MatrixXr M_inv;
-  M_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
+  M_inv.resize(this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp())->rows(), this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp())->cols());
 
-  const MatrixXr * E_inv = this->inverter->getInv();
+  const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
   const MatrixXr * U = this->inf_car.getUp();
   const MatrixXr * V = this->inf_car.getVp();
   const Eigen::PartialPivLU<MatrixXr> * G_decp = this->inf_car.getG_decp();
