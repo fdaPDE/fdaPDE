@@ -50,11 +50,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
                         
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
-			     if(optimizationData.get_last_ls_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
+                             regression.build_regression_inference(lambda_inference);
                         }
 		}
 		else
@@ -66,11 +62,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
-			      if(optimizationData.get_last_ls_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
+                             regression.build_regression_inference(lambda_inference);
                         }
 		}
 	}
@@ -85,11 +77,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
-                             if(optimizationData.get_last_ls_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
+                             regression.build_regression_inference(lambda_inference);
                         }
 		}
 		else
@@ -101,11 +89,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
                              Real lambda_inference = solution_bricks.second.lambda_sol;
-                             if(optimizationData.get_last_ls_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
+                             regression.build_regression_inference(lambda_inference);
                         }
 				
 		}
