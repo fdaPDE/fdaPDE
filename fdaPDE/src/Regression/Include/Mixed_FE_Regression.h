@@ -70,8 +70,6 @@ class MixedFERegressionBase
 		//Eigen::IncompleteLUT<Real> R0dec_;
 		Eigen::SparseLU<SpMat> R0dec_; 		//!< Stores the factorization of R0_
 		Eigen::SparseLU<SpMat> DMatdec_;
-		bool isR0factorized = false;
-		bool isDMatfactorized = false;
 
 		VectorXr rhs_ft_correction_;	//!< right hand side correction for the forcing term:
 		VectorXr rhs_ic_correction_;	//!< Initial condition correction (parabolic case)
@@ -91,11 +89,7 @@ class MixedFERegressionBase
 		bool isGAMData;
 
 		//preconditioner choice
-		bool diagPreconditioned = false;
-		bool JacobiPreconditioned = false;
-		bool massLumping = false;
-		bool blockPreconditioned = false;
-		bool lambdaPreconditioned = false;
+		bool lambdaPreconditioned = true;
 		BaseSolver solver;
 
 
@@ -149,23 +143,8 @@ class MixedFERegressionBase
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
 
 		// -- PRECONDITION --
-		//! A function to solve the system according to the chosen type of preconditioner
-		template<typename Derived>
-		MatrixXr solveSystem(const Eigen::MatrixBase<Derived>&);
-		//! A function to build the system matrix MatrixNoCov_
-		void buildMatrix(const SpMat& NWblock, const SpMat& NEblock, const SpMat& SWblock, const SpMat& SEblock);
-		void preconditionSystemMatrix();
-		MatrixXr preconditionRHS(const MatrixXr& b);
 		//! Vector storing the diagonal preconditioner diagonal terms
 		VectorXr preconditioner;
-		//! Matrices storing the block diagonal preconditioner blocks and their factorization
-		SpMat NW, SE;
-		Eigen::SparseLU<SpMat> NWdec, SEdec;
-
-		// -- MASS LUMPING --
-		void computeLumpedMass();
-		void computeLumpedMass(const SpMat& M);
-		VectorXr lumpedMass;
 
 	public:
 		//!A Constructor.

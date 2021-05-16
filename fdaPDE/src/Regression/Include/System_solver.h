@@ -36,16 +36,20 @@ class MassLumping : public BaseSolver
 protected:
 	VectorXr diag;    // Stores the diagonal of SE'
 	void lumpMassMatrix(const SpMat& M);    // Compute the diagonal terms of SE'
+	bool lumped = false;
 public:
+	MassLumping() : diag(VectorXr::Ones(1)) {};
 	explicit MassLumping(const SpMat& M) { compute(M); };
 	MassLumping(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE);
 	SpMat buildSystemMatrix(const SpMat& M);	// Compute the system matrix Ml starting from M
 	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) override; // Assemble the system matrix Ml starting from the four blocks
 	inline void compute(const SpMat& M) override
 	{
-		buildSystemMatrix(M);
+		if(!lumped)
+			buildSystemMatrix(M);
 		system_factorize(M);
 	}
+	using BaseSolver::system_solve;
 	MatrixXr system_solve(const SpMat& M, const MatrixXr& b) override;
 };
 
@@ -83,16 +87,6 @@ public:
 	inline void preconditioner(const VectorXr& p) { prec = p; initialized = true; }
 };
 
-
-//class JacobiPreconditioner : public BaseDiagPreconditioner
-//{
-//public:
-//	explicit JacobiPreconditioner(const SpMat& M) { compute(M); };
-//	MatrixXr system_solve(const SpMat& M, const MatrixXr& b) override;
-//	void compute(const SpMat& M) override;
-//};
-
-
 // Solves the system DMDx'=Db, x = Dx'
 // with D=diag(1,...,1,1/sqrt(lambda),...,1/sqrt(lambda))
 
@@ -103,6 +97,8 @@ public:
 	LambdaPreconditioner() : lambda(1.0) {};
 	LambdaPreconditioner(const Real lambda_, const UInt nnodes) : lambda(lambda_) { compute(lambda_, nnodes); };
 	Real getlambda() { return lambda; }
+	using BaseDiagPreconditioner::system_solve;
+	using BaseSolver::buildSystemMatrix;
 	MatrixXr system_solve(const SpMat& M, const MatrixXr& b) override;
 	void compute(const SpMat& M) override;
 	void compute(const Real lambda_);
@@ -113,7 +109,6 @@ public:
 // Base class for a generic SparseLU solver with a block diagonal preconditioner with two blocks
 // Solves the system BMx=Bb, where B is a block diagonal matrix:  B = | NWblock^-1 |     0      |
 //																	  |     0      | SEblock^-1 |
-
 class BaseBlocksPreconditioner : public BaseSolver
 {
 protected:
@@ -133,42 +128,5 @@ public:
 	MatrixXr system_solve(const SpMat& M, const MatrixXr& b) override;
 	virtual void compute(const SpMat& M);
 };
-
-
-// NWblock and SEblock respectively correspond to the top-left and bottom-right blocks of M
-class BlocksPreconditioner : public BaseBlocksPreconditioner
-{
-public:
-	BlocksPreconditioner() = default;
-	BlocksPreconditioner(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) { compute(NW, SE, SW, NE); };
-	explicit BlocksPreconditioner(const SpMat& M) { compute(M); };
-	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) override;
-	MatrixXr system_solve(const SpMat& M, const MatrixXr& b) override;
-	void compute(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE);
-	void compute(const SpMat& M) override;
-};
-
-
-//// Class solving the system B(DMD)x' = BDb, x=Dx'
-//class BlockLambdaPreconditioner : public BlocksPreconditioner
-//{
-//protected:
-//	LambdaPreconditioner L;
-//public:
-//	explicit BlockLambdaPreconditioner(const SpMat& M) { compute(M); };
-//	BlockLambdaPreconditioner(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) { compute(NW, SE, SW, NE); };
-//	inline spMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) override
-//	{
-//		Real l = L.getlambda();
-//		if (l == 0)
-//			return BlocksPreconditioner::buildSystemMatrix(NW, SE, SW, NE);
-//		return BlocksPreconditioner::buildSystemMatrix(NW, SE / l, SW / sqrt(l), NE / sqrt(l));
-//	}
-//	MatrixXr system_solve(const MatrixXr& b) const override;
-//	MatrixXr system_solve(const SpMat& M, const MatrixXr& b) override;
-//	void compute(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) override;
-//	void compute(const SpMat& M) override;
-//	void compute(const Real lambda_);
-//};
 
 #endif

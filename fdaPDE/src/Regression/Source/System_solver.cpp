@@ -124,28 +124,6 @@ MatrixXr BaseDiagPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
 }
 
 
-//// ---------- Jacobi diagonal preconditioner methods ----------
-//void JacobiPreconditioner::compute(const SpMat& M)
-//{
-//	prec.resize(M.outerSize());
-//
-//	for (UInt k = 0; k < M.outerSize(); ++k)
-//	{
-//		Real val = 0.0;
-//		for (SpMat::InnerIterator it(M, k); it; ++it)
-//			val += pow(it.value(), 2);
-//		prec(k) = 1 / val;
-//	}
-//	initialized = true;
-//	system_factorize(prec.asDiagonal() * M);
-//}
-//
-//MatrixXr JacobiPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
-//{
-//	compute(M);
-//	return BaseDiagPreconditioner::system_solve(b);
-//}
-
 // ---------- Lambda preconditioner methods ----------
 void LambdaPreconditioner::compute(const SpMat& M)
 {
@@ -270,74 +248,3 @@ void BaseBlocksPreconditioner::compute(const SpMat& M)
 		system_factorize(M);
 	}
 }
-
-
-// ---------- Blocks digonal preconditioner methods ----------
-void BlocksPreconditioner::compute(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
-{
-	BaseSolver::system_factorize(this->buildSystemMatrix(NW, SE, SW, NE));
-}
-
-SpMat BlocksPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
-{
-	NWblock = NW;
-	SEblock = SE;
-
-	NWdec.compute(NWblock);
-	SEdec.compute(SEblock);
-	initialized = true;
-
-	UInt nnodes = NW.outerSize();
-	SpMat Id;
-	Id.resize(nnodes, nnodes);
-	Id.setIdentity();
-
-	return BaseSolver::buildSystemMatrix(Id, Id, SEdec.solve(SW), NWdec.solve(NE));
-}
-
-void BlocksPreconditioner::compute(const SpMat& M)
-{
-	UInt nnodes = M.outerSize() / 2;
-
-	compute(M.topLeftCorner(nnodes, nnodes), M.bottomRightCorner(nnodes, nnodes),
-		M.bottomLeftCorner(nnodes, nnodes), M.topRightCorner(nnodes, nnodes));
-}
-
-MatrixXr BlocksPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
-{
-	compute(M);
-	return BaseBlocksPreconditioner::system_solve(b);
-}
-
-
-// --------- Lambda Block Preconditioner methods ---------
-
-//MatrixXr BlockLambdaPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
-//{
-//	compute(M);
-//	return system_solve(b);
-//}
-//
-//MatrixXr BlockLambdaPreconditioner::system_solve(const MatrixXr& b) const
-//{
-//	return L.preconditioner().asDiagonal() * BaseBlocksPreconditioner::system_solve(L.preconditionRHS(b));
-//}
-//
-//void BlockLambdaPreconditioner::compute(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
-//{
-//	system_factorize(buildSystemMatrix(NW, SE, SW, NE));
-//}
-//
-//void BlockLambdaPreconditioner::compute(const SpMat& M)
-//{
-//	if (L.getlambda() != 1)
-//		BlocksPreconditioner::compute(L.preconditioner().asDiagonal() * M * L.preconditioner().asDiagonal());
-//	else
-//		BlocksPreconditioner::compute(M);
-//}
-//
-//void BlockLambdaPreconditioner::compute(const Real lambda_)
-//{
-//	if (lambda_ != L.getlambda())
-//		L.compute(lambda_);
-//}
