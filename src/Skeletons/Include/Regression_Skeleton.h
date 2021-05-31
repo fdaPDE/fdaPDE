@@ -36,7 +36,8 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	regression.preapply(mesh); // preliminary apply (preapply) to store all problem matrices
 
 	std::pair<MatrixXr, output_Data> solution_bricks;	// Prepare solution to be filled
-	MatrixXv inference_Output; 				//Matrix that will store the output from inference, i.e. p-values and/or intervals
+	MatrixXv inference_Output; 				// Matrix that will store the output from inference, i.e. p-values and/or intervals
+        Real lambda_inference = 0; 				// Will store the value of the optimal lambda
 
 	// Build the Carrier according to problem type
 	if(regression.isSV())
@@ -49,7 +50,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler, Forced,Areal>>(carrier);
                         
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             Real lambda_inference = solution_bricks.second.lambda_sol;
+                             lambda_inference = solution_bricks.second.lambda_sol;
 			     if(optimizationData.get_last_lS_used() != lambda_inference){
                              	regression.build_regression_inference(lambda_inference);
 				// for debug only 
@@ -65,7 +66,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Forced>>(carrier);
 
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             Real lambda_inference = solution_bricks.second.lambda_sol;
+                             lambda_inference = solution_bricks.second.lambda_sol;
 			      if(optimizationData.get_last_lS_used() != lambda_inference){
                              	regression.build_regression_inference(lambda_inference);
 				// for debug only 
@@ -84,7 +85,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Areal>>(carrier);
 
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             Real lambda_inference = solution_bricks.second.lambda_sol;
+                             lambda_inference = solution_bricks.second.lambda_sol;
                              if(optimizationData.get_last_lS_used() != lambda_inference){
                              	regression.build_regression_inference(lambda_inference);
 				// for debug only 
@@ -100,7 +101,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler>>(carrier);
 
                           if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             Real lambda_inference = solution_bricks.second.lambda_sol;
+                             lambda_inference = solution_bricks.second.lambda_sol;
                              if(optimizationData.get_last_lS_used() != lambda_inference){
                              	regression.build_regression_inference(lambda_inference);
 				// for debug only 
@@ -114,7 +115,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
         //Inference
 	if(inferenceData.get_definition()==true){ 
 		//only if inference is actually required
-		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData); //Carrier for inference Data
+		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
 		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output); 
 
          }
@@ -272,17 +273,17 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 
 //! Function to select the right inference method
 /*
- \tparam InputHandler the type of regression problem
- \param opt_data the object containing optimization data
- \param inf_car the object containing data to make inference
- \param inference_output the object to be filled with inference output 
- \return void
+  \tparam InputHandler the type of regression problem
+  \param opt_data the object containing optimization data
+  \param inf_car the object containing data to make inference
+  \param inference_output the object to be filled with inference output 
+  \return void
 */
 template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
   // Factory instantiation: using factory provided in Inverse_Factory.h
-  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inf_car.getInfData()->get_exact_inference()); // Select the right policy for inversion of MatrixNoCov
+  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
 
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
@@ -290,14 +291,14 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
   inference_output.resize(n_implementations, p+1);
 
   for(UInt i=0; i<n_implementations; ++i){
-  // Factory instantiation for solver: using factory provided in Inference_Factory.h
-  std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
+    // Factory instantiation for solver: using factory provided in Inference_Factory.h
+    std::unique_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-  inference_output.row(i) = inference_Solver->compute_inference_output();
+    inference_output.row(i) = inference_Solver->compute_inference_output();
 
-  if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
-			output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
-		}
+    if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
+      output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
+    }
   }
 
   return;

@@ -13,12 +13,18 @@ void Inverse_Base::print_for_debug(void) const {
   return;
 };
 
-void Inverse_Exact::Compute_Inv(const Eigen::SparseLU<SpMat> * E_decp, const SpMat * Ep){
+void Inverse_Exact::Compute_Inv(void){
   if(!inverse_computed){
-    E_inv=E_decp->solve(MatrixXr::Identity(Ep->rows(),Ep->cols())); //Solve directly the system for an identity matrix
-    inverse_computed=true;
+    this->E_inv=this->E_decp->solve(MatrixXr::Identity(Ep->rows(),Ep->cols())); //Solve directly the system for an identity matrix
+    this->inverse_computed=true;
   }
   
+  return;
+};
+
+void Inverse_Non_Exact::Compute_Inv(void){
+
+  Rprintf("This is a test to see if Invers_Non_Exact works");
   return;
 };
 
