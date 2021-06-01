@@ -89,9 +89,13 @@ class MixedFERegressionBase
 		bool isGAMData;
 
 		//preconditioner choice
-		bool lambdaPreconditioned = true;
-		BaseSolver solver;
-
+		bool lambdaPreconditioned = false;
+		//BaseSolver solver;
+		//MassLumping solver;
+		//LambdaPreconditioner solver;
+		BlockPreconditioner solver;
+		//IdentityMass solver;
+		//LumpedPreconditioner solver;
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
@@ -141,10 +145,6 @@ class MixedFERegressionBase
 		//! A function which solves the factorized system
 		template<typename Derived>
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
-
-		// -- PRECONDITION --
-		//! Vector storing the diagonal preconditioner diagonal terms
-		VectorXr preconditioner;
 
 	public:
 		//!A Constructor.

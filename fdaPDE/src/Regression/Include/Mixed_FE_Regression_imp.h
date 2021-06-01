@@ -584,10 +584,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 				U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*P->asDiagonal()*W;
     	}
 
-		if (lambdaPreconditioned)
-			MatrixXr y = preconditioner.asDiagonal() * solver.system_solve(preconditioner.asDiagonal() * U_);
-		else
-			MatrixXr y = solver.system_solve(U_);
+		MatrixXr y = solver.system_solve(U_);
 		MatrixXr D = V_*y; 
 
 		// G = C + D
@@ -609,6 +606,7 @@ template<typename InputHandler>
 template<typename Derived>
 MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBase<Derived> & b)
 {
+	
 	MatrixXr x1 = solver.system_solve(MatrixXr(b));
 	
 	if (regressionData_.getCovariates()->rows() != 0)
@@ -617,15 +615,15 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBa
 		MatrixXr x2 = Gdec_.solve(V_ * x1);
 		
 		// Resolution of the system matrixNoCov * x3 = U * x2
-		if (lambdaPreconditioned)
-			MatrixXr x3 = preconditioner.asDiagonal() * solver.system_solve(MatrixXr(preconditioner.asDiagonal() * U_ * x2));
-		else
-			MatrixXr x3 = solver.system_solve(MatrixXr(U_ * x2));
+		MatrixXr x3 = solver.system_solve(MatrixXr(U_ * x2));
 		
 		x1 -= x3;
 	}
 	
+	//Rprintf("System solving phase completed\n");
+	
 	return x1;
+	
 }
 
 //----------------------------------------------------------------------------//
@@ -945,7 +943,7 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
 	// Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
 	if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic())
 	{
-		if (lambdaPreconditioned)
+		if(lambdaPreconditioned)
 			this->R1_lambda -= sqrt(lambdaS) * (lambdaT * LR0k_);
 		else
 			this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
@@ -973,18 +971,13 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 	const Real lambda_ = optimizationData_.get_current_lambdaS();
         if(lambda_ != last_lambda)
         {
+
+			solver.compute(lambda_, b.rows());
                 this->buildSystemMatrix(lambda_);
 
 			if(regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
 			{
 				this->addDirichletBC_matrix();
-			}
-
-			if (lambdaPreconditioned)
-			{
-				preconditioner.resize(b.cols());
-				preconditioner = VectorXr::Ones(b.cols());
-				preconditioner.bottomRows(b.cols() / 2) = preconditioner.bottomRows(b.cols() / 2) * (1 / sqrt(lambda_));
 			}
 
                 this->system_factorize();
@@ -1034,6 +1027,9 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			Real lambdaT = (optimizationData_.get_lambda_T())[t];
 			_rightHandSide = rhs;
 
+
+			solver.compute(lambdaS, nnodes);
+
 			if(isGAMData || regressionData_.isSpaceTime() || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
 			{
 				if(!regressionData_.isSpaceTime())
@@ -1049,10 +1045,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			// Right-hand side correction for space varying PDEs
 			if(this->isSpaceVarying)
 			{
-				if(lambdaPreconditioned)
-					_rightHandSide.bottomRows(nnodes) = sqrt(lambdaS)*rhs_ft_correction_;
-				else
-					_rightHandSide.bottomRows(nnodes)= (lambdaS)*rhs_ft_correction_;
+			    _rightHandSide.bottomRows(nnodes)= (lambdaS)*rhs_ft_correction_;
 			}
 
 			// Right-hand side correction for initial condition in parabolic case
@@ -1060,23 +1053,13 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			{
 				for(UInt i=0; i<regressionData_.getInitialValues()->rows(); i++)
 				{
-					if(lambdaPreconditioned)
-						_rightHandSide(nnodes + i) -= sqrt(lambdaS)*rhs_ic_correction_(i);
-					else
-						_rightHandSide(nnodes+i) -= (lambdaS)*rhs_ic_correction_(i);
+					_rightHandSide(nnodes+i) -= (lambdaS)*rhs_ic_correction_(i);
 				}
 			}
 
 			// Applying boundary conditions if necessary
 			if(regressionData_.getDirichletIndices()->size() != 0)  // if areal data NO BOUNDARY CONDITIONS				
 				addDirichletBC();
-
-			if (lambdaPreconditioned)
-			{
-				preconditioner.resize(2 * nnodes);
-				preconditioner = VectorXr::Ones(2 * nnodes);
-				preconditioner.bottomRows(nnodes) = preconditioner.bottomRows(nnodes) * (1/sqrt(lambdaS));
-			}
 
 			//f Factorization of the system for woodbury decomposition
 			if(isGAMData || regressionData_.isSpaceTime() || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())

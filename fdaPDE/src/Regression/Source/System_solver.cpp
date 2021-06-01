@@ -82,6 +82,7 @@ void MassLumping::lumpMassMatrix(const SpMat& M)
 		diag(k) = val;
 	}
 
+	lumped = true;
 }
 
 SpMat MassLumping::buildSystemMatrix(const SpMat& M)
@@ -104,6 +105,35 @@ MatrixXr MassLumping::system_solve(const SpMat& M, const MatrixXr& b)
 	return BaseSolver::system_solve(b);
 }
 
+// ---------- Identity Mass methods ----------
+
+SpMat IdentityMass::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
+{
+	UInt nnodes = SW.outerSize();
+	SpMat Id(nnodes, nnodes);
+	Id.setIdentity();
+
+	return BaseSolver::buildSystemMatrix(NW,lambda*Id,SW,NE);
+}
+
+// ---------- Lumped Mass Preconditioner methods ----------
+
+SpMat LumpedPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
+{
+	lumpMassMatrix(SE); // / lambda);
+	UInt nnodes = SE.outerSize();
+	SpMat Id(nnodes, nnodes);
+	Id.setIdentity();
+
+	return BaseSolver::buildSystemMatrix(NW, Id, diag.cwiseInverse().asDiagonal()*SW, NE);
+}
+
+MatrixXr LumpedPreconditioner::system_solve(const MatrixXr& b) const
+{
+	VectorXr prec = VectorXr::Ones(2 * diag.rows());
+	prec.bottomRows(diag.rows()) = diag.cwiseInverse();
+	return MassLumping::system_solve(prec.asDiagonal() * b);
+}
 
 // ---------- Base diagonal preconditioner methods ----------
 
@@ -125,16 +155,6 @@ MatrixXr BaseDiagPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
 
 
 // ---------- Lambda preconditioner methods ----------
-void LambdaPreconditioner::compute(const SpMat& M)
-{
-	if (initialized)
-		system_factorize(prec.asDiagonal() * M * prec.asDiagonal());
-	else
-	{
-		Rprintf("Preconditioner not initialized. Using identity");
-		system_factorize(M);
-	}
-}
 
 void LambdaPreconditioner::compute(const Real lambda_, const UInt nnodes)
 {
@@ -147,41 +167,52 @@ void LambdaPreconditioner::compute(const Real lambda_, const UInt nnodes)
 
 void LambdaPreconditioner::compute(const Real lambda_)
 {
-	if (!initialized)
-	{
-		Rprintf("Error: system size not specified. Unable to construct preconditioner. Using identity");
-		return;
-	}
-
 	if (lambda == lambda_)
 		return;
 
 	lambda = lambda_;
-	UInt nnodes = prec.cols() / 2;
-	prec.bottomRows(nnodes) = VectorXr::Ones(nnodes) / sqrt(lambda_);
+	if (initialized)
+	{
+		UInt nnodes = prec.cols() / 2;
+		prec.bottomRows(nnodes) = VectorXr::Ones(nnodes) / sqrt(lambda_);
+	}
 }
 
 MatrixXr LambdaPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
 {
 	compute(M);
-	if(initialized)
+	return system_solve(b);
+}
+
+MatrixXr LambdaPreconditioner::system_solve(const MatrixXr& b) const
+{
+	if (initialized)
 		return prec.asDiagonal() * BaseDiagPreconditioner::system_solve(b);
 	return BaseDiagPreconditioner::system_solve(b);
 }
 
-
 // ---------- Abstract blocks digonal preconditioner methods ----------
-BaseBlocksPreconditioner::BaseBlocksPreconditioner()
+BlockPreconditioner::BlockPreconditioner()
 {
-	NWblock.resize(1,1);
 	SEblock.resize(1,1);
-	NWblock.setIdentity();
 	SEblock.setIdentity();
-	NWdec.compute(NWblock);
 	SEdec.compute(SEblock);
 }
 
-SpMat BaseBlocksPreconditioner::preconditioner() const
+SpMat BlockPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
+{
+	UInt nnodes = SE.outerSize();
+	SEblock = SE;
+	SEdec.compute(SE);
+	initialized = true;
+
+	SpMat Id(nnodes, nnodes);
+	Id.setIdentity();
+
+	return BaseSolver::buildSystemMatrix(NW, Id, SEdec.solve(SW), NE);
+}
+
+SpMat BlockPreconditioner::preconditioner() const
 {
 	SpMat M;
 	if (!initialized)
@@ -189,20 +220,18 @@ SpMat BaseBlocksPreconditioner::preconditioner() const
 		Rprintf("Preconditioner not initalized. Returning identity");
 		M.resize(1, 1);
 		M.setIdentity();
+		return M;
 	}
 	else
 	{
-		UInt nnodes = NWblock.outerSize();
-		M.resize(2 * nnodes, 2 * nnodes);
-		MatrixXr Mtemp(2 * nnodes, 2 * nnodes);
-		Mtemp.topLeftCorner(nnodes, nnodes) = NWdec.solve(MatrixXr::Identity(nnodes, nnodes));
-		Mtemp.topRightCorner(nnodes, nnodes) = SEdec.solve(MatrixXr::Identity(nnodes, nnodes));
-		M = Mtemp.sparseView();
+		UInt nnodes = SEblock.outerSize();
+		MatrixXr M = MatrixXr::Identity(nnodes, nnodes);
+		M.bottomRightCorner(nnodes, nnodes) = SEdec.solve(MatrixXr::Identity(nnodes, nnodes));
+		return M.sparseView();
 	}
-	return M;
 }
 
-MatrixXr BaseBlocksPreconditioner::preconditionRHS(const MatrixXr& b) const
+MatrixXr BlockPreconditioner::preconditionRHS(const MatrixXr& b) const
 {
 	if (!initialized)
 	{
@@ -210,14 +239,13 @@ MatrixXr BaseBlocksPreconditioner::preconditionRHS(const MatrixXr& b) const
 		return b;
 	}
 	
-	UInt nnodes = NWblock.outerSize();
-	MatrixXr rhs(b.rows(), b.cols());
-	rhs.topRows(nnodes) = NWdec.solve(b.topRows(nnodes));
+	UInt nnodes = SEblock.outerSize();
+	MatrixXr rhs(b);
 	rhs.bottomRows(nnodes) = SEdec.solve(b.bottomRows(nnodes));
 	return rhs;
 }
 
-MatrixXr BaseBlocksPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
+MatrixXr BlockPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
 {
 	if (initialized)
 		return BaseSolver::system_solve(preconditioner() * M, preconditionRHS(b));
@@ -226,25 +254,9 @@ MatrixXr BaseBlocksPreconditioner::system_solve(const SpMat& M, const MatrixXr& 
 	return BaseSolver::system_solve(M, b);
 }
 
-MatrixXr BaseBlocksPreconditioner::system_solve(const MatrixXr& b) const
+MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
 {
 	if (!initialized)
 		Rprintf("Preconditioner not initialized. Using identity");
 	return BaseSolver::system_solve(preconditionRHS(b));
-}
-
-void BaseBlocksPreconditioner::compute(const SpMat& M)
-{
-	if (initialized)
-	{
-		UInt nnodes = M.rows() / 2;
-		system_factorize(buildSystemMatrix(NWdec.solve(M.topLeftCorner(nnodes, nnodes)), 
-			SEdec.solve(M.bottomRightCorner(nnodes, nnodes)), SEdec.solve(M.bottomLeftCorner(nnodes, nnodes)),
-			NWdec.solve(M.topRightCorner(nnodes, nnodes))));
-	}
-	else
-	{
-		Rprintf("Preconditioner not initialized. Using identity");
-		system_factorize(M);
-	}
 }
