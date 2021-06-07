@@ -77,7 +77,7 @@ class Inference_Carrier{
 	public:
 		// CONSTUCTORS
 		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, lambda is set to 0
-		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression_, const InferenceData * inf_data_); //Main constructor of the class
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression_, const InferenceData * inf_data_, Real lambda_); //Main constructor of the class
 
 		// GETTERS
 		inline const InputHandler * getRegData (void) const {return reg_data;}  			        //!< Getter of reg_data \return reg_data
