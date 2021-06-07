@@ -9,9 +9,9 @@
 
 template<typename InputHandler> 
 void Speckman<InputHandler>::compute_Lambda2(void){
-  this->inverter->Compute_Inv(this->inf_car.getE_decp(), this->inf_car.getEp());
+  this->inverter->Compute_Inv();
   // extract the inverse of E
-  const MatrixXr * E_inv = this->inverter->getInv(this->inf_car.getE_decp(), this->inf_car.getEp());
+  const MatrixXr * E_inv = this->inverter->getInv();
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
