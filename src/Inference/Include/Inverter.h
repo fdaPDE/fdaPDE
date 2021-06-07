@@ -43,7 +43,8 @@ class Inverse_Exact : public Inverse_Base {
 		Inverse_Exact()=delete; 										//!< Default constructor deleted
 		Inverse_Exact(const SpMat * Ep_, const Eigen::SparseLU<SpMat> * E_decp_): Ep(Ep_),E_decp(E_decp_){}; 	//!< Main constructor
 
-		void Compute_Inv(void) override;									//!< Function for the exact computation of the inverse matrix
+		void Compute_Inv(void) override;
+};									//!< Function for the exact computation of the inverse matrix
 
 // *** inverse_Non_Exact Class ***
 //! Class for the approximate inversion of sparse matrices in inference framework
@@ -64,6 +65,8 @@ class Inverse_Non_Exact : public Inverse_Base {
 
 		void Compute_Inv(void) override; 								//!< Function for the non-exact computation of the inverse matrix
 };
+
+#include "Inverter_imp.h"
 
 
 #endif 

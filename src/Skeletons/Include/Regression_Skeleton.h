@@ -283,7 +283,7 @@ template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
   // Factory instantiation: using factory provided in Inverse_Factory.h
-  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory<InputHandler>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
 
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();

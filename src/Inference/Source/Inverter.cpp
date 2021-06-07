@@ -22,9 +22,4 @@ void Inverse_Exact::Compute_Inv(void){
   return;
 };
 
-void Inverse_Non_Exact::Compute_Inv(void){
-
-  Rprintf("This is a test to see if Invers_Non_Exact works");
-  return;
-};
 

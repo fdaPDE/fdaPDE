@@ -19,7 +19,7 @@ public:
     \param inf_car inference carrier needed to extract the matrices to be inverted
     \return a pointer to the selected policy
   */
-  static std::shared_ptr<Inverse_Base> create_inverter_method(const Inference_Carrier<InputHandler> & inf_car);
+  static std::shared_ptr<Inverse_Base> create_inverter_method(const Inference_Carrier<InputHandler> & inf_car)
   {
     const std::string policy = inf_car.getInfData()->get_exact_inference();
     if(policy=="exact")
@@ -29,7 +29,7 @@ public:
       Rprintf("Method not found, using non-exact");
     }
 
-    return make_shared<Inverse_Non_Exact>(inf_car);
+    return make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
   }
 };
 
