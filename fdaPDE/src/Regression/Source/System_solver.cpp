@@ -2,6 +2,21 @@
 
 // ---------- Base Solver methods ----------
 
+SpMat BaseSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
+{
+	SpMat R0_lambda = (-lambdaS) * R0; // build the SouthEast block of the matrix
+	SpMat R1_lambda = (-lambdaS) * R1;
+
+	SpMat R1_lambdaT(R1_lambda.transpose());
+
+	if (timeDependent && !parabolic)
+		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
+	else if (parabolic)
+		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
+
+	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
+}
+
 SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
 {
 
@@ -45,12 +60,6 @@ SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMa
 	return M;
 }
 
-MatrixXr BaseSolver::system_solve(const SpMat& M, const MatrixXr& b)
-{
-	system_factorize(M);
-	return Mdec.solve(b);
-}
-
 MatrixXr BaseSolver::system_solve(const MatrixXr& b) const
 {
 	if (!decomposed)
@@ -65,14 +74,9 @@ MatrixXr BaseSolver::system_solve(const MatrixXr& b) const
 
 // ---------- Mass lumping methods ----------
 
-MassLumping::MassLumping(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
+SpMat MassLumping::lumpMassMatrix(const SpMat& M)
 {
-	system_factorize(this->buildSystemMatrix(NW, SE, SW, NE));
-}
-
-void MassLumping::lumpMassMatrix(const SpMat& M)
-{
-	diag.resize(M.outerSize());
+	VectorXr diag(M.outerSize());
 
 	for (UInt k = 0; k < M.outerSize(); ++k)
 	{
@@ -83,56 +87,23 @@ void MassLumping::lumpMassMatrix(const SpMat& M)
 	}
 
 	lumped = true;
+	SpMat lumpedMass(diag.asDiagonal());
+	return lumpedMass;
 }
 
-SpMat MassLumping::buildSystemMatrix(const SpMat& M)
+SpMat MassLumping::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	UInt nnodes = M.outerSize() / 2;
-	return buildSystemMatrix(M.topLeftCorner(nnodes, nnodes), M.bottomRightCorner(nnodes, nnodes),
-		M.bottomLeftCorner(nnodes, nnodes), M.topRightCorner(nnodes, nnodes));
-}
+	SpMat R0_lambda = (-lambdaS) * lumpMassMatrix(R0); // build the SouthEast block of the matrix
+	SpMat R1_lambda = (-lambdaS) * R1;
 
-SpMat MassLumping::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
-{
-	lumpMassMatrix(SE);
-	SpMat SEblock(diag.asDiagonal());
-	return BaseSolver::buildSystemMatrix(NW,SEblock,SW,NE);
-}
+	SpMat R1_lambdaT(R1_lambda.transpose());
 
-MatrixXr MassLumping::system_solve(const SpMat& M, const MatrixXr& b)
-{
-	compute(M);
-	return BaseSolver::system_solve(b);
-}
+	if (timeDependent && !parabolic)
+		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
+	else if (parabolic)
+		R1_lambda -= lambdaS * (lambdaT * lumpMassMatrix(*LR0k));
 
-// ---------- Identity Mass methods ----------
-
-SpMat IdentityMass::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
-{
-	UInt nnodes = SW.outerSize();
-	SpMat Id(nnodes, nnodes);
-	Id.setIdentity();
-
-	return BaseSolver::buildSystemMatrix(NW,lambda*Id,SW,NE);
-}
-
-// ---------- Lumped Mass Preconditioner methods ----------
-
-SpMat LumpedPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
-{
-	lumpMassMatrix(SE); // / lambda);
-	UInt nnodes = SE.outerSize();
-	SpMat Id(nnodes, nnodes);
-	Id.setIdentity();
-
-	return BaseSolver::buildSystemMatrix(NW, Id, diag.cwiseInverse().asDiagonal()*SW, NE);
-}
-
-MatrixXr LumpedPreconditioner::system_solve(const MatrixXr& b) const
-{
-	VectorXr prec = VectorXr::Ones(2 * diag.rows());
-	prec.bottomRows(diag.rows()) = diag.cwiseInverse();
-	return MassLumping::system_solve(prec.asDiagonal() * b);
+	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
 
 // ---------- Base diagonal preconditioner methods ----------
@@ -146,58 +117,78 @@ MatrixXr BaseDiagPreconditioner::preconditionRHS(const MatrixXr& b) const
 	return b;
 }
 
-
-MatrixXr BaseDiagPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
-{
-	compute(M);
-	return system_solve(b);
-}
-
-
 // ---------- Lambda preconditioner methods ----------
 
-void LambdaPreconditioner::compute(const Real lambda_, const UInt nnodes)
+SpMat LambdaPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	lambda = lambda_;
+	SpMat R0_lambda = -R0; // build the SouthEast block of the matrix
+	SpMat R1_lambda = (-sqrt(lambdaS)) * R1;
+
+	lambda = lambdaS;
+	UInt nnodes = R0.outerSize();
 	prec.resize(2*nnodes);
 	prec = VectorXr::Ones(2*nnodes);
-	prec.bottomRows(nnodes) = prec.bottomRows(nnodes) / sqrt(lambda_);
+	prec.bottomRows(nnodes) = prec.bottomRows(nnodes) / sqrt(lambdaS);
 	initialized = true;
-}
 
-void LambdaPreconditioner::compute(const Real lambda_)
-{
-	if (lambda == lambda_)
-		return;
+	SpMat R1_lambdaT(R1_lambda.transpose());
 
-	lambda = lambda_;
-	if (initialized)
-	{
-		UInt nnodes = prec.cols() / 2;
-		prec.bottomRows(nnodes) = VectorXr::Ones(nnodes) / sqrt(lambda_);
-	}
-}
+	if (timeDependent && !parabolic)
+		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
+	else if (parabolic)
+		R1_lambda -= sqrt(lambdaS) * (lambdaT * (*LR0k));
 
-MatrixXr LambdaPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
-{
-	compute(M);
-	return system_solve(b);
+	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
 
 MatrixXr LambdaPreconditioner::system_solve(const MatrixXr& b) const
 {
 	if (initialized)
-		return prec.asDiagonal() * BaseDiagPreconditioner::system_solve(b);
+	{
+		MatrixXr sol = BaseDiagPreconditioner::system_solve(preconditionRHS(b));
+		UInt nnodes = b.rows() / 2;
+		sol.bottomRows(nnodes) = sol.bottomRows(nnodes) / sqrt(lambda);
+		return sol;
+	}
 	return BaseDiagPreconditioner::system_solve(b);
 }
 
-// ---------- Abstract blocks digonal preconditioner methods ----------
-BlockPreconditioner::BlockPreconditioner()
+MatrixXr LambdaPreconditioner::preconditionRHS(const MatrixXr& b) const
 {
-	SEblock.resize(1,1);
-	SEblock.setIdentity();
-	SEdec.compute(SEblock);
+	UInt nnodes = b.rows() / 2;
+	MatrixXr rhs(b);
+	if (initialized && rhs.bottomRows(nnodes) != MatrixXr::Zero(nnodes, b.cols()))
+		rhs.bottomRows(nnodes) = rhs.bottomRows(nnodes) / sqrt(lambda);
+
+	return rhs;
 }
+
+// ---------- Block digonal preconditioner methods ----------
+
+//SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
+//{
+//	SpMat R0_lambda = (-lambdaS) * R0; // build the SouthEast block of the matrix
+//	SpMat R1_lambda = (-lambdaS) * R1;
+//
+//	UInt nnodes = R0_lambda.outerSize();
+//	SEblock = R0_lambda;
+//	SEdec.compute(R0_lambda);
+//	initialized = true;
+//
+//	SpMat Id(nnodes, nnodes);
+//	Id.setIdentity();
+//
+//	if (timeDependent && parabolic)
+//		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
+//
+//	SWblock = SEdec.solve(R1_lambda);
+//	SpMat R1_lambdaT(R1_lambda.transpose());
+//
+//	if (!parabolic)
+//		return buildSystemMatrix(DMat + lambdaT * (*Ptk), Id, SWblock, R1_lambdaT);
+//
+//	return buildSystemMatrix(DMat, Id, SWblock, R1_lambdaT);
+//}
 
 SpMat BlockPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
 {
@@ -210,6 +201,14 @@ SpMat BlockPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, c
 	Id.setIdentity();
 
 	return BaseSolver::buildSystemMatrix(NW, Id, SEdec.solve(SW), NE);
+}
+
+BlockPreconditioner::BlockPreconditioner()
+{
+	SEblock.resize(1,1);
+	SEblock.setIdentity();
+	SEdec.compute(SEblock);
+	lambda = 1.0;
 }
 
 SpMat BlockPreconditioner::preconditioner() const
@@ -241,17 +240,10 @@ MatrixXr BlockPreconditioner::preconditionRHS(const MatrixXr& b) const
 	
 	UInt nnodes = SEblock.outerSize();
 	MatrixXr rhs(b);
-	rhs.bottomRows(nnodes) = SEdec.solve(b.bottomRows(nnodes));
+	if (rhs.bottomRows(nnodes) != MatrixXr::Zero(nnodes, b.cols()))
+		rhs.bottomRows(nnodes) = (SEdec.solve(b.bottomRows(nnodes)))/lambda;
+	Rprintf("rhs");
 	return rhs;
-}
-
-MatrixXr BlockPreconditioner::system_solve(const SpMat& M, const MatrixXr& b)
-{
-	if (initialized)
-		return BaseSolver::system_solve(preconditioner() * M, preconditionRHS(b));
-
-	Rprintf("Preconditioner not initialized. Using identity");
-	return BaseSolver::system_solve(M, b);
 }
 
 MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
@@ -259,4 +251,21 @@ MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
 	if (!initialized)
 		Rprintf("Preconditioner not initialized. Using identity");
 	return BaseSolver::system_solve(preconditionRHS(b));
+}
+
+// ---------- Space Time solver methods ----------
+
+SpMat SpaceTimeSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
+{
+	if (timeDependent && !parabolic)
+	{
+		Real lambdaST = lambdaS / lambdaT;
+		SpMat R0_lambda = (-lambdaST) * R0; // build the SouthEast block of the matrix
+		SpMat R1_lambda = (-lambdaST) * R1;
+
+		SpMat R1_lambdaT(R1_lambda.transpose());
+		return BaseSolver::buildSystemMatrix((DMat / lambdaT) + (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
+	}
+	else
+		return MassLumping::assembleMatrix(DMat, R0, R1, lambdaS);
 }

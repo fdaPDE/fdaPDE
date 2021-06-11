@@ -911,55 +911,18 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S)
 {
-	if (lambdaPreconditioned)
-	{
-		this->R1_lambda = (-sqrt(lambda_S)) * (R1_);
-		this->R0_lambda = -R0_;
-	}
-	else
-	{
-		this->R1_lambda = (-lambda_S) * (R1_);
-		this->R0_lambda = (-lambda_S) * (R0_);
-	}
-		
-	this->buildMatrixNoCov(this->DMat_, this->R1_lambda, this->R0_lambda);
+	matrixNoCov_ = solver.assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
 }
 
 
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real lambdaT)
 {
-	if (lambdaPreconditioned)
-	{
-		this->R1_lambda = (-sqrt(lambdaS)) * (R1_);
-		this->R0_lambda = -R0_;
-	}
-	else
-	{
-		this->R0_lambda = (-lambdaS) * R0_; // build the SouthEast block of the matrix
-		this->R1_lambda = (-lambdaS) * R1_;
-	}
-	
-	// Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
 	if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic())
-	{
-		if(lambdaPreconditioned)
-			this->R1_lambda -= sqrt(lambdaS) * (lambdaT * LR0k_);
-		else
-			this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
-	}
-
-	// Update NorthWest block of matrix if separable problem
-	if(regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
-	{
-		this->buildMatrixNoCov(this->DMat_+lambdaT*Ptk_, R1_lambda, R0_lambda);
-
-	}
-	else
-	{
-		this->buildMatrixNoCov(this->DMat_, R1_lambda, R0_lambda);
-	}
-
+		solver.addTimeCorrection(std::make_shared<SpMat>(LR0k_), lambdaT, true);
+	else if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic(), false)
+		solver.addTimeCorrection(std::make_shared<SpMat>(Ptk_), lambdaT, false);
+	matrixNoCov_ = solver.assembleMatrix(this->DMat_, this->R0_, this->R1_, lambdaS);
 }
 
 //----------------------------------------------------------------------------//
@@ -972,7 +935,6 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
         if(lambda_ != last_lambda)
         {
 
-			solver.compute(lambda_, b.rows());
                 this->buildSystemMatrix(lambda_);
 
 			if(regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
@@ -1028,7 +990,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			_rightHandSide = rhs;
 
 
-			solver.compute(lambdaS, nnodes);
 
 			if(isGAMData || regressionData_.isSpaceTime() || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
 			{

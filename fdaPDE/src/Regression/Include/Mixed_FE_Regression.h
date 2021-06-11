@@ -94,8 +94,7 @@ class MixedFERegressionBase
 		//MassLumping solver;
 		//LambdaPreconditioner solver;
 		BlockPreconditioner solver;
-		//IdentityMass solver;
-		//LumpedPreconditioner solver;
+		//SpaceTimeSolver solver;
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
