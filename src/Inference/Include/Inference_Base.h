@@ -32,10 +32,13 @@ public:
   Inference_Base()=delete;	//The default constructor is deleted
   Inference_Base(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):inverter(inverter_), inf_car(inf_car_), pos_impl(pos_impl_){}; 
   
-  //!< public method that calls the requested functions according to test_type and interval_type
+  //!< Public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);
+
+  //!< Public setter for pos_impl, needed when multiple tests are required
+  inline void setpos_impl (UInt pos_impl_){this->pos_impl=pos_impl_;};
   
-  //!< virtual public method that computes exact GCV, implemented only for Wald 
+  //!< Virtual public method that computes exact GCV, implemented only for Wald 
   inline virtual Real compute_GCV_from_inference(void) const {return 0;};
 
   // DESTRUCTOR
