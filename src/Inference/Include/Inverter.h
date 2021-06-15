@@ -55,8 +55,10 @@ template<typename InputHandler>
 class Inverse_Non_Exact : public Inverse_Base {
 	private:
 		const Inference_Carrier<InputHandler> & inf_car; 	//!< Refernce to inference carrier
-		//const SpMat E_tilde;					//!< [Psi^T Psi + lambda*R] matrix
-		// ++ eventual parameters TO BE MODIFIED
+		SpMat E_tilde;					        //!< [Psi^T Psi + lambda*R] matrix
+		SpMat R0_inv_tilde;                                     //!< Approximated inverse of the mass matrix in space as sparse matrix 
+                
+                void pre_Inverse(void);                                 //!< Method that computes matrices R0_tilde and E_tilde
 		
 	public:
 		// Constructor
