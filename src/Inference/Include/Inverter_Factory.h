@@ -29,7 +29,7 @@ public:
       Rprintf("Method not found, using non-exact");
     }
 
-    return make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
+    return fdaPDE::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
   }
 };
 
