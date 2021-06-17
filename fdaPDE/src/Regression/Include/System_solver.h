@@ -22,6 +22,7 @@ protected:
 	inline void system_factorize(const SpMat& M) { Mdec.compute(M); Rprintf("inversion"); decomposed = true; }
 public:
 	BaseSolver() = default;
+	BaseSolver(const SpMat& M) { compute(M); };
 	inline void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic) 
 	{
 		parabolic = flagParabolic; 
@@ -53,6 +54,7 @@ protected:
 	bool lumped = false;
 public:
 	MassLumping() = default;
+	MassLumping(const SpMat& M) { compute(M); };
 	SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
 	using BaseSolver::system_solve;
 	using BaseSolver::compute;
@@ -70,6 +72,7 @@ protected:
 	bool initialized = false;  // Indicates if the preconditioner has been initialized
 public:
 	BaseDiagPreconditioner() : prec{VectorXr::Ones(1)} {};
+	BaseDiagPreconditioner(const SpMat& M) { compute(M); };
 	inline VectorXr preconditioner() const { return prec; }   // Get the preconditioner diagonal
 	virtual MatrixXr preconditionRHS(const MatrixXr& b) const;		  // Compute D*b
 	inline MatrixXr system_solve(const MatrixXr& b) const override { return BaseSolver::system_solve(preconditionRHS(b)); }
@@ -90,6 +93,7 @@ class DiagonalPreconditioner : public BaseDiagPreconditioner
 {
 public:
 	explicit DiagonalPreconditioner(const VectorXr& p) { prec = p; initialized = true; };
+	DiagonalPreconditioner(const SpMat& M) { compute(M); };
 	DiagonalPreconditioner(const SpMat& M, const VectorXr& p) { prec = p; initialized = true; compute(M); }; // Set the preconditioner diagonal
 	inline void preconditioner(const VectorXr& p) { prec = p; initialized = true; }
 	using BaseSolver::assembleMatrix;
@@ -106,6 +110,7 @@ class LambdaPreconditioner : public BaseDiagPreconditioner
 	Real lambda;
 public:
 	LambdaPreconditioner() : lambda(1.0) {};
+	LambdaPreconditioner(const SpMat& M) { compute(M); };
 	LambdaPreconditioner(Real lambda_) : lambda(lambda_) {};
 	Real getlambda() const { return lambda; }
 	SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
@@ -131,32 +136,14 @@ protected:
 
 public:
 	BlockPreconditioner();
-	//SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
-	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE) override;
+	BlockPreconditioner(const SpMat& M) { compute(M); };
+	SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
 	SpMat preconditioner() const;
 	MatrixXr preconditionRHS(const MatrixXr& b) const;
 	MatrixXr system_solve(const MatrixXr& b) const override;
 	using BaseSolver::compute;
 	using BaseSolver::addTimeCorrection;
 	using BaseSolver::assembleMatrix;
-};
-
-
-class SpaceTimeSolver : public MassLumping
-{
-public:
-	SpaceTimeSolver() = default;
-	SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
-	using BaseSolver::compute;
-	inline MatrixXr preconditionRHS(const MatrixXr& b) const
-	{
-		if (timeDependent && !parabolic)
-			return (b / lambdaT);
-		else
-			return b;
-	}
-	inline MatrixXr system_solve(const MatrixXr& b) const override { return BaseSolver::system_solve(preconditionRHS(b)); }
-	using BaseSolver::addTimeCorrection;
 };
 
 #endif

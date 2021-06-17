@@ -199,7 +199,7 @@ class Carrier: public Extensions...
                 inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda)
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
-                        return this->model->apply_to_b(b);
+                        return this->model->apply_to_b<BaseSolver>(b);
                 }
 
                 //! Method to the system given a lambda [right hand side is the usual of the problem]
@@ -211,7 +211,7 @@ class Carrier: public Extensions...
                 inline MatrixXr apply(Real lambda)
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
-                        return (this->model->apply())(0,0);
+                        return (this->model->apply<BaseSolver>())(0,0);
                 }
 
                 //! Method to take advantage of simplified multiplication by Q

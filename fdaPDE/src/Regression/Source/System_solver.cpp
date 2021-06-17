@@ -165,42 +165,29 @@ MatrixXr LambdaPreconditioner::preconditionRHS(const MatrixXr& b) const
 
 // ---------- Block digonal preconditioner methods ----------
 
-//SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
-//{
-//	SpMat R0_lambda = (-lambdaS) * R0; // build the SouthEast block of the matrix
-//	SpMat R1_lambda = (-lambdaS) * R1;
-//
-//	UInt nnodes = R0_lambda.outerSize();
-//	SEblock = R0_lambda;
-//	SEdec.compute(R0_lambda);
-//	initialized = true;
-//
-//	SpMat Id(nnodes, nnodes);
-//	Id.setIdentity();
-//
-//	if (timeDependent && parabolic)
-//		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
-//
-//	SWblock = SEdec.solve(R1_lambda);
-//	SpMat R1_lambdaT(R1_lambda.transpose());
-//
-//	if (!parabolic)
-//		return buildSystemMatrix(DMat + lambdaT * (*Ptk), Id, SWblock, R1_lambdaT);
-//
-//	return buildSystemMatrix(DMat, Id, SWblock, R1_lambdaT);
-//}
-
-SpMat BlockPreconditioner::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE)
+SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	UInt nnodes = SE.outerSize();
-	SEblock = SE;
-	SEdec.compute(SE);
+	SpMat R0_lambda = (-lambdaS) * R0; // build the SouthEast block of the matrix
+	SpMat R1_lambda = (-lambdaS) * R1;
+
+	UInt nnodes = R0_lambda.outerSize();
+	SEblock = R0_lambda;
+	SEdec.compute(R0_lambda);
 	initialized = true;
 
 	SpMat Id(nnodes, nnodes);
 	Id.setIdentity();
 
-	return BaseSolver::buildSystemMatrix(NW, Id, SEdec.solve(SW), NE);
+	if (timeDependent && parabolic)
+		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
+
+	SWblock = SEdec.solve(R1_lambda);
+	SpMat R1_lambdaT(R1_lambda.transpose());
+
+	if (timeDependent && !parabolic)
+		return buildSystemMatrix(DMat + lambdaT * (*Ptk), Id, SWblock, R1_lambdaT);
+
+	return buildSystemMatrix(DMat, Id, SWblock, R1_lambdaT);
 }
 
 BlockPreconditioner::BlockPreconditioner()

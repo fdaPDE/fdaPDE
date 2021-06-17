@@ -89,11 +89,12 @@ class MixedFERegressionBase
 		bool isGAMData;
 
 		//preconditioner choice
-		bool lambdaPreconditioned = false;
-		//BaseSolver solver;
+		UInt solver_options;
+		//bool lambdaPreconditioned = false;
+		BaseSolver solver;
 		//MassLumping solver;
 		//LambdaPreconditioner solver;
-		BlockPreconditioner solver;
+		//BlockPreconditioner solver;
 		//SpaceTimeSolver solver;
 
 	        // -- SETTERS --
@@ -132,28 +133,33 @@ class MixedFERegressionBase
 
 		// -- BUILD SYSTEM --
 		 //! Spatial version
-		void buildSystemMatrix(Real lambda);
+		template<typename Solver>
+		void buildSystemMatrix(Real lambda, Solver* solverobj);
 		//! Space-time version
-		void buildSystemMatrix(Real lambdaS, Real lambdaT);
+		template<typename Solver>
+		void buildSystemMatrix(Real lambdaS, Real lambdaT, Solver* solverobj);
 
 		// -- FACTORIZER --
 	  	//! A function to factorize the system, using Woodbury decomposition when there are covariates
-		void system_factorize();
+		template<typename Solver>
+		void system_factorize(Solver* solverobj);
 
 		// -- SOLVER --
 		//! A function which solves the factorized system
-		template<typename Derived>
-		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
+		template<typename Solver>
+		MatrixXr system_solve(const MatrixXr& b, Solver* solverobj);
 
 	public:
 		//!A Constructor.
 		MixedFERegressionBase( const InputHandler & regressionData, OptimizationData & optimizationData,  UInt nnodes_) :
-			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
+			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()),
+			solver_options(regressionData.getSolver()){isGAMData = regressionData.getisGAM();};
 
 
 		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree) :
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()+spline_degree-1),
-			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
+			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()),
+			solver_options(regressionData.getSolver()){isGAMData = regressionData.getisGAM();};
 
 
 		//! A member function computing the dofs for external calls
@@ -167,6 +173,10 @@ class MixedFERegressionBase
 		inline void recomputeWTW(void){ this->isWTWfactorized_ = false;}
 
 		// -- GETTERS --
+		//!A function returning the system matrix
+		inline SpMat getMatrixNoCov(void) const { return this->matrixNoCov_; }
+		//! A function returning the solver choice
+		inline UInt getSolver(void) const { return this->solver_options; }
 		//! A function returning the computed barycenters of the locationss
 		inline MatrixXr const & getBarycenters(void) const {return barycenters_;}; //returns a const reference as in rergressionData
 		//! A function returning the element ids of the locations
@@ -218,7 +228,9 @@ class MixedFERegressionBase
 		template<UInt ORDER, UInt mydim, UInt ndim, typename A>
 		void preapply(EOExpr<A> oper, const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
 
+		template<typename Solver>
 		MatrixXv apply(void);
+		template<typename Solver>
 		MatrixXr apply_to_b(const MatrixXr & b);
 };
 
@@ -233,6 +245,7 @@ class MixedFERegression : public MixedFERegressionBase<InputHandler>
 		MixedFERegression(const std::vector<Real> & mesh_time, const InputHandler & regressionData,  OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
 			MixedFERegressionBase<InputHandler>(mesh_time, regressionData, optimizationData, nnodes_, spline_degree) {};
 
+		template<typename Solver>
 		void apply(void)
 		{
 			Rprintf("Option not implemented!\n");

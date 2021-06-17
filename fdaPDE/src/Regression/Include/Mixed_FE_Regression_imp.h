@@ -540,7 +540,8 @@ void MixedFERegressionBase<InputHandler>::buildMatrixNoCov(const SpMat& NWblock,
 //----------------------------------------------------------------------------//
 // Factorizer & Solver
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::system_factorize()
+template<typename Solver>
+void MixedFERegressionBase<InputHandler>::system_factorize(Solver* solverobj)
 {
 	//Rprintf("Factorization phase started\n");
 	UInt nnodes = N_*M_;	// Note that is only space M_=1
@@ -548,7 +549,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 	
 	// First phase: Factorization of matrixNoCov
 	matrixNoCovdec_.compute(matrixNoCov_);
-	solver.compute(matrixNoCov_);
+	solverobj->compute(matrixNoCov_);
 	
 	if(regressionData_.getCovariates()->rows() != 0)
 	{ // Needed only if there are covariates, else we can stop before
@@ -584,7 +585,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 				U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*P->asDiagonal()*W;
     	}
 
-		MatrixXr y = solver.system_solve(U_);
+		MatrixXr y = solverobj->system_solve(U_);
 		MatrixXr D = V_*y; 
 
 		// G = C + D
@@ -603,11 +604,11 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 }
 
 template<typename InputHandler>
-template<typename Derived>
-MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBase<Derived> & b)
+template<typename Solver>
+MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr& b, Solver* solverobj)
 {
 	
-	MatrixXr x1 = solver.system_solve(MatrixXr(b));
+	MatrixXr x1 = solverobj->system_solve(b);
 	
 	if (regressionData_.getCovariates()->rows() != 0)
 	{
@@ -615,7 +616,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBa
 		MatrixXr x2 = Gdec_.solve(V_ * x1);
 		
 		// Resolution of the system matrixNoCov * x3 = U * x2
-		MatrixXr x3 = solver.system_solve(MatrixXr(U_ * x2));
+		MatrixXr x3 = solverobj->system_solve(MatrixXr(U_ * x2));
 		
 		x1 -= x3;
 	}
@@ -816,7 +817,7 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt
 	}
 
 	// Resolution of the system
-	MatrixXr x = system_solve(b);
+	MatrixXr x = this->template system_solve(b, &solver);
 
 	MatrixXr uTpsi = u.transpose()*psi_;
 	VectorXr edf_vect(nrealizations);
@@ -909,51 +910,56 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 
 // To be general, it takes in input the value of lambda
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S)
+template<typename Solver>
+void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S, Solver* solverobj)
 {
-	matrixNoCov_ = solver.assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
+	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
 }
 
 
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real lambdaT)
+template<typename Solver>
+void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real lambdaT, Solver* solverobj)
 {
 	if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic())
-		solver.addTimeCorrection(std::make_shared<SpMat>(LR0k_), lambdaT, true);
+		solverobj->addTimeCorrection(std::make_shared<SpMat>(LR0k_), lambdaT, true);
 	else if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic(), false)
-		solver.addTimeCorrection(std::make_shared<SpMat>(Ptk_), lambdaT, false);
-	matrixNoCov_ = solver.assembleMatrix(this->DMat_, this->R0_, this->R1_, lambdaS);
+		solverobj->addTimeCorrection(std::make_shared<SpMat>(Ptk_), lambdaT, false);
+	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambdaS);
 }
 
 //----------------------------------------------------------------------------//
 // Public solvers
 template<typename InputHandler>
+template<typename Solver>
 MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 {
+	Solver solverobj;
 	const Real last_lambda = optimizationData_.get_last_lS_used();
 	const Real lambda_ = optimizationData_.get_current_lambdaS();
         if(lambda_ != last_lambda)
         {
 
-                this->buildSystemMatrix(lambda_);
+                this->template buildSystemMatrix(lambda_, &solverobj);
 
 			if(regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
 			{
 				this->addDirichletBC_matrix();
 			}
 
-                this->system_factorize();
+                this->template system_factorize(&solverobj);
         }
 
 	optimizationData_.set_last_lS_used(lambda_);
 
-	return this->template system_solve(b);
+	return this->template system_solve(b, &solverobj);
 }
 
-
 template<typename InputHandler>
+template<typename BaseSolver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
+	Solver solverobj;
 	UInt nnodes = N_*M_; // Define nuber of nodes
 	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
 
@@ -995,11 +1001,11 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			{
 				if(!regressionData_.isSpaceTime())
 				{
-					buildSystemMatrix(lambdaS);
+					this->template buildSystemMatrix(lambdaS, &solverobj);
 				}
                         	else
 				{
-					buildSystemMatrix(lambdaS, lambdaT);
+					this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
 				}
 			}
 
@@ -1025,11 +1031,12 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			//f Factorization of the system for woodbury decomposition
 			if(isGAMData || regressionData_.isSpaceTime() || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
 			{
-				system_factorize();
+				this->template system_factorize(&solverobj);
 			}
 
 			// system solution
-			_solution(s,t) = this->template system_solve(this->_rightHandSide);
+			MatrixXr tempRHS(this->_rightHandSide);
+			_solution(s,t) = this->template system_solve(tempRHS, &solverobj);
 
 
 			if(optimizationData_.get_loss_function()=="GCV" && (!isGAMData&&regressionData_.isSpaceTime()))

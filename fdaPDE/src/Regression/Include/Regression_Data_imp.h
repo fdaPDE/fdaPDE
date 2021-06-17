@@ -6,8 +6,8 @@
 template<typename RegressionHandler>
 RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 	SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
-	SEXP Rmax_num_iteration, SEXP Rthreshold):
-	RegressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch)
+	SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Rsolver):
+	RegressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch, Rsolver)
 {
 	max_num_iterations_ = INTEGER(Rmax_num_iteration)[0];
 	threshold_ =  REAL(Rthreshold)[0];
@@ -19,9 +19,9 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP Rb
 template<typename RegressionHandler>
 RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 	SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-	SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold):
+	SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Rsolver):
 	RegressionDataElliptic(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc,
-		Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch)
+		Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch, Rsolver)
 {
 	max_num_iterations_ = INTEGER(Rmax_num_iteration)[0];
 	threshold_ =  REAL(Rthreshold)[0];
@@ -33,9 +33,9 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP Rb
 template<typename RegressionHandler>
 RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 	SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-	SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold):
+	SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Rsolver):
 	RegressionDataEllipticSpaceVarying(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Ru,
-		Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch)
+		Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch, Rsolver)
 {
 	max_num_iterations_ = INTEGER(Rmax_num_iteration)[0];
 	threshold_ =  REAL(Rthreshold)[0];
