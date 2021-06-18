@@ -24,7 +24,7 @@ for(l in lambda)
   }
   rmseD<-cbind(rmseD, rmse)
 }
-
+rmseCovC=NULL
 for(l in lambda)
 {
   set.seed(1527)
@@ -40,32 +40,32 @@ for(l in lambda)
     # output_CPP<-smooth.FEM(observations=data3d+rnorm (length(nodes3d[1,]), sd=0.01*(ran3d[2]-ran3d[1])),
     #                        FEMbasis=FEMbasis, #locations=locations,
     #                        lambda=lambda[best_lambda[i]])
-    rmse <- c(rmse, RMSE(func( loc_eval),eval.FEM(output_CPP$fit.FEM,locations=loc_eval)))
+    rmse <- c(rmse, RMSE(fs.test( loc_eval[,1],loc_eval[,2]),eval.FEM(output_CPP$fit.FEM,locations=loc_eval)))
   }
-  rmseCovD<-cbind(rmseCovD, rmse)
+  rmseCovC<-cbind(rmseCovC, rmse)
 }
 
 
-rmseGLMA<-NULL
-for(l in lambdaGLM)
+rmse4C<-NULL
+for(l in lambda)
 {
   set.seed(1527)
   #best_lambda <- NULL
   rmse <- NULL
   for (i in 1:30)
   {
-    output_CPP<-smooth.FEM(locations = NULL, observations = as.numeric(rpois(nloc, lambda = mu)),
-                           FEMbasis =FEMbasis, covariates = desmat,
-                           max.steps=15, family =FAMILY, mu0=NULL, scale.param=NULL,
+    output_CPP<-smooth.FEM(locations = loc, observations = as.numeric(rpois(length(loc[,1]), lambda = mu4)),
+                           FEMbasis =FEMbasis, covariates = NULL,
+                           max.steps=15, family =FAMILY4, mu0=NULL, scale.param=NULL,
                            lambda = l)
     # best_lambda<-c(best_lambda,
     #               which(output_CPP$optimization$GCV_vector==min(output_CPP$optimization$GCV_vector)))
     # output_CPP<-smooth.FEM(observations=data3d+rnorm (length(nodes3d[1,]), sd=0.01*(ran3d[2]-ran3d[1])),
     #                        FEMbasis=FEMbasis, #locations=locations,
     #                        lambda=lambda[best_lambda[i]])
-    rmse <- c(rmse, RMSE(a1* sin(2*pi*loc_eval[,1]) +  a2* sin(2*pi*loc_eval[,2]) +  a3*sin(2*pi*loc_eval[,3]) + 7,eval.FEM(output_CPP$fit.FEM,locations=loc_eval)))
+    rmse <- c(rmse, RMSE(z(loc_eval),eval.FEM(output_CPP$fit.FEM,locations=loc_eval)))
   }
-  rmseGLMA<-cbind(rmseGLMA, rmse)
+  rmse4C<-cbind(rmse4C, rmse)
 }
 
 set.seed(1527)
@@ -105,7 +105,7 @@ lines(log10(lambda), colMeans(rmseB), col=2)
 points(log10(lambda), colMeans(rmseC), pch=1, col=3)
 points(log10(lambda), colMeans(rmseD), pch=6, col=4)
 grid() 
-legend('topleft',legend=c('no preconditioner', 'mass lumping',' lambda preconditioner', 'block preconditioner'), cex=0.62,col=1:4, pch=19)
+legend('bottomleft',legend=c('no preconditioner', 'mass lumping',' lambda preconditioner', 'block preconditioner'), cex=0.62,col=1:4, pch=19)
 
 boxplot(rmseA, names=log10(lambda), ylab="RMSE", xlab="log_10(lambda)")
 title("No preconditioner RMSE boxplot")
@@ -121,14 +121,14 @@ boxplot(rmseA[,which.min(colMeans(rmseA))],rmseB[,which.min(colMeans(rmseB))],
         names=c("fdaPDE", "Mass lumping", "Lambda", "Block"),
         col=c("grey", 2,3,4))
 
-plot(log10(lambda), colMeans(rmseCovA), pch=4, col=1, ylab="Mean RMSE")
+plot(log10(lambda), colMeans(rmseCovA), pch=4, col=1, ylab="Mean RMSE", ylim=c(min(colMeans(rmseCovA)),max(colMeans(rmseCovB))))
 lines(log10(lambda), colMeans(rmseCovA), pch=4, col=1)
 points(log10(lambda), colMeans(rmseCovB), pch=4, col=2)
 lines(log10(lambda), colMeans(rmseCovB), col=2)
 points(log10(lambda), colMeans(rmseCovC), pch=1, col=3)
 points(log10(lambda), colMeans(rmseCovD), pch=6, col=4)
 grid() 
-legend('topleft',legend=c('no preconditioner', 'mass lumping',' lambda preconditioner', 'block preconditioner'), cex=0.62,col=1:4, pch=19)
+legend('bottomleft',legend=c('no preconditioner', 'mass lumping',' lambda preconditioner', 'block preconditioner'), cex=0.62,col=1:4, pch=19)
 
 boxplot(rmseCovA, names=log10(lambda), ylab="RMSE", xlab="log_10(lambda)")
 title("No preconditioner RMSE boxplot")

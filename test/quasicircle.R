@@ -60,7 +60,7 @@ sol = smooth.FEM(observations = data,  FEMbasis = FEMbasis, locations = location
                   #lambda.selection.criterion = 'newton_fd',DOF.evaluation = 'exact')
                   lambda=lambda)#,lambda.selection.criterion = 'grid', DOF.evaluation = 'exact')
 sol_approx <- sol$fit.FEM
-best_lambda4 <- sol$optimization$lambda_solution
+best_lambda8 <- sol$optimization$lambda_solution
 
 sol1 = smooth.FEM(observations = data1,  FEMbasis = FEMbasis, lambda=lambda,locations = locations,
                    PDE_parameters = PDE_parameters, BC = BC)
@@ -72,21 +72,21 @@ femsol_approx1 <- t(eval.FEM(sol_approx1,locations))
 error <- matrix(nrow=dim(locations)[1], ncol= length(lambda))
 for (i in 1:length(lambda))
   error[,i] <- abs(data-t(femsol_approx)[,i])
-err4 <- colMeans(error^2)
-plot(log10(lambda), err, pch=4, xlab='log_10(lambda)', ylab='error', col=1,ylim=c(0,0.031))
+err8 <- colMeans(error^2)
+plot(log10(lambda), err5, pch=4, xlab='log_10(lambda)', ylab='error', col=1,ylim=c(0,0.031))
 grid()
 abline(v=log10(best_lambda1), lty=2, col=1)
-lines(-12:3, err1, col=1)
+lines(-12:3, err5, col=1)
 points(log10(best_lambda1), err1[10], pch=19, col=1)
-points(-12:3, err2, pch=4, col=2)
+points(-12:3, err6, pch=4, col=2)
 abline(v=log10(best_lambda2), lty=2, col=2)
-lines(-12:3, err2, col=2)
+lines(-12:3, err6, col=2)
 points(log10(best_lambda2), err2[10], pch=19, col=2)
-lines(-12:3, err3, col=3)
+lines(-12:3, err7, col=3)
 points(-12:3, err3, pch=3, col=3)
 abline(v=log10(best_lambda3), lty=2, col=3)
 points(log10(best_lambda3), err3[10], pch=1, col=3)
-lines(-12:3, err4, col=4)
+lines(-12:3, err8, col=4)
 points(-12:3, err4, pch=1, col=4)
 abline(v=log10(best_lambda4), lty=2, col=4)
 points(log10(best_lambda4), err4[7], pch=19, col=4)
@@ -94,7 +94,7 @@ legend('topleft',legend=c('no preconditioner', 'mass lumping', 'lambda precondit
 
 residual <- matrix(nrow=dim(locations)[1], ncol= length(lambda))
 residual <- abs(t(femsol_approx1)-t(femsol_approx))
-res4 <- colMeans(residual)
+res8 <- colMeans(residual)
 plot(-12:3, res1, pch=4, xlab='log_10(lambda)', ylab='residual', col=1)
 grid()
 abline(v=log10(best_lambda1), lty=2, col=1)
@@ -104,7 +104,7 @@ points(-12:3, res2, pch=4, col=2)
 abline(v=log10(best_lambda2), lty=2, col=2)
 lines(-12:3, res2, col=2)
 points(log10(best_lambda2), 2*res2[9]/3+res2[8]/3, pch=19, col=2)
-lines(-12:3, res4, col=4)
+lines(-12:3, res8, col=4)
 points(-12:3, res3, pch=4, col=3)
 abline(v=log10(best_lambda4), lty=2, col=4)
 points(log10(best_lambda4), res4[8], pch=19, col=4)
@@ -169,7 +169,7 @@ sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_m
                    #lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact', PDE_parameters = PDE_parameters_areal, BC = BC_areal)
                    lambda=lambda, PDE_parameters = PDE_parameters_areal, BC = BC_areal)
 sol_approx_areal <- sol_areal$fit.FEM
-best_lambda_areal4 <- sol_areal$optimization$lambda_solution
+best_lambda_areal8 <- sol_areal$optimization$lambda_solution
 
 sol1_areal = smooth.FEM(observations = data1_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal, lambda = lambda,
                     PDE_parameters = PDE_parameters_areal, BC = BC_areal)
@@ -180,7 +180,7 @@ femsol_approx1_areal <- t(eval.FEM(sol_approx1_areal,mesh_areal$nodes))
 
 residual_areal <- matrix(nrow=dim(nodes_areal)[1], ncol= length(lambda))
 residual_areal <- abs(t(femsol_approx1_areal)-t(femsol_approx_areal))
-res_areal4 <- colMeans(residual_areal)
+res_areal8 <- colMeans(residual_areal)
 plot(-12:3,res_areal, pch=4, xlab='log_10(lambda)', ylab='reisdual', col=1)
 grid()
 abline(v=log10(best_lambda_areal1), lty=2, col=1)
@@ -196,16 +196,16 @@ points(log10(best_lambda_areal3), res_areal3[8], pch=1, col=3)
 lines(-12:3, res_areal4, col=4)
 points(-12:3, res_areal4, pch=4, col=4)
 points(log10(best_lambda_areal4), res_areal4[8], pch=19, col=4)
-legend('topright',legend=c('no preconditioner', 'mass lumping', 'lambda preconditioner','block preconditioner'), cex=0.62,col=1:4, pch=19)
+legend('bottomleft',legend=c('no preconditioner', 'mass lumping', 'lambda preconditioner','block preconditioner'), cex=0.62,col=1:4, pch=19)
 
 ###### execution times #####
-tA=microbenchmark(smooth.FEM(observations = data,  FEMbasis = FEMbasis, locations = locations,
+tD=microbenchmark(smooth.FEM(observations = data,  FEMbasis = FEMbasis, locations = locations,
                   lambda=best_lambda2, PDE_parameters = PDE_parameters, BC = BC))
-t2A=microbenchmark(smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
+t2D=microbenchmark(smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
                       lambda=best_lambda_areal2, PDE_parameters = PDE_parameters_areal, BC = BC_areal))
 
-boxplot(log(tA$time),log(tB$time),log(tC$time), names=c('fdaPDE','mass lumping','lambda'),col=c('grey',2,3), ylab='log(time)')
-boxplot(log(t2A$time),log(t2B$time),log(t2C$time), names=c('fdaPDE','mass lumping','lambda'),col=c('grey',2,3), ylab='log(time)')
+boxplot(log(tE$time),log(tF$time),log(tG$time), log(tD$time),names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='log(time)')
+boxplot(log(t2E$time),log(t2F$time),log(t2G$time),log(t2D$time), names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='log(time)')
 
 boxplot(tA$time,tB$time,tC$time,tD$time, names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='time')
 boxplot(t2A$time,t2B$time,t2C$time,t2D$time, names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='time')

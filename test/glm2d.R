@@ -571,18 +571,18 @@ boxplot(rmse4A,rmse4B,rmse4C, names=c('fdaPDE', 'mass lumping', 'lambda'), col=c
 
 
 ##### execution times #####
-t1D=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response1), FEMbasis =FEMbasis, covariates = NULL,
+t1A=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response1), FEMbasis =FEMbasis, covariates = NULL,
                               max.steps=15, fam=FAMILY1, mu0=NULL, scale.param=NULL,
-                                lambda = best_lambda12[1]),times=10)
-t2D=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response2), FEMbasis =FEMbasis, covariates = NULL,
+                                lambda = best_lambda1[1]),times=10)
+t2A=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response2), FEMbasis =FEMbasis, covariates = NULL,
                               max.steps=15, fam=FAMILY2, mu0=NULL, scale.param=NULL,
-                              lambda=best_lambda22[1]),times=10)
-t3D=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response3), FEMbasis =FEMbasis, covariates = NULL,
+                              lambda=best_lambda2[1]),times=10)
+t3A=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response3), FEMbasis =FEMbasis, covariates = NULL,
                               max.steps=15, fam=FAMILY3, mu0=NULL, scale.param=NULL,
-                              lambda = best_lambda32[1]),times=10)
-t4D=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response4), FEMbasis =FEMbasis, covariates = NULL,
+                              lambda = best_lambda3[1]),times=10)
+t4A=microbenchmark(smooth.FEM(location = loc, observations = as.numeric(response4), FEMbasis =FEMbasis, covariates = NULL,
                               max.steps=15, fam=FAMILY4, mu0=NULL, scale.param=NULL,
-                              lambda = best_lambda42[1]),times=10)
+                              lambda = best_lambda4[1]),times=10)
 
 
 boxplot(log(t1A$time),log(t1B$time),log(t1C$time), names=c('fdaPDE','mass lumping','lambda'),col=c('grey',2,3), ylab='log(time)')

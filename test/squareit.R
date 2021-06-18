@@ -2,10 +2,10 @@ best_lambdaO =NULL
 err=NULL
 res=NULL
 rmseOOO =NULL
-tF = NULL
+tD = NULL
 
 
-for (k in seq(1,6,by=2))
+for (k in seq(1,7,by=2))
 {
 x = seq(0,1, length.out =k*10)
 y = x
@@ -66,18 +66,18 @@ RMSE<-function(f,g) sqrt(mean((f-g)^2))
 rmse <- NULL
 #rmse <- c(rmse, RMSE(f(xeval,yeval),eval.FEM(output_CPP$fit.FEM,locations=cbind(xeval,yeval))))
 
-for (i in 1)
-{
-  output_CPP<-smooth.FEM(observations=data+ rnorm(nnodes, mean=0, sd=0.01*abs(ran[2]-ran[1])),
-                         FEMbasis=FEMbasis, lambda.selection.criterion='newton',
-                         DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
-  rmse <- c(rmse, RMSE(f(xeval,yeval),eval.FEM(output_CPP$fit.FEM,locations=cbind(xeval,yeval))))
-}
+# for (i in 1)
+# {
+#   output_CPP<-smooth.FEM(observations=data+ rnorm(nnodes, mean=0, sd=0.01*abs(ran[2]-ran[1])),
+#                          FEMbasis=FEMbasis, lambda.selection.criterion='newton',
+#                          DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
+#   rmse <- c(rmse, RMSE(f(xeval,yeval),eval.FEM(output_CPP$fit.FEM,locations=cbind(xeval,yeval))))
+# }
+# 
+# boxplot(rmse)
+# rmseOOO <- cbind(rmseOOO,rmse)
 
-boxplot(rmse)
-rmseOOO <- cbind(rmseOOO,rmse)
-
-#tF <- cbind(tF,microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=best_lambda7[length(best_lambda7)]),times=1)$time)
+#tD <- cbind(tD,microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=best_lambda7[length(best_lambda7)]),times=10)$time)
 
 }
 
