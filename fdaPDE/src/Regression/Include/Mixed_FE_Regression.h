@@ -91,21 +91,15 @@ class MixedFERegressionBase
 		//preconditioner choice
 		UInt solver_options;
 		//bool lambdaPreconditioned = false;
-		BaseSolver solver;
+		//BaseSolver solver;
 		//MassLumping solver;
 		//LambdaPreconditioner solver;
 		//BlockPreconditioner solver;
-<<<<<<< HEAD
 		//SpaceTimeSolver solver;
-=======
-		SpaceTimeSolver solver;
->>>>>>> 33bd6775d2b7aadd63aa2a19c05fc44416110290
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
 	    void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
-		//! A method computing the no-covariates version of the system matrix
-		void buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock);
 
 		//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
 		void addDirichletBC();
@@ -131,7 +125,8 @@ class MixedFERegressionBase
 		//! A method computing dofs in case of exact GCV, it is called by computeDegreesOfFreedom
 		void computeDegreesOfFreedomExact(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method computing dofs in case of stochastic GCV, it is called by computeDegreesOfFreedom
-		void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+		template<typename Solver>
+		void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT, Solver* solverobj);
 		//! A method computing GCV from the dofs
 		void computeGeneralizedCrossValidation(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 
@@ -172,6 +167,7 @@ class MixedFERegressionBase
 
 		// -- UTILITIES --
 		//! A method computing the dofs
+		template<typename Solver>
 		void computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method that set WTW flag to false, in order to recompute the matrix WTW.
 		inline void recomputeWTW(void){ this->isWTWfactorized_ = false;}

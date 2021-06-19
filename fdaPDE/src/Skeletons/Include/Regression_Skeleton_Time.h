@@ -21,7 +21,15 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	MixedFERegression<InputHandler> regression(mesh_time, regressionData, optimizationData, mesh.num_nodes(), SPLINE_DEGREE);//! load data in a C++ object
 
 	regression.preapply(mesh); //! solve the problem (compute the _solution, _dof, _GCV, _beta)
-    regression.apply<BaseSolver>();
+
+	if(regression.getSolver() == 0)
+		regression.template apply<BaseSolver>();
+	else if (regression.getSolver() == 1)
+		regression.template apply<MassLumping>();
+	else if (regression.getSolver() == 2)
+		regression.template apply<LambdaPreconditioner>();
+	else if (regression.getSolver() == 3)
+		regression.template apply<BlockPreconditioner>();
 
 	//! copy result in R memory
 	MatrixXv const & solution = regression.getSolution();

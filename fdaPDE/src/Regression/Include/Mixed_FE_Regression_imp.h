@@ -530,13 +530,6 @@ void MixedFERegressionBase<InputHandler>::getRightHandData(VectorXr& rightHandDa
 	}
 }
 
-template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::buildMatrixNoCov(const SpMat& NWblock, const SpMat& SWblock, const SpMat& SEblock)
-{
-	SpMat NEblock(SWblock.transpose());
-	matrixNoCov_ = solver.buildSystemMatrix(NWblock, SEblock, SWblock, NEblock);
-}
-
 //----------------------------------------------------------------------------//
 // Factorizer & Solver
 template<typename InputHandler>
@@ -631,15 +624,17 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr& b, So
 // GCV
 
 template<typename InputHandler>
+template<typename Solver>
 void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
 {
+	Solver solverobj(this->matrixNoCov_);
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
 	switch (GCVmethod == "exact") {
 		case 1:
-			computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
+			this->computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
 			break;
 		case 0:
-			computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT);
+			this->template computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT, &solverobj);
 			break;
 	}
 }
@@ -784,7 +779,8 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomExact(UInt outp
 }
 
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
+template<typename Solver>
+void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT, Solver* solverobj)
 {
 
 	UInt nnodes = N_*M_;
@@ -817,7 +813,7 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt
 	}
 
 	// Resolution of the system
-	MatrixXr x = this->template system_solve(b, &solver);
+	MatrixXr x = this->template system_solve(b, solverobj);
 
 	MatrixXr uTpsi = u.transpose()*psi_;
 	VectorXr edf_vect(nrealizations);
@@ -956,7 +952,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 }
 
 template<typename InputHandler>
-template<typename BaseSolver>
+template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
 	Solver solverobj;
@@ -1043,7 +1039,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			{
 				if (optimizationData_.get_DOF_evaluation()!="not_required")
 				{
-					computeDegreesOfFreedom(s,t,lambdaS,lambdaT);
+					this->template computeDegreesOfFreedom<Solver>(s,t,lambdaS,lambdaT);
 				}
 				computeGeneralizedCrossValidation(s,t,lambdaS,lambdaT);
 			}

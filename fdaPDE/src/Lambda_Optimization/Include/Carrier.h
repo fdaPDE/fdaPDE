@@ -199,7 +199,7 @@ class Carrier: public Extensions...
                 inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda)
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
-                        return this->model->apply_to_b<BaseSolver>(b);
+                        return this->model->template apply_to_b<BaseSolver>(b);
                 }
 
                 //! Method to the system given a lambda [right hand side is the usual of the problem]
@@ -211,7 +211,14 @@ class Carrier: public Extensions...
                 inline MatrixXr apply(Real lambda)
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
-                        return (this->model->apply<BaseSolver>())(0,0);
+                        if (this->model->getSolver() == 0)
+                            return (this->model->template apply<BaseSolver>())(0,0);
+                        else if (this->model->getSolver() == 1)
+                            return (this->model->template apply<MassLumping>())(0, 0);
+                        else if (this->model->getSolver() == 2)
+                            return (this->model->template apply<LambdaPreconditioner>())(0, 0);
+                        else if (this->model->getSolver() == 3)
+                            return (this->model->template apply<BlockPreconditioner>())(0, 0);
                 }
 
                 //! Method to take advantage of simplified multiplication by Q

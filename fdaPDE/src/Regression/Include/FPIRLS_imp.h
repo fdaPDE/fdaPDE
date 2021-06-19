@@ -105,7 +105,16 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(UInt& lambda_
   // Here we have to solve a weighted regression problem.
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
   regression_.preapply(this->mesh_);
-  regression_.apply<BaseSolver>();
+
+  if (regression_.getSolver() == 0)
+      regression_.template apply<BaseSolver>();
+  else if (regression_.getSolver() == 1)
+      regression_.template apply<MassLumping>();
+  else if (regression_.getSolver() == 2)
+      regression_.template apply<LambdaPreconditioner>();
+  else if (regression_.getSolver() == 3)
+      regression_.template apply<BlockPreconditioner>();
+
   const SpMat * Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
   // get the solutions from the regression object.
@@ -249,7 +258,14 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_GCV(UInt & lambda_ind
 
         if (optimizationData_.get_DOF_evaluation() != "not_required") //in this case surely we have already the dofs
         { // is DOF_matrix to be computed?
-        regression_.computeDegreesOfFreedom(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+            if(regression_.getSolver() == 0)
+                regression_.template computeDegreesOfFreedom<BaseSolver>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+            else if (regression_.getSolver() == 1)
+                regression_.template computeDegreesOfFreedom<MassLumping>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+            else if (regression_.getSolver() == 2)
+                regression_.template computeDegreesOfFreedom<LambdaPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+            else if (regression_.getSolver() == 3)
+                regression_.template computeDegreesOfFreedom<BlockPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
         _dof(lambda_index,0) = regression_.getDOF()(0,0);
         }
         else _dof(lambda_index,0) = regression_.getDOF()(lambda_index,0);

@@ -239,20 +239,3 @@ MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
 		Rprintf("Preconditioner not initialized. Using identity");
 	return BaseSolver::system_solve(preconditionRHS(b));
 }
-
-// ---------- Space Time solver methods ----------
-
-SpMat SpaceTimeSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
-{
-	if (timeDependent && !parabolic)
-	{
-		Real lambdaST = lambdaS / lambdaT;
-		SpMat R0_lambda = (-lambdaST) * R0; // build the SouthEast block of the matrix
-		SpMat R1_lambda = (-lambdaST) * R1;
-
-		SpMat R1_lambdaT(R1_lambda.transpose());
-		return BaseSolver::buildSystemMatrix((DMat / lambdaT) + (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
-	}
-	else
-		return MassLumping::assembleMatrix(DMat, R0, R1, lambdaS);
-}
