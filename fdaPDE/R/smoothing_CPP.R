@@ -467,7 +467,7 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
   return(A)
 }
 
-CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters, solver=0)
+CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
 {
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
@@ -512,19 +512,18 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters, solver=
   areal.data.avg <- as.integer(areal.data.avg)
   storage.mode(areal.data.avg) <-"integer"
   storage.mode(search) <- "integer"
-  storage.mode(solver) <- "integer"
   
   ## Call C++ function
   triplets <- .Call("get_FEM_PDE_matrix", locations, observations, FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
-                    BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, solver, PACKAGE = "fdaPDE")
+                    BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, PACKAGE = "fdaPDE")
 
   A = sparseMatrix(i = triplets[[1]][,1], j=triplets[[1]][,2], x = triplets[[2]], dims = c(nrow(FEMbasis$mesh$nodes),nrow(FEMbasis$mesh$nodes)))
   return(A)
 }
 
 
-CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters, solver=0)
+CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
 {
 
   if(class(FEMbasis$mesh) == "mesh.2D"){
@@ -584,7 +583,7 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters, solv
   ## Call C++ function
   triplets <- .Call("get_FEM_PDE_space_varying_matrix", locations, observations, FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
-                    BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, solver,  PACKAGE = "fdaPDE")
+                    BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,  PACKAGE = "fdaPDE")
 
   A = sparseMatrix(i = triplets[[1]][,1], j=triplets[[1]][,2], x = triplets[[2]], dims = c(nrow(FEMbasis$mesh$nodes),nrow(FEMbasis$mesh$nodes)))
   return(A)

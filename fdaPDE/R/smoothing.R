@@ -388,7 +388,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   else if(solver.options=="lambda_preconditioner")
     solver=2
   else if(solver.options=="block_preconditioner")
-    solver=2
+    solver=3
   else
     stop("'solver.options' must be 'no_preconditioner','mass_lumping',
          'lambda_preconditioner' or 'block_preconditioner'")

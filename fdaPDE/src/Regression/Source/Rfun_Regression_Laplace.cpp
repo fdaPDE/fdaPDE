@@ -39,6 +39,7 @@ extern "C"
 		\param RDOF_matrix user provided DOF matrix for GCV computation
 		\param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
 		\param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
+		\param Rsolver rescaling strategy chosen by the user: 0=BaseSolver, 1=MassLumping, 2=LambdaPreconditioner, 3=BlockPreconditioner (default is 1)
 		\return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
 	*/
 	SEXP regression_Laplace(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
@@ -100,7 +101,8 @@ extern "C"
 		\param Rseed integer, user defined seed for stochastic DOF computation methods
 		\param RDOF_matrix user provided DOF matrix for GCV computation
 		\param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
-		\param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
+		\param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences))
+		\param Rsolver rescaling strategy chosen by the user: 0=BaseSolver, 1=MassLumping, 2=LambdaPreconditioner, 3=BlockPreconditioner (default is 1)
 		\return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
 	*/
 	SEXP regression_Laplace_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder, SEXP Rmydim, SEXP Rndim,
@@ -164,7 +166,8 @@ extern "C"
 		\param Rseed integer, user defined seed for stochastic DOF computation methods
 		\param RDOF_matrix user provided DOF matrix for GCV computation
 		\param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
-		\param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
+		\param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences))
+		\param Rsolver rescaling strategy chosen by the user: 0=BaseSolver, 1=MassLumping, 2=LambdaPreconditioner, 3=BlockPreconditioner (default is 1)
 		\return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
 	*/
 	 SEXP gam_Laplace(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,

@@ -12,7 +12,7 @@ search = "tree", bary.locations = NULL,
 lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, solver.options='mass_lumping')
 }
 \arguments{
 \item{locations}{A matrix where each row specifies the spatial coordinates \code{x} and \code{y} (and \code{z} if ndim=3) of the corresponding observations in the vector \code{observations}.
@@ -107,6 +107,13 @@ It is advised to set it grather than 1 to avoid overfitting.}
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{solver.options}{A string specifying which solving technique is applied to the resolution of the finite element
+system: "no_preconditioner" solves the original system, "mass_lumping" solves the system with lumped mass matrix,
+"lambda_preconditioner" performs a scaling both by rows and columns by a factor sqrt(lambda_s), "block_preconditioner"
+applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
+south-west block accordingly. "block_preconditioner" is the slowest, "lambda_preconditioner" is the safest,
+default is "mass_lumping" that works particularly well for covariate model. Avoid "mass_lumping" when the mesh is ver irregular.}
 }
 \value{
 A list with the following variables:

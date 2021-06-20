@@ -19,7 +19,7 @@ protected:
 	bool decomposed = false;
 	bool parabolic = false;
 	bool timeDependent = false;
-	inline void system_factorize(const SpMat& M) { Mdec.compute(M); Rprintf("inversion"); decomposed = true; }
+	inline void system_factorize(const SpMat& M) { Mdec.compute(M); decomposed = true; }
 public:
 	BaseSolver() = default;
 	BaseSolver(const SpMat& M) { compute(M); };

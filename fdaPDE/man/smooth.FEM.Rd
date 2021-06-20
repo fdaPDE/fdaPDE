@@ -12,7 +12,7 @@ smooth.FEM(locations = NULL, observations, FEMbasis,
  max.steps.FPIRLS = 15, lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
- lambda.optimization.tolerance = 0.05)
+ lambda.optimization.tolerance = 0.05, solver.options='mass_lumping')
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -132,6 +132,13 @@ It is advised to set it grather than 1 to avoid overfitting.}
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{solver.options}{A string specifying which solving technique is applied to the resolution of the finite element
+system: \code{'no_preconditioner'} solves the original system, \code{'mass_lumping'} solves the system with lumped mass matrix,
+\code{'lambda_preconditioner'} performs a scaling both by rows and columns by a factor sqrt(lambda_s), \code{'block_preconditioner'}
+applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
+south-west block accordingly. Block preconditioner is the slowest, lambda preconditioner is the safest,
+default is \code{solver.options='mass_lumping'} that works particularly well for covariate model. Avoid mass lumping when the mesh is very irregular.}
 }
 \value{
 A list with the following variables in \code{family="gaussian"} case:
