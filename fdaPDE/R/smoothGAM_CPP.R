@@ -1,4 +1,4 @@
-CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0002020, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05)
+CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0002020, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05, solver)
 {
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
@@ -90,18 +90,20 @@ CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NUL
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
+  storage.mode(solver) <-"double"
 
   ## Call C++ function
   bigsol <- .Call("gam_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                  mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
                  FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
-                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
+                 solver, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }
 
 
-CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05)
+CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05, solver)
 {
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
@@ -197,17 +199,19 @@ CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covari
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
+  storage.mode(sovler) <- "integer"
   
   ## Call C++ function
   bigsol <- .Call("gam_PDE", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                  mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates, BC$BC_indices, BC$BC_values,
                  incidence_matrix, areal.data.avg, FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
-                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
+                 solver, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }
 
-CPP_smooth.GAM.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05)
+CPP_smooth.GAM.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05, solver)
 {
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
@@ -310,17 +314,19 @@ CPP_smooth.GAM.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, cov
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
+  storage.mode(solver) <- "integer"
 
   ## Call C++ function
   bigsol <- .Call("gam_PDE_space_varying", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                  mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates, BC$BC_indices, BC$BC_values,
                  incidence_matrix, areal.data.avg, FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param,
-                 search, optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                 search, optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
+                 solver, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }
 
-CPP_smooth.manifold.GAM.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05)
+CPP_smooth.manifold.GAM.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05, solver=0)
 {
   
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
@@ -414,17 +420,19 @@ CPP_smooth.manifold.GAM.FEM.basis<-function(locations, observations, FEMbasis, c
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
+  storage.mode(solver) <- "integer"
   
   ## Call C++ function
   bigsol <- .Call("gam_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$mesh$order,
                 mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
                 FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search, 
-                optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
+                solver, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }
 
-CPP_smooth.volume.GAM.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05)
+CPP_smooth.volume.GAM.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = FALSE, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL, threshold.FPIRLS = 0.0004, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1.8, lambda.optimization.tolerance = 0.05, solver=0)
 {
   
   # Indexes in C++ starts from 0, in R from 1
@@ -519,12 +527,13 @@ CPP_smooth.volume.GAM.FEM.basis<-function(locations, observations, FEMbasis, cov
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
+  storage.mode(solver) <- "integer"
   
   ## Call C++ function
   bigsol <- .Call("gam_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$mesh$order,
                  mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
                  FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,  
-                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, solver, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }

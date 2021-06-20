@@ -74,6 +74,12 @@ NULL
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
+#' @param solver.options A string specifying which solving technique is applied to the resolution of the finite element
+#' system: "no_preconditioner" solves the original system, "mass_lumping" solves the system with lumped mass matrix,
+#' "lambda_preconditioner" performs a scaling both by rows and columns by a factor sqrt(lambda_s), "block_preconditioner"
+#' applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
+#' south-west block accordingly. "block_preconditioner" is the slowest, "lambda_preconditioner" is the safest,
+#' default is "mass_lumping" that works particularly well for covariate model. Avoid "mass_lumping" when the mesh is ver irregular.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 #' \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
@@ -94,7 +100,7 @@ NULL
 #' lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 #' DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, solver.options='mass_lumping')
 #' @export
 #' @references #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
 #' spatially dependent functional data via regression with differential regularization. 
@@ -135,7 +141,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
                           search = "tree", bary.locations = NULL,
                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
-                          lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+                          lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
+                          solver.options="mass_lumping")
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
@@ -155,6 +162,20 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   }
   ##################### Checking parameters, sizes and conversion ################################
 
+  # Preliminary consistency of solver parameter
+  if(solver.options=="no_preconditioner")
+    solver=0
+  else if(solver.options=="mass_lumping")
+    solver=1
+  else if(solver.options=="lambda_preconditioner")
+    solver=2
+  else if(solver.options=="block_preconditioner")
+    solver=2
+  else
+    stop("'solver.options' must be 'no_preconditioner','mass_lumping',
+         'lambda_preconditioner' or 'block_preconditioner'")
+  
+  
   # Preliminary consistency of optimization parameters
   
   if(lambda.selection.criterion == "grid")
@@ -344,7 +365,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+      solver)
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE)
   {
     bigsol = NULL
@@ -353,7 +375,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
        search = search, bary.locations = bary.locations,
-       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+       solver)
                                       
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE)
   {
@@ -363,7 +386,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+      solver)
   }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
   {
     bigsol = NULL
@@ -372,7 +396,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+      solver)
   }else if(class(FEMbasis$mesh) == 'mesh.3D')
   {
     bigsol = NULL
@@ -381,7 +406,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+      solver)
   }
 
   # ---------- Solution -----------
