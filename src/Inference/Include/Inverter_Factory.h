@@ -23,7 +23,7 @@ public:
   {
     const std::string policy = inf_car.getInfData()->get_exact_inference();
     if(policy=="exact")
-      return make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
+      return fdaPDE::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
 
     if(policy!="non-exact"){
       Rprintf("Method not found, using non-exact");

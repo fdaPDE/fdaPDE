@@ -23,10 +23,10 @@ void Inverse_Exact::Compute_Inv(void){
   return;
 };
 
-
-void Inverse_Non_Exact::pre_Inverse(void){
+template<typename InputHandler>
+void Inverse_Non_Exact<InputHandler>::pre_Inverse(void){
   SpMat R0 = *(inf_car.getR0p());
-  bool status = FSPAI_wrapper(R0, this->R0_inv_tilde);
+  bool status = FSPAI_Wrapper(R0, this->R0_inv_tilde);
   if(!status){
     return; // Add a boolean as a member of Inverse_Non_Exact for well-posedness
   }

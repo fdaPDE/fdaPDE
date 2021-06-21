@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "../../fdaPDE.h"
-#include "Eigen/SparseExtra"
+#include <unsupported/Eigen/SparseExtra>
 #include <cstdio>
 
 //! Wrapper for FSPAI methods used to approximate the inverse of a sparse matrix
@@ -13,6 +13,6 @@
   \return bool
 */
 
-bool FSPAI_wrapper(const SpMat & A, SpMat & A_inv);
+bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv);
 
 #endif
