@@ -2,7 +2,7 @@
 #define __FSPAI_WRAPPER_H__
 
 #include <iostream>
-#include "../../fdaPDE.h"
+#include "../../FdaPDE.h"
 #include <unsupported/Eigen/SparseExtra>
 #include <cstdio>
 
@@ -15,7 +15,7 @@
 
 bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv);
 
-int FSPAI_Solver_Wrapper (int argc, char ** argv){  // New Name for the main to be given
+inline int FSPAI_Solver_Wrapper (int argc, char ** argv){  // New Name for the main to be given
 	return 0;
 }
 

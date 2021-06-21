@@ -28,13 +28,13 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
   };
 
   FSPAI_data FSPAI_dat;
-  FSPAI_dat.out_file = Temp_name_read;
+  FSPAI_dat.out_File = Temp_name_read;
   
   // Vector of parameters that are needed by FSPAI library for the computation of the inverse
   std::vector<std::string> SPAI_Arguments = {"FSPAI_Solver_Wrapper", Temp_name_write.c_str(), "-diag", "1", "-ep", FSPAI_dat.tol_Inverse.c_str(),
-    "-ns", FSPAI_dat.max_Step_Col.c_str(), "-mn", FSPAI_dat.max_New_Nz.c_str(), "-out", FSPAI_dat.out_File.c_str(), "-sol", FSPAI_dat.sol.c_str()} //ONLY SEQUENTIAL UP TO NOW
+    "-ns", FSPAI_dat.max_Step_Col.c_str(), "-mn", FSPAI_dat.max_New_Nz.c_str(), "-out", FSPAI_dat.out_File.c_str(), "-sol", FSPAI_dat.sol.c_str()}; //ONLY SEQUENTIAL UP TO NOW
 
-    std::vector<char*> SPAI_Argv;
+  std::vector<char*> SPAI_Argv;
   for (const auto& arg : SPAI_Arguments){
     SPAI_Argv.push_back((char*)arg.data());
   }
