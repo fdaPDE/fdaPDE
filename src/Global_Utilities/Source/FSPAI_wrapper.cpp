@@ -14,14 +14,43 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
     return false;
   }
 
-  // DO ALL THAT YOU NEED WITH FSAPI
+  // FSPAI LIBRARY BEGIN
+
+  struct FSPAI_data{
+
+    // From imput // TO BE RETRIEVED
+    std::string tol_Inverse     = "0.4";                        // Controls the quality of approximatin, default 0.4
+    std::string max_Step_Col    = "5";                          // Max number of improvement steps per columns
+    std::string max_New_Nz      = "5";                          // Max number of new nonzero candidates per step
+    std::string out_File;                                       // Temporary file on which will be written the inverse matrix
+    std::string sol             = "0";                          // Type of solver used for the system Lx=rhs, 0 means no solver is used
+    
+  };
+
+  FSPAI_data FSPAI_dat;
+  FSPAI_dat.out_file = Temp_name_read;
+  
+  // Vector of parameters that are needed by FSPAI library for the computation of the inverse
+  std::vector<std::string> SPAI_Arguments = {"FSPAI_Solver_Wrapper", Temp_name_write.c_str(), "-diag", "1", "-ep", FSPAI_dat.tol_Inverse.c_str(),
+    "-ns", FSPAI_dat.max_Step_Col.c_str(), "-mn", FSPAI_dat.max_New_Nz.c_str(), "-out", FSPAI_dat.out_File.c_str(), "-sol", FSPAI_dat.sol.c_str()} //ONLY SEQUENTIAL UP TO NOW
+
+    std::vector<char*> SPAI_Argv;
+  for (const auto& arg : SPAI_Arguments){
+    SPAI_Argv.push_back((char*)arg.data());
+  }
+  SPAI_Argv.push_back(nullptr);
+  
+  int FSPAI_Inverted = FSPAI_Solver_Wrapper(SPAI_Argv.size() - 1, SPAI_Argv.data()); // Run the FSPAI library solver, computes apprixmate inverse of an SPD matrix 
+
+  // FSPAI LIBRARY END
 
   read_Mat=Eigen::loadMarket(A_inv, Temp_name_read); // Read the matrix from a temporary file produced by FSPAI in Market format (May be Preconditioner (inv) or PCG sol)
 
-  if(read_Mat!=true){
-    Rprintf("Internal error: unable to communicate with FSPAI, inference discarded");
+  if(FSPAI_Inverted!=0 || read_Mat!=true){
+    Rprintf("Internal error: unable to communicate with FSPAI correctly, inference discarded");
     return false;
   }
+
 
   remove(Temp_name_write.c_str()); // Remove the temporary file
   remove(Temp_name_read.c_str());  // Remove the temporary file

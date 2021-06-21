@@ -15,4 +15,8 @@
 
 bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv);
 
+int FSPAI_Solver_Wrapper (int argc, char ** argv){  // New Name for the main to be given
+	return 0;
+}
+
 #endif
