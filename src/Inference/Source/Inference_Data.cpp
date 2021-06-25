@@ -107,7 +107,7 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %s", implementation_Type[i].c_str());
   }
   Rprintf("\n");
-  Rprintf("exact_Inference: %d\n",exact_Inference);
+  Rprintf("exact_Inference: %s\n",exact_Inference.c_str());
   Rprintf("coeff_inference:");
   for(UInt i=0; i < coeff_Inference.rows(); ++i){
     for(UInt j=0; j < coeff_Inference.cols(); ++j){
@@ -115,14 +115,14 @@ void InferenceData::print_inference_data() const{
   }
   }
   Rprintf("\n");
-  Rprintf("beta_0:");
+  Rprintf("beta_0: \n");
   for(UInt i=0; i < beta_0.size(); ++i){
-    Rprintf(" %f", beta_0(i));
+    Rprintf(" %f \n", beta_0(i));
   }
   Rprintf("\n");
-  Rprintf("inference_Quantile:",inference_Quantile);
+  Rprintf("inference_Quantile: \n");
   for(UInt i=0; i < inference_Quantile.size(); ++i){
-    Rprintf(" %f", inference_Quantile(i));
+    Rprintf(" %f \n", inference_Quantile(i));
   }
   Rprintf("\n");
   Rprintf("n_perm: %d\n", n_perm);
