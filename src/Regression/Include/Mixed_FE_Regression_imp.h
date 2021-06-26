@@ -593,7 +593,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize(Solver* solverobj)
 		}
 		Gdec_.compute(G);
 	}
-	Rprintf("factorization phase completed\n");
+	//Rprintf("factorization phase completed\n");
 }
 
 template<typename InputHandler>

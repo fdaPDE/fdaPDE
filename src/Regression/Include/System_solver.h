@@ -12,20 +12,28 @@
 class BaseSolver
 {
 protected:
-	std::shared_ptr<SpMat> Ptk = NULL;
-	std::shared_ptr<SpMat> LR0k = NULL;
-	Real lambdaT = 1.0;
-	Eigen::SparseLU<SpMat> Mdec;
-	bool decomposed = false;
+	// Time-dependent elements
+	std::shared_ptr<SpMat> Ptk = NULL;	// additive block corresponding to separate penalization
+	std::shared_ptr<SpMat> LR0k = NULL;	// additive block corresponding to parabolic penalization
+	Real lambdaT = 1.0;					// time smoothing parameter
 	bool parabolic = false;
 	bool timeDependent = false;
-	inline void system_factorize(const SpMat& M) { Mdec.compute(M); decomposed = true; }
+
+	// Factorization of the system matrix
+	Eigen::SparseLU<SpMat> Mdec;
+	bool decomposed = false;
+	void system_factorize(const SpMat& M)	{ Mdec.compute(M); decomposed = true; }
+
+	// A method assembling the system matrix starting from the four blocks
+	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE);
 public:
 	BaseSolver() = default;
-	BaseSolver(const SpMat& M) { compute(M); };
-	inline void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic) 
+	BaseSolver(const SpMat & M) { compute(M); };
+
+	// A method that stores the pointers to the additive blocks corresponding to time penalization
+	virtual void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
 	{
-		parabolic = flagParabolic; 
+		parabolic = flagParabolic;
 		if (parabolic)
 			LR0k = Mat;
 		else
@@ -33,12 +41,15 @@ public:
 		lambdaT = lambda;
 		timeDependent = true;
 	}
-	//inline void addParabolicCorrection(const std::shared_ptr<SpMat> Mat, Real lambda) { LR0k = Mat; lambdaT = lambda; }
-	virtual SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS);
-	virtual SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE); // Assemble the system matrix starting from the four blocks
-	virtual void compute(const SpMat& M) { system_factorize(M); }
-	//Solve the system
-	virtual MatrixXr system_solve(const MatrixXr& b) const;
+
+	// A method assembling the system matrix starting from the space-dependent blocks
+	virtual SpMat assembleMatrix(const SpMat & DMat, const SpMat & R0, const SpMat & R1, Real lambdaS);
+
+	// Factorize the system matrix
+	virtual void compute(const SpMat & M) { system_factorize(M); }
+
+	// Solve the system
+	virtual MatrixXr system_solve(const MatrixXr & b) const;
 };
 
 
@@ -51,7 +62,6 @@ class MassLumping : public BaseSolver
 {
 protected:
 	SpMat lumpMassMatrix(const SpMat& M);    // Compute the diagonal terms of SE'
-	bool lumped = false;
 public:
 	MassLumping() = default;
 	MassLumping(const SpMat& M) { compute(M); };
@@ -107,7 +117,8 @@ public:
 //
 class LambdaPreconditioner : public BaseDiagPreconditioner
 {
-	Real lambda;
+protected:
+	Real lambda; // The space smoothing parameter
 public:
 	LambdaPreconditioner() : lambda(1.0) {};
 	LambdaPreconditioner(const SpMat& M) { compute(M); };
@@ -128,22 +139,32 @@ public:
 class BlockPreconditioner : public BaseSolver
 {
 protected:
-	Real lambda;
-	SpMat SEblock;
-	SpMat SWblock;
-	Eigen::SparseLU<SpMat> SEdec;
+	Real lambda;			// The space smoothing parameter
+
+	SpMat SEblock;			// R0_lambda
+	SpMat SWblock;			// R0^-1 * R1
+	Eigen::SparseLU<SpMat> SEdec;	// LU decomposition of R0
 	bool initialized = false;
+
+	bool recompute = false;		// Indicates if the blocks and factorizations have to be recomputed
 
 public:
 	BlockPreconditioner();
 	BlockPreconditioner(const SpMat& M) { compute(M); };
+	void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic) override
+	{
+		// If the time constant does not change, no need for recomputing the factorization and blocks
+		if (lambda == lambdaT)
+			recompute = false;
+		else
+			recompute = true;
+		BaseSolver::addTimeCorrection(Mat, lambda, flagParabolic);
+	}
 	SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
-	SpMat preconditioner() const;
+	SpMat preconditioner() const; // Get the preconditioner 
 	MatrixXr preconditionRHS(const MatrixXr& b) const;
 	MatrixXr system_solve(const MatrixXr& b) const override;
 	using BaseSolver::compute;
-	using BaseSolver::addTimeCorrection;
-	using BaseSolver::assembleMatrix;
 };
 
 #endif

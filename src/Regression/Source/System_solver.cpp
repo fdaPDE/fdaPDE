@@ -5,16 +5,18 @@
 SpMat BaseSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
 	Rprintf("Using base solver");
-	SpMat R0_lambda = (-lambdaS) * R0; // build the SouthEast block of the matrix
+	SpMat R0_lambda = (-lambdaS) * R0; 
 	SpMat R1_lambda = (-lambdaS) * R1;
 
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
+	// Add time-dependent blocks
 	if (timeDependent && !parabolic)
 		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
 	else if (parabolic)
 		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
 
+	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
 
@@ -87,7 +89,6 @@ SpMat MassLumping::lumpMassMatrix(const SpMat& M)
 		diag(k) = val;
 	}
 
-	lumped = true;
 	SpMat lumpedMass(diag.asDiagonal());
 	return lumpedMass;
 }
@@ -95,16 +96,18 @@ SpMat MassLumping::lumpMassMatrix(const SpMat& M)
 SpMat MassLumping::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
 	Rprintf("Using mass lumping");
-	SpMat R0_lambda = (-lambdaS) * lumpMassMatrix(R0); // build the SouthEast block of the matrix
+	SpMat R0_lambda = (-lambdaS) * lumpMassMatrix(R0); 
 	SpMat R1_lambda = (-lambdaS) * R1;
 
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
+	// Add time-dependent blocks
 	if (timeDependent && !parabolic)
 		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
 	else if (parabolic)
 		R1_lambda -= lambdaS * (lambdaT * lumpMassMatrix(*LR0k));
 
+	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
 
@@ -127,6 +130,7 @@ SpMat LambdaPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, c
 	SpMat R0_lambda = -R0; // build the SouthEast block of the matrix
 	SpMat R1_lambda = (-sqrt(lambdaS)) * R1;
 
+	// Store the space smoothing parameter and the diagonal of the preconditioner
 	lambda = lambdaS;
 	UInt nnodes = R0.outerSize();
 	prec.resize(2*nnodes);
@@ -136,11 +140,13 @@ SpMat LambdaPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, c
 
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
+	// Add time-dependent blocks
 	if (timeDependent && !parabolic)
 		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
 	else if (parabolic)
 		R1_lambda -= sqrt(lambdaS) * (lambdaT * (*LR0k));
 
+	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
 
@@ -171,26 +177,37 @@ MatrixXr LambdaPreconditioner::preconditionRHS(const MatrixXr& b) const
 SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
 	Rprintf("Using block preconditioner");
-	SpMat R0_lambda = (-lambdaS) * R0; // build the SouthEast block of the matrix
-	SpMat R1_lambda = (-lambdaS) * R1;
+	SpMat R0_lambda = (-lambdaS) * R0;
+	SpMat R1_lambda = -R1;
+
+	// Add time-dependent blocks in the parabolic case
+	if (timeDependent && parabolic)
+		R1_lambda -= (lambdaT * (*LR0k));
 
 	UInt nnodes = R0_lambda.outerSize();
-	SEblock = R0_lambda;
-	SEdec.compute(R0_lambda);
-	initialized = true;
+
+	// If needed, recompute the factorization of R0 and the blocks
+	if (recompute)
+	{
+		SEblock = R0_lambda;
+		SEdec.compute(R0);
+		SWblock = SEdec.solve(R1_lambda);
+		initialized = true;
+	}
+
+	R1_lambda = lambdaS * R1_lambda;
 
 	SpMat Id(nnodes, nnodes);
 	Id.setIdentity();
 
-	if (timeDependent && parabolic)
-		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
-
-	SWblock = SEdec.solve(R1_lambda);
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
+	// Add time-dependent blocks in the separable case
+	// And build the system matrix from the four blocks
 	if (timeDependent && !parabolic)
 		return buildSystemMatrix(DMat + lambdaT * (*Ptk), Id, SWblock, R1_lambdaT);
 
+	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, Id, SWblock, R1_lambdaT);
 }
 

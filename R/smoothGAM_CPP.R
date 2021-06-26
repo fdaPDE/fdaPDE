@@ -90,7 +90,7 @@ CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NUL
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
-  storage.mode(solver) <-"double"
+  storage.mode(solver) <-"integer"
 
   ## Call C++ function
   bigsol <- .Call("gam_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
