@@ -1,0 +1,20 @@
+LIBS 	 := -atlas -lrt ${KSL_HYPRE_LIB} ${KSL_LAPACK_LIBS} -L/opt/ibmcmp/xlf/bg/11.1/lib -lxl -lxlf90  
+CXXFLAGS := -DENV_MPI -O3 -qarch=450d -qtune=450 -qsmp=omp -DMPICH_IGNORE_CXX_SEEK ${KSL_HYPRE_INC}
+CXX      := /bgsys/drivers/ppcfloor/comm/default/bin/mpixlcxx_r
+EXT      := cpp
+TARGET   := ../bin/fspai-1.0
+SOURCES  := $(wildcard *.$(EXT) sequential/*.$(EXT) parallel/*.$(EXT))
+OBJECTS  := $(patsubst %.$(EXT), %.o, $(SOURCES))
+
+.PHONY: all
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) ${KSL_HYPRE_INC} -o $(TARGET) $(OBJECTS) $(LIBS)
+
+$(OBJECTS): %.o: %.$(EXT)
+	$(CXX) $(CXXFLAGS) ${KSL_HYPRE_INC} -c $< -o $@
+
+.PHONY: clean
+clean:
+	rm -rf *.o

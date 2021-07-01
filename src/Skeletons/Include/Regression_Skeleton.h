@@ -19,6 +19,7 @@
 #include "../../Inference/Include/Inference_Factory.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
+#include "../../Global_Utilities/Include/FSPAI_Wrapper.h"
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -117,9 +118,18 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		//only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
 		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output); 
-
-         }
-
+                
+                //debug only
+                SpMat R0_inv;
+                bool solved = FSPAI_Wrapper(*inf_car.getR0p(), R0_inv);
+                if(solved == true){
+                  Rprintf("Element (10, 10) = %f", R0_inv(10, 10));
+                  }
+                else{
+                  Rprintf("Error: not solved");
+                  }
+                
+       }
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }
 

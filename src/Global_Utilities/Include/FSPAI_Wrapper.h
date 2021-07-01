@@ -6,6 +6,19 @@
 #include <unsupported/Eigen/SparseExtra>
 #include <cstdio>
 
+
+struct FSPAI_data{
+
+    // From imput // TO BE RETRIEVED
+    std::string tol_Inverse     = "0.4";                        // Controls the quality of approximatin, default 0.4
+    std::string max_Step_Col    = "5";                          // Max number of improvement steps per columns
+    std::string max_New_Nz      = "5";                          // Max number of new nonzero candidates per step
+    std::string out_File;                                       // Temporary file on which will be written the inverse matrix
+    std::string sol             = "0";                          // Type of solver used for the system Lx=rhs, 0 means no solver is used
+    
+  };
+
+
 //! Wrapper for FSPAI methods used to approximate the inverse of a sparse matrix
 /*
   \param A the sparse matrix to be inverted 
@@ -15,8 +28,6 @@
 
 bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv);
 
-inline int FSPAI_Solver_Wrapper (int argc, char ** argv){  // New Name for the main to be given
-	return 0;
-}
+
 
 #endif

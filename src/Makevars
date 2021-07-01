@@ -7,6 +7,9 @@ CXX_STD = CXX11
 #It has been commented out because it is not admissible on CRAN  
 #PKG_CXXFLAGS = -Wno-ignored-attributes
 
+#This flag is needed for the FSPAI utility 
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS)
+
 # Group the source files
 SOURCES =  $(wildcard */*.cpp) #subfolders cpp files
 SOURCES_C= $(wildcard */*.c)   #subfolders c files
