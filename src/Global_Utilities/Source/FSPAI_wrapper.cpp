@@ -8,7 +8,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
   bool saved_Mat = false;
   bool read_Mat  = false;
   
-  saved_Mat=Eigen::saveMarket(A, Temp_name_write); // Save the matrix in market format into a temporary file that will be read by FSPAI interface
+  saved_Mat=Eigen::saveMarket(A, Temp_name_write, Eigen::Symmetric); // Save the matrix in market format into a temporary file that will be read by FSPAI interface
 
   if(saved_Mat!=true){
     Rprintf("Internal error: unable to communicate with FSPAI, inference discarded");

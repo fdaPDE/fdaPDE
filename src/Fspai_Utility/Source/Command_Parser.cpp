@@ -55,11 +55,11 @@ Command_Parser::Command_Parser
     alg_level       = 0;
     pattern_file    = NULL;
     matrix_file     = NULL;
-    output_file     = static_cast<char*>( "precond.mtx" );
+    output_file     = "precond.mtx";
     solver_param    = 1;
     solver_tol      = 1e-06;
     solver_maxit    = 1000;
-    solver_file     = static_cast<char*>( "solution.mtx" );
+    solver_file     = "solution.mtx" ;
     rhs_param       = 1;
     para_max_levels = 1;
     para_threshold  = 0.1;

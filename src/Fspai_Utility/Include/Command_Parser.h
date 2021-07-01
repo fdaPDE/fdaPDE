@@ -157,10 +157,10 @@ class Command_Parser
                 *matrix_file,
 
                 /// Path of output file
-                *output_file,
+                output_file[],
 
                 /// Path of solution output file
-                *solver_file;
+                solver_file[];
 
                 /// Whether to use mean value as upper bound for augmenting
                 /// indices in tau calculation
