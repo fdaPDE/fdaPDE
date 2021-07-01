@@ -30,6 +30,25 @@
     =======================================================================
     =======================================================================
 */
+#include "../Include/FSPAI_Solver_Wrapper.h"
+
+//C++/MPI includings
+#include <iostream>
+#include <stdexcept>
+
+//file includings
+#include "../Include/ENV_Handler.h"
+#include "../Include/Macros.h"
+#include "../Include/PE_Exception.h"
+#include "../Include/Command_Parser.h"
+#include "../Include/Timer.h"
+#include "../Include/Type_Base_Handler.h"
+#include "../Include/Double_Handler.h"
+#include "../Include/Complex_Handler.h"
+#include "../Include/MMio.h"
+#include "../Include/Pattern.h"
+
+
 
 int FSPAI_Solver_Wrapper(int argc, char *argv[])
 {

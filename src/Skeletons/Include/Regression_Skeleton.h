@@ -119,15 +119,6 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
 		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output); 
                 
-                //debug only
-                SpMat R0_inv;
-                bool solved = FSPAI_Wrapper(*inf_car.getR0p(), R0_inv);
-                if(solved == true){
-                  Rprintf("Element (10, 10) = %f", R0_inv(10, 10));
-                  }
-                else{
-                  Rprintf("Error: not solved");
-                  }
                 
        }
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
