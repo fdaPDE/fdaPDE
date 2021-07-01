@@ -45,6 +45,9 @@
 Command_Parser::Command_Parser
 (   ENV_Handler& env_handler )
 {
+  char output_file_init[]   = "precond.mtx";
+  char solver_file_init[]  = "solution.mtx";
+    
     //Set default values
     epsilon_param   = 0.4;
     updates_param   = 5;
@@ -55,11 +58,11 @@ Command_Parser::Command_Parser
     alg_level       = 0;
     pattern_file    = NULL;
     matrix_file     = NULL;
-    output_file     = "precond.mtx";
+    output_file     = &output_file_init[0];
     solver_param    = 1;
     solver_tol      = 1e-06;
     solver_maxit    = 1000;
-    solver_file     = "solution.mtx" ;
+    solver_file     = &solver_file_init[0];
     rhs_param       = 1;
     para_max_levels = 1;
     para_threshold  = 0.1;
