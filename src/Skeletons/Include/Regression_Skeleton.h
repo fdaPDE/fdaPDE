@@ -288,7 +288,8 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 
   // Factory instantiation: using factory provided in Inverse_Factory.h
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
-    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = Inverter_Factory<InputHandler, MatrixXr>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+    //std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = Inverter_Factory<InputHandler, MatrixXr>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = fdaPDE::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
 
     for(UInt i=0; i<n_implementations; ++i){
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
@@ -302,7 +303,8 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
     }
   }
   else{
-    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = Inverter_Factory<InputHandler, SpMat>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+    //std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = Inverter_Factory<InputHandler, SpMat>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = fdaPDE::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
 
     for(UInt i=0; i<n_implementations; ++i){
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
@@ -312,9 +314,10 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 
 
     }
-
-    return;
-  
   }
+
+  return;
+  
+}
 
 #endif

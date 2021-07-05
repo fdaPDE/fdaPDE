@@ -18,9 +18,9 @@
 /*!
   This class performes hypothesis testing using a eigen sign-flip approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
-private:
+protected:
   MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
   MatrixXr Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
@@ -43,7 +43,7 @@ public:
   void print_for_debug(void) const;
 };
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
 private: 
   void compute_Lambda(void) override;
@@ -53,7 +53,7 @@ public:
   Eigen_Sign_Flip_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
 };
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Non_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
 private: 
   void compute_Lambda(void) override;

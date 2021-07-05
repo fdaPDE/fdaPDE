@@ -18,9 +18,9 @@
 /*!
   This class performes hypothesis testing and/or computes confidence intervals using a Speckman approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 class Speckman_Base:public Inference_Base<InputHandler, MatrixType>{
-private: 
+protected: 
   MatrixXr Lambda2;   					//!< (I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t)^2
   bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda^2 has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
@@ -50,7 +50,7 @@ public:
 };
 
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 class Speckman_Exact:public Speckman_Base<InputHandler, MatrixType>{
 private: 
   void compute_Lambda2(void) override;
@@ -61,7 +61,7 @@ public:
 
 };
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 class Speckman_Non_Exact:public Speckman_Base<InputHandler, MatrixType>{
 private: 
   void compute_Lambda2(void) override;

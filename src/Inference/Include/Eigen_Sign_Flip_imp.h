@@ -2,7 +2,7 @@
 #include <cmath>
 #include <random>
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
   // extract matrix C  
@@ -135,7 +135,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
 };
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   MatrixXv result;
 
@@ -145,11 +145,11 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
-  const MatrixXr * E_inv = this->inverter->getInv();
+  const MatrixType * E_inv = this->inverter->getInv();
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
@@ -157,14 +157,14 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
   UInt q = this->inf_car.getq(); 
   
-  Lambda.resize(n_obs,n_obs);
-  Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
-  is_Lambda_computed = true;
+  this->Lambda.resize(n_obs,n_obs);
+  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  this->is_Lambda_computed = true;
   
   return; 
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
@@ -176,15 +176,15 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
   UInt q = this->inf_car.getq(); 
   
-  Lambda.resize(n_obs,n_obs);
-  Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
-  is_Lambda_computed = true;
+  this->Lambda.resize(n_obs,n_obs);
+  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  this->is_Lambda_computed = true;
   
   return; 
 };
 
-template<typename InputHandler, MatrixType>
-void Eigen_Sign_Flip<InputHandler, MatrixType>::print_for_debug(void) const {
+template<typename InputHandler, typename MatrixType>
+void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::print_for_debug(void) const {
   return;
 };
 

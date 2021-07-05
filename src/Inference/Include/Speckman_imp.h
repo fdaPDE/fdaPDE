@@ -1,7 +1,7 @@
 #include "Speckman.h"
 #include <cmath>
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   // get the residuals needed
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
@@ -23,7 +23,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   return;
 };
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
   if(!is_Lambda2_computed){
     compute_Lambda2();
@@ -36,7 +36,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
   is_WLW_computed=true;
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
   if(!is_WLW_computed){
     compute_WLW_dec();
@@ -49,7 +49,7 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
   
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
@@ -125,7 +125,7 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_CI(void){
   
   // get the matrix of coefficients
@@ -168,11 +168,11 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_CI(void){
   return result;
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
-  const MatrixXr * E_inv = this->inverter->getInv();
+  const MatrixType * E_inv = this->inverter->getInv();
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
@@ -180,14 +180,14 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
-  Lambda2.resize(n_obs, n_obs);
-  Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
-  is_Lambda2_computed = true;
+  this->Lambda2.resize(n_obs, n_obs);
+  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  this->is_Lambda2_computed = true;
   
   return; 
 };
 
-template<typename InputHandler, MatrixType> 
+template<typename InputHandler, typename MatrixType> 
 void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E_tilde
@@ -199,14 +199,14 @@ void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
-  Lambda2.resize(n_obs, n_obs);
-  Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
-  is_Lambda2_computed = true;
+  this->Lambda2.resize(n_obs, n_obs);
+  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  this->is_Lambda2_computed = true;
   
   return; 
 };
 
-template<typename InputHandler, MatrixType>
-void Speckman<InputHandler, MatrixType>::print_for_debug(void) const {
+template<typename InputHandler, typename MatrixType>
+void Speckman_Base<InputHandler, MatrixType>::print_for_debug(void) const {
   return;
 };

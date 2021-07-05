@@ -1,6 +1,6 @@
 #include "Inference_Base.h"
 
-template<typename InputHandler, MatrixType>
+template<typename InputHandler, typename MatrixType>
 MatrixXv Inference_Base<InputHandler, MatrixType>::compute_inference_output(void){
   // declare the result Matrix of vectors to be returned
   MatrixXv result;

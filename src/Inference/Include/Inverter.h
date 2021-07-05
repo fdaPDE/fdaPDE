@@ -33,8 +33,7 @@ public:
 /*!
   This class provided is used to compute the exact inverse of the sparse noCovMatrix, needed to recover the exact inverse of the system matrix
 */
-template<typename MatrixType>
-class Inverse_Exact : public Inverse_Base<MatrixType> {
+class Inverse_Exact : public Inverse_Base<MatrixXr> {
 private:
   const SpMat * Ep;			//!< Const pointer to the MatrixNoCov
   const Eigen::SparseLU<SpMat> * E_decp; 	//!< Const pointer to the (already computed) decomposition of MatrixNoCov
@@ -52,8 +51,8 @@ public:
 /*!
   This class provided computes the sparse approximate inverse of the sparse matrix [Psi^T Psi + lambda*R] via FSPAI algorithm
 */
-template<typename InputHandler, MatrixType>
-class Inverse_Non_Exact : public Inverse_Base<MatrixType> {
+template<typename InputHandler>
+class Inverse_Non_Exact : public Inverse_Base<SpMat> {
 private:
   const Inference_Carrier<InputHandler> & inf_car; 	//!< Refernce to inference carrier
   SpMat E_tilde;					        //!< [Psi^T Psi + lambda*R] matrix
