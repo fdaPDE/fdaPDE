@@ -17,10 +17,10 @@
 /*!
   This class provides the basic tools to perform hypothesis testing and/or compute confidence intervals. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
 */
-template<typename InputHandler>
+template<typename InputHandler, MatrixType>
 class Inference_Base{
 protected:
-  std::shared_ptr<Inverse_Base> inverter = nullptr;     //!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
+  std::shared_ptr<Inverse_Base<MatrixType>> inverter = nullptr;     //!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   UInt pos_impl;					//!< Index that gives the position in all the vectors in infecenceData object
   virtual VectorXr compute_pvalue(void) = 0;		//!< Pure virtual method used to compute the pvalues of the tests 
@@ -30,7 +30,7 @@ protected:
 public:
   // CONSTUCTOR
   Inference_Base()=delete;	//The default constructor is deleted
-  Inference_Base(std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):inverter(inverter_), inf_car(inf_car_), pos_impl(pos_impl_){}; 
+  Inference_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):inverter(inverter_), inf_car(inf_car_), pos_impl(pos_impl_){}; 
   
   //!< Public method that calls the requested functions according to test_type and interval_type
   MatrixXv compute_inference_output (void);

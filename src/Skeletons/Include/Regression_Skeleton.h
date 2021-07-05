@@ -117,10 +117,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	if(inferenceData.get_definition()==true){ 
 		//only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
-		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output); 
-	//Debug only
-	SpMat Inv;
-	bool Solved = FSPAI_Wrapper(*inf_car.getR0p(),Inv);     
+		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output);    
        }
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }
@@ -284,27 +281,40 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
-  // Factory instantiation: using factory provided in Inverse_Factory.h
-  std::shared_ptr<Inverse_Base> inference_Inverter = Inverter_Factory<InputHandler>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
-
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
 
   inference_output.resize(n_implementations, p+1);
 
-  for(UInt i=0; i<n_implementations; ++i){
-    // Factory instantiation for solver: using factory provided in Inference_Factory.h
-    std::shared_ptr<Inference_Base<InputHandler>> inference_Solver = Inference_Factory<InputHandler>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
-		
-    inference_output.row(i) = inference_Solver->compute_inference_output();
+  // Factory instantiation: using factory provided in Inverse_Factory.h
+  if(inf_car.getInfData()->get_exact_inference() == "exact"){
+    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = Inverter_Factory<InputHandler, MatrixXr>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
 
-    if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
-      output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
+    for(UInt i=0; i<n_implementations; ++i){
+      // Factory instantiation for solver: using factory provided in Inference_Factory.h
+      std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
+		
+      inference_output.row(i) = inference_Solver->compute_inference_output();
+
+      if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
+	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
+      }
     }
   }
+  else{
+    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = Inverter_Factory<InputHandler, SpMat>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
 
-  return;
+    for(UInt i=0; i<n_implementations; ++i){
+      // Factory instantiation for solver: using factory provided in Inference_Factory.h
+      std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
+		
+      inference_output.row(i) = inference_Solver->compute_inference_output();
+
+
+    }
+
+    return;
   
-}
+  }
 
 #endif

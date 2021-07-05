@@ -1,7 +1,7 @@
 #include "Inference_Base.h"
 
-template<typename InputHandler>
-MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
+template<typename InputHandler, MatrixType>
+MatrixXv Inference_Base<InputHandler, MatrixType>::compute_inference_output(void){
   // declare the result Matrix of vectors to be returned
   MatrixXv result;
   
@@ -17,7 +17,7 @@ MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
   if(test_type == "not-defined"){
     result(0).resize(p);
     for(UInt k=0;k<p;k++){
-    result(0)(k) = 10e20; // Default value (unfeasible)
+      result(0)(k) = 10e20; // Default value (unfeasible)
     }
     result.rightCols(p) = this->compute_CI();
   }
@@ -25,10 +25,10 @@ MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
   if(interval_type == "not-defined"){
     result(0) = this->compute_pvalue();
     for(UInt k=0;k<p;k++){
-    result(k+1).resize(3);
-    result(k+1)(0)=10e20;  // default value (unfeasible)
-    result(k+1)(1)=10e20;  // default value (unfeasible)
-    result(k+1)(2)=10e20;  // default value (unfeasible)
+      result(k+1).resize(3);
+      result(k+1)(0)=10e20;  // default value (unfeasible)
+      result(k+1)(1)=10e20;  // default value (unfeasible)
+      result(k+1)(2)=10e20;  // default value (unfeasible)
     } 
   }
   // else, both are required
@@ -36,6 +36,6 @@ MatrixXv Inference_Base<InputHandler>::compute_inference_output(void){
     result(0) = this->compute_pvalue();
     result.rightCols(p) = this->compute_CI();
   }
-return result;
+  return result;
 };
 

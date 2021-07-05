@@ -1,38 +1,8 @@
 #include "Wald.h"
 #include <cmath>
 
-template<typename InputHandler> 
-void Wald<InputHandler>::compute_S(void){
-  // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
-  this->inverter->Compute_Inv();
-
-  MatrixXr M_inv;
-  M_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
-
-  const MatrixXr * E_inv = this->inverter->getInv();
-  const MatrixXr * U = this->inf_car.getUp();
-  const MatrixXr * V = this->inf_car.getVp();
-  const Eigen::PartialPivLU<MatrixXr> * G_decp = this->inf_car.getG_decp();
-  
-  M_inv = *E_inv - (*E_inv)*(*U)*((*G_decp).solve((*V)*(*E_inv)));
-  
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();
-  S.resize(n_obs, n_obs);
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  UInt q = this->inf_car.getq(); 
-  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
-  
-  S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
-  
-  is_S_computed = true;
-  
-  return; 
-};
-
-template<typename InputHandler> 
-void Wald<InputHandler>::compute_sigma_hat_sq(void){
+template<typename InputHandler, MatrixType> 
+void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
   if(is_S_computed==true){
     VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
     Real SS_res = eps_hat.squaredNorm();
@@ -47,8 +17,8 @@ void Wald<InputHandler>::compute_sigma_hat_sq(void){
   return; 
 };
 
-template<typename InputHandler> 
-void Wald<InputHandler>::compute_V(){
+template<typename InputHandler, MatrixType> 
+void Wald_Base<InputHandler, MatrixType>::compute_V(){
   // resize the variance-covariance matrix
   UInt q = this->inf_car.getq();
   V.resize(q,q);
@@ -63,8 +33,8 @@ void Wald<InputHandler>::compute_V(){
   return;
 };
 
-template<typename InputHandler> 
-VectorXr Wald<InputHandler>::compute_pvalue(void){
+template<typename InputHandler, MatrixType> 
+VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
   
@@ -104,7 +74,7 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
     //result(0) = pval;
     result(0) = stat;
     for(UInt k=1;k<C.rows();k++){
-    result(k)==10e20;
+      result(k)==10e20;
     }
     return result;
   }
@@ -143,8 +113,8 @@ VectorXr Wald<InputHandler>::compute_pvalue(void){
   
 };
 
-template<typename InputHandler> 
-MatrixXv Wald<InputHandler>::compute_CI(void){
+template<typename InputHandler, MatrixType> 
+MatrixXv Wald_Base<InputHandler, MatrixType>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -186,8 +156,8 @@ MatrixXv Wald<InputHandler>::compute_CI(void){
   return result;
 };
 
-template<typename InputHandler>
-Real Wald<InputHandler>::compute_GCV_from_inference(void) const {
+template<typename InputHandler, MatrixType>
+Real Wald_Base<InputHandler, MatrixType>::compute_GCV_from_inference(void) const {
   UInt n_obs =this->inf_car.getN_obs();
   UInt q = this->inf_car.getq();
   if(this->is_S_computed==true){
@@ -197,8 +167,73 @@ Real Wald<InputHandler>::compute_GCV_from_inference(void) const {
   }
 };
 
-template<typename InputHandler>
-void Wald<InputHandler>::print_for_debug(void) const {
+template<typename InputHandler, MatrixType> 
+void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
+  // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
+  this->inverter->Compute_Inv();
+
+  MatrixXr M_inv;
+  M_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
+
+  const MatrixXr * E_inv = this->inverter->getInv();
+  const MatrixXr * U = this->inf_car.getUp();
+  const MatrixXr * V = this->inf_car.getVp();
+  const Eigen::PartialPivLU<MatrixXr> * G_decp = this->inf_car.getG_decp();
+  
+  M_inv = *E_inv - (*E_inv)*(*U)*((*G_decp).solve((*V)*(*E_inv)));
+  
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
+  S.resize(n_obs, n_obs);
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  UInt q = this->inf_car.getq(); 
+  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
+  
+  S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
+  
+  is_S_computed = true;
+  
+  return; 
+};
+
+template<typename InputHandler, MatrixType> 
+void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
+  // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
+  this->inverter->Compute_Inv();
+
+  MatrixXr M_tilde_inv;
+  M_tilde_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
+
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();  
+  UInt q = this->inf_car.getq(); 
+
+  const MatrixType * E_tilde_inv = this->inverter->getInv();
+  const MatrixXr * U_tilde = *(this->inf_car.getUp()).topRows(n_nodes);
+  const MatrixXr * V_tilde = *(this->inf_car.getVp()).leftCols(n_nodes);
+  const MatrixXr C_tilde = -*(this->inf_car.getWtW_decp()).solve(MatrixXr::Identity(q, q));
+  const MatrixXr G_tilde = C_tilde + (*V_tilde)*(*E_tilde_inv)*(*U_tilde);
+  const Eigen::PartialPivLU<MatrixXr> G_tilde_decp; 
+  G_tilde_decp.compute(G_tilde);
+  
+  M_tilde_inv = *E_tilde_inv - (*E_tilde_inv)*(*U_tilde)*((*G_tilde_decp).solve((*V_tilde)*(*E_tilde_inv)));
+  
+  S.resize(n_obs, n_obs);
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
+  
+  S = (*Psi)*M_tilde_inv*((*Psi_t)*Q);
+  
+  is_S_computed = true;
+  
+  return; 
+};
+
+
+template<typename InputHandler, MatrixType>
+void Wald_Base<InputHandler, MatrixType>::print_for_debug(void) const {
   
   Rprintf("S computed: %d \n", is_S_computed); 
   

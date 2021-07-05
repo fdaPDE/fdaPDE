@@ -1,33 +1,8 @@
 #include "Speckman.h"
-//#include <boost/math/distributions/chi_squared.hpp>
-//#include <boost/math/distributions/normal.hpp>
 #include <cmath>
 
-//using boost::math::chi_squared;
-//using boost::math::normal;
-//using namespace boost::math; 
-
-template<typename InputHandler> 
-void Speckman<InputHandler>::compute_Lambda2(void){
-  this->inverter->Compute_Inv();
-  // extract the inverse of E
-  const MatrixXr * E_inv = this->inverter->getInv();
-  
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();
-  
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
-  
-  Lambda2.resize(n_obs, n_obs);
-  Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
-  is_Lambda2_computed = true;
-  
-  return; 
-};
-
-template<typename InputHandler> 
-void Speckman<InputHandler>::compute_V(){
+template<typename InputHandler, MatrixType> 
+void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   // get the residuals needed
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
   // build squared residuals
@@ -48,8 +23,8 @@ void Speckman<InputHandler>::compute_V(){
   return;
 };
 
-template<typename InputHandler>
-void Speckman<InputHandler>::compute_WLW_dec(void){
+template<typename InputHandler, MatrixType>
+void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
   if(!is_Lambda2_computed){
     compute_Lambda2();
   }
@@ -61,8 +36,8 @@ void Speckman<InputHandler>::compute_WLW_dec(void){
   is_WLW_computed=true;
 };
 
-template<typename InputHandler> 
-VectorXr Speckman<InputHandler>::compute_beta_hat(void){
+template<typename InputHandler, MatrixType> 
+VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
   if(!is_WLW_computed){
     compute_WLW_dec();
   }
@@ -74,8 +49,8 @@ VectorXr Speckman<InputHandler>::compute_beta_hat(void){
   
 };
 
-template<typename InputHandler> 
-VectorXr Speckman<InputHandler>::compute_pvalue(void){
+template<typename InputHandler, MatrixType> 
+VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
   
@@ -109,7 +84,7 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
     result.resize(C.rows()); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
     result(0) = stat;
     for(UInt k=1;k<C.rows();k++){
-    result(k)==10e20;
+      result(k)==10e20;
     } 
     return result;
   }
@@ -150,8 +125,8 @@ VectorXr Speckman<InputHandler>::compute_pvalue(void){
   
 };
 
-template<typename InputHandler> 
-MatrixXv Speckman<InputHandler>::compute_CI(void){
+template<typename InputHandler, MatrixType> 
+MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_CI(void){
   
   // get the matrix of coefficients
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -193,8 +168,45 @@ MatrixXv Speckman<InputHandler>::compute_CI(void){
   return result;
 };
 
+template<typename InputHandler, MatrixType> 
+void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
+  this->inverter->Compute_Inv();
+  // extract the inverse of E
+  const MatrixXr * E_inv = this->inverter->getInv();
+  
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
+  
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
+  
+  Lambda2.resize(n_obs, n_obs);
+  Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  is_Lambda2_computed = true;
+  
+  return; 
+};
 
-template<typename InputHandler>
-void Speckman<InputHandler>::print_for_debug(void) const {
+template<typename InputHandler, MatrixType> 
+void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
+  this->inverter->Compute_Inv();
+  // extract the inverse of E_tilde
+  const MatrixType * E_tilde_inv = this->inverter->getInv();
+  
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
+  
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
+  
+  Lambda2.resize(n_obs, n_obs);
+  Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  is_Lambda2_computed = true;
+  
+  return; 
+};
+
+template<typename InputHandler, MatrixType>
+void Speckman<InputHandler, MatrixType>::print_for_debug(void) const {
   return;
 };

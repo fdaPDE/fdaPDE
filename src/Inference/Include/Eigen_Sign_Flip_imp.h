@@ -2,27 +2,8 @@
 #include <cmath>
 #include <random>
 
-template<typename InputHandler> 
-void Eigen_Sign_Flip<InputHandler>::compute_Lambda(void){
-  this->inverter->Compute_Inv();
-  // extract the inverse of E
-  const MatrixXr * E_inv = this->inverter->getInv();
-  
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  UInt q = this->inf_car.getq(); 
-  
-  Lambda.resize(n_obs,n_obs);
-  Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
-  is_Lambda_computed = true;
-  
-  return; 
-};
-
-template<typename InputHandler> 
-VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
+template<typename InputHandler, MatrixType> 
+VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
   // extract matrix C  
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -57,13 +38,13 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     MatrixXr C_out = MatrixXr::Zero(C.cols(), C.cols());
     
     for(UInt j = 0; j < C.cols(); ++j){
-    	UInt count = 0; 
-        for(UInt i = 0; i < p; ++i){
-		if(C(i,j) == 1)
-			count++;
-	}
-	if(count == 0)
-		C_out(j,j) = 1; 
+      UInt count = 0; 
+      for(UInt i = 0; i < p; ++i){
+	if(C(i,j) == 1)
+	  count++;
+      }
+      if(count == 0)
+	C_out(j,j) = 1; 
     }
     
     // compute the partial residuals
@@ -100,7 +81,7 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
     result.resize(p); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
     result(0) = pval;
     for(UInt k=1;k<p;k++){
-    result(k)=10e20;
+      result(k)=10e20;
     }
   }
   else{
@@ -154,8 +135,8 @@ VectorXr Eigen_Sign_Flip<InputHandler>::compute_pvalue(void){
   
 };
 
-template<typename InputHandler>
-MatrixXv Eigen_Sign_Flip<InputHandler>::compute_CI(void){
+template<typename InputHandler, MatrixType>
+MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   MatrixXv result;
 
   // Not implemented yet //
@@ -164,9 +145,46 @@ MatrixXv Eigen_Sign_Flip<InputHandler>::compute_CI(void){
   
 };
 
+template<typename InputHandler, MatrixType> 
+void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
+  this->inverter->Compute_Inv();
+  // extract the inverse of E
+  const MatrixXr * E_inv = this->inverter->getInv();
+  
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  UInt q = this->inf_car.getq(); 
+  
+  Lambda.resize(n_obs,n_obs);
+  Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  is_Lambda_computed = true;
+  
+  return; 
+};
 
-template<typename InputHandler>
-void Eigen_Sign_Flip<InputHandler>::print_for_debug(void) const {
+template<typename InputHandler, MatrixType> 
+void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
+  this->inverter->Compute_Inv();
+  // extract the inverse of E
+  const MatrixType * E_tilde_inv = this->inverter->getInv();
+  
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  UInt q = this->inf_car.getq(); 
+  
+  Lambda.resize(n_obs,n_obs);
+  Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  is_Lambda_computed = true;
+  
+  return; 
+};
+
+template<typename InputHandler, MatrixType>
+void Eigen_Sign_Flip<InputHandler, MatrixType>::print_for_debug(void) const {
   return;
 };
 
