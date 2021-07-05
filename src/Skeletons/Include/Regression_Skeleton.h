@@ -120,7 +120,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output); 
 	//Debug only
 	SpMat Inv;
-	bool Solved = FSPAI_Solver_Wrapper(*inf_car.getR0p(),Inv);     
+	bool Solved = FSPAI_Wrapper(*inf_car.getR0p(),Inv);     
        }
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }

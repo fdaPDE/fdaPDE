@@ -17,7 +17,12 @@ template<typename InputHandler>
 class Inference_Factory
 {
 private:
-  static std::map<std::string,std::shared_ptr<Inference_Base<InputHandler>>> factory_Store;
+  static std::map<std::string,std::shared_ptr<Inference_Base<InputHandler>>>& get_Factory_Store(void)
+  {
+    static std::map<std::string,std::shared_ptr<Inference_Base<InputHandler>>> factory_Store; // initialize the static map
+    return factory_Store;
+  }
+
 public:
   //! A method that takes as parameter a string and builds a pointer to the right implementation object
   /*!
@@ -28,11 +33,13 @@ public:
   */
   static std::shared_ptr<Inference_Base<InputHandler>> create_inference_method(const std::string & implementation_type_, std::shared_ptr<Inverse_Base> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_)
   {
+    std::map<std::string,std::shared_ptr<Inference_Base<InputHandler>>> factory_Store=get_Factory_Store(); // Get the static factory
+    
     if(implementation_type_=="wald"){
       auto It = factory_Store.find("wald");
       if(It==factory_Store.end()){
 	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler>>>("wald", fdaPDE::make_shared<Wald<InputHandler>>(inverter_, inf_car_, pos_impl_)));
-	  }else{
+      }else{
 	It->second->setpos_impl(pos_impl_);
       }
       return factory_Store["wald"];
@@ -41,7 +48,7 @@ public:
       auto It = factory_Store.find("speckman");
       if(It==factory_Store.end()){
 	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler>>>("speckman", fdaPDE::make_shared<Speckman<InputHandler>>(inverter_, inf_car_, pos_impl_)));
-	  }else{
+      }else{
 	It->second->setpos_impl(pos_impl_);
       }
       return factory_Store["speckman"];
@@ -50,7 +57,7 @@ public:
       auto It = factory_Store.find("eigen-sign-flip");
       if(It==factory_Store.end()){
 	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler>>>("eigen-sign-flip", fdaPDE::make_shared<Eigen_Sign_Flip<InputHandler>>(inverter_, inf_car_, pos_impl_)));
-	  }else{
+      }else{
 	It->second->setpos_impl(pos_impl_);
       }
       return factory_Store["eigen-sign-flip"];
@@ -61,14 +68,12 @@ public:
 	auto It = factory_Store.find("wald");
 	if(It==factory_Store.end()){
 	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler>>>("wald", fdaPDE::make_shared<Wald<InputHandler>>(inverter_, inf_car_, pos_impl_)));
-	    }else{
+	}else{
 	  It->second->setpos_impl(pos_impl_);
 	}
 	return factory_Store["wald"];
       }
   }
 };
-
-template<typename InputHandler> std::map<std::string,std::shared_ptr<Inference_Base<InputHandler>>> Inference_Factory<InputHandler>::factory_Store;
 
 #endif
