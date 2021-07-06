@@ -212,7 +212,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   const MatrixType * E_tilde_inv = this->inverter->getInv();
   const MatrixXr U_tilde = this->inf_car.getUp()->topRows(n_nodes);
   const MatrixXr V_tilde = this->inf_car.getVp()->leftCols(n_nodes);
-  const MatrixXr C_tilde = -*(this->inf_car.getWtW_decp()).solve(MatrixXr::Identity(q, q));
+  const MatrixXr C_tilde = -this->inf_car.getWtW_decp()->solve(MatrixXr::Identity(q, q));
   const MatrixXr G_tilde = C_tilde + V_tilde*(*E_tilde_inv)*U_tilde;
   Eigen::PartialPivLU<MatrixXr> G_tilde_decp; 
   G_tilde_decp.compute(G_tilde);

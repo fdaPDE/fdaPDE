@@ -34,12 +34,19 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
 
   // FSPAI LIBRARY END
 
-  read_Mat=Eigen::loadMarket(A_inv, Temp_name_read); // Read the matrix from a temporary file produced by FSPAI in Market format (May be Preconditioner (inv) or PCG sol)
+  SpMat Chol_A_inv;
+
+  read_Mat=Eigen::loadMarket(Chol_A_inv, Temp_name_read); // Read the matrix from a temporary file produced by FSPAI in Market format (May be Preconditioner (inv) or PCG sol)
 
   if(FSPAI_Inverted!=0 || read_Mat!=true){
     Rprintf("Internal error: unable to communicate with FSPAI correctly, inference discarded");
     return false;
   }
+
+  Chol_A_inv.makeCompressed();
+
+  A_inv = Chol_A_inv * Chol_A_inv.transpose();
+  A_inv.makeCompressed();
 
 
   remove(Temp_name_write.c_str()); // Remove the temporary file

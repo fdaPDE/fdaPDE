@@ -57,7 +57,10 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				// for debug only 
                                 Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 				}
-                        }
+                        }else{ if(inferenceData.get_definition()==true){
+                                  lambda_inference = optimizationData.get_last_lS_used();
+                                  }
+                              }
 		}
 		else
 		{
@@ -73,7 +76,10 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				// for debug only 
                                 Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 				}
-                        }
+                        }else{ if(inferenceData.get_definition()==true){
+                                  lambda_inference = optimizationData.get_last_lS_used();
+                                  }
+                              }
 		}
 	}
 	else
@@ -92,7 +98,10 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				// for debug only 
                                 Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 				}
-                        }
+                        }else{ if(inferenceData.get_definition()==true){
+                                  lambda_inference = optimizationData.get_last_lS_used();
+                                  }
+                              }
 		}
 		else
 		{
@@ -108,7 +117,10 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				// for debug only 
                                 Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 				}
-                        }
+                        }else{ if(inferenceData.get_definition()==true){
+                                  lambda_inference = optimizationData.get_last_lS_used();
+                                  }
+                              }
 				
 		}
 

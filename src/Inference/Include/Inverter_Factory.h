@@ -33,7 +33,7 @@ public:
     if(policy=="exact"){
       auto It = factory_Store.find("exact");
       if(It==factory_Store.end()){
-	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inverse_Base<MatrixType>>>("exact", fdaPDE::make_shared<Inverse_Exact<MatrixType>>(inf_car.getEp(), inf_car.getE_decp())));
+	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inverse_Base<MatrixType>>>("exact", fdaPDE::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp())));
       }
       return factory_Store["exact"];
     }
@@ -41,7 +41,7 @@ public:
     if(policy=="non-exact"){
       auto It = factory_Store.find("non-exact");
       if(It==factory_Store.end()){
-	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inverse_Base<MatrixType>>>("non-exact", fdaPDE::make_shared<Inverse_Non_Exact<InputHandler, MatrixType>>(inf_car)));
+	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inverse_Base<MatrixType>>>("non-exact", fdaPDE::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car)));
       }
       return factory_Store["non-exact"];
     }
@@ -50,7 +50,7 @@ public:
       auto It = factory_Store.find("non-exact");
       Rprintf("Method not found, using non-exact");
       if(It==factory_Store.end()){
-	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inverse_Base<MatrixType>>>("non-exact", fdaPDE::make_shared<Inverse_Non_Exact<InputHandler, MatrixType>>(inf_car)));
+	factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inverse_Base<MatrixType>>>("non-exact", fdaPDE::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car)));
       }
       return factory_Store["non-exact"];
     }
