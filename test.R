@@ -11,8 +11,8 @@ nnodes = dim(mesh$nodes) [ 1 ]
 FEMbasis = create.FEM.basis(mesh)
 
 # Test function
-a1 = runif (1 ,min=1.5, max=1.5)
-a2 = runif (1 ,min=1.5, max=1.5)
+a1 = runif (1 ,min=-1.5, max=1.5)
+a2 = runif (1 ,min=-1.5, max=1.5)
 f = function (p)
 {
   a1* sin (2*pi *p[ , 1]) * cos(2*pi *p[ , 2])+ a2* sin (3* pi *p[ , 1])
