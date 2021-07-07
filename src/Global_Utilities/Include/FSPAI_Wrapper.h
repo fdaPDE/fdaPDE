@@ -10,11 +10,11 @@
 struct FSPAI_data{
 
     // From imput // TO BE RETRIEVED
-    std::string tol_Inverse     = "0.4";                        // Controls the quality of approximatin, default 0.4
-    std::string max_Step_Col    = "5";                          // Max number of improvement steps per columns
-    std::string max_New_Nz      = "5";                          // Max number of new nonzero candidates per step
-    std::string out_File;                                       // Temporary file on which will be written the inverse matrix
-    std::string sol             = "0";                          // Type of solver used for the system Lx=rhs, 0 means no solver is used
+    std::string tol_Inverse     = "0.05";                        // Controls the quality of approximatin, default 0.05 //TO BE FIXED FROM EXTERNAL
+    std::string max_Step_Col    = "10";                          // Max number of improvement steps per columns
+    std::string max_New_Nz      = "10";                          // Max number of new nonzero candidates per step
+    std::string out_File;                                        // Temporary file on which will be written the inverse matrix
+    std::string sol             = "0";                           // Type of solver used for the system Lx=rhs, 0 means no solver is used
     
   };
 

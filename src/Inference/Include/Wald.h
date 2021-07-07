@@ -46,8 +46,6 @@ public:
   // GETTERS
   inline const MatrixXr * getSp (void) const {return &this->S;}      //!< Getter of Sp \return Sp
   inline const MatrixXr * getVp (void) const {return &this->V;}      //!< Getter of Vp \ return Vp
-  
-  void print_for_debug(void) const;
 };
 
 template<typename InputHandler, typename MatrixType>

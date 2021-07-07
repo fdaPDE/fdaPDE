@@ -20,7 +20,16 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
   // compute Lambda
   if(!is_Lambda_computed){
-    compute_Lambda();
+    this->compute_Lambda();
+    if(!is_Lambda_computed){
+      Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference");
+      result.resize(p);
+    
+      for(UInt k=0;k<p;k++){
+	result(k)==10e20;
+      }
+      return result;
+    }
   }
   
   // compute eigenvectors and eigenvalues of Lambda
@@ -167,6 +176,12 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
 template<typename InputHandler, typename MatrixType> 
 void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->inverter->Compute_Inv();
+  
+  if(this->inverter->get_status_E_tilde_inv()==false){
+    this->is_Lambda_computed=false;
+    return;
+  }
+  
   // extract the inverse of E
   const MatrixType * E_tilde_inv = this->inverter->getInv();
   
@@ -181,11 +196,6 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->is_Lambda_computed = true;
   
   return; 
-};
-
-template<typename InputHandler, typename MatrixType>
-void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::print_for_debug(void) const {
-  return;
 };
 
 

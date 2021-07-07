@@ -15,7 +15,6 @@
 #include "../../Inference/Include/Wald.h"
 #include "../../Inference/Include/Speckman.h"
 #include "../../Inference/Include/Eigen_Sign_Flip.h"
-#include "../../Inference/Include/Inverter_Factory.h"
 #include "../../Inference/Include/Inference_Factory.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
@@ -27,6 +26,8 @@ template<typename EvaluationType, typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier);
 template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
+template<typename InputHandler>
+void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference );
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh)
@@ -50,17 +51,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_forced_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler, Forced,Areal>>(carrier);
                         
-                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             lambda_inference = solution_bricks.second.lambda_sol;
-			     if(optimizationData.get_last_lS_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
-                        }else{ if(inferenceData.get_definition()==true){
-                                  lambda_inference = optimizationData.get_last_lS_used();
-                                  }
-                              }
+              		lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference); // Set lambda for inference
 		}
 		else
 		{
@@ -69,17 +60,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_forced_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Forced>>(carrier);
 
-                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             lambda_inference = solution_bricks.second.lambda_sol;
-			      if(optimizationData.get_last_lS_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
-                        }else{ if(inferenceData.get_definition()==true){
-                                  lambda_inference = optimizationData.get_last_lS_used();
-                                  }
-                              }
+                        lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference); // Set lambda for inference
 		}
 	}
 	else
@@ -91,17 +72,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Areal>>(carrier);
 
-                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             lambda_inference = solution_bricks.second.lambda_sol;
-                             if(optimizationData.get_last_lS_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
-                        }else{ if(inferenceData.get_definition()==true){
-                                  lambda_inference = optimizationData.get_last_lS_used();
-                                  }
-                              }
+                        lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference); // Set lambda for inference
 		}
 		else
 		{
@@ -110,18 +81,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 				carrier = CarrierBuilder<InputHandler>::build_plain_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler>>(carrier);
 
-                          if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-                             lambda_inference = solution_bricks.second.lambda_sol;
-                             if(optimizationData.get_last_lS_used() != lambda_inference){
-                             	regression.build_regression_inference(lambda_inference);
-				// for debug only 
-                                Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
-				}
-                        }else{ if(inferenceData.get_definition()==true){
-                                  lambda_inference = optimizationData.get_last_lS_used();
-                                  }
-                              }
-				
+                        lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference); // Set lambda for inference	
 		}
 
 	}
@@ -330,6 +290,47 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 
   return;
   
+}
+
+//! Function that sets the correct lambda needed for inferential operations
+/*
+  \tparam InputHandler the type of regression problem
+  \param optimization_data the object containing optimization data
+  \param output_Data the object containing the solution of the optimization problem
+  \param InferenceData the object containing the data needed for for inference
+  \param regression the object containing the model of the problem
+  \param lambda_inference the lambda that will be used to compute the optimal model and the right inferential solutions
+  \return void
+*/
+template<typename InputHandler>
+void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference ){
+	if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
+		lambda_inference = output.lambda_sol;
+		if(optimizationData.get_last_lS_used() != lambda_inference){
+			regression.build_regression_inference(lambda_inference);
+			// for debug only 
+			Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
+			}
+	}else{ 		// supposing we have only one lambda, otherwise inference gets discarded in smoothing.R
+		if(inferenceData.get_definition()==true){
+			lambda_inference = optimizationData.get_last_lS_used();
+			}
+		}
+	return; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 #endif

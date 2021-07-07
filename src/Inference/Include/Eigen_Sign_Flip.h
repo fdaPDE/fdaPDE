@@ -39,8 +39,6 @@ public:
   // GETTERS
   inline const MatrixXr * getLambdap (void) const {return &this->Lambda;}      	                        //!< Getter of Lambdap \return Lambdap
   inline const MatrixXr * getPartial_res_H0p (void) const {return &this->Partial_res_H0;}  		//!< Getter of Partial_res_H0p \return Partial_res_H0p
-  
-  void print_for_debug(void) const;
 };
 
 template<typename InputHandler, typename MatrixType>

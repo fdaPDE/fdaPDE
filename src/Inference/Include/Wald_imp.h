@@ -3,15 +3,18 @@
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
-  if(is_S_computed==true){
-    VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
-    Real SS_res = eps_hat.squaredNorm();
-  
-    UInt n = this->inf_car.getN_obs();
-    UInt q = this->inf_car.getq();
-    tr_S = this->S.trace();
-    sigma_hat_sq = SS_res/(n - (q + tr_S));
+
+  if(is_S_computed==false){
+    this->compute_S();
   }
+  
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
+  Real SS_res = eps_hat.squaredNorm();
+  
+  UInt n = this->inf_car.getN_obs();
+  UInt q = this->inf_car.getq();
+  tr_S = this->S.trace();
+  sigma_hat_sq = SS_res/(n - (q + tr_S));
   
   
   return; 
@@ -19,6 +22,11 @@ void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_V(){
+
+  if(is_S_computed==false){
+    this->compute_S();
+  }
+  
   // resize the variance-covariance matrix
   UInt q = this->inf_car.getq();
   V.resize(q,q);
@@ -37,6 +45,24 @@ template<typename InputHandler, typename MatrixType>
 VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
+
+  // compute the variance-covariance matrix if needed
+  if(!is_S_computed){
+    compute_S();
+    if(!is_S_computed){     // Failed computation of E_tilde_inv/E_inv, returning, unfeasible p_values
+      Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference");
+      MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+      result.resize(C.rows());
+    
+      for(UInt k=0;k<C.rows();k++){
+	result(k)==10e20;
+      }
+      return result;
+    }
+  }
+  if(!is_V_computed){
+    compute_V();
+  }
   
   // simultaneous test
   if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
@@ -49,14 +75,6 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
     
-    // compute the variance-covariance matrix if needed
-    if(!is_S_computed){
-      compute_S();
-    }
-    if(!is_V_computed){
-      compute_V();
-    }
-    
     MatrixXr Sigma = C*V*C.transpose();
     // compute the LU factorization of Sigma
     Eigen::PartialPivLU<MatrixXr> Sigma_dec;
@@ -64,21 +82,18 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
     
     // compute the test statistic
     Real stat = diff.adjoint() * Sigma_dec.solve(diff);
-    
-    //chi_squared distribution(C.rows());
-    
-    // compute the p-value
-    //Real pval = cdf(complement(distribution, stat));
-    
-    result.resize(C.rows()); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
-    //result(0) = pval;
+
+    // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
+    result.resize(C.rows());
     result(0) = stat;
+    
     for(UInt k=1;k<C.rows();k++){
       result(k)==10e20;
     }
+    
     return result;
   }
-
+  
   // one-at-the-time tests
   else{
     // get the matrix of coefficients for the tests
@@ -89,20 +104,13 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
     VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
-    
-    // compute S and V if needed
-    if(!is_S_computed){
-      compute_S();
-    }
-    if(!is_V_computed){
-      compute_V();
-    }
       
     // for each row of C matrix
     for(UInt i=0; i<p; ++i){
       VectorXr col = C.row(i);
       Real difference = col.adjoint()*beta_hat - beta_0(i);
       Real sigma = col.adjoint()*V*col;
+      
       // compute the test statistic
       Real stat = difference/std::sqrt(sigma);
       result(i) = stat;	
@@ -115,6 +123,31 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
 
 template<typename InputHandler, typename MatrixType> 
 MatrixXv Wald_Base<InputHandler, MatrixType>::compute_CI(void){
+  
+  // compute S and V if needed
+  if(!is_S_computed){
+    compute_S();
+    if(!is_S_computed){   // Failed inversion of E_tilde_inv/E_inv, returning unfeasible CI
+      Rprintf("error: failed FSPAI inversion in confidence intervals computation, discarding inference");
+      MatrixXv result;
+      MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+      for(UInt i=0; i<C.rows(); ++i){
+	result(i).resize(3);
+
+	//Central element
+	result(i)(1)=10e20;
+
+	// compute the limits of the interval
+	result(i)(0) = 10e20;
+	result(i)(2) = 10e20; 	
+      }
+      return result;
+    }
+  }
+
+  if(!is_V_computed){
+    compute_V();
+  }
   
   // get the matrix of coefficients
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -130,13 +163,6 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_CI(void){
   // Extract the quantile needed for computing the upper and lower bounds
   Real quant = this->inf_car.getInfData()->get_inference_quantile()[this->pos_impl];
   
-  // compute S and V if needed
-  if(!is_S_computed){
-    compute_S();
-  }
-  if(!is_V_computed){
-    compute_V();
-  }
   // for each row of C matrix
   for(UInt i=0; i<p; ++i){
     result(i).resize(3);
@@ -202,6 +228,11 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   this->inverter->Compute_Inv();
 
+  if(this->inverter->get_status_E_tilde_inv()==false){
+    this->is_S_computed = false;
+    return;
+  }
+
   MatrixXr M_tilde_inv;
   M_tilde_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
 
@@ -214,6 +245,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   const MatrixXr V_tilde = this->inf_car.getVp()->leftCols(n_nodes);
   const MatrixXr C_tilde = -this->inf_car.getWtW_decp()->solve(MatrixXr::Identity(q, q));
   const MatrixXr G_tilde = C_tilde + V_tilde*(*E_tilde_inv)*U_tilde;
+  
   Eigen::PartialPivLU<MatrixXr> G_tilde_decp; 
   G_tilde_decp.compute(G_tilde);
   
@@ -229,34 +261,6 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   this->is_S_computed = true;
   
   return; 
-};
-
-
-template<typename InputHandler, typename MatrixType>
-void Wald_Base<InputHandler, MatrixType>::print_for_debug(void) const {
-  
-  Rprintf("S computed: %d \n", is_S_computed); 
-  
-  if(is_S_computed==true){
-    Rprintf("Matrix Smoothing S is (only some samples): \n");
-    for (UInt i=0; i<10; i++){
-      Rprintf( "S( %d, %d):  %f \n", 10*i, 20*i, S(10*i,20*i));
-    }
-  }
-  
-  Rprintf("V computed: %d \n" , is_V_computed); 
-  
-  if(is_V_computed==true){
-    Rprintf( "Matrix variance V is: \n");
-    for(UInt i=0; i < V.rows(); ++i){
-      for(UInt j=0; j < V.cols(); ++j){
-	Rprintf(" %f",V(i,j));
-      }
-    }
-    
-  } 
-  
-  return;
 };
 
 
