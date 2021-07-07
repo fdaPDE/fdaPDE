@@ -69,7 +69,7 @@ public:
   Inverse_Non_Exact(const Inference_Carrier<InputHandler> & inf_car_): inf_car(inf_car_){}; 	//!< Main constructor
 
   // Getter         
-  inline bool get_status_inverse (void) const {return status_E_tilde_inv;} override; 		//!< Getter for the status of the inverse after FSPAI computation \return status_E_tilde_inv
+  inline bool get_status_inverse (void) const override {return status_E_tilde_inv;}; 		//!< Getter for the status of the inverse after FSPAI computation \return status_E_tilde_inv
 
   void Compute_Inv(void) override; 								//!< Function for the non-exact computation of the inverse matrix
 };

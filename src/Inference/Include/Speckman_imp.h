@@ -7,6 +7,9 @@ void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   if(!is_Lambda2_computed){
     this->compute_Lambda2();
   }
+  if(!is_WLW_computed){
+    compute_WLW_dec();
+  }
   
   // get the residuals needed
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
