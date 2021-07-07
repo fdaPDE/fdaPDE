@@ -228,7 +228,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   this->inverter->Compute_Inv();
 
-  if(this->inverter->get_status_E_tilde_inv()==false){
+  if(this->inverter->get_status_inverse()==false){
     this->is_S_computed = false;
     return;
   }

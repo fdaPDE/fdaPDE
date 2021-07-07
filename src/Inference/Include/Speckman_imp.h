@@ -142,7 +142,7 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_CI(void){
   // compute Lambda2 and V if needed
   if(!is_Lambda2_computed){
     compute_Lambda2();
-    if(!is_lambda2_computed){
+    if(!is_Lambda2_computed){
       Rprintf("error: failed FSPAI inversion in confidence intervals computation, discarding inference");
       MatrixXv result;
       MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
@@ -219,7 +219,7 @@ template<typename InputHandler, typename MatrixType>
 void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->inverter->Compute_Inv();
 
-  if(this->inverter.get_status_E_tilde_inv==false){
+  if(this->inverter->get_status_inverse()==false){
     this->is_Lambda2_computed = false;
     return;
   } 

@@ -177,7 +177,7 @@ template<typename InputHandler, typename MatrixType>
 void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->inverter->Compute_Inv();
   
-  if(this->inverter->get_status_E_tilde_inv()==false){
+  if(this->inverter->get_status_inverse()==false){
     this->is_Lambda_computed=false;
     return;
   }

@@ -6,7 +6,7 @@ void Inverse_Non_Exact<InputHandler>::pre_Inverse(void){
   SpMat R0 = *(inf_car.getR0p());
   R0.makeCompressed();
 
-  status_R0 = FSPAI_Wrapper(R0, this->R0_inv_tilde);
+  status_R0_inv_tilde = FSPAI_Wrapper(R0, this->R0_inv_tilde);
   if(!status_R0_inv_tilde){
     return;
   }

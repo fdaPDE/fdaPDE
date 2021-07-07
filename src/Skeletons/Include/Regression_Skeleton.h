@@ -319,18 +319,4 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
 	return; 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
 #endif
