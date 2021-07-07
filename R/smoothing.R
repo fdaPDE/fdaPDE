@@ -99,7 +99,8 @@
 #' \code{'lambda_preconditioner'} performs a scaling both by rows and columns by a factor sqrt(lambda_s), \code{'block_preconditioner'}
 #' applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
 #' south-west block accordingly. Block preconditioner is the slowest, lambda preconditioner is the safest,
-#' default is \code{solver.options='mass_lumping'} that works particularly well for covariate model. Avoid mass lumping when the mesh is very irregular.
+#' mass lumping works particularly well for covariate model.
+#' Default is \code{solver.options='no_preconditioner'}. Avoid mass lumping when the mesh is very irregular.
 #' @return A list with the following variables in \code{family="gaussian"} case:
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
@@ -358,7 +359,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                      family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
                      lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
                      lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
-                     solver.options="mass_lumping")
+                     solver.options="no_preconditioner")
 {
   # Mesh identification
   if(class(FEMbasis$mesh) == "mesh.2D")

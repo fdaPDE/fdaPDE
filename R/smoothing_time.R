@@ -75,11 +75,12 @@ NULL
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
 #' @param solver.options A string specifying which solving technique is applied to the resolution of the finite element
-#' system: "no_preconditioner" solves the original system, "mass_lumping" solves the system with lumped mass matrix,
-#' "lambda_preconditioner" performs a scaling both by rows and columns by a factor sqrt(lambda_s), "block_preconditioner"
+#' system: \code{'no_preconditioner'} solves the original system, \code{'mass_lumping'} solves the system with lumped mass matrix,
+#' \code{'lambda_preconditioner'} performs a scaling both by rows and columns by a factor sqrt(lambda_s), \code{'block_preconditioner'}
 #' applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
-#' south-west block accordingly. "block_preconditioner" is the slowest, "lambda_preconditioner" is the safest,
-#' default is "mass_lumping" that works particularly well for covariate model. Avoid "mass_lumping" when the mesh is ver irregular.
+#' south-west block accordingly. Block preconditioner is the slowest, lambda preconditioner is the safest,
+#' mass lumping works particularly well for covariate model.
+#' Default is \code{solver.options='no_preconditioner'}. Avoid mass lumping when the mesh is very irregular.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 #' \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
@@ -142,7 +143,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           search = "tree", bary.locations = NULL,
                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
                           lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
-                          solver.options="mass_lumping")
+                          solver.options="no_preconditioner")
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
