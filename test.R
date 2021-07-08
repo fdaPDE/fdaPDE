@@ -2,17 +2,9 @@
 ############## TEST SCRIPT ###############
 ##########################################
 
-<<<<<<< HEAD
-##### Examples on how to perform the computation of
-##### residual, RMSE and computational time
-##### are reported only for the square 2D domain
-##### both with and without covariates.
-##### The extension to all the other cases is trivial
-=======
 # Examples for the computation of residual, RMSE and computational time
 # only given for the square 2D domain both with and without covariates
 # The extension to all the other test cases is trivial
->>>>>>> main
 
 library(fdaPDE)
 
@@ -54,7 +46,7 @@ set.seed (7893475)
 ran = range (sol_exact)
 data = sol_exact
 data1 = sol_exact + rnorm(nnodes, mean=0,
-                                 sd=0.001* abs(ran[2]-ran[1]))
+                          sd=0.001* abs(ran[2]-ran[1]))
 
 # Set smoothing parameter
 lambda = 10^( -12:3)
@@ -186,8 +178,9 @@ for ( i in 1:30 )
   best_lambda1 <- c (best_lambda1, output_CPP$optimization$lambda_solution)
   sol_approx=output_CPP$fit.FEM
   rmse <- c (rmse, RMSE( f (cbind(xeval, yeval)),
-                           eval.FEM( sol_approx, locations=cbind(xeval,yeval))))
+                         eval.FEM( sol_approx, locations=cbind(xeval,yeval))))
 }
+boxplot (rmse)
 rmseA <- rmse
 
 # mass lumping
@@ -256,11 +249,11 @@ for ( l in lambda )
   for(i in 1:30)
   {
     output_CPP <- smooth.FEM(observations = data+rnorm (length(nodes[1,]),
-                                            sd=0.1*(ran[2]=ran[1])),
-                                            FEMbasis=FEMbasis,
-                                            lambda=l )
+                                                        sd=0.1*(ran[2]=ran[1])),
+                             FEMbasis=FEMbasis,
+                             lambda=l )
     rmse <- c(rmse, RMSE( f(cbind(xeval, yeval)) ,
-                             eval.FEM( output_CPP$fit.FEM, locations=cbind(xeval,yeval))))
+                          eval.FEM( output_CPP$fit.FEM, locations=cbind(xeval,yeval))))
   }
   rmse_gridA <- cbind( rmse_gridA, rmse )
 }
@@ -327,7 +320,7 @@ library(microbenchmark)
 
 # no preconditioner
 tA=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
-    lambda=best_lambda1[1]), times=30)
+                             lambda=best_lambda1[1]), times=30)
 
 # mass lumping
 tB=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
@@ -351,53 +344,34 @@ boxplot(log(tA$time),log(tB$time),log(tC$time),log(tD$time), names=c('fdaPDE','m
 #            no BC
 #            order FE = 1
 
-<<<<<<< HEAD
-# keep the same mesh and basis functions as before
-
-# covariate definition
-cov=cos(3*pi*nodes[,2])
-beta=1.2
-=======
 cov=cos(3*pi*nodes[,2])
 beta=1.2
 
->>>>>>> main
 image(FEM(cov,FEMbasis))
 
 data = sol_exact + beta*cov
 ran = range(sol_exact)
 data1 <- data + rnorm (nnodes, sd=0.001*(ran[2]-ran[1]))
 
-<<<<<<< HEAD
-=======
 # Set smoothing parameter
 lambda = 10^( -12:3)
 
->>>>>>> main
 ### Computation of the residual
 # no GCV
 
 # no preconditioner
 output_CPP <- smooth.FEM(observations=data,
                          FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                         lambda=lambda, covariates = cov)
-=======
                          covariates=cov,
                          lambda=lambda)
->>>>>>> main
 image (output_CPP$fit.FEM)
 sol_approx = output_CPP$fit.FEM
 femsol_approx <- eval.FEM(sol_approx, nodes)
 
 output_CPP1 <- smooth.FEM(observations=data1,
                           FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                          lambda=lambda, covariates = cov)
-=======
                           covariates=cov,
                           lambda=lambda)
->>>>>>> main
 sol_approx1 = output_CPP1$fit.FEM
 femsol_approx1 <- eval.FEM(sol_approx1, nodes)
 
@@ -408,26 +382,16 @@ res1 <- colMeans(residual)
 # mass lumping
 output_CPP <- smooth.FEM(observations=data,
                          FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                         lambda=lambda, covariates = cov,
-                         solver.options="mass_lumping")
-=======
                          covariates=cov,
                          lambda=lambda, solver.options="mass_lumping")
->>>>>>> main
 image (output_CPP$fit.FEM)
 sol_approx = output_CPP$fit.FEM
 femsol_approx <- eval.FEM(sol_approx, nodes)
 
 output_CPP1 <- smooth.FEM(observations=data1,
                           FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                          lambda=lambda, covariates = cov,
-                          solver.options="mass_lumping")
-=======
                           covariates=cov,
                           lambda=lambda, solver.options="mass_lumping")
->>>>>>> main
 sol_approx1 = output_CPP1$fit.FEM
 femsol_approx1 <- eval.FEM(sol_approx1, nodes)
 
@@ -438,26 +402,16 @@ res2 <- colMeans(residual)
 # lambda preconditoner
 output_CPP <- smooth.FEM(observations=data,
                          FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                         lambda=lambda, covariates = cov,
-                         solver.options="lambda_preconditioner")
-=======
                          covariates=cov,
                          lambda=lambda, solver.options="lambda_preconditioner")
->>>>>>> main
 image (output_CPP$fit.FEM)
 sol_approx = output_CPP$fit.FEM
 femsol_approx <- eval.FEM(sol_approx, nodes)
 
 output_CPP1 <- smooth.FEM(observations=data1,
                           FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                          lambda=lambda, covariates = cov,
-                          solver.options="lambda_preconditioner")
-=======
                           covariates=cov,
                           lambda=lambda, solver.options="lambda_preconditioner")
->>>>>>> main
 sol_approx1 = output_CPP1$fit.FEM
 femsol_approx1 <- eval.FEM(sol_approx1, nodes)
 
@@ -468,26 +422,16 @@ res3 <- colMeans(residual)
 # block preconditoner
 output_CPP <- smooth.FEM(observations=data,
                          FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                         lambda=lambda, covariates = cov,
-                         solver.options="block_preconditioner")
-=======
                          covariates=cov,
                          lambda=lambda, solver.options="block_preconditioner")
->>>>>>> main
 image (output_CPP$fit.FEM)
 sol_approx = output_CPP$fit.FEM
 femsol_approx <- eval.FEM(sol_approx, nodes)
 
 output_CPP1 <- smooth.FEM(observations=data1,
                           FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                          lambda=lambda, covariates = cov,
-                          solver.options="block_preconditioner")
-=======
                           covariates=cov,
                           lambda=lambda, solver.options="block_preconditioner")
->>>>>>> main
 sol_approx1 = output_CPP1$fit.FEM
 femsol_approx1 <- eval.FEM(sol_approx1, nodes)
 
@@ -499,12 +443,8 @@ res4 <- colMeans(residual)
 ### Newton exact method with exact GCV
 ### default initial lambda and tolerance
 # no preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV')
@@ -512,12 +452,8 @@ best_lambda1 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # mass lumping
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "mass_lumping")
@@ -525,12 +461,8 @@ best_lambda2 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # lambda preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "lambda_preconditoner")
@@ -538,12 +470,8 @@ best_lambda3 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # block preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "block_preconditoner")
@@ -561,13 +489,8 @@ rmse <- NULL
 for ( i in 1:30 )
 {
   output_CPP <- smooth.FEM(observations=data+rnorm(nnodes, mean=0, sd=0.1*abs(ran[2]-ran[1])),
-<<<<<<< HEAD
-                           FEMbasis=FEMbasis,  covariates = cov,
-                           lambda.selection.criterion='newton',
-=======
                            FEMbasis=FEMbasis,
                            covariates=cov, lambda.selection.criterion='newton',
->>>>>>> main
                            DOF.evaluation='exact',
                            lambda.selection.lossfunction='GCV')
   best_lambda1 <- c (best_lambda1, output_CPP$optimization$lambda_solution)
@@ -583,13 +506,8 @@ rmse <- NULL
 for ( i in 1:30 )
 {
   output_CPP <- smooth.FEM(observations=data+rnorm(nnodes, mean=0, sd=0.1*abs(ran[2]-ran[1])),
-<<<<<<< HEAD
-                           FEMbasis=FEMbasis,  covariates = cov,
-                           lambda.selection.criterion='newton',
-=======
                            FEMbasis=FEMbasis,
                            covariates=cov, lambda.selection.criterion='newton',
->>>>>>> main
                            DOF.evaluation='exact',
                            lambda.selection.lossfunction='GCV',
                            solver.options = "mass_lumping")
@@ -606,13 +524,8 @@ rmse <- NULL
 for ( i in 1:30 )
 {
   output_CPP <- smooth.FEM(observations=data+rnorm(nnodes, mean=0, sd=0.1*abs(ran[2]-ran[1])),
-<<<<<<< HEAD
-                           FEMbasis=FEMbasis,  covariates = cov,
-                           lambda.selection.criterion='newton',
-=======
                            FEMbasis=FEMbasis,
                            covariates=cov, lambda.selection.criterion='newton',
->>>>>>> main
                            DOF.evaluation='exact',
                            lambda.selection.lossfunction='GCV',
                            solver.options = "lambda_preconditioner")
@@ -629,13 +542,8 @@ rmse <- NULL
 for ( i in 1:30 )
 {
   output_CPP <- smooth.FEM(observations=data+rnorm(nnodes, mean=0, sd=0.1*abs(ran[2]-ran[1])),
-<<<<<<< HEAD
-                           FEMbasis=FEMbasis,  covariates = cov,
-                           lambda.selection.criterion='newton',
-=======
                            FEMbasis=FEMbasis,
                            covariates=cov, lambda.selection.criterion='newton',
->>>>>>> main
                            DOF.evaluation='exact',
                            lambda.selection.lossfunction='GCV',
                            solver.options = "block_preconditioner")
@@ -661,18 +569,11 @@ for ( l in lambda )
   rmse <- NULL
   for(i in 1:30)
   {
-<<<<<<< HEAD
-    output_CPP <- smooth.FEM(observations = data+rnorm(length(nodes[1,]),
-                                                        sd=0.1*(ran[2]=ran[1])),
-                             FEMbasis=FEMbasis,
-                             lambda=l, covariates = cov)
-=======
     output_CPP <- smooth.FEM(observations = data+rnorm (length(nodes[1,]),
                                                         sd=0.1*(ran[2]=ran[1])),
                              FEMbasis=FEMbasis,
                              covariates=cov,
                              lambda=l )
->>>>>>> main
     rmse <- c(rmse, RMSE( f(cbind(xeval, yeval)) ,
                           eval.FEM( output_CPP$fit.FEM, locations=cbind(xeval,yeval))))
   }
@@ -686,19 +587,11 @@ for ( l in lambda )
   rmse <- NULL
   for(i in 1:30)
   {
-<<<<<<< HEAD
-    output_CPP <- smooth.FEM(observations = data+rnorm(length(nodes[1,]),
-                                                        sd=0.1*(ran[2]=ran[1])),
-                             FEMbasis=FEMbasis,
-                             lambda=l, covariates = cov,
-                             solver.options = "mass_lumping" )
-=======
     output_CPP <- smooth.FEM(observations = data+rnorm (length(nodes[1,]),
                                                         sd=0.1*(ran[2]=ran[1])),
                              FEMbasis=FEMbasis,
                              covariates=cov,
                              lambda=l, solver.options = "mass_lumping" )
->>>>>>> main
     rmse <- c(rmse, RMSE( f(cbind(xeval, yeval)) ,
                           eval.FEM( output_CPP$fit.FEM, locations=cbind(xeval,yeval))))
   }
@@ -715,13 +608,8 @@ for ( l in lambda )
     output_CPP <- smooth.FEM(observations = data+rnorm (length(nodes[1,]),
                                                         sd=0.1*(ran[2]=ran[1])),
                              FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                             lambda=l, covariates = cov,
-                             solver.options = "lambda_preconditioner" )
-=======
                              covariates=cov,
                              lambda=l, solver.options = "lambda_preconditioner" )
->>>>>>> main
     rmse <- c(rmse, RMSE( f(cbind(xeval, yeval)) ,
                           eval.FEM( output_CPP$fit.FEM, locations=cbind(xeval,yeval))))
   }
@@ -738,13 +626,8 @@ for ( l in lambda )
     output_CPP <- smooth.FEM(observations = data+rnorm (length(nodes[1,]),
                                                         sd=0.1*(ran[2]=ran[1])),
                              FEMbasis=FEMbasis,
-<<<<<<< HEAD
-                             lambda=l, covariates = cov,
-                             solver.options = "block_preconditioner" )
-=======
                              covariates=cov,
                              lambda=l, solver.options = "block_preconditioner" )
->>>>>>> main
     rmse <- c(rmse, RMSE( f(cbind(xeval, yeval)) ,
                           eval.FEM( output_CPP$fit.FEM, locations=cbind(xeval,yeval))))
   }
@@ -761,21 +644,6 @@ boxplot(rmse_gridA,rmse_gridB,rmse_gridC,rmse_gridD, names=c('fdaPDE','mass lump
 library(microbenchmark)
 
 # no preconditioner
-<<<<<<< HEAD
-tA=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates=cov,
-                             lambda=best_lambda1[1]), times=30)
-
-# mass lumping
-tB=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates=cov,
-                             lambda=best_lambda2[1], solver.options = "mass_lumping"), times=30)
-
-# lambda preconditioner
-tC=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates=cov,
-                             lambda=best_lambda3[1], solver.options = "lambda_preconditioner"), times=30)
-
-# block preconditioner
-tD=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates=cov,
-=======
 tA=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
                              covariates=cov,
                              lambda=best_lambda1[1]), times=30)
@@ -792,24 +660,15 @@ tC=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
 # block preconditioner
 tD=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
                              covariates=cov,
->>>>>>> main
                              lambda=best_lambda4[1], solver.options = "block_preconditioner"), times=30)
 
 # comparison
 boxplot(log(tA$time),log(tB$time),log(tC$time),log(tD$time), names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='log(time)')
 
-<<<<<<< HEAD
-
-#### Test 3: c-shaped domain ####
-#            locations != nodes
-#            laplacian
-#            with covariates
-=======
 #### Test 3: c-shaped domain ####
 #            locations != nodes
 #            laplacian
 #            no covariates
->>>>>>> main
 #            no BC
 #            order FE = 1
 library(fdaPDE)
@@ -823,10 +682,6 @@ locations = horseshoe2D$locations
 
 mesh <- create.mesh.2D(nodes = rbind (boundary_nodes, locations), segments = boundary_segments)
 nodes <- mesh$nodes
-<<<<<<< HEAD
-nnodes=length(nodes[,1])
-=======
->>>>>>> main
 locations = refine.mesh.2D(mesh, maximum_area = 0.05)$nodes
 FEMbasis <- create.FEM.basis(mesh)
 
@@ -838,30 +693,15 @@ image(femfun)
 
 lambda = 10^(-12:3)
 sol_exact <- fs.test(locations[,1],locations[,2])
-<<<<<<< HEAD
-ran=range(sol_exact)
-
-data = sol_exact
-data1 = sol_exact + rnorm(nnodes, mean=0,
-                          sd=0.001* abs(ran[2]-ran[1]))
-
-# Set smoothing parameter
-lambda = 10^( -12:3)
-=======
 data <- sol_exact
 ran = range(sol_exact)
 data1 <- data + rnorm (length(data), sd=0.001*(ran[2]-ran[1]))
->>>>>>> main
 
 ### Best lambda corresponding to exact data
 ### Newton exact method with exact GCV
 ### default initial lambda and tolerance
 # no preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV')
@@ -869,11 +709,7 @@ best_lambda1 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # mass lumping
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "mass_lumping")
@@ -881,11 +717,7 @@ best_lambda2 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # lambda preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "lambda_preconditoner")
@@ -893,11 +725,7 @@ best_lambda3 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # block preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "block_preconditoner")
@@ -911,23 +739,6 @@ image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 #            no BC
 #            order FE = 1
 
-<<<<<<< HEAD
-# keep the same mesh and basis functions as before
-
-ndata=length(locations[,1])
-cov1 = rnorm(ndata, mean = 1, sd = 2)
-cov2 = sin(nodes[,1])
-coeff = fs.test(nodes[,1], nodes[,2])
-
-cov1_loc = rnorm(ndata, mean = 1, sd = 2)
-cov2_loc = sin(locations[,1])
-cov = cbind(cov1_loc,cov2_loc)
-sol_exact = fs.test(locations[,1], locations[,2])
-
-data <- sol_exact +2*cov1_loc -cov2_loc
-ran = range(sol_exact)
-data1 <- data + rnorm (ndata, sd=0.001*(ran[2]-ran[1]))
-=======
 ndata=length(coeff)
 cov1 = rnorm(ndata, mean = 1, sd = 2)
 cov2 = sin(nodes[,1])
@@ -940,19 +751,13 @@ cov=cbind(cov1_exact,cov2_exact)
 sol_exact = fs.test(locations[,1], locations[,2])
 
 data = data + beta[1]*cov[,1] + beta[2]*cov[,2]
->>>>>>> main
 
 ### Best lambda corresponding to exact data
 ### Newton exact method with exact GCV
 ### default initial lambda and tolerance
 # no preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-                         covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV')
@@ -960,13 +765,8 @@ best_lambda1 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # mass lumping
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-                         covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "mass_lumping")
@@ -974,13 +774,8 @@ best_lambda2 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # lambda preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-                         covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "lambda_preconditoner")
@@ -988,13 +783,8 @@ best_lambda3 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # block preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, locations=locations,
-                         covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov, locations = locations,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "block_preconditoner")
@@ -1063,38 +853,15 @@ BC_areal = NULL
 BC_areal$BC_indices = which(mesh_areal$nodesmarkers == 1) # b.c. on the complete boundary
 BC_areal$BC_values = rep(0,length(BC_areal$BC_indices)) # homogeneus b.c.
 
-<<<<<<< HEAD
-### Best lambda corresponding to exact data
-### Newton exact method with exact GCV
-### default initial lambda and tolerance
-# no preconditioner
-sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
-                       lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact',
-                       PDE_parameters = PDE_parameters_areal, BC = BC_areal)
-=======
 # no preconditioner
 sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
                        lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact', PDE_parameters = PDE_parameters_areal, BC = BC_areal)
-                       
->>>>>>> main
+
 sol_approx_areal <- sol_areal$fit.FEM
 best_lambda_areal1 <- sol_areal$optimization$lambda_solution
 
 # mass lumping
 sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
-<<<<<<< HEAD
-                       lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact',
-                       solver.options="mass_lumping",
-                       PDE_parameters = PDE_parameters_areal, BC = BC_areal)
-sol_approx_areal <- sol_areal$fit.FEM
-best_lambda_areal2 <- sol_areal$optimization$lambda_solution
-
-# lambda preconditioner
-sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
-                       lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact',
-                       solver.options="lambda_preconditioner",
-                       PDE_parameters = PDE_parameters_areal, BC = BC_areal)
-=======
                        solver.options="mass_lumping",
                        lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact', PDE_parameters = PDE_parameters_areal, BC = BC_areal)
 
@@ -1106,21 +873,14 @@ sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_m
                        solver.options="lambda_preconditioner",
                        lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact', PDE_parameters = PDE_parameters_areal, BC = BC_areal)
 
->>>>>>> main
 sol_approx_areal <- sol_areal$fit.FEM
 best_lambda_areal3 <- sol_areal$optimization$lambda_solution
 
 # block preconditioner
 sol_areal = smooth.FEM(observations = data_areal, incidence_matrix = incidence_matrix, FEMbasis = fembasis_areal,
-<<<<<<< HEAD
-                       lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact',
-                       solver.options="block_preconditioner",
-                       PDE_parameters = PDE_parameters_areal, BC = BC_areal)
-=======
                        solver.options="block preconditioner",
                        lambda.selection.criterion = 'newton_fd', DOF.evaluation = 'exact', PDE_parameters = PDE_parameters_areal, BC = BC_areal)
 
->>>>>>> main
 sol_approx_areal <- sol_areal$fit.FEM
 best_lambda_areal4 <- sol_areal$optimization$lambda_solution
 
@@ -1131,15 +891,9 @@ best_lambda_areal4 <- sol_areal$optimization$lambda_solution
 #            no covariates
 #            no BC
 #            order FE = 1
-<<<<<<< HEAD
-
-library(fdaPDE)
-rm(list=ls())
-=======
 library(fdaPDE)
 rm(list=ls())
 graphics.off()
->>>>>>> main
 
 data(hub2.5D)
 mesh <- create.mesh.2.5D(nodes = hub2.5D$hub2.5D.nodes,triangles = hub2.5D$hub2.5D.triangles)
@@ -1162,11 +916,7 @@ func = function(x)
 coeff = func(nodes)
 plot(FEM(coeff,FEMbasis))
 
-<<<<<<< HEAD
-lambda=10^(-12:3)
-=======
 lambdaS=10^(-12:3)
->>>>>>> main
 ran=range(coeff)
 
 data=coeff
@@ -1213,37 +963,21 @@ image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 #            no BC
 #            order FE = 1
 
-<<<<<<< HEAD
-# keep the same mesh and basis functions as before
-
-cov1 = 4*sin(2*pi*nodes[,2])*cos(2*pi*nodes[,3])
-cov2 = rnorm(nodes[,1],mean=3,sd=0.1)
-cov = cbind(cov1,cov2)
-=======
 cov1 = 4*sin(2*pi*nodes[,2])*cos(2*pi*nodes[,3])
 cov2 = rnorm(nodes[,1],mean=3,sd=0.1)
 cov= cbind(cov1,cov2)
->>>>>>> main
 plot(FEM(cov1,FEMbasis))
 plot(FEM(cov2,FEMbasis))
 beta=c(0.45,0.3)
 
 data <- coeff +beta[1]*cov1+beta[2]*cov2
-<<<<<<< HEAD
-data1 <- data + rnorm (nnodes, sd=0.001*(ran[2]-ran[1]))
-=======
->>>>>>> main
 
 ### Best lambda corresponding to exact data
 ### Newton exact method with exact GCV
 ### default initial lambda and tolerance
 # no preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV')
@@ -1251,12 +985,8 @@ best_lambda1 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # mass lumping
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "mass_lumping")
@@ -1264,12 +994,8 @@ best_lambda2 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # lambda preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "lambda_preconditoner")
@@ -1277,57 +1003,27 @@ best_lambda3 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # block preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "block_preconditoner")
 best_lambda4 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 ####### 3D ########
 
 #### Test 1: sphere domain ####
 #            locations = nodes 
-<<<<<<< HEAD
-#            covariates
-#            no BC
-#            order FE = 1
-
-=======
 #            no covariates
 #            no BC
 #            order FE = 1
->>>>>>> main
 library(fdaPDE)
 rm(list=ls())
 graphics.off()
 
 # # Function to generate random points in a sphere
 # rsphere <- function(n, r = 0.9, surface_only = FALSE) {
-<<<<<<< HEAD
-#   phi       <- runif(n, 0.0, 2.0 * pi)
-#   cos_theta <- runif(n, -1.0, 1.0)
-#   sin_theta <- sqrt((1.0-cos_theta)*(1.0+cos_theta))
-#   radius <- r
-#   if (surface_only == FALSE) {
-#     radius <- r * runif(n, 0.0, 1.0)^(1.0/3.0)
-#   }
-#   
-#   x <- radius * sin_theta * cos(phi)
-#   y <- radius * sin_theta * sin(phi)
-#   z <- radius * cos_theta
-#   
-#   cbind(x, y, z)
-=======
 # phi       <- runif(n, 0.0, 2.0 * pi)
 # cos_theta <- runif(n, -1.0, 1.0)
 # sin_theta <- sqrt((1.0-cos_theta)*(1.0+cos_theta))
@@ -1341,7 +1037,6 @@ graphics.off()
 # z <- radius * cos_theta
 # 
 # cbind(x, y, z)
->>>>>>> main
 # }
 
 # Build mesh: Sphere
@@ -1358,22 +1053,15 @@ a1 = rnorm(1,mean = 1, sd = 1)
 a2 = rnorm(1,mean = 1, sd = 1)
 a3 = rnorm(1,mean = 1, sd = 1)
 
-<<<<<<< HEAD
-
-=======
 # Exact test function
->>>>>>> main
 nodes=mesh$nodes
 nnodes = nrow(mesh$nodes)
 
 # Set smoothing parameter
 lambda=10^(-12:3)
 
-<<<<<<< HEAD
-=======
 ##### no covariate case #####
 
->>>>>>> main
 # Evaluate exact solution on mesh nodes
 coeff =  sin(2*pi*mesh$nodes[,1]) +  2 * sin(2*pi*mesh$nodes[,2]) +  sin(2*pi*mesh$nodes[,3])
 
@@ -1381,11 +1069,6 @@ coeff =  sin(2*pi*mesh$nodes[,1]) +  2 * sin(2*pi*mesh$nodes[,2]) +  sin(2*pi*me
 plot(FEM(coeff,FEMbasis))
 
 data = coeff
-<<<<<<< HEAD
-data1 = data + rnorm(nrow(mesh$nodes), mean=0, sd=0.001*diff(range(coeff)))
-
-=======
->>>>>>> main
 
 func = function(x)
 {
@@ -1433,14 +1116,6 @@ image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 #            no BC
 #            order FE = 1
 
-<<<<<<< HEAD
-# keep the same mesh and basis functions as before
-
-cov1=(4*sin(2*pi*nodes[,2])+6*sin((2*pi*nodes[,3])^2))*(1-exp(-nodes[,1]))/3
-cov2=1+2*nodes[,1]*sin(2*pi*nodes[,2])/6
-cov=cbind(cov1,cov2)
-beta=c(0.7,0.2)
-=======
 cov1=(4*sin(2*pi*nodes[,2])+6*sin((2*pi*nodes[,3])^2))*(1-exp(-nodes[,1]))/3
 cov2=1+2*nodes[,1]*sin(2*pi*nodes[,2])/6
 
@@ -1448,18 +1123,13 @@ cov=cbind(cov1,cov2)
 
 beta=c(0.7,0.2)
 data = data + beta[1]*cov[,1] + beta[2]*cov[,2]
->>>>>>> main
 
 ### Best lambda corresponding to exact data
 ### Newton exact method with exact GCV
 ### default initial lambda and tolerance
 # no preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV')
@@ -1467,12 +1137,8 @@ best_lambda1 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # mass lumping
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "mass_lumping")
@@ -1480,12 +1146,8 @@ best_lambda2 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # lambda preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "lambda_preconditoner")
@@ -1493,12 +1155,8 @@ best_lambda3 <- output_CPP$optimization$lambda_solution
 image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 # block preconditioner
-<<<<<<< HEAD
-output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis, covariates = cov,
-=======
 output_CPP <- smooth.FEM(observations=data, FEMbasis=FEMbasis,
                          covariates=cov,
->>>>>>> main
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact',
                          lambda.selection.lossfunction='GCV', solver.options = "block_preconditoner")
@@ -1508,12 +1166,6 @@ image (FEM( output_CPP$fit.FEM$coeff , FEMbasis ) )
 
 ####### GLM ########
 
-<<<<<<< HEAD
-library(fdaPDE)
-library(purrr)
-
-=======
->>>>>>> main
 #### Test 1: square domain BINOMIAL family ####
 #            locations = nodes 
 #            laplacian
@@ -1521,10 +1173,6 @@ library(purrr)
 #            no BC
 #            order FE = 1
 #
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 rm(list=ls())
 graphics.off()
 
@@ -1637,19 +1285,6 @@ FAMILY2 = "exponential"
 link<-function(x){-1/x}
 inv.link<-link 
 
-<<<<<<< HEAD
-# 2D random field (function f)
-a1=-1.5
-a2=0.4
-
-z<-function(p)
-{
-  a1*sin(2*pi*p[1])*cos(2*pi*p[2])+a2*sin(3*pi*p[1]) - 2
-  
-}
-
-=======
->>>>>>> main
 # mesh
 x = seq(0,1, length.out = 40)
 y = x
@@ -1669,8 +1304,6 @@ xobs=runif(min=0,max=1,n=nloc)
 yobs=runif(min=0,max=1,n=nloc)
 loc=cbind(xobs,yobs)
 
-<<<<<<< HEAD
-=======
 # 2D random field (function f)
 a1=-1.5
 a2=0.4
@@ -1681,7 +1314,6 @@ z<-function(p)
   
 }
 
->>>>>>> main
 # exact solution
 sol_exact2=rep(0,length(loc[,1]))
 for(i in 1:length(loc[,1])){
@@ -1704,10 +1336,7 @@ response2 <- response2 <- rexp(nloc, rate = 1/mu2)
 # Set smoothing parameter
 lambda = 10^seq(-5,0,length.out = 20)
 
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 ### Best lambda corresponding to exact data
 ### Newton exact method with exact GCV
 ### default initial lambda and tolerance
@@ -1738,10 +1367,7 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
                                  lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
 best_lambda4 <- output_CPP$bestlambda
 
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 #### Test 3: square domain GAMMA family ####
 #            locations = nodes 
 #            laplacian
@@ -1761,20 +1387,6 @@ FAMILY3 = "gamma"
 link<-function(x){-1/x}
 inv.link<-link
 
-<<<<<<< HEAD
-
-# 2D random field (function f) 
-a1=-1.5
-a2=0.4
-
-z<-function(p)
-{
-  a1*sin(2*pi*p[1])*cos(2*pi*p[2])+a2*sin(3*pi*p[1]) - 2
-  
-}
-
-=======
->>>>>>> main
 # mesh
 x = seq(0,1, length.out = 40)
 y = x
@@ -1794,8 +1406,6 @@ xobs=runif(min=0,max=1,n=nloc)
 yobs=runif(min=0,max=1,n=nloc)
 loc=cbind(xobs,yobs)
 
-<<<<<<< HEAD
-=======
 # 2D random field (function f) 
 a1=-1.5
 a2=0.4
@@ -1805,7 +1415,6 @@ z<-function(p)
   a1*sin(2*pi*p[1])*cos(2*pi*p[2])+a2*sin(3*pi*p[1]) - 2
   
 }
->>>>>>> main
 
 # exact solution
 sol_exact3=rep(0,length(loc[,1]))
@@ -1868,10 +1477,7 @@ best_lambda4 <- output_CPP$bestlambda
 #            no BC
 #            order FE = 1
 #
-<<<<<<< HEAD
-=======
 
->>>>>>> main
 rm(list=ls())
 graphics.off()
 
@@ -1884,20 +1490,6 @@ l<-make.link("log")
 link<-l$linkfun
 inv.link<-l$linkinv
 
-<<<<<<< HEAD
-
-# 2D random field (function f) 
-a1=-1.5
-a2=0.4
-
-z<-function(p)
-{
-  a1*sin(2*pi*p[1])*cos(2*pi*p[2])+a2*sin(3*pi*p[1]) + 2
-  
-}
-
-=======
->>>>>>> main
 # mesh
 x = seq(0,1, length.out = 40)
 y = x
@@ -1917,8 +1509,6 @@ xobs=runif(min=0,max=1,n=nloc)
 yobs=runif(min=0,max=1,n=nloc)
 loc=cbind(xobs,yobs)
 
-<<<<<<< HEAD
-=======
 # 2D random field (function f) 
 a1=-1.5
 a2=0.4
@@ -1928,7 +1518,6 @@ z<-function(p)
   a1*sin(2*pi*p[1])*cos(2*pi*p[2])+a2*sin(3*pi*p[1]) + 2
   
 }
->>>>>>> main
 
 # exact solution
 sol_exact4=rep(0,length(loc[,1]))
