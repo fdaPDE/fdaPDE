@@ -1574,5 +1574,3 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
                                  lambda = lambda, solver.options="block_preconditioner",
                                  lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
 best_lambda4 <- output_CPP$bestlambda
-=======
->>>>>>> 0660f0319cefc7cfa7e147a71fa35dc5e97d4406
