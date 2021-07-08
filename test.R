@@ -31,8 +31,8 @@ nnodes = dim(mesh$nodes) [ 1 ]
 FEMbasis = create.FEM.basis(mesh)
 
 # Test function
-a1 = runif (1 ,min=1.5, max=1.5)
-a2 = runif (1 ,min=1.5, max=1.5)
+a1 = runif (1 ,min=-1.5, max=1.5)
+a2 = runif (1 ,min=-1.5, max=1.5)
 f = function (p)
 {
   a1* sin (2*pi *p[ , 1]) * cos(2*pi *p[ , 2])+ a2* sin (3* pi *p[ , 1])
@@ -336,6 +336,7 @@ tD=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
 
 # comparison
 boxplot(log(tA$time),log(tB$time),log(tC$time),log(tD$time), names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='log(time)')
+<<<<<<< HEAD
 
 #### Test 2: square domain ####
 #            locations = nodes 
@@ -1573,3 +1574,5 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
                                  lambda = lambda, solver.options="block_preconditioner",
                                  lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
 best_lambda4 <- output_CPP$bestlambda
+=======
+>>>>>>> 0660f0319cefc7cfa7e147a71fa35dc5e97d4406
