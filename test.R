@@ -336,7 +336,6 @@ tD=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
 
 # comparison
 boxplot(log(tA$time),log(tB$time),log(tC$time),log(tD$time), names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='log(time)')
-<<<<<<< HEAD
 
 #### Test 2: square domain ####
 #            locations = nodes 
