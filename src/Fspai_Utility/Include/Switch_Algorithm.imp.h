@@ -45,11 +45,11 @@ Switch_Algorithm<T_Field>::Get_Algorithm
    const int         max_idcs_param,
    const bool        use_mean_param)
 {
-    if ( mtx->my_id == 0 )   std::cout << "\t    Optimizations:\n";
+    // if ( mtx->my_id == 0 )   std::cout << "\t    Optimizations:\n";
     switch( alg_level )
     {
         case unrestrained: // Unrestrained FSPAI without any dictionary
-            if ( mtx->my_id == 0 )
+            /*if ( mtx->my_id == 0 )
             {
                 std::cout << "\t    CACHE:\t";
                 std::cout << COLOR_RED << "no" << COLOR_NORMAL << std::endl;
@@ -59,7 +59,7 @@ Switch_Algorithm<T_Field>::Get_Algorithm
                 // todo: Abstrakte klasse für Lapack und CSparse gemeinsam!!!!
                 std::cout << "\t    CHOLESKY DATA MODE:\t";
                 std::cout << COLOR_RED << "Lapack\n" << COLOR_NORMAL << std::endl;
-            }
+            }*/
             return new Fspai_Unrestrained<T_Field>(
                     mtx, precond, P, env_handler, hash_param, epsilon_param,
                     updates_param, max_idcs_param, use_mean_param);

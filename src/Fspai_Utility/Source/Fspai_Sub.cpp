@@ -46,7 +46,7 @@ Fspai_Sub<double>::Print_Red_Mtx
     const int       n,
     const int       m)
 {
-    std::cout << "\n\tred_mtx:  \n\t\t";
+    /*std::cout << "\n\tred_mtx:  \n\t\t";
     for (int i = 0; i < m*n; i++)
         std::cout << red_mtx[i] << " ";
     std::cout << std::endl;
@@ -57,7 +57,8 @@ Fspai_Sub<double>::Print_Red_Mtx
         for (int j = 0; j < n; j++)
             std::cout << red_mtx[i + j * m] << " ";
     }
-    std::cout << "\n" << std::endl;
+    std::cout << "\n" << std::endl;*/
+    return;
 }
 
 
@@ -66,10 +67,13 @@ template<>  void
 Fspai_Sub<double>::Print_Diags
 (   const int dim )
 {
+    /*
     std::cout << "\tdiag_elements: ";
     for(int i= 0; i < dim; i++)
         std::cout << diag_elements[i].diag_el << " ";
     std::cout << std::endl;
+    */
+    return;
 
 }
 
@@ -177,7 +181,7 @@ Fspai_Sub<COMPLEX>::Print_Red_Mtx
     const int       n,
     const int       m)
 {
-    std::cout << "\n\tred_mtx:  \n\t\t";
+    /*std::cout << "\n\tred_mtx:  \n\t\t";
     for (int i = 0; i < m*n; i++)
         std::cout << red_mtx[i].real
                   << " " << red_mtx[i].imag << " | ";
@@ -191,6 +195,8 @@ Fspai_Sub<COMPLEX>::Print_Red_Mtx
                       << " " << red_mtx[i+ j * m].imag << " | ";
     }
     std::cout << "\n" << std::endl;
+    */
+    return;
 }
 
 
@@ -199,11 +205,14 @@ template<>  void
 Fspai_Sub<COMPLEX>::Print_Diags
 (   const int dim )
 {
+    /*
     std::cout << "diag_elements: ";
     for(int i= 0; i < dim; i++)
         std::cout << diag_elements[i].diag_el.real << " "
                   << diag_elements[i].diag_el.imag << " ";
     std::cout << std::endl;
+    */
+    return;
 }
 
 

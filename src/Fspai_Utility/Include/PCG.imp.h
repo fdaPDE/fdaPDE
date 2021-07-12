@@ -226,10 +226,11 @@ PCG<T_Field>::Solve_System()
      {
          if(i == maxit) std::cout << "\t    Maximum number of iter: "
                                   << i << " reached!" << std::endl;
-         else           std::cout << "\t    Converged at iter:\t    "
+         /*else           std::cout << "\t    Converged at iter:\t    "
                                   << i << std::endl;
          std::cout << "\t    With Rel-res-norm:\t    "
                    << sqrt(i_prod/bi_prod) << std::endl;
+	 */
      }
 
      delete [] p;

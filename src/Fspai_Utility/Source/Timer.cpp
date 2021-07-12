@@ -89,11 +89,12 @@ Timer::Report
     env_handler.Get_Environment_Params( num_procs, my_id );
     env_handler.Time_Diff( max, sum_time );
 
-    if( my_id == 0 )
+    /*if( my_id == 0 )
     {
         std::cout.precision( 10 );
         std::cout << "  " << max << "\t[sec]" << std::endl;
     }
+    */
     sum_time = 0.0;
 }
 
@@ -141,7 +142,7 @@ Timer::Dbg_Report
         // Getting times of all operations from all pe's
         env_handler.Dbg_Timers( dbg_sum_timers[id], sum );
 
-        if( my_id == 0 )
+        /*if( my_id == 0 )
         {
             std::cout.precision( 10 );
             std::cout << "######## id: " << id << std::endl;
@@ -150,6 +151,7 @@ Timer::Dbg_Report
                           << ":  sum: "<< sum[i] << std::endl;
             std::cout << std::endl;
         }
+        */
     }
     delete [] sum;
 }

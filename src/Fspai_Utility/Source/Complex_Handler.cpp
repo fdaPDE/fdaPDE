@@ -74,7 +74,8 @@ void
 Complex_Handler::Print_Mtx_Type
 ( ) const
 {
-    std::cout << "\t  Matrix is COMPLEX!" << std::endl;
+    //std::cout << "\t  Matrix is COMPLEX!" << std::endl;
+    return;
 }
 
 
@@ -204,32 +205,32 @@ void Complex_Handler::Invoke_PCG
     switch(solver_param)
     {
         case 1:
-            if( my_id == 0 )
+            /*if( my_id == 0 )
             {
                 std::cout << "\n\t* Solving system with PCG "
                 "using FSPAI... ";
                 std::cout.flush();
-            }
+            }*/
             solver->Set_Precond(precond);
             solver->Init_Solution(mtx->my_nbr_cols);
             solver->Solve_System();
             break;
         case 2:
-            if( my_id == 0 )
+            /*if( my_id == 0 )
             {
                 std::cout << "\n\t* Solving system with "
                 "unprecond. CG...   ";
                 std::cout.flush();
-            }
+            }*/
             solver->Set_Precond(NULL);
             solver->Init_Solution(mtx->my_nbr_cols);
             solver->Solve_System();
-            if( my_id == 0 )
+            /*if( my_id == 0 )
             {
                 std::cout << "\n\t* Solving system with PCG using "
                 "FSPAI... ";
                 std::cout.flush();
-            }
+            }*/
             solver->Set_Precond(precond);
             solver->Init_Solution(mtx->my_nbr_cols);
             solver->Solve_System();

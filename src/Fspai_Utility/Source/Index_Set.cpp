@@ -63,10 +63,12 @@ void
 Index_Set::Print_Index_Set
 (   char* str ) const
 {
+    /*
     std::cout <<"\t" << str <<  " ";
     for ( int i = 0; i < len; i++ )
             std::cout << idcs[i] << " ";
     std::cout << std::endl;
+    */
 }
 
 

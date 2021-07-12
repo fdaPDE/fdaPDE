@@ -352,7 +352,7 @@ Pattern::Count_NNZ_Rows
 void
 Pattern::Print_Pattern_Data
 ( )
-{
+{   /*
     std::cout << "\n\tPattern Data:\t\n"
               << "\n\tmy_id:\t\t" << my_id
               << "\n\tnum_procs:\t" << num_procs
@@ -387,6 +387,8 @@ Pattern::Print_Pattern_Data
         std::cout << std::endl;
         std::cout << "\t";
     }
+   */
+   return;
 }
 
 

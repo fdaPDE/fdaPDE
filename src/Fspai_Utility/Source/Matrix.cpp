@@ -51,6 +51,7 @@ template<> void
 Matrix<double>::Print_Matrix_Data
 ( ) const
 {
+    /*
     std::cout << "\n\tMatrix Data:\t\n"
             << "\n\tmy_id:\t\t" << my_id
             << "\n\tnum_procs:\t" << num_procs
@@ -97,6 +98,8 @@ Matrix<double>::Print_Matrix_Data
             std::cout << c_lines->col_idcs[i][j] << " ";
         std::cout << std::endl;
     }
+   */
+    return;
 }
 
 
@@ -105,6 +108,7 @@ template<>  void
 Matrix<double>::Print_Matrix_Human_Readable
 ( ) const
 {
+    /*
     double* print_matrix = new double [n * m],
             val;
 
@@ -147,8 +151,9 @@ Matrix<double>::Print_Matrix_Human_Readable
     std::cout << "\n" << std::endl;
 
     delete [] print_matrix;
+    */
+    return;
 }
-
 
 
 template<> void
@@ -184,7 +189,7 @@ Matrix<double>::Write_Header
 template<> void
 Matrix<COMPLEX>::Print_Matrix_Data
 ( ) const
-{
+{   /*
     std::cout << "\n\tMatrix Data:\t\n"
             << "\n\tmy_id:\t\t" << my_id
             << "\n\tnum_procs:\t" << num_procs
@@ -237,6 +242,9 @@ Matrix<COMPLEX>::Print_Matrix_Data
             std::cout << c_lines->col_idcs[i][j] << " ";
         std::cout << std::endl;
     }
+
+  */
+  return;
 }
 
 
@@ -244,7 +252,7 @@ Matrix<COMPLEX>::Print_Matrix_Data
 template<>  void
 Matrix<COMPLEX>::Print_Matrix_Human_Readable
 ( ) const
-{
+{   /*
     COMPLEX*    print_matrix = new COMPLEX [n * m];
     double      real, imag;
 
@@ -288,6 +296,8 @@ Matrix<COMPLEX>::Print_Matrix_Human_Readable
     std::cout << "\n" << std::endl;
 
     delete [] print_matrix;
+    */
+    return;
 }
 
 
@@ -304,7 +314,9 @@ Matrix<COMPLEX>::Write_Line
             imag  = c_lines->mtx_vals[c][r].imag;
 
     // Write data
-    fprintf(f, "%d %d %.13e %.13e\n", row, col, real, imag);
+    //fprintf(f, "%d %d %.13e %.13e\n", row, col, real, imag);
+
+    return;
 }
 
 
@@ -313,5 +325,6 @@ template<> void
 Matrix<COMPLEX>::Write_Header
 (   FILE* f ) const
 {
-    fprintf(f, "matrix coordinate complex symmetric\n");
+    //fprintf(f, "matrix coordinate complex symmetric\n");
+    return;
 }

@@ -157,12 +157,15 @@ void MMio::Clear_Typecode
 void MMio::Print_Typecode
 ( ) const
 {
+    /*
     std::cout <<
     matcode[0] << " " <<
     matcode[1] << " " <<
     matcode[2] << " " <<
     matcode[3] << " " <<
     std::endl;
+    */
+    return;
 }
 
 
