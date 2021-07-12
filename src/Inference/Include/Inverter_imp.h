@@ -11,8 +11,9 @@ void Inverse_Non_Exact<InputHandler>::pre_Inverse(void){
     return;
   }
   this->R0_inv_tilde.makeCompressed();
-
-  this->E_tilde = (*inf_car.getPsi_tp())*(*inf_car.getPsip()) + inf_car.getlambda()*(inf_car.getR1p()->transpose())*(this->R0_inv_tilde)*(*inf_car.getR1p());
+ 
+  UInt n_nodes = inf_car.getN_nodes();
+  this->E_tilde = (inf_car.getEp()->block(0,0, n_nodes, n_nodes)) + inf_car.getlambda()*(inf_car.getR1p()->transpose())*(this->R0_inv_tilde)*(*inf_car.getR1p());
   this->E_tilde.makeCompressed();
 
   return;

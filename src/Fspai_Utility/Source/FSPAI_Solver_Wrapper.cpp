@@ -69,8 +69,10 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
     // No exception class because only message string will be different
     try
     {
+      /*
         if( my_id == 0 )
         {
+       
             std::cout <<
             "\n\t==============================================================\n"
             "\t= \t\t\t\t\t\t\t     = \n"
@@ -85,6 +87,7 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
             "\t=====================   STARTING FSPAI   =====================\n\n"
             "\t-> on " << num_procs << " processor(s) " << std::endl;
             std::cout.flush();
+       
         }
 
         // Getting the user input parameters from shell
@@ -93,6 +96,7 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
             std::cout << "\n\t* Reading input parameters...\t\t" << std::endl;
             std::cout.flush();
         }
+      */
         Command_Parser comm_parser = Command_Parser( env_handler );
         comm_parser.Read_Parameters( argc, argv, env_handler );
 
@@ -120,20 +124,24 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
             }
         }
         // Reading data input and generating the matrix object
+	/*
         if( my_id == 0 )
         {
             type_handler->Print_Mtx_Type();
             std::cout << "\n\t* Reading matrix data...\t\t ";
             std::cout.flush();
         }
+	*/
         type_handler->Mtx_To_Memory( mmio, comm_parser.matrix_file );
 
         // Reading pattern file and generating pattern
+	/*
         if( my_id == 0 )
         {
             std::cout << "\n\t* Generating pattern data...\t\t ";
             std::cout.flush();
         }
+	*/
         P = new Pattern();
         switch( comm_parser.pattern_param )
         {
@@ -154,9 +162,11 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
 
         // Checking algorithm level and getting the
         // requested SPAI algorithm
+	/*
         if( my_id == 0 )
             std::cout << "\n\t* Checking algorithm level... "
                       << std::endl;
+	*/
         type_handler->Set_Fspai_Algorithm( comm_parser.alg_level, P,
 										   comm_parser.hash_param,
 										   comm_parser.epsilon_param,
@@ -165,6 +175,7 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
 										   comm_parser.use_mean_param);
 
         // Compute FSPAI with requested FSPAI algorithm
+	/*
         if ( my_id == 0 )
         {
             std::cout << "\t* Computing FSPAI..." << std::endl;
@@ -180,6 +191,7 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
 
             std::cout.flush();
         }
+	*/
         type_handler->Invoke_Fspai( );
 
         // Invoke solver if requested
@@ -199,20 +211,23 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
         // Write preconditioner to file if requested
         if ( comm_parser.write_param )
         {
+	  /*
             if( my_id == 0 )
             {
                 std::cout << "\n\t* Writing FSPAI to file " +
                     std::string( comm_parser.output_file ) + "...   ";
                 std::cout.flush();
             }
+	  */
             type_handler->Fspai_To_File( comm_parser.output_file );
         }
 
         // Stop time measurement
+	/*
         if (my_id == 0)
             std::cout << "\t\t\t\t_____________________________________\n"
                            "\n\t\t\t\tTotal time: \t ";
-
+	*/
         timer.Stop( env_handler );
         timer.Report( env_handler );
     }
@@ -254,12 +269,14 @@ int FSPAI_Solver_Wrapper(int argc, char *argv[])
 
     delete P;
     delete type_handler;
+    /*
     if( my_id == 0 )
     {
         std::cout << "\n\n\t==================   SUCCESSFULLY FINISHED   "
         "=================\n\t=========================================="
         "====================\n" << std::endl;
     }
+    */
 
     // Closing environment
     env_handler.Barrier();
