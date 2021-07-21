@@ -33,7 +33,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   }
   
   // compute eigenvectors and eigenvalues of Lambda
-  Eigen::SelfAdjointEigenSolver<MatrixXr> Lambda_dec(Lambda);
+  Eigen::SelfAdjointEigenSolver<MatrixType> Lambda_dec(Lambda);
   
   // extract covariates matrices
   const MatrixXr * W = this->inf_car.getWp();
