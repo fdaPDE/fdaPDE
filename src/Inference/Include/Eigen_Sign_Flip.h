@@ -22,7 +22,7 @@ template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
 protected:
   MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
-  MatrixXr Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
+  MatrixType Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
   virtual void compute_Lambda(void) = 0;		//!< Method used to compute Lambda, either in an exact or non-exact way
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 

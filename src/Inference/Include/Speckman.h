@@ -21,7 +21,7 @@
 template<typename InputHandler, typename MatrixType>
 class Speckman_Base:public Inference_Base<InputHandler, MatrixType>{
 protected: 
-  MatrixXr Lambda2;   					//!< (I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t)^2
+  MatrixType Lambda2;   				//!< (I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t)^2
   bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda^2 has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether WLW has been computed or not

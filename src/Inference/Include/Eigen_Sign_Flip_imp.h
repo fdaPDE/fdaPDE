@@ -1,6 +1,7 @@
 #include "Eigen_Sign_Flip.h"
 #include <cmath>
 #include <random>
+#include <type_traits>
 
 template<typename InputHandler, typename MatrixType> 
 VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
@@ -167,7 +168,7 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   UInt q = this->inf_car.getq(); 
   
   this->Lambda.resize(n_obs,n_obs);
-  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  this->Lambda = (MatrixType::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
   this->is_Lambda_computed = true;
   
   return; 
@@ -192,7 +193,10 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   UInt q = this->inf_car.getq(); 
   
   this->Lambda.resize(n_obs,n_obs);
-  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  this->Lambda = (MatrixType::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  if(std::is_same<MatrixType, SpMat>::value==true){
+    this->Lambda2.makeCompressed();
+  }
   this->is_Lambda_computed = true;
   
   return; 

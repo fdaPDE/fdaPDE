@@ -1,5 +1,6 @@
 #include "Speckman.h"
 #include <cmath>
+#include <type_traits>
 
 template<typename InputHandler, typename MatrixType> 
 void Speckman_Base<InputHandler, MatrixType>::compute_V(){
@@ -212,7 +213,7 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
   this->Lambda2.resize(n_obs, n_obs);
-  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  this->Lambda2 = (MatrixType::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixType::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
   this->is_Lambda2_computed = true;
   
   return; 
@@ -237,7 +238,10 @@ void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
   this->Lambda2.resize(n_obs, n_obs);
-  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  this->Lambda2 = (MatrixType::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(MatrixType::Identity(n_obs,n_obs) - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  if(std::is_same<MatrixType, SpMat>::value==true){
+    this->Lambda2.makeCompressed();
+  }
   this->is_Lambda2_computed = true;
   
   return; 
