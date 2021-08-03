@@ -178,7 +178,7 @@ output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints,
 bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
 plot(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
-output_CPP$beta[,bestlambdas[1],bestlambdas[2]]
+output_CPP$beta
 
 #### Test 2.3: stochastic GCV
 lambdaS = 10^(-2:0)
