@@ -1,12 +1,12 @@
 #' Class for inference data
 #'
-#'@slot test An integer taking value 0, 1 or 2; in the first case no test is performed, in the second one-at-the-time tests are performed,
+#'@slot test A vector of integers taking value 0, 1 or 2; in the first case no test is performed, in the second one-at-the-time tests are performed,
 #'in the third a simultaneous test is performed.
-#'@slot interval An integer taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
+#'@slot interval A vector of integers taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 #'in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.
-#'@slot type An integer taking value 1, 2 or 3, corresponding to Wald, speckman or eigen-sign-flip implementation 
+#'@slot type A vector of integers taking value 1, 2 or 3, corresponding to Wald, speckman or eigen-sign-flip implementation 
 #'of the inference analysis.
-#'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistic will be performed,
+#'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 #'whereas if 2 an approximated computation will be carried out.
 #'@slot dim Number of covariates taken into account in the linear part of the regression problem.
 #'@slot coeff A matrix of numeric coefficients with columns of dimension \code{dim} and each row represents a linear combination of the linear parameters to be tested and/or to be
@@ -18,7 +18,7 @@
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
 #'@description
-#' A class that contains all possible information for linear parameters in spatial regression with
+#' A class that contains all possible information for inference over linear parameters in spatial regression with
 #' differential regularization problem. This object can be used as parameter in smoothing function of the fdaPDE library [smooth.FEM].
 #' 
 #'@details #Warning
@@ -39,33 +39,35 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 
 #'Constructor for inferenceDataObject class
 #'
-#'@param test A string defining the type of test to be performed. The default is NULL, and can take values 'one-at-the-time' or 'simultaneous'.
-#'If the value is NULL, no test is performed, and the \code{interval} parameter need to be not NULL. If it takes value
+#'@param test A list of strings defining the type of test to be performed, with the same length of \code{interval} and \code{type} lists. The default is NULL, and can take values 'one-at-the-time' 
+#'or 'simultaneous'. If the value is NULL, no test is performed, and the \code{interval} parameter in the same position of the list needs to be not NULL. If it takes value
 #''one-at-the-time', the parameters \code{beta0}, \code{dim}, \code{coeff} are taken into account, and one-at-the-time tests will be performed. If it takes value 
 #''simultaneous', a global simultaneous test will be performed.
-#'@param interval A string defining the type of confidence intervals to be computed. The default is NULL, and can take value 'one-at-the-time' 'simultaneous' and 'bonferroni'.
-#'If the value is NULL, no interval will be computed, and the \code{test} parameter needs to be set. Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed.
-#'If it is not NULL, the parameter \code{level} will be taken into account. Up to now, confidence intervals can be computed only in the Wald implementation.
-#'@param type A string defining the type of implementation for the inferential analysis. The possible values are three:
-#''wald'(default), 'speckman' or 'eigen-sign-flip', corresponding to the three possible methods developed in Ferraccioli....
+#'@param interval A list of strings defining the type of confidence intervals to be computed, with the same length of \code{test} and \code{type} lists. The default is NULL,
+#' and can take values 'one-at-the-time' 'simultaneous' and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
+#'  Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account. Confidence intervals can be 
+#'  computed only in Wald or Speckman implementation.
+#'@param type A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
+#''wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.
 #'@param exact A string used to decide the method used to estimate the statistics variance.
-#'The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally very expensive.
+#'The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally expensive.
 #'In the second case an approximate method is used, leading to a lower accuracy, but faster computation.
-#'@param dim Number of the covariates, defaulted to NULL.
-#'@param coeff A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL, it will be defaulted to an identity matrix. 
-#'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. If \code{test} is set and \code{beta0} is NULL,
-#'will be set to a vector of zeros.
-#'@param level Level of significance, defaulted to 0.05. It is taken into account only if \code{interval} is set.
-#'@param n_perm Number of permutations, defaulted to 1000. It is taken into account only if \code{type} is set to "eigen-sign-flip".
+#'@param dim Number of the covariates, defaulted to NULL. (Must be set by the user)
+#'@param coeff A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
+#'in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.
+#'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
+#'If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.
+#'@param level Level of significance used to compute quantiles for confidence intervals, defaulted to 0.05. It is taken into account only if \code{interval} is set.
+#'@param n_perm Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.
 #'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
 #'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
 #'
 #'@usage inferenceDataObjectBuilder<-function(test = NULL, 
 #'interval = NULL, 
-#'type = "wald", 
+#'type = 'wald', 
 #'exact = "False", 
-#'dim = NULL, 
+#'dim, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
 #'level = 0.05,
@@ -76,10 +78,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' @examples 
 #' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 4);
 #' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.01);
-
-##### VERY IMPORTANT REMARK: ate the moment one can call a vector of tests/CI; however, the cmputations are optimized only if
-##### the elemnts of the vectors are different in type, especially in the case of WALD (if you call it two times, matrixnocov
-##### is saved, but not the system inverse).
+#' obj3<-inferenceDataObjectBuilder(interval=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
+#'  type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.01)
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 

@@ -95,7 +95,7 @@
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
 #' @param R_Inference_Data_Object An [inferenceDataObject] that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
-#' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results
+#' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via [inferenceDataObjectBuilder] function, so that the object is guaranteed to be well defined.
 #' @return A list with the following variables in \code{family="gaussian"} case:
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
@@ -120,9 +120,17 @@
 #'          }
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
-    
-#Aggiungere risultato Inferenza    
-
+#'    \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
+#'          \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+#'               \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               }
+#'         \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+#'               \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+#'               \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+#'              }
+#'         }
 #' }
 #' A list with the following variables in others GAM case:
 #' \itemize{
@@ -144,7 +152,7 @@
 #'  non-stationarity is available the PDE involves a general second order linear differential operator with possibly
 #'  space-varying coefficients. 
 #'  The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions
-#'  can be imposed at the domain boundaries.
+#'  can be imposed at the domain boundaries
 #' @usage smooth.FEM(locations = NULL, observations, FEMbasis,
 #'  covariates = NULL, PDE_parameters = NULL, BC = NULL,
 #'  incidence_matrix = NULL, areal.data.avg = TRUE,
@@ -156,11 +164,6 @@
 #'  lambda.optimization.tolerance = 0.05,
 #'  R_Inference_Data_Object=NULL)
 #' @export
-
-### Aggiungere referenza Ferraccioli, esempio smooth.fem.
-
-# Aggiungere esempio inferenza
-
 #' @references
 #' \itemize{
 #'    \item{Sangalli, L. M., Ramsay, J. O., Ramsay, T. O. (2013). Spatial spline regression models.
@@ -169,6 +172,8 @@
 #' via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
 #'    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
 #'  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
+#'    \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
+#'    with differential regularization. Journal of Multivariate Analysis, to appear}
 #' }
 #' @examples
 #' library(fdaPDE)
@@ -191,12 +196,20 @@
 #' # with covariates
 #' covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
+#' 
+#' #Inferential tests and cofidence intervals
+#' R_inference_data_object = inferenceDataObjectBuilder(test = c('one-at-the-time','simultaneous','one-at-the-time'), interval = c('simultaneous','one-at-the-time','none'), exact = 'True', type = c('wald','speckman','eigen-sign-flip'), dim = 1)
 #'
 #' solution = smooth.FEM(observations = data, covariates = covariate, 
-#'                       FEMbasis = FEMbasis, lambda = lambda)
+#'                       FEMbasis = FEMbasis, lambda = lambda,
+#'                       R_Inference_Data_Object=R_inference_data_object)
 #'
 #' # beta estimate:
 #' solution$solution$beta
+#' # tests over beta estimates p-values:
+#' solution$inference$p_values
+#' # cinfidence intervals for beta estimates:
+#' solution$inference$CI
 #' # non-parametric estimate:
 #' plot(solution$fit.FEM)
 #'
@@ -217,7 +230,7 @@
 #'
 #'
 #' #### Smoothing with prior information about anysotropy/non-stationarity and boundary conditions ####
-#' # See Azzimonti et al. for reference to the current exemple
+#' # See Azzimonti et al. for reference to the current example
 #' data(quasicircle2D)
 #' boundary_nodes = quasicircle2D$boundary_nodes
 #' boundary_segments = quasicircle2D$boundary_segments
@@ -508,8 +521,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     search = search, bary.locations = bary.locations,
     optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
     DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
-
-  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency
+  # Checking infeence data
+  # Most of the checks have already been carried out by infarenceDataObjectBuilder function
+  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency, costructing default object in NULL casw
   
   # Chek that GCV is set for inference
   if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
@@ -907,8 +921,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       confidence_intervals = matrix(data = bigsol[[24]], nrow = 3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1])
       p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type))
   
-      for(i in 1:length(R_Inference_Data_Object@type)){
-        if(R_Inference_Data_Object@interval[i]!=0){
+      for(i in 1:length(R_Inference_Data_Object@type)){ # each element is a different inferential setting
+        if(R_Inference_Data_Object@interval[i]!=0){ # Intervals requested by this setting, adding them to the right implementation position
           ci=t(confidence_intervals[(3*(i-1)+1):(3*(i-1)+3),])
           
           if(R_Inference_Data_Object@type[i]==1){
@@ -925,19 +939,21 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           }
         }
         
-        if(R_Inference_Data_Object@test[i]!=0){
+        if(R_Inference_Data_Object@test[i]!=0){ # Test requested by this setting, adding them to the right implementation position
         statistics=p_val[,i]
         p_values = numeric()
-        if(R_Inference_Data_Object@type[i]==3){
-          if(R_Inference_Data_Object@test[i]==1){
-             p_values = statistics
+        if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip p-value is already computed in cpp code
+          if(R_Inference_Data_Object@test[i]==1){ 
+            # one-at-the-time tests
+            p_values = statistics
           }
           else if(R_Inference_Data_Object@test[i]==2){
+            # simultaneous test
             p_values = statistics[1]
           }
         }else{
           # Compute p-values
-          if(R_Inference_Data_Object@test[i]==1){
+          if(R_Inference_Data_Object@test[i]==1){ # Wald and Speckman return statistics and needs computation of p-values (no internal use of distributions quantiles)
             # one-at-the-time-tests
             p_values = numeric(length(statistics))
             for(l in 1:length(statistics)){
@@ -950,6 +966,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
             p_values = 1-pchisq(statistics[1], p)
           }
         }
+        # add p-values in the right position
         if(R_Inference_Data_Object@type[i]==1){
           inference$p_values$wald[[length(inference$p_values$wald)+1]] = p_values
           inference$p_values$wald=as.list(inference$p_values$wald)
