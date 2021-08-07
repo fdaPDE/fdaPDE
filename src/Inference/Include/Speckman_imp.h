@@ -4,10 +4,11 @@
 
 template<typename InputHandler, typename MatrixType> 
 void Speckman_Base<InputHandler, MatrixType>::compute_V(){
-
+  //check if Lambda2 has been computed
   if(!is_Lambda2_computed){
     this->compute_Lambda2();
   }
+  //check if WLW_dec has been computed
   if(!is_WLW_computed){
     compute_WLW_dec();
   }
@@ -34,6 +35,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_V(){
 
 template<typename InputHandler, typename MatrixType>
 void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
+  //check if Lambda2 has been computed
   if(!is_Lambda2_computed){
     this->compute_Lambda2();
   }
@@ -47,6 +49,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
 
 template<typename InputHandler, typename MatrixType> 
 VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
+  //check if WLW_dec has been computed
   if(!is_WLW_computed){
     compute_WLW_dec();
   }

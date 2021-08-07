@@ -7,7 +7,7 @@
 //!  Class for inference data
 /*!
  * This class collects all the data needed for inferential analysis over the linear estimated parameter of the model,
- * is constructed using the input defined in R.
+ * it is constructed using the input defined in R.
 */
 class InferenceData
 {
@@ -18,11 +18,11 @@ class InferenceData
   		std::vector<std::string> implementation_Type  	= {"wald"}; 	                //!< Values: wald [default], speckman, eigen-sign-flip
   		std::string exact_Inference			= "non-exact";		        //!< Values: non-exact [default], exact 
 		// Parameters needed
-                MatrixXr coeff_Inference;	        					//!< If position j is true, the j-th covariate is taken into account in the inferential analysis
+                MatrixXr coeff_Inference;	        					//!< Matrix of coefficients for the linear combinations of parameters 
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
-  		VectorXr inference_Quantile;		 					//!< Quantile needed for confidence intervals if interval_Type != not-defined
+  		VectorXr inference_Quantile;		 					//!< Quantiles needed for confidence intervals if interval_Type != not-defined
   		bool definition					= false;			//!< Defines whether the inference analysis needs to be carried out or not
-                long int n_perm 				= 1000; 			//!< Number of permutations if permutatinal tests are required
+                long int n_perm 				= 1000; 			//!< Number of permutations if eigen-sign-flip tests are required
 
 	public:
   	//Constructors

@@ -6,7 +6,7 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   //Setting lambda (optimal)
   setlambda(lambda_);
 
-  //Setting the datasets
+  //Setting the problem specifications
   setRegData(Regression_Data_);
   setModel(model_);
   setInfData(inf_data_);

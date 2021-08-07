@@ -13,10 +13,10 @@
 #include "Inference_Base.h"
 #include <memory>
 
-// *** Speckman Class ***
+// *** Speckman_Base Class ***
 //! Hypothesis testing and confidence intervals using Speckman implementation
 /*!
-  This class performes hypothesis testing and/or computes confidence intervals using a Speckman approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
+  This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Speckman approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda squared, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the variance-covariance matrix V of the beta parameters, the LU decomposition of W^T *Lambda^2 * W, alongside with some covenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Speckman apporach. It has a pure virtual method for the computation of Lambda squared, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it has also a method for the computation of the estimators beta_hat required by the Speckman inferential approach. 
 */
 template<typename InputHandler, typename MatrixType>
 class Speckman_Base:public Inference_Base<InputHandler, MatrixType>{
@@ -24,10 +24,10 @@ protected:
   MatrixType Lambda2;   				//!< (I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t)^2
   bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda^2 has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
-  bool is_V_computed = false;				//!< Boolean that tells whether WLW has been computed or not
+  bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
   Eigen::PartialPivLU<MatrixXr> WLW_dec; 		//!< Decomposition of [W^t * Lambda^2 * W] 
-  bool is_WLW_computed=false; 				//!< Boolean that tells whether Lambda has been computed or not
-  virtual void compute_Lambda2(void) = 0;		//!< Method used to compute Lambda^2, either in an exact or non-exact way
+  bool is_WLW_computed=false; 				//!< Boolean that tells whether WLW decomposition has been computed or not
+  virtual void compute_Lambda2(void) = 0;		//!< Pure virtual method used to compute Lambda^2, either in an exact or non-exact way
   void compute_V(void);					//!< Method used to compute V
   void compute_WLW_dec(void); 				//!< Method that computes the decomposition for WLW
   VectorXr compute_beta_hat(void);               	//!< Method used to compute beta estimates for the Speckman test
@@ -37,7 +37,7 @@ protected:
 public:
   // CONSTUCTOR
   Speckman_Base()=delete;	//The default constructor is deleted
-  Speckman_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
+  Speckman_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; //Main constructor of the class
   
   // DESTRUCTOR
   virtual ~ Speckman_Base() {};
@@ -47,7 +47,11 @@ public:
   inline const MatrixXr * getVp (void) const {return &this->V;}     	 	//!< Getter of Vp \ return Vp
 };
 
-
+// *** Speckman_Exact Class ***
+//! Hypothesis testing and confidence intervals using Speckman implementation in an exact way 
+/*!
+   This template class derives from the Speckman_Base class and it overrides the method that manages the computation of the matrix Lambda2, relying on an exact inversion of the MatrixNoCov. 
+*/
 template<typename InputHandler, typename MatrixType>
 class Speckman_Exact:public Speckman_Base<InputHandler, MatrixType>{
 private: 
@@ -59,6 +63,11 @@ public:
 
 };
 
+// *** Speckman_Non_Exact Class ***
+//! Hypothesis testing and confidence intervals using Speckman implementation in a non-exact way 
+/*!
+   This template class derives from the Speckman_Base class and it overrides the method that manages the computation of the matrix Lambda2, relying on an approximated inversion of the MatrixNoCov. 
+*/
 template<typename InputHandler, typename MatrixType>
 class Speckman_Non_Exact:public Speckman_Base<InputHandler, MatrixType>{
 private: 

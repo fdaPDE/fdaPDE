@@ -1,14 +1,15 @@
 #include "../Include/Inference_Data.h"
 //! Main constructor of the class
 /*!
- \param test_Type_ parameter used to define the type of test is required (if any)
- \param interval_Type_ parameter used to define which type of confidence interval is required (if any)
- \param implementation_Type_ parameter used to define which type of implementation is used for the test and intervals computation
+ \param test_Type_ vector parameter used to define the type of tests that are required (if any)
+ \param interval_Type_ vector parameter used to define which type of confidence intervals are required (if any)
+ \param implementation_Type_ vector parameter used to define which type of implementations (Wald, Speckman, ESF) are used for the tests and intervals computation
  \param exact_Inference_ parameter for the method used to invert E matrix in Woodbury decomposition for inference
- \param coeff_Inference_ vector that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals. 
- \param beta_0_ vector for the null hypotesis (if test is defined)
- \param inference_Quantile_ parameter used to set the significance level of the confidence intervals (if interval_type is set)
- \param definition_ parameter used to set definition of the InferenceData object. 
+ \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
+ \param beta_0_ vector for the null hypotesis (if a test is required)
+ \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
+ \param n_perm_ parameter that provides the number of permutations to be used for the eigen-sign-flip tests (if they are required)
+ \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
 			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,

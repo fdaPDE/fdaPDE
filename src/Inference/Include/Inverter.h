@@ -5,10 +5,11 @@
 #include "../../FdaPDE.h"
 #include "Inference_Carrier.h"
 
-// *** inverse_Base Class ***
+// *** Inverse_Base Class ***
 //! Class for the inversion of sparse matrices in inference framework
 /*!
-  This class provides the base for the classes that are used to compute the exact or non exact inverse of sparse matrices needed for inferential work
+  \tparam MatrixType the type of the inverse of MatrixNoCov, it will be either MatrixXr or SpMat 
+  This template class provides the base for the classes that are used to compute the exact or non exact inverse of sparse matrices needed for inferential work
   The class is pure virtual, as one needs to specify the policy of inversion by using one of its derivation (inverse_Exact or inverse_Approximated)
 */
 template<typename MatrixType>
@@ -21,18 +22,20 @@ public:
   // Constructor
   Inverse_Base() = default;		//!< Default constructor
 		
-  // Getter
+  // Getters
   inline const MatrixType * getInv(void){if(inverse_computed==false){Compute_Inv();} return &E_inv;}; 	//!< Getter for the Inverse Matrix [Need to call Compute_inv before calling this]
-  virtual inline bool get_status_inverse (void) const {return true;} 					//!< Interface for getter for FSPAI status
-  virtual void Compute_Inv (void) = 0; 						     //!< Virtual function for the computation of the inverse matrix, takes as input matrixNoCov decomposition
+  virtual inline bool get_status_inverse (void) const {return true;} 					//!< Virtual method that will be overriden by the non exact derived class to get the FSPAI status
+  virtual void Compute_Inv (void) = 0; 						     //!< Pure virtual function for the computation of the inverse matrix, takes as input MatrixNoCov decomposition
+  
+  // Destructor
   virtual ~Inverse_Base() {};
 
 };
 
-// *** inverse_Exact Class ***
+// *** Inverse_Exact Class ***
 //! Class for the exact inversion of sparse matrices in inference framework
 /*!
-  This class provided is used to compute the exact inverse of the sparse noCovMatrix, needed to recover the exact inverse of the system matrix
+  This class is used to compute the exact inverse of the sparse MatrixNoCov, needed to recover the exact inverse of the system matrix
 */
 class Inverse_Exact : public Inverse_Base<MatrixXr> {
 private:
@@ -47,19 +50,20 @@ public:
   void Compute_Inv(void) override;                                                                      //!< Function for the exact computation of the inverse matrix
 }; 
 
-// *** inverse_Non_Exact Class ***
+// *** Inverse_Non_Exact Class ***
 //! Class for the approximate inversion of sparse matrices in inference framework
 /*!
-  This class provided computes the sparse approximate inverse of the sparse matrix [Psi^T Psi + lambda*R] via FSPAI algorithm
+  \tparam InputHandler the regression data type of the problem 
+  This class is used to compute the sparse approximate inverse of the sparse matrix [Psi^T Psi + lambda*R] via FSPAI algorithm
 */
 template<typename InputHandler>
 class Inverse_Non_Exact : public Inverse_Base<SpMat> {
 private:
-  const Inference_Carrier<InputHandler> & inf_car; 	  //!< Refernce to inference carrier
+  const Inference_Carrier<InputHandler> & inf_car; 	  //!< Reference to inference carrier
   SpMat E_tilde;					  //!< [Psi^T Psi + lambda*R] matrix
   SpMat R0_inv_tilde;                                     //!< Approximated inverse of the mass matrix in space as sparse matrix
-  bool status_R0_inv_tilde = false;                       //!< Boolean that states wether the FSPAI computation of R0_inv went well
-  bool status_E_tilde_inv = false;                        //!< Boolean that states wether the FSPAI computation of E_tilde_inv (E_inv) went well
+  bool status_R0_inv_tilde = false;                       //!< Boolean that states whether the FSPAI computation of R0_inv went well
+  bool status_E_tilde_inv = false;                        //!< Boolean that states whether the FSPAI computation of E_tilde_inv (E_inv) went well
      
   void pre_Inverse(void);                                 //!< Method that computes matrices R0_tilde and E_tilde
 		

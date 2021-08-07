@@ -13,9 +13,9 @@
 #include <memory>
 
 // *** Inference_Base Class ***
-//! Hypothesis testing and confidence intervals base class
+//! Hypothesis testing and confidence intervals abstract base class
 /*!
-  This class provides the basic tools to perform hypothesis testing and/or compute confidence intervals. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
+  This template class provides the basic tools to perform hypothesis testing and/or compute confidence intervals. It contains a shared pointer to an inverter, that manages the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference; It contains an integer pos_impl that indicates the index position of the current inferential procedure to be carried out. It is needed to take the correct information from the vector parameters in the Inference_Carrier object. There are two pure virtual protected methods for the computation of p-values and confidence intervals; there is a main public method that calls the proper functions according to the current test and interval types; then there is a public setter for the index position that is needed when multiple inferential procedures are required and a virtual method that will be actually implemented only in the derived Wald class used to compute exact GCV. 
 */
 template<typename InputHandler, typename MatrixType>
 class Inference_Base{

@@ -10,11 +10,11 @@
 #include "Inference_Data.h"
 
 // *** Inference_Carrier Class ***
-//! Carrier for Inference Data
+//! Carrier for Inference Methods
 /*!
- This class contains all the information needed by inference methods. All the needed objects are wrapped with pointers
- whith the exception of the smoohing parameter lambda and the functional fitted values f_hat
- \tparam InputHandler the type of regression problem needed to determine the MIxedFERegressionBase object type
+ This template class contains all the information needed by inference methods. All the needed objects are wrapped with pointers
+ whith the exception of the optimal smoothing parameter lambda and the problem dimensions: the number of observations, the number of nodes and the number of covariates.  
+ \tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type
 */
 template<typename InputHandler>
 class Inference_Carrier{

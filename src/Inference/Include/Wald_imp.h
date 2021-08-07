@@ -3,7 +3,7 @@
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
-
+  //check if S has been computed 
   if(is_S_computed==false){
     this->compute_S();
   }
@@ -22,7 +22,7 @@ void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_V(){
-
+  //check if S has been computed 
   if(is_S_computed==false){
     this->compute_S();
   }
@@ -227,7 +227,8 @@ template<typename InputHandler, typename MatrixType>
 void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
   this->inverter->Compute_Inv();
-
+ 
+  // check if the FSPAI algorithm has succeded in computing the inverse
   if(this->inverter->get_status_inverse()==false){
     this->is_S_computed = false;
     return;

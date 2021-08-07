@@ -6,11 +6,13 @@
 #include <unsupported/Eigen/SparseExtra>
 #include <cstdio>
 
-
+//!  struct for FSPAI data
+/*!
+ * This struct collects all the parameters needed by the FSPAI utility for the approximation of the inverse of a sparse s.p.d matrix. 
+*/
 struct FSPAI_data{
 
-    // From imput // TO BE RETRIEVED
-    std::string tol_Inverse     = "0.005";                       // Controls the quality of approximatin, default 0.05 //TO BE FIXED FROM EXTERNAL
+    std::string tol_Inverse     = "0.05";                        // Controls the quality of approximation, default 0.05 
     std::string max_Step_Col    = "10";                          // Max number of improvement steps per columns
     std::string max_New_Nz      = "10";                          // Max number of new nonzero candidates per step
     std::string out_File;                                        // Temporary file on which will be written the inverse matrix
@@ -23,7 +25,7 @@ struct FSPAI_data{
 /*
   \param A the sparse matrix to be inverted 
   \param A_inv the inverse of A that will be computed by FSPAI
-  \return bool
+  \return bool indicating if the inversion went well 
 */
 
 bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv);

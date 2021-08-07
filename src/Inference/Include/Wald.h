@@ -13,10 +13,10 @@
 #include "Inference_Base.h"
 #include <memory>
 
-// *** Wald Class ***
+// *** Wald_Base Class ***
 //! Hypothesis testing and confidence intervals using Wald implementation
 /*!
-  This class performes hypothesis testing and/or computes confidence intervals using a Wald-type approach. It contains a reference to an inverter, that manages to compute the invertion of matrixNoCov in an exact or non-exact way; It contains a reference to an Inference_Carrier object that wraps all the information needed to make inference. There is only one public method that calls the proper private methods to compute what is requested by the user.
+  This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Wald-type approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the smoothing matrix S, its trace, the estimator of the residuals variance, the variance-covariance matrix of the beta parameters V, alongside with some convenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Wald apporach. It has a pure virtual method for the computation of the smoothing matrix S, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it also overrides the method for the computation of the exact GCV, since it can be computed in a straight-forward way after having computed the smoothing matrix S and its trace. 
 */
 template<typename InputHandler, typename MatrixType>
 class Wald_Base:public Inference_Base<InputHandler, MatrixType>{
@@ -27,7 +27,7 @@ protected:
   bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
-  virtual void compute_S(void) = 0;			//!< Method used to compute S, either in an exact or non-exact way 
+  virtual void compute_S(void) = 0;			//!< Pure virtual method used to compute S, either in an exact or non-exact way 
   void compute_V(void);					//!< Method used to compute V
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
@@ -36,7 +36,7 @@ protected:
 public:
   // CONSTUCTOR
   Wald_Base()=delete;	//The default constructor is deleted
-  Wald_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
+  Wald_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; //Main constructor of the class
   
   virtual ~ Wald_Base(){};
   
@@ -48,6 +48,12 @@ public:
   inline const MatrixXr * getVp (void) const {return &this->V;}      //!< Getter of Vp \ return Vp
 };
 
+
+// *** Wald_Exact Class ***
+//! Hypothesis testing and confidence intervals using Wald implementation in an exact way 
+/*!
+   This template class derives from the Wald_Base class and it overrides the method that manages the computation of the smoothing matrix S, relying on an exact inversion of the MatrixNoCov. 
+*/
 template<typename InputHandler, typename MatrixType>
 class Wald_Exact:public Wald_Base<InputHandler, MatrixType>{
 private: 
@@ -58,7 +64,11 @@ public:
   Wald_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Wald_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
 };
 
-
+// *** Wald_Non_Exact Class ***
+//! Hypothesis testing and confidence intervals using Wald implementation in a non-exact way
+/*!
+   This template class derives from the Wald_Base class and it overrides the method that manages the computation of the smoothing matrix S, relying on an approximated inversion of the MatrixNoCov.
+*/
 template<typename InputHandler, typename MatrixType>
 class Wald_Non_Exact:public Wald_Base<InputHandler, MatrixType>{
 private: 

@@ -27,7 +27,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 template<typename InputHandler>
 void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 template<typename InputHandler>
-void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference );
+void lambda_inference_selection(const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh)
@@ -246,7 +246,8 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 /*
   \tparam InputHandler the type of regression problem
   \param opt_data the object containing optimization data
-  \param inf_car the object containing data to make inference
+  \param output the object containing the solution of the optimization problem 
+  \param inf_car the object wrapping all the objects needed to make inference
   \param inference_output the object to be filled with inference output 
   \return void
 */
@@ -258,9 +259,8 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 
   inference_output.resize(n_implementations, p+1);
 
-  // Factory instantiation: using factory provided in Inverse_Factory.h
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
-    //std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = Inverter_Factory<InputHandler, MatrixXr>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+    // Select the right policy for inversion of MatrixNoCov
     std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = fdaPDE::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
 
     for(UInt i=0; i<n_implementations; ++i){
@@ -270,12 +270,12 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
       inference_output.row(i) = inference_Solver->compute_inference_output();
 
       if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
-	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero cost function, since tr(S) hase been already computed
+	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
       }
     }
   }
   else{
-    //std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = Inverter_Factory<InputHandler, SpMat>::create_inverter_method(inf_car); // Select the right policy for inversion of MatrixNoCov
+    // Select the right policy for inversion of MatrixNoCov
     std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = fdaPDE::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
 
     for(UInt i=0; i<n_implementations; ++i){
@@ -297,13 +297,13 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
   \tparam InputHandler the type of regression problem
   \param optimization_data the object containing optimization data
   \param output_Data the object containing the solution of the optimization problem
-  \param InferenceData the object containing the data needed for for inference
+  \param inferenceData the object containing the data needed for for inference
   \param regression the object containing the model of the problem
   \param lambda_inference the lambda that will be used to compute the optimal model and the right inferential solutions
   \return void
 */
 template<typename InputHandler>
-void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference ){
+void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference){
 	if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
 		lambda_inference = output.lambda_sol;
 		if(optimizationData.get_last_lS_used() != lambda_inference){

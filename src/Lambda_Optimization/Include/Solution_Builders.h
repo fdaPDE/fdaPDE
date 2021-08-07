@@ -42,6 +42,8 @@ namespace Solution_Builders
          \param output output_Data struct coming from a Lambda_Optimizer type class
          \param mesh to be returned to the user
          \param regressionData the original data passed by the user
+         \param inference_Output the matrix collecting the inference output 
+         \param inf_Data the object containing the inference data passed by the user
          \return SEXP containg all the data that will be managed by R code
         */
         template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>

@@ -42,14 +42,14 @@ extern "C"
     \param RDOF_matrix user provided DOF matrix for GCV computation
     \param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
     \param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
-    \param RtestType an integer defining if a hypotesis test is required, and which type (one at the time, simultaneous)
-    \param RintervalType an R-integer defining if a confidence interval is required, and which type (one at the time, simultaneous, bonferroni)
-    \param RimplementationType an R-integer defining the type of implementation required for inferential analysis (Wald, sandwich, permutational)
-    \param RexactInference an R-integer that defines if an exact inferential analysis is required
+    \param RtestType an R-vector defining if hypotesis testing is required, and which type (one at the time, simultaneous)
+    \param RintervalType an R-vector defining if confidence intervals are required, and which type (one at the time, simultaneous, bonferroni)
+    \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, eigen-sign-flip)
+    \param RexactInference an R-integer that defines if an exact inferential analysis is required or not
     \param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
-    \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for test
-    \param RinferenceQuantile an R-double defining the quantile needed for the confidence intervals for the betas parameters of the model
-    \param RinferencePerm an R-integer defining the number of permutations needed in Eigen-Sign-Flip inference
+    \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
+    \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
+    \param RinferencePerm an R-integer defining the number of permutations needed in eigen-sign-flip inference
     \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
     \return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
   */

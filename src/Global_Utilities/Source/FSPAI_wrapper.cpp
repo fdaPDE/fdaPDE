@@ -15,7 +15,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
     return false;
   }
 
-  // FSPAI LIBRARY BEGIN
+  // FSPAI LIBRARY BEGINS
 
   FSPAI_data FSPAI_dat;
   FSPAI_dat.out_File = Temp_name_read;
@@ -24,6 +24,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
   std::vector<std::string> SPAI_Arguments = {"FSPAI_Solver_Wrapper", Temp_name_write.c_str(), "-diag", "1", "-ep", FSPAI_dat.tol_Inverse.c_str(),
     "-ns", FSPAI_dat.max_Step_Col.c_str(), "-mn", FSPAI_dat.max_New_Nz.c_str(), "-out", FSPAI_dat.out_File.c_str(), "-sol", FSPAI_dat.sol.c_str()}; //ONLY SEQUENTIAL UP TO NOW
 
+  // Since FSPAI_Solver_Wrapper is expecting as inputs: (int argc, char *argv[])
   std::vector<char*> SPAI_Argv;
   for (const auto& arg : SPAI_Arguments){
     SPAI_Argv.push_back((char*)arg.data());
@@ -32,11 +33,11 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
   
   int FSPAI_Inverted = FSPAI_Solver_Wrapper(SPAI_Argv.size() - 1, SPAI_Argv.data()); // Run the FSPAI library solver, computes apprixmate inverse of an SPD matrix 
 
-  // FSPAI LIBRARY END
+  // FSPAI LIBRARY ENDS
 
   SpMat Chol_A_inv;
 
-  read_Mat=Eigen::loadMarket(Chol_A_inv, Temp_name_read); // Read the matrix from a temporary file produced by FSPAI in Market format (May be Preconditioner (inv) or PCG sol)
+  read_Mat=Eigen::loadMarket(Chol_A_inv, Temp_name_read); // Read the matrix from a temporary file produced by FSPAI in market format
 
   if(FSPAI_Inverted!=0 || read_Mat!=true){
     Rprintf("Internal error: unable to communicate with FSPAI correctly, inference discarded");
@@ -45,6 +46,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
 
   Chol_A_inv.makeCompressed();
 
+  //Recover matrix A_inv via Cholesky factorization
   A_inv = Chol_A_inv * Chol_A_inv.transpose();
   A_inv.makeCompressed();
 

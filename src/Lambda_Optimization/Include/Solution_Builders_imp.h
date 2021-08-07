@@ -5,7 +5,7 @@ template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MatrixXv & inference_Output, const InferenceData & inf_Data)
 {
         // ---- Preparation ----
-        // Prepare regresion coefficients space
+        // Prepare regression coefficients space
         MatrixXv beta;
         if(regressionData.getCovariates()->rows()==0)
         {

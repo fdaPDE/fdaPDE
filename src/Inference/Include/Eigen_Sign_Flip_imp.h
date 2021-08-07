@@ -6,7 +6,8 @@
 template<typename InputHandler, typename MatrixType> 
 VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
-  // extract matrix C  
+  // extract matrix C 
+  //(in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   UInt p = C.rows(); 
   
@@ -19,7 +20,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // get the value of the parameters under the null hypothesis
   VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0(); 
   
-  // compute Lambda
+  // compute Lambda if necessary
   if(!is_Lambda_computed){
     this->compute_Lambda();
     if(!is_Lambda_computed){
@@ -67,6 +68,8 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // Observed statistic
     VectorXr stat=TildeX*Tilder;
     VectorXr stat_perm=stat;
+    
+    //Random sign-flips
     std::default_random_engine eng;
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
@@ -74,15 +77,13 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     Pi.resize(TildeX.cols());
     VectorXr Tilder_perm=Tilder;
     
-    
-    
     for(unsigned long int i=0;i<n_perm;i++){
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip=2*distr(eng)-1;
 	Tilder_perm(j)=Tilder(j)*flip;
       }
       stat_perm=TildeX*Tilder_perm; // Flipped statistic
-      if(stat_perm > stat){ ++count; } 
+      if(stat_perm > stat){ ++count; } //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
     }
     
     
@@ -116,6 +117,8 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // Observed statistic
     MatrixXr stat=TildeX*Tilder;
     MatrixXr stat_perm=stat;
+
+    // Random sign-flips
     std::default_random_engine eng;
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     VectorXr count = VectorXr::Zero(p);
