@@ -19,6 +19,7 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 #include "../../Global_Utilities/Include/FSPAI_Wrapper.h"
+#include <memory>
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -261,7 +262,7 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
     // Select the right policy for inversion of MatrixNoCov
-    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = fdaPDE::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
+    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
 
     for(UInt i=0; i<n_implementations; ++i){
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
@@ -276,7 +277,7 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
   }
   else{
     // Select the right policy for inversion of MatrixNoCov
-    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = fdaPDE::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
+    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = std::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
 
     for(UInt i=0; i<n_implementations; ++i){
       // Factory instantiation for solver: using factory provided in Inference_Factory.h

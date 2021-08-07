@@ -16,7 +16,7 @@
 // *** Speckman_Base Class ***
 //! Hypothesis testing and confidence intervals using Speckman implementation
 /*!
-  This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Speckman approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda squared, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the variance-covariance matrix V of the beta parameters, the LU decomposition of W^T *Lambda^2 * W, alongside with some covenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Speckman apporach. It has a pure virtual method for the computation of Lambda squared, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it has also a method for the computation of the estimators beta_hat required by the Speckman inferential approach. 
+  This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Speckman approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda squared, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the variance-covariance matrix V of the beta parameters, the vector of estimated beta parameters via Speckaman estimator, the LU decomposition of W^T *Lambda^2 * W, alongside with some covenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Speckman apporach. It has a pure virtual method for the computation of Lambda squared, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it has also a method for the computation of the estimators beta_hat required by the Speckman inferential approach. 
 */
 template<typename InputHandler, typename MatrixType>
 class Speckman_Base:public Inference_Base<InputHandler, MatrixType>{
@@ -25,12 +25,14 @@ protected:
   bool is_Lambda2_computed = false;			//!< Boolean that tells whether Lambda^2 has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
+  VectorXr beta_hat;                                    //!< Vector of estimated beta parameters via Speckman estimator
+  bool is_beta_hat_computed = false;                    //!< Boolean that tells whether beta_hat has been computed or not
   Eigen::PartialPivLU<MatrixXr> WLW_dec; 		//!< Decomposition of [W^t * Lambda^2 * W] 
   bool is_WLW_computed=false; 				//!< Boolean that tells whether WLW decomposition has been computed or not
   virtual void compute_Lambda2(void) = 0;		//!< Pure virtual method used to compute Lambda^2, either in an exact or non-exact way
   void compute_V(void);					//!< Method used to compute V
   void compute_WLW_dec(void); 				//!< Method that computes the decomposition for WLW
-  VectorXr compute_beta_hat(void);               	//!< Method used to compute beta estimates for the Speckman test
+  void compute_beta_hat(void);               	        //!< Method used to compute beta estimates for the Speckman test
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
   
@@ -45,6 +47,7 @@ public:
   // GETTERS
   inline const MatrixXr * getLambda2p (void) const {return &this->Lambda2;}     //!< Getter of Lambda2p \return Lambda2p
   inline const MatrixXr * getVp (void) const {return &this->V;}     	 	//!< Getter of Vp \ return Vp
+  inline const VectorXr * getBeta_hatp (void) const {return &this->beta_hat;}   //!< Getter of beta_hatp \ return beta_hatp
 };
 
 // *** Speckman_Exact Class ***

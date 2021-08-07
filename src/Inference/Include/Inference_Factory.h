@@ -6,7 +6,6 @@
 #include "Wald.h"
 #include "Speckman.h"
 #include "Eigen_Sign_Flip.h"
-#include "../../Global_Utilities/Include/Make_Shared.h"
 #include <memory>
 #include <map>
 #include <type_traits>
@@ -46,7 +45,7 @@ public:
         auto It = factory_Store.find("wald_exact");
         // if not, insert the new object
 	if(It==factory_Store.end()){
-	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_exact", fdaPDE::make_shared<Wald_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_exact", std::make_shared<Wald_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	}else{
           // if it is already in the factory, just update the pos_impl
 	  It->second->setpos_impl(pos_impl_);
@@ -57,7 +56,7 @@ public:
 	auto It = factory_Store.find("wald_non_exact");
         // if not, insert the new object
 	if(It==factory_Store.end()){
-	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_non_exact", fdaPDE::make_shared<Wald_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_non_exact", std::make_shared<Wald_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	}else{
           // if it is already in the factory, just update the pos_impl
 	  It->second->setpos_impl(pos_impl_);
@@ -73,7 +72,7 @@ public:
 	auto It = factory_Store.find("speckman_exact");
         // if not, insert the new object
 	if(It==factory_Store.end()){
-	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("speckman_exact", fdaPDE::make_shared<Speckman_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("speckman_exact", std::make_shared<Speckman_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	}else{
           // if it is already in the factory, just update the pos_impl
 	  It->second->setpos_impl(pos_impl_);
@@ -84,7 +83,7 @@ public:
 	auto It = factory_Store.find("speckman_non_exact");
         // if not, insert the new object
 	if(It==factory_Store.end()){
-	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("speckman_non_exact", fdaPDE::make_shared<Speckman_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("speckman_non_exact", std::make_shared<Speckman_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	}else{
           // if it is already in the factory, just update the pos_impl
 	  It->second->setpos_impl(pos_impl_);
@@ -100,7 +99,7 @@ public:
 	auto It = factory_Store.find("eigen-sign-flip_exact");
         // if not, insert the new object
 	if(It==factory_Store.end()){
-	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("eigen-sign-flip_exact", fdaPDE::make_shared<Eigen_Sign_Flip_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("eigen-sign-flip_exact", std::make_shared<Eigen_Sign_Flip_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	}else{
           // if it is already in the factory, just update the pos_impl
 	  It->second->setpos_impl(pos_impl_);
@@ -111,7 +110,7 @@ public:
 	auto It = factory_Store.find("eigen-sign-flip_non_exact");
         // if not, insert the new object
 	if(It==factory_Store.end()){
-	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("eigen-sign-flip_non_exact", fdaPDE::make_shared<Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	  factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("eigen-sign-flip_non_exact", std::make_shared<Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	}else{
           // if it is already in the factory, just update the pos_impl
 	  It->second->setpos_impl(pos_impl_);
@@ -126,7 +125,7 @@ public:
 	  Rprintf("Implementation not found, using wald exact");
 	  auto It = factory_Store.find("wald_exact");
 	  if(It==factory_Store.end()){
-	    factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_exact", fdaPDE::make_shared<Wald_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	    factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_exact", std::make_shared<Wald_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	  }else{
 	    It->second->setpos_impl(pos_impl_);
 	  }
@@ -135,7 +134,7 @@ public:
 	  Rprintf("Implementation not found, using wald non exact");
 	  auto It = factory_Store.find("wald_non_exact");
 	  if(It==factory_Store.end()){
-	    factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_non_exact", fdaPDE::make_shared<Wald_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
+	    factory_Store.insert(std::make_pair<std::string, std::shared_ptr<Inference_Base<InputHandler, MatrixType>>>("wald_non_exact", std::make_shared<Wald_Non_Exact<InputHandler, MatrixType>>(inverter_, inf_car_, pos_impl_)));
 	  }else{
 	    It->second->setpos_impl(pos_impl_);
 	  }

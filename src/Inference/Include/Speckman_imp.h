@@ -48,16 +48,17 @@ void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
+void Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
   //check if WLW_dec has been computed
   if(!is_WLW_computed){
     compute_WLW_dec();
   }
   const MatrixXr * W = this->inf_car.getWp();
   
-  VectorXr beta = WLW_dec.solve(W->transpose()*Lambda2*(*(this->inf_car.getZp())));
+  this->beta_hat = WLW_dec.solve(W->transpose()*Lambda2*(*(this->inf_car.getZp())));
+  this->is_beta_hat_computed = true; 
   
-  return beta; 
+  return; 
   
 };
 
@@ -91,7 +92,9 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = compute_beta_hat();
+    if(!is_beta_hat_computed){
+      compute_beta_hat();
+    }
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
     
@@ -124,8 +127,9 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = compute_beta_hat(); 
-    
+     if(!is_beta_hat_computed){
+      compute_beta_hat();
+    }  
     // for each row of C matrix
     for(UInt i=0; i<p; ++i){
       VectorXr col = C.row(i);
@@ -173,8 +177,9 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_CI(void){
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   
   // get the estimates of the parameters
-  VectorXr beta_hat = compute_beta_hat();
-  
+   if(!is_beta_hat_computed){
+      compute_beta_hat();
+    }
   // declare the matrix that will store the p-values
   UInt p=C.rows();
   MatrixXv result;
