@@ -521,11 +521,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     search = search, bary.locations = bary.locations,
     optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
     DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
-  # Checking infeence data
-  # Most of the checks have already been carried out by infarenceDataObjectBuilder function
-  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency, costructing default object in NULL casw
+  # Checking inference data
+  # Most of the checks have already been carried out by inferenceDataObjectBuilder function
+  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
   
-  # Chek that GCV is set for inference
+  # Check that GCV is set for inference
   if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
     warning("Inference is not defined when lambda grid is provided without GCV")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
