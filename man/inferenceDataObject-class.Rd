@@ -6,7 +6,7 @@
 \alias{inferenceDataObject}
 \title{Class for inference data}
 \description{
-A class that contains all possible information for linear parameters in spatial regression with
+A class that contains all possible information for inference over linear parameters in spatial regression with
 differential regularization problem. This object can be used as parameter in smoothing function of the fdaPDE library [smooth.FEM].
 }
 \details{
@@ -17,16 +17,16 @@ The usage of [inferenceDataObjectBuilder] is recommended for the construction of
 \section{Slots}{
 
 \describe{
-\item{\code{test}}{An integer taking value 0, 1 or 2; in the first case no test is performed, in the second one-at-the-time tests are performed,
+\item{\code{test}}{A vector of integers taking value 0, 1 or 2; in the first case no test is performed, in the second one-at-the-time tests are performed,
 in the third a simultaneous test is performed.}
 
-\item{\code{interval}}{An integer taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
+\item{\code{interval}}{A vector of integers taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.}
 
-\item{\code{type}}{An integer taking value 1, 2 or 3, corresponding to Wald, sandwich or permutational implementation 
+\item{\code{type}}{A vector of integers taking value 1, 2 or 3, corresponding to Wald, speckman or eigen-sign-flip implementation 
 of the inference analysis.}
 
-\item{\code{exact}}{An integer taking value 1 or 2. If 1 an exact computation of the test statistic will be performed,
+\item{\code{exact}}{An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 whereas if 2 an approximated computation will be carried out.}
 
 \item{\code{dim}}{Number of covariates taken into account in the linear part of the regression problem.}
@@ -36,7 +36,9 @@ estimated via confidence interval.}
 
 \item{\code{beta0}}{Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.}
 
-\item{\code{level}}{Level of significance for the confidence intervals. Needs to be between 0 and 1. Used only if interval is not 0.}
+\item{\code{quantile}}{Quantile needed for confidence intervals. Used only if interval is not 0.}
+
+\item{\code{n_perm}}{An integer representing the number of permutations in the case of eigen-sign-flip test.}
 
 \item{\code{definition}}{An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 leading to avoid some of the checks that are performed on inference data within smoothing functions.}

@@ -6,41 +6,43 @@
 \usage{
 inferenceDataObjectBuilder<-function(test = NULL, 
 interval = NULL, 
-type = "wald", 
+type = 'wald', 
 exact = "False", 
-dim = NULL, 
+dim, 
 coeff = NULL, 
 beta0 = NULL, 
 level = 0.05,
-definition=1)
+n_perm = 1000)
 }
 \arguments{
-\item{test}{A string defining the type of test to be performed. The default is NULL, and can take values 'one-at-the-time' or 'simultaneous'.
-If the value is NULL, no test is performed, and the \code{interval} parameter need to be not NULL. If it takes value
+\item{test}{A list of strings defining the type of test to be performed, with the same length of \code{interval} and \code{type} lists. The default is NULL, and can take values 'one-at-the-time' 
+or 'simultaneous'. If the value is NULL, no test is performed, and the \code{interval} parameter in the same position of the list needs to be not NULL. If it takes value
 'one-at-the-time', the parameters \code{beta0}, \code{dim}, \code{coeff} are taken into account, and one-at-the-time tests will be performed. If it takes value 
 'simultaneous', a global simultaneous test will be performed.}
 
-\item{interval}{A string defining the type of confidence intervals to be computed. The default is NULL, and can take value 'one-at-the-time' 'simultaneous' and 'bonferroni'.
-If the value is NULL, no interval will be computed, and the \code{test} parameter needs to be set. Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed.
-If it is not NULL, the parameter \code{level} will be taken into account. Up to now, confidence intervals can be computed only in the Wald implementation.}
+\item{interval}{A list of strings defining the type of confidence intervals to be computed, with the same length of \code{test} and \code{type} lists. The default is NULL,
+and can take values 'one-at-the-time' 'simultaneous' and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
+ Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account. Confidence intervals can be 
+ computed only in Wald or Speckman implementation.}
 
-\item{type}{A string defining the type of implementation for the inferential analysis. The possible values are three:
-'wald'(default), 'sandwich' or 'permutational', corresponding to the three possible methods developed in Ferraccioli....}
+\item{type}{A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
+'wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.}
 
 \item{exact}{A string used to decide the method used to estimate the statistics variance.
-The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally very expensive.
+The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally expensive.
 In the second case an approximate method is used, leading to a lower accuracy, but faster computation.}
 
-\item{dim}{Number of the covariates, defaulted to NULL.}
+\item{dim}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
 
-\item{coeff}{A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL, it will be defaulted to an identity matrix.}
+\item{coeff}{A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
+in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.}
 
-\item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. If \code{test} is set and \code{beta0} is NULL,
-will be set to a vector of zeros.}
+\item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
+If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.}
 
-\item{level}{Level of significance, defaulted to 0.05. It is taken into account only if \code{intrval} is set.}
+\item{level}{Level of significance used to compute quantiles for confidence intervals, defaulted to 0.05. It is taken into account only if \code{interval} is set.}
 
-\item{definition}{A 0-1 integer. If it is set, and the procedure outcomes a valid inferenceDataObject, some checks will be avoided inside [smooth.FEM].}
+\item{n_perm}{Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.}
 }
 \value{
 The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
@@ -52,4 +54,6 @@ that can be used as parameter in [smooth.FEM] function. Notice that this constru
 \examples{
 obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 4);
 obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.01);
+obj3<-inferenceDataObjectBuilder(interval=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
+ type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.01)
 }
