@@ -336,7 +336,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   }
   # Creating an inference data object just for coherence
   R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                              coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, quantile = -1, n_perm = as.integer(1000), definition=as.integer(0))
+                              coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, quantile = -1, n_flip = as.integer(1000), definition=as.integer(0))
 
   ################## End checking parameters, sizes and conversion #############################
   if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))

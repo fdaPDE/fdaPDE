@@ -8,12 +8,12 @@
  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
  \param beta_0_ vector for the null hypotesis (if a test is required)
  \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
- \param n_perm_ parameter that provides the number of permutations to be used for the eigen-sign-flip tests (if they are required)
+ \param n_flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
  \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
 			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,
-			     SEXP inference_Quantile_, SEXP n_perm_, SEXP definition_){
+			     SEXP inference_Quantile_, SEXP n_flip_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
   test_Type.resize(size_test_Type);
@@ -88,7 +88,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
  this->set_definition(bool(INTEGER(definition_)[0]));
 
  //n_perm
- this->set_n_perm(INTEGER(n_perm_)[0]);
+ this->set_n_flip(INTEGER(n_flip_)[0]);
 };
 
 void InferenceData::print_inference_data() const{
@@ -126,6 +126,6 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %f \n", inference_Quantile(i));
   }
   Rprintf("\n");
-  Rprintf("n_perm: %d\n", n_perm);
+  Rprintf("n_flip: %d\n", n_flip);
   Rprintf("definition: %d\n",definition);
 };

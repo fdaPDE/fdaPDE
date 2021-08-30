@@ -74,7 +74,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
-  inference_n_perm=R_Inference_Data_Object@n_perm
+  inference_n_flip=R_Inference_Data_Object@n_flip
   inference_Defined=R_Inference_Data_Object@definition
 
 
@@ -127,7 +127,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
   storage.mode(inference_Quantile) <- "double"
-  storage.mode(inference_n_perm) <- "integer"
+  storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_Defined) <- "integer"
   
 
@@ -157,7 +157,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
       search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm, inference_Defined,
+      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_Defined,
       PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
@@ -170,7 +170,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
          search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm, inference_Defined,
+         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_Defined,
          PACKAGE = "fdaPDE")
     }
     else
@@ -185,7 +185,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
            FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
            BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
            search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor,lambda.optimization.tolerance, 
-           test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm, inference_Defined,
+           test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_Defined,
            PACKAGE = "fdaPDE")
       }
     }

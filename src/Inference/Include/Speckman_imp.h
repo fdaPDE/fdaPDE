@@ -249,9 +249,6 @@ void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
   this->Lambda2 = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
-  //if(std::is_same<MatrixType, SpMat>::value==true){
-  //  this->Lambda2.makeCompressed();
-  //}
   this->is_Lambda2_computed = true;
   
   return; 

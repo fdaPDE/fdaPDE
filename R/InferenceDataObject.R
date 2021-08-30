@@ -13,7 +13,7 @@
 #' estimated via confidence interval. 
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
 #'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
-#'@slot n_perm An integer representing the number of permutations in the case of eigen-sign-flip test.
+#'@slot n_flip An integer representing the number of permutations in the case of eigen-sign-flip test.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
@@ -33,7 +33,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   coeff = "matrix",
                                                                   beta0 = "numeric",
                                                                   quantile = "numeric",
-                                                                  n_perm = "integer",
+                                                                  n_flip = "integer",
                                                                   definition="integer")
                               )
 
@@ -57,8 +57,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
 #'If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.
-#'@param level Level of significance used to compute quantiles for confidence intervals, defaulted to 0.05. It is taken into account only if \code{interval} is set.
-#'@param n_perm Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.
+#'@param level Level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
+#'@param n_flip Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.
 #'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
 #'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
@@ -70,16 +70,16 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'dim, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
-#'level = 0.05,
-#'n_perm = 1000)
+#'level = 0.95,
+#'n_flip = 1000)
 #' @export
 #' 
 #' 
 #' @examples 
 #' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 4);
-#' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.01);
+#' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
 #' obj3<-inferenceDataObjectBuilder(interval=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
-#'  type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.01)
+#'  type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.99)
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
@@ -88,8 +88,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 dim = NULL, 
                                 coeff = NULL, 
                                 beta0 = NULL, 
-                                level = 0.05,
-                                n_perm = 1000){
+                                level = 0.95,
+                                n_flip = 1000){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -144,17 +144,17 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
 
-  if(level!=0.05){
+  if(level!=0.95){
     if(class(level)!="numeric")
       stop("'level' should be numeric")
     if(length(level)==0)
       stop("'level' is zerodimensional, should be a positive number between 0 and 1")
   }
   
-  if(!is.null(n_perm)){
-    if(class(n_perm)!="numeric" && class(n_perm)!="integer")
-      stop("'n_perm' should be an integer or convertible to integer type")
-    n_perm=as.integer(n_perm)
+  if(!is.null(n_flip)){
+    if(class(n_flip)!="numeric" && class(n_flip)!="integer")
+      stop("'n_flip' should be an integer or convertible to integer type")
+    n_flip=as.integer(n_flip)
   }
   
   # Check of consistency of parameters. Translation into numeric representation. The checks are repeated for each element of the vectors test, interval and type
@@ -275,13 +275,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
         }else{
           if(level > 0){
               if(interval[index] == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
-                quantile[index]=qchisq(1-level, dim(coeff)[1])
+                quantile[index]=qchisq(level, dim(coeff)[1])
               }else{
                 if(interval[index]=="one-at-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
-                  quantile[index]=qnorm((1-level/2),0,1)
+                  quantile[index]=qnorm((1-(1-level)/2),0,1)
               }else{ 
                   if(interval[index]== "bonferroni"){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
-                  quantile[index]=qnorm((1-level/(2*dim(coeff)[1])),0,1)
+                  quantile[index]=qnorm((1-(1-level)/(2*dim(coeff)[1])),0,1)
                   }
               }
             }
@@ -297,18 +297,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("dimension of 'coeff' and 'beta0' are not consistent")
   }
   
-  if(!is.null(n_perm)){
-    if(n_perm <= 0)                                                
-      stop("number of permutations must be a positive value")
+  if(!is.null(n_flip)){
+    if(n_flip <= 0)                                                
+      stop("number of sign-flips must be a positive value")
   }else {
-    n_perm <- as.integer(1000)
+    n_flip <- as.integer(1000)
   }
   
   definition=as.integer(1)
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), exact = exact_numeric, dim = dim, 
-              coeff = coeff, beta0 = beta0, quantile = quantile, n_perm = n_perm, definition=definition)
+              coeff = coeff, beta0 = beta0, quantile = quantile, n_flip = n_flip, definition=definition)
   
   return(result)
 }

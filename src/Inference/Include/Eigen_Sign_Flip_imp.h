@@ -199,9 +199,6 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
   this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
-  //if(std::is_same<MatrixType, SpMat>::value==true){
-  //  this->Lambda2.makeCompressed();
-  //}
   this->is_Lambda_computed = true;
   
   return; 

@@ -22,7 +22,7 @@ class InferenceData
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
   		VectorXr inference_Quantile;		 					//!< Quantiles needed for confidence intervals if interval_Type != not-defined
   		bool definition					= false;			//!< Defines whether the inference analysis needs to be carried out or not
-                long int n_perm 				= 1000; 			//!< Number of permutations if eigen-sign-flip tests are required
+                long int n_flip 				= 1000; 			//!< Number of sign-flips if eigen-sign-flip tests are required
 
 	public:
   	//Constructors
@@ -31,7 +31,7 @@ class InferenceData
 
   		InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
 				SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_, 
-			        SEXP inference_Quantile_, SEXP n_perm_, SEXP definition_);
+			        SEXP inference_Quantile_, SEXP n_flip_, SEXP definition_);
         //Setters
   		inline void set_test_type(const std::vector<std::string> & test_Type_){test_Type = test_Type_;};		 //!< Setter for test_Type \param test_Type_ new test_Type
   		inline void set_interval_type(const std::vector<std::string> & interval_Type_){interval_Type = interval_Type_;}; //!< Setter for interval_Type \param interval_Type_ new interval_Type
@@ -41,7 +41,7 @@ class InferenceData
   		inline void set_beta_0(const VectorXr & beta_0_){beta_0 = beta_0_;};					        //!< Setter for beta0 \param beta0_ new beta0
   		inline void set_inference_quantile(const VectorXr & inference_Quantile_){inference_Quantile = inference_Quantile_;};//!< Setter for inference_Quantile \param inference_Quantile_ new inference_Quantile
   		inline void set_definition(const bool & definition_){definition = definition_;};				//!< Setter for definition \param definition_ new definition
-		inline void set_n_perm(const long int & n_perm_){n_perm=n_perm_;}; 						//!< Setter for n_perm \param n_perm_ new n_perm
+		inline void set_n_flip(const long int & n_flip_){n_flip=n_flip_;}; 						//!< Setter for n_flip \param n_flip_ new n_flip
 
   	//Getters
   		inline std::vector<std::string> get_test_type() const{return this->test_Type;}; 				//!< Getter for test_Type \return test_Type
@@ -52,7 +52,7 @@ class InferenceData
   		inline VectorXr get_beta_0() const{return this->beta_0;};				                        //!< Getter for beta0 \return beta0
   		inline VectorXr get_inference_quantile() const{return this->inference_Quantile;};			        //!< Getter for inference_Quantile \return inference_quantile
   		inline bool get_definition() const{return this->definition;};					                //!< Getter for definition \return definition
-		inline long int get_n_perm() const{return this->n_perm;}; 					                //!< Getter for n_perm \return n_perm
+		inline long int get_n_flip() const{return this->n_flip;}; 					                //!< Getter for n_flip \return n_flip
 
 	//For debugging
   		void print_inference_data() const;

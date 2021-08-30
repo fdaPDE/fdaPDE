@@ -60,7 +60,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
-  inference_n_perm=R_Inference_Data_Object@n_perm
+  inference_n_flip=R_Inference_Data_Object@n_flip
   inference_Defined=R_Inference_Data_Object@definition
 
   ## Set propr type for correct C++ reading
@@ -101,14 +101,14 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
   storage.mode(inference_Quantile) <- "double"
-  storage.mode(inference_n_perm) <- "integer"
+  storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_Defined) <- "integer"
 
   ## Call C++ function
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, 
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_perm, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
