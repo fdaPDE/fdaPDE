@@ -11,8 +11,8 @@ exact = "False",
 dim, 
 coeff = NULL, 
 beta0 = NULL, 
-level = 0.05,
-n_perm = 1000)
+level = 0.95,
+n_flip = 1000)
 }
 \arguments{
 \item{test}{A list of strings defining the type of test to be performed, with the same length of \code{interval} and \code{type} lists. The default is NULL, and can take values 'one-at-the-time' 
@@ -40,9 +40,9 @@ in the corresponding inferenceDataObject it will be defaulted to an identity mat
 \item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
 If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.}
 
-\item{level}{Level of significance used to compute quantiles for confidence intervals, defaulted to 0.05. It is taken into account only if \code{interval} is set.}
+\item{level}{Level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.}
 
-\item{n_perm}{Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.}
+\item{n_flip}{Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.}
 }
 \value{
 The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
@@ -53,7 +53,7 @@ that can be used as parameter in [smooth.FEM] function. Notice that this constru
 }
 \examples{
 obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 4);
-obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.01);
+obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
 obj3<-inferenceDataObjectBuilder(interval=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
- type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.01)
+ type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.99)
 }
