@@ -15,7 +15,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   VectorXr result;
   
   // get the number of permutations
-  unsigned long int n_perm=this->inf_car.getInfData()->get_n_perm();
+  unsigned long int n_flip=this->inf_car.getInfData()->get_n_flip();
   
   // get the value of the parameters under the null hypothesis
   VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0(); 
@@ -77,7 +77,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     Pi.resize(TildeX.cols());
     VectorXr Tilder_perm=Tilder;
     
-    for(unsigned long int i=0;i<n_perm;i++){
+    for(unsigned long int i=0;i<n_flip;i++){
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip=2*distr(eng)-1;
 	Tilder_perm(j)=Tilder(j)*flip;
@@ -87,7 +87,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     }
     
     
-    Real pval = count/n_perm;
+    Real pval = count/n_flip;
     
     result.resize(p); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
     result(0) = pval;
@@ -125,7 +125,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     
     MatrixXr Tilder_perm=Tilder;
     
-    for(unsigned long int i=0;i<n_perm;i++){
+    for(unsigned long int i=0;i<n_flip;i++){
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip=2*distr(eng)-1;
 	Tilder_perm.row(j)=Tilder.row(j)*flip;
@@ -139,7 +139,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
       } 
     }
     
-    VectorXr pval = count/n_perm;
+    VectorXr pval = count/n_flip;
     
     result.resize(p);
     result = pval;
@@ -198,7 +198,6 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->Lambda.resize(n_obs,n_obs);
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
-  this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
   this->is_Lambda_computed = true;
   
   return; 
