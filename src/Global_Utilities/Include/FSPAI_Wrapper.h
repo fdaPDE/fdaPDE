@@ -12,9 +12,9 @@
 */
 struct FSPAI_data{
 
-    std::string tol_Inverse     = "0.05";                        // Controls the quality of approximation, default 0.05 
-    std::string max_Step_Col    = "10";                          // Max number of improvement steps per columns
-    std::string max_New_Nz      = "10";                          // Max number of new nonzero candidates per step
+    std::string tol_Inverse     = "0.005";                       // Controls the quality of approximation, default 0.005 
+    std::string max_Step_Col    = "20";                          // Max number of improvement steps per columns
+    std::string max_New_Nz      = "20";                          // Max number of new nonzero candidates per step
     std::string out_File;                                        // Temporary file on which will be written the inverse matrix
     std::string sol             = "0";                           // Type of solver used for the system Lx=rhs, 0 means no solver is used
     
