@@ -198,6 +198,7 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->Lambda.resize(n_obs,n_obs);
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
+  this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
   this->is_Lambda_computed = true;
   
   return; 
