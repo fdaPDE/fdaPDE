@@ -14,6 +14,7 @@
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
 #'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
 #'@slot n_flip An integer representing the number of permutations in the case of eigen-sign-flip test.
+#'@slot tol_fspai A number between 0 and 1 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
@@ -34,6 +35,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   beta0 = "numeric",
                                                                   quantile = "numeric",
                                                                   n_flip = "integer",
+                                                                  tol_fspai = "numeric",
                                                                   definition="integer")
                               )
 
@@ -59,6 +61,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.
 #'@param level Level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
 #'@param n_flip Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.
+#'@param tol_fspai Tolerance for FSPAI algorithm taking value between 0 and 1, defaulted to 0.05. It is taken into account only if \code{exact} is set to 'False'. The lower is the tolerance, the heavier is the computation.
 #'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
 #'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
@@ -71,15 +74,17 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'coeff = NULL, 
 #'beta0 = NULL, 
 #'level = 0.95,
-#'n_flip = 1000)
+#'n_flip = 1000,
+#'tol_fspai = 0.05)
 #' @export
 #' 
 #' 
 #' @examples 
-#' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 4);
+#' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = 'True', dim = 4);
 #' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
 #' obj3<-inferenceDataObjectBuilder(interval=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
 #'  type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.99)
+#' obj4<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 3, tol_fspai = 0.005);
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
@@ -89,7 +94,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 coeff = NULL, 
                                 beta0 = NULL, 
                                 level = 0.95,
-                                n_flip = 1000){
+                                n_flip = 1000,
+                                tol_fspai = 0.05){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -155,6 +161,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
     if(class(n_flip)!="numeric" && class(n_flip)!="integer")
       stop("'n_flip' should be an integer or convertible to integer type")
     n_flip=as.integer(n_flip)
+  }
+  
+  if(tol_fspai!=0.05){
+    if(class(tol_fspai)!="numeric")
+      stop("'tol_fspai' should be numeric")
+    if(length(tol_fspai)==0)
+      stop("'tol_fspai' is zerodimensional, should be a positive number between 0 and 1")
   }
   
   # Check of consistency of parameters. Translation into numeric representation. The checks are repeated for each element of the vectors test, interval and type
@@ -304,11 +317,16 @@ inferenceDataObjectBuilder<-function(test = NULL,
     n_flip <- as.integer(1000)
   }
   
+  if(exact=='False'){
+    if(tol_fspai <= 0 || tol_fspai > 1)                                                
+      stop("tol_fspai should be a positive value smaller or equal to 1")
+  }
+  
   definition=as.integer(1)
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), exact = exact_numeric, dim = dim, 
-              coeff = coeff, beta0 = beta0, quantile = quantile, n_flip = n_flip, definition=definition)
+              coeff = coeff, beta0 = beta0, quantile = quantile, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   
   return(result)
 }
