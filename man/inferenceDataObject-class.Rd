@@ -40,6 +40,8 @@ estimated via confidence interval.}
 
 \item{\code{n_flip}}{An integer representing the number of permutations in the case of eigen-sign-flip test.}
 
+\item{\code{tol_fspai}}{A number between 0 and 1 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.}
+
 \item{\code{definition}}{An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
 leading to avoid some of the checks that are performed on inference data within smoothing functions.}
 }}
