@@ -58,7 +58,7 @@ extern "C"
 				    SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
 				    SEXP Rsearch, SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
 				    SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
-				    SEXP Rbeta0, SEXP RinferenceQuantile, SEXP RinferenceFlip, , SEXP RinferenceTolFspai, SEXP RinferenceDefined)
+				    SEXP Rbeta0, SEXP RinferenceQuantile, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set data
     RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Ru, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);

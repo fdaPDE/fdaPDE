@@ -15,7 +15,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   VectorXr result;
   
   // get the number of permutations
-  unsigned long int n_flip=this->inf_car.getInfData()->get_n_flip();
+  unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
   
   // get the value of the parameters under the null hypothesis
   VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0(); 
