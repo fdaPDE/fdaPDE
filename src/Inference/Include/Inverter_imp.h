@@ -8,7 +8,7 @@ void Inverse_Non_Exact<InputHandler>::pre_Inverse(void){
   R0.makeCompressed();
 
   // call the FSPAI to get a sparse approximation of R0_inv_tilde
-  status_R0_inv_tilde = FSPAI_Wrapper(R0, this->R0_inv_tilde);
+  status_R0_inv_tilde = FSPAI_Wrapper(R0, this->R0_inv_tilde, inf_car.getInfData()->get_tol_Fspai());
   if(!status_R0_inv_tilde){
     return;
   }
@@ -35,7 +35,7 @@ void Inverse_Non_Exact<InputHandler>::Compute_Inv(void){
       return;
     }
     // call the FSPAI to get a sparse approximation of E_inv
-    status_E_tilde_inv = FSPAI_Wrapper(this->E_tilde, this->E_inv);
+    status_E_tilde_inv = FSPAI_Wrapper(this->E_tilde, this->E_inv, inf_car.getInfData()->get_tol_Fspai());
   
     if(!status_E_tilde_inv){
       return;

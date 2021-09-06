@@ -8,12 +8,13 @@
  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
  \param beta_0_ vector for the null hypotesis (if a test is required)
  \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
- \param n_flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
+ \param n_Flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
+ \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
  \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
 			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,
-			     SEXP inference_Quantile_, SEXP n_flip_, SEXP definition_){
+			     SEXP inference_Quantile_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
   test_Type.resize(size_test_Type);
@@ -84,11 +85,15 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
    inference_Quantile(i)=REAL(inference_Quantile_)[i];
  }
 
+ //n_flip
+ this->set_n_Flip(INTEGER(n_Flip_)[0]);
+
+ //tol_Fspai
+ this->set_tol_Fspai(REAL(tol_Fspai_)[0]);
+
  //definition
  this->set_definition(bool(INTEGER(definition_)[0]));
 
- //n_perm
- this->set_n_flip(INTEGER(n_flip_)[0]);
 };
 
 void InferenceData::print_inference_data() const{
@@ -126,6 +131,7 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %f \n", inference_Quantile(i));
   }
   Rprintf("\n");
-  Rprintf("n_flip: %d\n", n_flip);
+  Rprintf("n_Flip: %d\n", n_Flip);
+  Rprintf("tol_Fspai: %d\n", tol_Fspai);
   Rprintf("definition: %d\n",definition);
 };

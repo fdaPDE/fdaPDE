@@ -1,7 +1,7 @@
 #include "../Include/FSPAI_Wrapper.h"
 #include "../../Fspai_Utility/Include/FSPAI_Solver_Wrapper.h"
 
-bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
+bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv, Real tol_Inverse){
   
   std::string Temp_name_write = "Tmp_file_mtx_to_inv_FSPAI"; // Name of temporary file for the matrix to be inverted
   std::string Temp_name_read  = "Tmp_file_mtx_invtd_FSPAI";  // Name of temporary file for inverted matrix
@@ -18,6 +18,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv){
   // FSPAI LIBRARY BEGINS
 
   FSPAI_data FSPAI_dat;
+  FSPAI_dat.tol_Inverse=tol_Inverse;
   FSPAI_dat.out_File = Temp_name_read;
   
   // Vector of parameters that are needed by FSPAI library for the computation of the inverse

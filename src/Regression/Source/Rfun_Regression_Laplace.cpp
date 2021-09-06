@@ -48,6 +48,7 @@ extern "C"
     \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
     \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
     \param RinferenceFlip an R-integer defining the number of sign-flips needed in eigen-sign-flip inference
+    \param RinferenceTolFspai an R-double defining the tolerance of the FSPAI algorithm needed if non-exact implementation of inference is required
     \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
     \return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
   */
@@ -55,12 +56,12 @@ extern "C"
 			  SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
 			  SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
 			  SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
-			  SEXP Rbeta0, SEXP RinferenceQuantile, SEXP RinferenceFlip, SEXP RinferenceDefined)
+			  SEXP Rbeta0, SEXP RinferenceQuantile, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set input data
     RegressionData regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RinferenceQuantile, RinferenceFlip, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RinferenceQuantile, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];

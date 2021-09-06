@@ -12,9 +12,9 @@
 */
 struct FSPAI_data{
 
-    std::string tol_Inverse     = "0.005";                       // Controls the quality of approximation, default 0.005 
-    std::string max_Step_Col    = "20";                          // Max number of improvement steps per columns
-    std::string max_New_Nz      = "20";                          // Max number of new nonzero candidates per step
+    std::string tol_Inverse     = "0.05";                        // Controls the quality of approximation, default 0.05 
+    std::string max_Step_Col    = "10";                          // Max number of improvement steps per columns
+    std::string max_New_Nz      = "10";                          // Max number of new nonzero candidates per step
     std::string out_File;                                        // Temporary file on which will be written the inverse matrix
     std::string sol             = "0";                           // Type of solver used for the system Lx=rhs, 0 means no solver is used
     
@@ -25,10 +25,11 @@ struct FSPAI_data{
 /*
   \param A the sparse matrix to be inverted 
   \param A_inv the inverse of A that will be computed by FSPAI
+  \param tol_Inverse the maximum tolerance admitted for || I - A*A_inv ||
   \return bool indicating if the inversion went well 
 */
 
-bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv);
+bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv, Real tol_Inverse);
 
 
 
