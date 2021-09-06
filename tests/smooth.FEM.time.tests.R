@@ -78,7 +78,7 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations,
                             FEMbasis=FEMbasis, lambdaS=lambdaS,lambdaT=lambdaT,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
 #### Test 1.3: grid with stochastic GCV
 lambdaS = 10^seq(-7, -5, length.out=3)
@@ -92,7 +92,7 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints,
                             DOF.evaluation='stochastic', 
                             lambda.selection.lossfunction='GCV')
 bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
 #### Test 2: c-shaped domain ####
 #            locations != nodes
