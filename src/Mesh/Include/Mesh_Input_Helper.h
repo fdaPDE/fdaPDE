@@ -38,9 +38,9 @@ private:
 
 template<UInt mydim>
 class simplex_container{
-  static_assert(mydim==2 || mydim==3,
-    "ERROR! TRYING TO INSTANTIATE SIMPLEX_CONTAINER IN DIMENSION OTHER THAN 2 OR 3! See mesh_input_helper.h");
-
+  static_assert(mydim == 1 || mydim==2 || mydim==3,
+    "ERROR! TRYING TO INSTANTIATE SIMPLEX_CONTAINER IN DIMENSION OTHER THAN 1, 2 OR 3! See mesh_input_helper.h");
+  
 public:
 
   using simplex_t = simplex<mydim>;

@@ -811,3 +811,65 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 
 }
 
+#' Create a 1D graph mesh
+#'
+#' @param nodes A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.
+#' @param nodesattributes A matrix with #nodes rows containing nodes' attributes.
+#' These are passed unchanged to the output. If a node is added during the triangulation process or mesh refinement, its attributes are computed
+#' by linear interpolation using the attributes of neighboring nodes. This functionality is for instance used to compute the value
+#' of a Dirichlet boundary condition at boundary nodes added during the triangulation process.
+#' @param edges A #edges-by-2 (when \code{order} = 1) or #triangles-by-3 (when \code{order} = 2) matrix.
+#' This option is used when a triangulation is already available. It specifies the edges giving the row's indices in \code{nodes} of the edges' vertices and (when \code{nodes} = 2) also if the triangles' edges midpoints. The triangles' vertices and midpoints are ordered as
+#' 1---3---2
+#' In this case the function \code{create.mesh.1D} is used to produce a complete mesh.1D object.
+#' @param order Either '1' or '2'. It specifies wether each mesh should be represented by 2 nodes (the edges vertices) or by 3 nodes (the edges's vertices and midpoint).
+#' These are
+#' respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements. Default is \code{order} = 1.
+#' @usage create.mesh.1D(nodes, edges = NULL, order = 1, nodesattributes = NULL)
+#' @return An object of the class mesh.2D with the following output:
+#' \itemize{
+#' \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
+#' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
+#' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.
+#' These are passed unchanged from the input.}
+#' \item{\code{edges}}{A #edges-by-2 matrix containing all the edges of the triangles in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the edge starts from and ends to.}
+#' \item{\code{neighbors}}{A #nodes(#nodes - 1)/2 vector. Contains the upper triangular part of the adjecny matrix.
+#' \item{\code{order}}{Either '1' or '2'. It specifies wether each mesh triangle should be represented by 3 nodes (the triangle' vertices) or by 6 nodes (the triangle's vertices and midpoints).
+#' These are respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements.}
+#' }
+#' @export
+
+create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NULL)
+{
+  nodes <- as.matrix(nodes)
+  if(ncol(nodes) != 2)
+    stop("Matrix of nodes should have 2 columns")
+  if(anyDuplicated(nodes))
+    stop("Duplicated nodes")
+  
+  if(any(is.null(edges)))
+    stop("Missing edges argument is needed!")
+  else
+    edges = as.matrix(edges)
+  
+  # Indexes in C++ starts from 0, in R from 1, needed transformations!
+  edges = edges - 1
+  
+  storage.mode(edges) <- "integer"
+  storage.mode(nodes) <- "double"
+  
+  out <- NULL
+  
+  if(order == 1 && ncol(edges) == 2){
+    out <- .Call("CPP_EdgeMeshHelper", edges, nodes, PACKAGE = "fdaPDE") 
+    
+    out <- list(nodes = nodes, nodesmarkers=outCPP[[3]], nodesattributes=nodesattributes,
+                edges=edges+1,
+                order=order, neighbors=outCPP[[4]]) 
+    
+  }
+  
+  
+  class(out) <- "mesh1D"
+  return(out)
+}  

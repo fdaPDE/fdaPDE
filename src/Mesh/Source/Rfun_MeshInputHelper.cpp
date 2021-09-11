@@ -177,4 +177,26 @@ SEXP CPP_TetraMeshSplitOrder2(SEXP Rtetrahedrons, SEXP Rnodes){
   return result;
 }
 
+SEXP CPP_EdgeMeshHelper(SEXP Redges, SEXP Rnodes){
+    
+    static constexpr std::array<UInt, 2> NODES_ORDERING = {1,0};
+    
+    
+    SEXP result = NILSXP;
+    result = PROTECT(Rf_allocVector(VECSXP, 4));
+    
+    {
+      simplex_container<1> nodes_list(Redges, Rnodes, NODES_ORDERING);
+      nodes_list.assemble_subs(result, 0);
+      nodes_list.mark_boundary(result, 1);
+      nodes_list.compute_neighbors(result, 3);
+    }
+    
+    mark_boundary_nodes(result, Rnodes, 2, 0, 1);
+    
+    UNPROTECT(1);
+    
+    return result;
+  }
+  
 }

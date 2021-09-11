@@ -184,5 +184,24 @@ void simplex_container<mydim>::order2extend(SEXP Routput, UInt index) const {
   }
 }
 
+template<>
+void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
+  
+  //Upper Triangular part (order 1 not needed)
+  UInt num_nodes = this->get_num_points();
+  SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(INTSXP, num_nodes * (num_nodes - 1)/2, 1));
+  RIntegerMatrix neighbors(VECTOR_ELT(Routput, index));
+
+   
+  for (UInt i=0; i<num_nodes*(num_nodes-1)/2; ++i)
+    neighbors[i]= 0;
+
+  for(UInt node = 0; node<elements.nrows();++node){
+    UInt i = elements(node,0);
+    UInt j = elements(node,1);
+    UInt k = num_nodes*(num_nodes - 1)/2 - (num_nodes - i) *(num_nodes- i - 1)/2 + j - i - 1;
+    neighbors[k] = 1;
+    }
+}
 
 #endif
