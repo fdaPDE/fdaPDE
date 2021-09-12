@@ -82,7 +82,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' @examples 
 #' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = 'True', dim = 4);
 #' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
-#' obj3<-inferenceDataObjectBuilder(interval=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
+#' obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
 #'  type=c('wald','speckman','eigen-sing-flip','speckman'),exact='True', dim=2, level=0.99)
 #' obj4<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, dim = 3, tol_fspai = 0.005);
 
