@@ -125,7 +125,7 @@ template<> void
 Fspai_Sub<double>::Solve_HPD_System
 (   double*     red_mtx,
     double*     red_col,
-    int&        n,
+    const int&        n,
     const char* uplo,
     int&        nrhs,
     int&        info)
@@ -133,10 +133,11 @@ Fspai_Sub<double>::Solve_HPD_System
     int lda = std::max(1, n);
     int ldb = std::max(1, n);
 
+    int n1=n;
     // computing the solution to a real system of linear equations
     // where A is an N-by-N symmetric positive definite matrix
     dposv_( uplo,
-            &n,
+            &n1,
             &nrhs,
             red_mtx,
             &lda,

@@ -153,7 +153,7 @@ class Fspai_Sub
         void        Solve_HPD_System
                     (   T_Field*    red_mtx,
                         T_Field*    red_col,
-                        int&        n,
+                        const int&        n,
                         const char* uplo,
                         int&        nrhs,
                         int&        info);
