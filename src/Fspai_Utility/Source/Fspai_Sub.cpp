@@ -270,7 +270,7 @@ template<> void
 Fspai_Sub<COMPLEX>::Solve_HPD_System
 (   COMPLEX*    red_mtx,
     COMPLEX*    red_col,
-    int&        n,
+    const int&        n,
     const char* uplo,
     int&        nrhs,
     int&        info)
@@ -278,10 +278,12 @@ Fspai_Sub<COMPLEX>::Solve_HPD_System
     int lda = std::max(1, n);
     int ldb = std::max(1, n);
 
+    int n1 = n;
+
     // computing the solution to a complex system of linear equations
     // where A is an N-by-N Hermitian positive definite matrix
     zposv_( uplo,
-            &n,
+            &n1,
             &nrhs,
             red_mtx,
             &lda,
