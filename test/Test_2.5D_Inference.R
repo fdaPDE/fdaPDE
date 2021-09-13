@@ -98,7 +98,7 @@ output_CPP_2$inference$CI$speckman
 
 
 #### Test 1.3: Exact inference, rejecting H0 
-output_CPP_3<-smooth.FEM(locations = locations, observations=data, 
+output_CPP_3<-smooth.FEM(locations = projected_locations, observations=data, 
                          covariates = cov1,
                          FEMbasis=FEMbasis, lambda=lambda,
                          lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = inf_Obj_3)
