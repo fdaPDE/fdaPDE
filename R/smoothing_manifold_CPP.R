@@ -61,7 +61,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   beta_0=as.vector(R_Inference_Data_Object@beta0)
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip=R_Inference_Data_Object@n_flip
-  inference_tol_fspia=R_Inference_Data_Object@tol_fspai
+  inference_tol_fspai=R_Inference_Data_Object@tol_fspai
   inference_Defined=R_Inference_Data_Object@definition
 
   ## Set proper type for correct C++ reading
