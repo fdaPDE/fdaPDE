@@ -184,24 +184,47 @@ void simplex_container<mydim>::order2extend(SEXP Routput, UInt index) const {
   }
 }
 
+//Need specialization, one element could have at most (#edges - 1) neighbors
+
 template<>
 void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
   
-  //Upper Triangular part (order 1 not needed)
+  //Upper Triangular part (order 1 not needed ? )
   UInt num_nodes = this->get_num_points();
   SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(INTSXP, num_nodes * (num_nodes - 1)/2, 1));
-  RIntegerMatrix neighbors(VECTOR_ELT(Routput, index));
+  RIntegerMatrix adjency_matrix(VECTOR_ELT(Routput, index));
 
    
   for (UInt i=0; i<num_nodes*(num_nodes-1)/2; ++i)
-    neighbors[i]= 0;
+    adjency_matrix[i]= 0;
 
   for(UInt node = 0; node<elements.nrows();++node){
     UInt i = elements(node,0);
     UInt j = elements(node,1);
     UInt k = num_nodes*(num_nodes - 1)/2 - (num_nodes - i) *(num_nodes- i - 1)/2 + j - i - 1;
-    neighbors[k] = 1;
+    adjency_matrix[k] = 1;
     }
+  /*
+  //computing neighbors matrix (left-neighbors only)
+  SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(INTSXP, elements.size(),elements.size()) );
+  RIntegerMatrix neighbors(VECTOR_ELT(Routput, index + 1));
+  
+  for (UInt i=0; i<simplexes.size(); ++i)
+    neighbors[i]=0;
+  
+  auto rep_it=duplicates.cbegin();
+  simplex_t prev{simplexes.front()};
+  for (auto const &curr : simplexes){
+    // Note: the first simplex cannot be a duplicate!
+    if (*(rep_it++)){
+      if(curr.j() == 1){ //Forse è un check inutile perché se un nodo è ripetuto
+                        //corrisponde sicuramente ad un elemento che sta alla sx
+                        //di quello a cui il nodo corrente appartiene 
+      neighbors(curr.i(), prev.i()) = 1; //elemento curr.i() ha alla sua sx l'elemento prev.i()
+      }
+    }
+    prev=curr;
+  }*/
 }
 
 #endif

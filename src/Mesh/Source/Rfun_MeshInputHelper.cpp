@@ -183,20 +183,33 @@ SEXP CPP_EdgeMeshHelper(SEXP Redges, SEXP Rnodes){
     
     
     SEXP result = NILSXP;
-    result = PROTECT(Rf_allocVector(VECSXP, 4));
+    result = PROTECT(Rf_allocVector(VECSXP, 3));
     
     {
       simplex_container<1> nodes_list(Redges, Rnodes, NODES_ORDERING);
       nodes_list.assemble_subs(result, 0);
       nodes_list.mark_boundary(result, 1);
-      nodes_list.compute_neighbors(result, 3);
+      nodes_list.compute_neighbors(result, 2);
     }
-    
-    mark_boundary_nodes(result, Rnodes, 2, 0, 1);
     
     UNPROTECT(1);
     
     return result;
   }
+
+SEXP CPP_EdgeMeshSplit(SEXP Redges, SEXP Rnodes){
   
+  SEXP result = NILSXP;
+  result = PROTECT(Rf_allocVector(VECSXP, 2));
+  
+  {
+    split1D(result, Rnodes, Redges, 0);
+    compute_midpoints(result, Rnodes, Redges, 1);
+  }
+  
+  UNPROTECT(1);
+  
+  return result;
+  }
+
 }

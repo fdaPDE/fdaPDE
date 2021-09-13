@@ -826,14 +826,14 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 #' These are
 #' respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements. Default is \code{order} = 1.
 #' @usage create.mesh.1D(nodes, edges = NULL, order = 1, nodesattributes = NULL)
-#' @return An object of the class mesh.2D with the following output:
+#' @return An object of the class mesh.1D with the following output:
 #' \itemize{
 #' \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 #' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.
 #' These are passed unchanged from the input.}
 #' \item{\code{edges}}{A #edges-by-2 matrix containing all the edges of the triangles in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the edge starts from and ends to.}
-#' \item{\code{neighbors}}{A #nodes(#nodes - 1)/2 vector. Contains the upper triangular part of the adjecny matrix.
+#' \item{\code{neighbors}}{A #nodes(#nodes - 1)/2 vector. Contains the upper triangular part of the adjecny matrix.}
 #' \item{\code{order}}{Either '1' or '2'. It specifies wether each mesh triangle should be represented by 3 nodes (the triangle' vertices) or by 6 nodes (the triangle's vertices and midpoints).
 #' These are respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements.}
 #' }
@@ -861,7 +861,7 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
   out <- NULL
   
   if(order == 1 && ncol(edges) == 2){
-    out <- .Call("CPP_EdgeMeshHelper", edges, nodes, PACKAGE = "fdaPDE") 
+    outCPP <- .Call("CPP_EdgeMeshHelper", edges, nodes, PACKAGE = "fdaPDE") 
     
     out <- list(nodes = nodes, nodesmarkers=outCPP[[3]], nodesattributes=nodesattributes,
                 edges=edges+1,

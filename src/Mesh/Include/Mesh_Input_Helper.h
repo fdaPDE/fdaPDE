@@ -38,9 +38,9 @@ private:
 
 template<UInt mydim>
 class simplex_container{
-  static_assert(mydim == 1 || mydim==2 || mydim==3,
+  /*static_assert(mydim == 1 || mydim==2 || mydim==3,
     "ERROR! TRYING TO INSTANTIATE SIMPLEX_CONTAINER IN DIMENSION OTHER THAN 1, 2 OR 3! See mesh_input_helper.h");
-  
+  */
 public:
 
   using simplex_t = simplex<mydim>;
@@ -217,6 +217,42 @@ void split3D(SEXP Routput, SEXP Rtetrahedrons, UInt index, const simplex_contain
     for (int k=0; k<tetrahedrons.nrows(); ++k, ++i)
       splitted_tetrahedrons[i]=extended_tetrahedrons[k+j*tetrahedrons.nrows()];
 
+}
+
+void compute_midpoints(SEXP Routput, SEXP Rnodes, SEXP Redges, UInt index){
+  
+  const RNumericMatrix nodes(Rnodes);
+  const RIntegerMatrix edges(Redges);
+  
+  SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(REALSXP, edges.nrows(), nodes.ncols())); 
+  RNumericMatrix midpoints(VECTOR_ELT(Routput, index));
+  
+  for (int i=0; i<midpoints.nrows(); ++i)
+    for (int j=0; j<midpoints.ncols(); ++j)
+      midpoints(i,j) = .5*(nodes(edges(i,0), j)+nodes(edges(i,1), j));
+}
+
+void split1D(SEXP Routput, SEXP Rnodes, SEXP Redges, UInt index){
+    
+  const RIntegerMatrix edges(Redges);
+  const RNumericMatrix nodes(Rnodes);
+  
+  SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(INTSXP, 2*edges.nrows(), 2));
+  UInt num_nodes = nodes.nrows();
+  RIntegerMatrix splitted_edges(VECTOR_ELT(Routput, index));
+  
+  //Every edges is splitted in two subedges 
+  // 1----2 ---> 1--3 3--2
+  for(UInt i = 0; i < edges.nrows(); ++i, ++num_nodes){
+      //Indexes in R starts from 1, in C++ from 0, needed transformations!
+      splitted_edges(2*i,0) = edges(i,0) + 1;
+      splitted_edges(2*i,1) = num_nodes + 1;
+    
+      splitted_edges(2*i+1, 0) = num_nodes + 1;
+      splitted_edges(2*i+1, 1) = edges(i,1) + 1;
+  }
+  
+  
 }
 
 #include "Mesh_Input_Helper_imp.h"
