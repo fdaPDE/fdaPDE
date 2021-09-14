@@ -2,6 +2,20 @@
 ############## TEST SCRIPT ###############
 ##########################################
 
+### Installation of fdaPDE 
+### Refer to Report_PACS_Cavazzutti_Galiberti for further details about installation
+### This is just a quick recap
+
+### If you are on Windows you need to install the right version of R tools before following the steps below
+### Launch the commands by typing ctrl + l once selected the right line
+### install.packages("rgl")
+### install.packages("plot3D")
+### install.packages("plot3Drgl")
+### install.packages("geometry")
+### install.packages("RcppEigen")
+### download fdaPDE-dev or fdaPDE-no-fspai-dev from GitHub
+### install.packages("path/to/fdaPDE", type='source', repos=NULL)
+
 library(fdaPDE)
 
 ####### 2.5D ########

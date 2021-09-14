@@ -138,7 +138,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(!is.null(coeff)){
-    if(class(coeff)!="matrix")
+    if(class(coeff)[1]!="matrix")
       stop("'coeff' should be of class matrix")
   }
   
