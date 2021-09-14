@@ -1,3 +1,10 @@
+# fdaPDE 1.1-2
+
+### New features
+
+1) Inference over the linear parameters of the model, laplacian case, no forcing terms, gaussian family
+2) FSPAI utility (Factorized Sparse Aprroximate Inverse)
+
 # fdaPDE 1.1-1
 
 ## New features
