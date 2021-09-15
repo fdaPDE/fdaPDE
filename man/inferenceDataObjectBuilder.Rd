@@ -7,7 +7,7 @@
 inferenceDataObjectBuilder<-function(test = NULL, 
 interval = NULL, 
 type = 'wald', 
-exact = "False", 
+exact = FALSE, 
 dim, 
 coeff = NULL, 
 beta0 = NULL, 
@@ -29,9 +29,9 @@ and can take values 'one-at-the-time' 'simultaneous' and 'bonferroni'. If the va
 \item{type}{A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
 'wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.}
 
-\item{exact}{A string used to decide the method used to estimate the statistics variance.
-The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally expensive.
-In the second case an approximate method is used, leading to a lower accuracy, but faster computation.}
+\item{exact}{A logical used to decide the method used to estimate the statistics variance.
+The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
+In the second case the evaluation is exact but computationally expensive.}
 
 \item{dim}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
 
@@ -55,8 +55,8 @@ A function that build an [inferenceDataObject]. In the process of construction m
 that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
 }
 \examples{
-obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = 'True', dim = 4);
+obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 4);
 obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
 obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
- type=c('wald','speckman','eigen-sign-flip','speckman'),exact='True', dim=2, level=0.99)
+ type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, level=0.99)
 }

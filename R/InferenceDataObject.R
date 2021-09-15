@@ -51,9 +51,9 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'  computed only in Wald or Speckman implementation.
 #'@param type A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
 #''wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.
-#'@param exact A string used to decide the method used to estimate the statistics variance.
-#'The possible values are: 'True' and 'False'(default). In the first case the evaluation is exact but computationally expensive.
-#'In the second case an approximate method is used, leading to a lower accuracy, but faster computation.
+#'@param exact A logical used to decide the method used to estimate the statistics variance.
+#'The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
+#'In the second case the evaluation is exact but computationally expensive.
 #'@param dim Number of the covariates, defaulted to NULL. (Must be set by the user)
 #'@param coeff A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
 #'in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.
@@ -69,7 +69,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@usage inferenceDataObjectBuilder<-function(test = NULL, 
 #'interval = NULL, 
 #'type = 'wald', 
-#'exact = "False", 
+#'exact = FALSE, 
 #'dim, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
@@ -80,16 +80,16 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' 
 #' 
 #' @examples 
-#' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = 'True', dim = 4);
+#' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 4);
 #' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
 #' obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
-#'  type=c('wald','speckman','eigen-sign-flip','speckman'),exact='True', dim=2, level=0.99)
+#'  type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, level=0.99)
 
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
                                 type = "wald", 
-                                exact = "False", 
+                                exact = F, 
                                 dim = NULL, 
                                 coeff = NULL, 
                                 beta0 = NULL, 
@@ -119,13 +119,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'type' is zero dimensional, should be a vector taking values among 'wald', 'speckman' or 'eigen-sign-flip'")
   }
   
-  if(exact!="False"){
-    if(class(exact)!="character")
-      stop("'exact' should be either 'True' or 'False'")
+  if(exact != F){
+    if(class(exact)!="logical")
+      stop("'exact' should be either TRUE or FALSE ")
     if(length(exact)==0)
-      stop("'exact' is zero dimensional, should be either 'True' or 'False'")
-    if(exact!="True")
-      stop("'exact' should be either 'True' or 'False'")
+      stop("'exact' is zero dimensional, should be either TRUE or FALSE")
+    if(exact!=T)
+      stop("'exact' should be either TRUE or FALSE")
     exact_numeric=as.integer(1)
   }else{
     exact_numeric=as.integer(2)
@@ -317,7 +317,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     n_flip <- as.integer(1000)
   }
   
-  if(exact=='False'){
+  if(exact==FALSE){
     if(tol_fspai <= 0 )                                                
       stop("tol_fspai should be a positive value")
   }

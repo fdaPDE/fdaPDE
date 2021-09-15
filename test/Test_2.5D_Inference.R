@@ -72,14 +72,14 @@ lambda = 10^seq(-4,-2,by=0.25)
 # Create inferenceDataObjects for the tests
 
 inf_Obj_1 <- inferenceDataObjectBuilder(test = c('one-at-the-time', 'simultaneous', 'one-at-the-time'), interval = c('one-at-the-time','bonferroni','none'),
-                                        type=c('wald', 'speckman','eigen-sign-flip'), exact='True', dim=1, beta0 = 1)
+                                        type=c('wald', 'speckman','eigen-sign-flip'), exact=T, dim=1, beta0 = 1)
 
 ### The following example should give a warning in no-fspai-dev library, performing exact inference in turn of fspai. 
 inf_Obj_2 <- inferenceDataObjectBuilder(test = c('one-at-the-time', 'one-at-the-time'), interval = c('simultaneous','one-at-the-time'),
-                                        type=c('wald', 'speckman'), exact='False', dim=1, beta0 = 1, tol_fspai = 0.005)
+                                        type=c('wald', 'speckman'), exact=F, dim=1, beta0 = 1, tol_fspai = 0.005)
 
 inf_Obj_3 <- inferenceDataObjectBuilder(test = c('one-at-the-time', 'simultaneous', 'one-at-the-time'), interval = c('one-at-the-time','bonferroni','none'),
-                                        type=c('wald', 'speckman','eigen-sign-flip'), exact='True', dim=1, beta0 = 0)
+                                        type=c('wald', 'speckman','eigen-sign-flip'), exact=T, dim=1, beta0 = 0)
 
 #### Test 1.1: Exact inference, accepting H0
 output_CPP_1<-smooth.FEM(locations = projected_locations, observations=data, 
