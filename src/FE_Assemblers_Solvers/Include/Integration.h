@@ -17,6 +17,18 @@ struct IntegratorEdgeP1{
     };
 };
 
+//Cavalieri-Simpson Rule
+struct IntegratorEdgeP2{
+    static constexpr UInt NNODES = 3;
+    static constexpr std::array<Real,NNODES> WEIGHTS{{1., 1., 2.0/3.0}};
+    //Point locations (in barycentric coordinates)
+    static constexpr std::array<Point<1>,NNODES> NODES{
+        Point<1>({0.0}),
+        Point<1>({1.0}),
+        Point<1>({0.5})
+    };
+};
+
 struct IntegratorTriangleP1{
 	//Number of nodes
 	static constexpr UInt NNODES = 1;
@@ -146,6 +158,12 @@ struct IntegratorTetrahedronP4{
 		Point<3>({0.405500312564648,0.094499687435353,0.405500312564648}),
 		Point<3>({0.094499687435353,0.405500312564648,0.405500312564648})
 	};
+};
+
+//mydim == 1
+struct ElementLineIntegratorHelper{
+    template<UInt NNODES>
+    using Integrator = typename std::conditional<NNODES == 2, IntegratorEdgeP1, IntegratorEdgeP2>::type;
 };
 
 struct ElementIntegratorHelper{
