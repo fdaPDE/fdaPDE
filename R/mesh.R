@@ -863,13 +863,39 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
   if(order == 1 && ncol(edges) == 2){
     outCPP <- .Call("CPP_EdgeMeshHelper", edges, nodes, PACKAGE = "fdaPDE") 
     
-    out <- list(nodes = nodes, nodesmarkers=outCPP[[3]], nodesattributes=nodesattributes,
+    out <- list(nodes = nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
                 edges=edges+1,
-                order=order, neighbors=outCPP[[4]]) 
+                order=order, neighbors=outCPP[[3]]) 
     
   }
   
   
-  class(out) <- "mesh1D"
+  class(out) <- "mesh.1D"
   return(out)
 }  
+
+#' Create a \code{mesh.1D} object by splitting each edge of a given mesh into two subedges.
+#'
+#' @param mesh a \code{mesh.1D} object to split
+#' @return An object of class mesh.1D with splitted edges
+#' @export
+refine.by.splitting.mesh.1D <- function (mesh=NULL){
+  if(is.null(mesh))
+    stop("No mesh passed as input!")
+  if(class(mesh)!='mesh.1D')
+    stop("Wrong mesh class! Should be mesh.1D")
+  
+  # Indexes in C++ starts from 0, in R from 1, needed transformations!
+  mesh$edges = mesh$edges - 1
+  
+  storage.mode(mesh$edges) <- "integer"
+  storage.mode(mesh$nodes) <- "double"
+  
+  if(mesh$order==1){
+    outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges[,1:2], mesh$nodes)
+    splittedmesh<-create.mesh.1D(nodes=rbind(mesh$nodes, outCPP[[2]]), edges=outCPP[[1]])
+  }
+  
+  return(splittedmesh)
+  
+}

@@ -6,6 +6,17 @@
 #include "../../FdaPDE.h"
 #include "../../Mesh/Include/Point.h"
 
+//Trap Rule
+struct IntegratorEdgeP1{
+    static constexpr UInt NNODES = 2;
+    static constexpr std::array<Real,NNODES> WEIGHTS{{0.5, 0.5}};
+    //Point locations (in barycentric coordinates)
+    static constexpr std::array<Point<1>,NNODES> NODES{
+        Point<1>({0.0}),
+        Point<1>({1.0})
+    };
+};
+
 struct IntegratorTriangleP1{
 	//Number of nodes
 	static constexpr UInt NNODES = 1;
