@@ -185,7 +185,7 @@ void simplex_container<mydim>::order2extend(SEXP Routput, UInt index) const {
 }
 
 //Need specialization, one element could have at most (#edges - 1) neighbors
-
+/*
 template<>
 void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
   
@@ -204,7 +204,7 @@ void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
     UInt k = num_nodes*(num_nodes - 1)/2 - (num_nodes - i) *(num_nodes- i - 1)/2 + j - i - 1;
     adjency_matrix[k] = 1;
     }
-  /*
+  // 
   //computing neighbors matrix (left-neighbors only)
   SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(INTSXP, elements.size(),elements.size()) );
   RIntegerMatrix neighbors(VECTOR_ELT(Routput, index + 1));
@@ -224,7 +224,46 @@ void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
       }
     }
     prev=curr;
-  }*/
+  }
 }
+*/
+
+
+template<>
+void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
+  
+  //SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(VECSXP, elements.nrows(), 2));
+
+  //     * - - - - *        edge
+  //     0         1        nodes
+  //    (1)       (0)       sides
+  //each row contains two lists of the edges to which the node belongs
+  //j = 0 there is the "left" list (current node is on the left of the edge)
+  //j = 1 there is the "right" list(current node is on the right of the edge)
+  HelperMatrix<int> nodes_neighbors(nodes.nrows(),2);
+
+  HelperMatrix<int> neighbors(elements.nrows(),2);
+
+  for(const auto& curr : simplexes){
+      nodes_neighbors(curr[0],curr.j()).push_back( curr.i() ); //Brutto
+  }
+  //filling neighbors matrix
+  helper_neighbors( neighbors, nodes_neighbors);
+
+  auto tmp = compute_number_elements(neighbors);
+  RIntegerMatrix number_neighbors(tmp.data(), elements.nrows(), 2);
+
+  //filling R Data Structure
+  SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(VECSXP, elements.nrows(), 2));
+  for(int i=0; i<2*elements.nrows(); ++i){
+      SET_VECTOR_ELT( VECTOR_ELT(Routput, index), i , Rf_allocMatrix(INTSXP, 1, number_neighbors[i]));
+      RIntegerMatrix neigh( VECTOR_ELT( VECTOR_ELT(Routput, index), i ));
+      for(int j=0; j<number_neighbors[i]; ++j) //BRUTTO, NB "+1" perché numerazione in R parte da 1
+          neigh[j] = neighbors[i][j] + 1;
+
+    }
+}
+
+
 
 #endif

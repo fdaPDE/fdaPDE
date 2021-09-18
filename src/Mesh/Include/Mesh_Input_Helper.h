@@ -5,6 +5,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include "Helper_Matrix.h"
 
 template<UInt mydim>
 class simplex{
@@ -73,7 +74,6 @@ public:
   void assemble_subs(SEXP Routput, UInt index) const;
   void compute_neighbors(SEXP Routput, UInt index) const;
   void order2extend(SEXP Routput, UInt index) const;
-
 
 private:
   simplex_container_t simplexes;
