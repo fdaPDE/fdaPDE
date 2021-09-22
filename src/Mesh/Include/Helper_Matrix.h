@@ -8,22 +8,22 @@ public:
     using value_type = std::vector<T>;
     using container_type = std::vector< value_type >;
 
-    HelperMatrix( const container_type& matr, int nrows, int ncols): matr_(matr),nrows_(nrows),ncols_(ncols){}
+    HelperMatrix( const container_type& matr, UInt nrows, UInt ncols): matr_(matr),nrows_(nrows),ncols_(ncols){}
 
-    HelperMatrix(int nrows, int ncols);
+    HelperMatrix(UInt nrows, UInt ncols);
 
-    value_type& operator[](int j);
-    const value_type& operator[] (int j) const;
+    value_type& operator[](UInt j);
+    const value_type& operator[] (UInt j) const;
 
-    value_type& operator()(int i , int j);
-    const value_type& operator() (int i, int j) const;
+    value_type& operator()(UInt i , UInt j);
+    const value_type& operator() (UInt i, UInt j) const;
 
-    const int nrows() const { return nrows_;};
-    const int ncols() const { return ncols_;};
+    const UInt nrows() const { return nrows_;};
+    const UInt ncols() const { return ncols_;};
 
-    int size(int i )const;
-    int size(int i, int j) const;
-    int size() const;
+    UInt size(UInt i )const;
+    UInt size(UInt i, UInt j) const;
+    UInt size() const;
 
     //debugging
     template <typename U>
@@ -31,14 +31,14 @@ public:
 
 private:
     container_type matr_;
-    const int nrows_;
-    const int ncols_;
+    const UInt nrows_;
+    const UInt ncols_;
 
 
 };
 
 template< typename T>
-HelperMatrix<T>::HelperMatrix(int nrows, int ncols):nrows_(nrows),ncols_(ncols){
+HelperMatrix<T>::HelperMatrix(UInt nrows, UInt ncols):nrows_(nrows),ncols_(ncols){
 
     //fill the container with empty value_type
     //value type must have a default constructor
@@ -46,28 +46,28 @@ HelperMatrix<T>::HelperMatrix(int nrows, int ncols):nrows_(nrows),ncols_(ncols){
 }
 
 template< typename T>
-typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator[](int j){
+typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator[](UInt j){
     return matr_[j];
 }
 
 template< typename T>
-const typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator[] (int j) const{
+const typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator[] (UInt j) const{
     return matr_[j];
 }
 template<typename T>
-typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator()(int i , int j){
+typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator()(UInt i , UInt j){
     return matr_[i+nrows_*j];
 }
 
 template<typename T>
-const typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator() (int i, int j) const{
+const typename HelperMatrix<T>::value_type& HelperMatrix<T>::operator() (UInt i, UInt j) const{
     return matr_[i+nrows_*j];
 }
 
 template <typename T>
 std::ostream& operator<< (std::ostream& stream_, const HelperMatrix<T>& matr_){
-    for(int i = 0; i < matr_.nrows_; ++i){
-        for(int j =0; j< matr_.ncols_; ++j ) {
+    for(UInt i = 0; i < matr_.nrows_; ++i){
+        for(UInt j =0; j< matr_.ncols_; ++j ) {
             stream_ << "(" << i << ", " << j << ")" << " :";
             for (const auto elem : matr_(i, j))
                 stream_ << elem << " ";
@@ -78,33 +78,33 @@ std::ostream& operator<< (std::ostream& stream_, const HelperMatrix<T>& matr_){
 }
 
 template < typename T>
-int HelperMatrix<T>::size(int i )const{
+UInt HelperMatrix<T>::size(UInt i )const{
     return matr_[i].size();
 }
 
 template < typename T>
-int HelperMatrix<T>::size(int i, int j) const{
+UInt HelperMatrix<T>::size(UInt i, UInt j) const{
     return matr_[i + nrows_*j].size();
 }
 
 template< typename T>
-int HelperMatrix<T>::size() const{
+UInt HelperMatrix<T>::size() const{
     return nrows_*ncols_;
 }
 
-//da rinominare
-
+//compute the lengths of each vector in matrix_
 template <typename T>
-std::vector<int> compute_number_elements(const HelperMatrix<T>& matrix_){
-    std::vector<int> result(matrix_.size(),0);
-    for(int i=0; i<matrix_.size(); ++i)
-        result[i] = matrix_.size(i);
-    return result;
+std::vector<UInt> compute_lengths(const HelperMatrix<T>& matrix_){
+    std::vector<UInt> lengths(matrix_.size(),0);
+    for(UInt i=0; i<matrix_.size(); ++i)
+        lengths[i] = matrix_.size(i);
+    return lengths;
 }
 
+//Fills the neighbors matrix
 template <typename T>
 void helper_neighbors( HelperMatrix<T>& result, const HelperMatrix<T>& node_list){
-    for(int node = 0; node < node_list.nrows(); ++node){
+    for(UInt node = 0; node < node_list.nrows(); ++node){
         const typename HelperMatrix<T>::value_type& curr_right = node_list(node,0); //questo vector<int> // lista di lati collegati
         // a node da parte "0", i.e da hanno il nodo allora loro dx
         const typename HelperMatrix<T>::value_type& curr_left = node_list(node,1); //questo vector<int> // lista di lati collegati
@@ -112,6 +112,7 @@ void helper_neighbors( HelperMatrix<T>& result, const HelperMatrix<T>& node_list
         helper_neigh_same_side_(result,curr_right,0);
         helper_neigh_same_side_(result,curr_left,1);
 
+        //filling different sides
         for(const auto& i : curr_right)
             for(const auto& j : curr_left){
                 result(i,0).push_back(j);
@@ -120,12 +121,13 @@ void helper_neighbors( HelperMatrix<T>& result, const HelperMatrix<T>& node_list
     }
 }
 
+//This function fills the neighbors on the same side
 template <typename T>
-void helper_neigh_same_side_( HelperMatrix<T>& result, const typename HelperMatrix<T>::value_type& curr,int idx){
+void helper_neigh_same_side_( HelperMatrix<T>& result, const typename HelperMatrix<T>::value_type& curr,UInt idx){
 
     if( !curr.empty() ) {
-        for (int i = 0; i < curr.size() - 1; ++i) {
-            for (int j = i + 1; j < curr.size(); ++j) {
+        for (UInt i = 0; i < curr.size() - 1; ++i) {
+            for (UInt j = i + 1; j < curr.size(); ++j) {
                 result(curr[i], idx).push_back(curr[j]);
                 result(curr[j], idx).push_back(curr[i]);
             }

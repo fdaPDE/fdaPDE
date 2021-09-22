@@ -868,8 +868,23 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
                 order=order, neighbors=outCPP[[3]]) 
     
   }
+  else if(order==2 && ncol(edges) == 3){
+    outCPP <- .Call("CPP_EdgeMeshHelper", edges[,1:2], nodes, PACKAGE = "fdaPDE")
+    
+    out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
+                edges=edges+1,
+                order=order, neighbors=outCPP[[3]])
   
-  
+  }
+  else if( order==2 && ncol(edges)==2){
+    print("You set order=2 but passed a matrix of edges with just 2 columns. The midpoints for each edge will be computed.")
+    outCPP <- .Call("CPP_EdgeMeshOrder2", edges[,1:2], nodes, PACKAGE = "fdaPDE")
+    edges = cbind( edges , outCPP[[5]])
+    nodes=rbind(nodes, outCPP[[4]])
+    out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
+                edges=edges+1,
+                order=order, neighbors=outCPP[[3]])
+  }
   class(out) <- "mesh.1D"
   return(out)
 }  
@@ -895,7 +910,11 @@ refine.by.splitting.mesh.1D <- function (mesh=NULL){
     outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges[,1:2], mesh$nodes)
     splittedmesh<-create.mesh.1D(nodes=rbind(mesh$nodes, outCPP[[2]]), edges=outCPP[[1]])
   }
-  
+  else if(mesh$order==2){
+    nnodes<-max(mesh$edges[,1:2])+1
+    outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges[,1:2], mesh$nodes[1:nnodes,])
+    splittedmesh <- create.mesh.1D(nodes= rbind(mesh$nodes[1:nnodes,], outCPP[[2]]), edges = outCPP[[1]], order = 2)
+  }
   return(splittedmesh)
-  
 }
+

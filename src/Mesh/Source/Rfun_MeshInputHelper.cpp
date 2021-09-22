@@ -195,7 +195,36 @@ SEXP CPP_EdgeMeshHelper(SEXP Redges, SEXP Rnodes){
     UNPROTECT(1);
     
     return result;
-  }
+}
+
+SEXP CPP_EdgeMeshOrder2(SEXP Redges, SEXP Rnodes){
+
+    static constexpr std::array<UInt, 2> NODES_ORDERING = {1,0};
+
+
+    SEXP result = NILSXP;
+    result = PROTECT(Rf_allocVector(VECSXP, 5));
+
+    {
+        simplex_container<1> nodes_list(Redges, Rnodes, NODES_ORDERING);
+        nodes_list.assemble_subs(result, 0);
+        nodes_list.mark_boundary(result, 1);
+        nodes_list.compute_neighbors(result, 2);
+        compute_midpoints(result, Rnodes,Redges,3);
+
+        //midpoints global numbering
+        SET_VECTOR_ELT(result,4, Rf_allocMatrix(INTSXP, nodes_list.get_num_elements(),1 ));
+        RIntegerMatrix midpoints(VECTOR_ELT(result,4));
+        UInt num_points = nodes_list.get_num_points();
+        for(UInt i=0; i<nodes_list.get_num_elements(); ++i, ++num_points)
+            midpoints[i]=num_points;
+    }
+
+
+    UNPROTECT(1);
+
+    return result;
+}
 
 SEXP CPP_EdgeMeshSplit(SEXP Redges, SEXP Rnodes){
   
@@ -203,7 +232,10 @@ SEXP CPP_EdgeMeshSplit(SEXP Redges, SEXP Rnodes){
   result = PROTECT(Rf_allocVector(VECSXP, 2));
   
   {
+    //split1D -> 0: splitted_edges
+    //        -> 1: vectors of global midpoints numbers
     split1D(result, Rnodes, Redges, 0);
+    // midpoints coordinates
     compute_midpoints(result, Rnodes, Redges, 1);
   }
   

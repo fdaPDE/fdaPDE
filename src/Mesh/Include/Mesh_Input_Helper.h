@@ -238,17 +238,17 @@ void split1D(SEXP Routput, SEXP Rnodes, SEXP Redges, UInt index){
   const RNumericMatrix nodes(Rnodes);
   
   SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(INTSXP, 2*edges.nrows(), 2));
-  UInt num_nodes = nodes.nrows();
+  UInt num_points = nodes.nrows();
   RIntegerMatrix splitted_edges(VECTOR_ELT(Routput, index));
-  
+
   //Every edges is splitted in two subedges 
   // 1----2 ---> 1--3 3--2
-  for(UInt i = 0; i < edges.nrows(); ++i, ++num_nodes){
+  for(UInt i = 0; i < edges.nrows(); ++i, ++num_points){
       //Indexes in R starts from 1, in C++ from 0, needed transformations!
       splitted_edges(2*i,0) = edges(i,0) + 1;
-      splitted_edges(2*i,1) = num_nodes + 1;
-    
-      splitted_edges(2*i+1, 0) = num_nodes + 1;
+      splitted_edges(2*i,1) = num_points+1;
+
+      splitted_edges(2*i+1, 0) = num_points+1;
       splitted_edges(2*i+1, 1) = edges(i,1) + 1;
   }
   
