@@ -21,10 +21,6 @@ public:
     const UInt nrows() const { return nrows_;};
     const UInt ncols() const { return ncols_;};
 
-    UInt size(UInt i )const;
-    UInt size(UInt i, UInt j) const;
-    UInt size() const;
-
     //debugging
     template <typename U>
     friend std::ostream& operator<< (std::ostream&, const HelperMatrix<U>&);
@@ -77,62 +73,65 @@ std::ostream& operator<< (std::ostream& stream_, const HelperMatrix<T>& matr_){
     return stream_;
 }
 
-template < typename T>
-UInt HelperMatrix<T>::size(UInt i )const{
-    return matr_[i].size();
-}
+//RIntegerMatrix specialization
+template<>
+class HelperMatrix<RIntegerMatrix>{
+    public:
+        using value_type = RIntegerMatrix;
+        using container_type = std::vector< value_type >;
 
-template < typename T>
-UInt HelperMatrix<T>::size(UInt i, UInt j) const{
-    return matr_[i + nrows_*j].size();
-}
+        // Robject must be filled!
+        HelperMatrix(SEXP Robject);
 
-template< typename T>
-UInt HelperMatrix<T>::size() const{
-    return nrows_*ncols_;
-}
+        // Robject(i,j) is allocated according to lengths
+        HelperMatrix(SEXP Robject, const RIntegerMatrix& lenghts);
 
-//compute the lengths of each vector in matrix_
-template <typename T>
-std::vector<UInt> compute_lengths(const HelperMatrix<T>& matrix_){
-    std::vector<UInt> lengths(matrix_.size(),0);
-    for(UInt i=0; i<matrix_.size(); ++i)
-        lengths[i] = matrix_.size(i);
-    return lengths;
-}
+        value_type& operator[](UInt j);
+        const value_type& operator[] (UInt j) const;
 
-//Fills the neighbors matrix
-template <typename T>
-void helper_neighbors( HelperMatrix<T>& result, const HelperMatrix<T>& node_list){
-    for(UInt node = 0; node < node_list.nrows(); ++node){
-        const typename HelperMatrix<T>::value_type& curr_right = node_list(node,0); //questo vector<int> // lista di lati collegati
-        // a node da parte "0", i.e da hanno il nodo allora loro dx
-        const typename HelperMatrix<T>::value_type& curr_left = node_list(node,1); //questo vector<int> // lista di lati collegati
-        // a node da parte "1", i.e da hanno il nodo allora loro sx
-        helper_neigh_same_side_(result,curr_right,0);
-        helper_neigh_same_side_(result,curr_left,1);
+        value_type& operator()(UInt i , UInt j);
+        const value_type& operator() (UInt i, UInt j) const;
 
-        //filling different sides
-        for(const auto& i : curr_right)
-            for(const auto& j : curr_left){
-                result(i,0).push_back(j);
-                result(j,1).push_back(i);
-            }
-    }
-}
+        const UInt nrows() const { return nrows_;};
+        const UInt ncols() const { return ncols_;};
 
-//This function fills the neighbors on the same side
-template <typename T>
-void helper_neigh_same_side_( HelperMatrix<T>& result, const typename HelperMatrix<T>::value_type& curr,UInt idx){
+    private:
+        container_type matr_;
+        const UInt nrows_;
+        const UInt ncols_;
+};
 
-    if( !curr.empty() ) {
-        for (UInt i = 0; i < curr.size() - 1; ++i) {
-            for (UInt j = i + 1; j < curr.size(); ++j) {
-                result(curr[i], idx).push_back(curr[j]);
-                result(curr[j], idx).push_back(curr[i]);
-            }
+HelperMatrix<RIntegerMatrix>::HelperMatrix(SEXP Robject):nrows_( INTEGER(Rf_getAttrib(Robject, R_DimSymbol))[0] ),
+                                                         ncols_( INTEGER(Rf_getAttrib(Robject, R_DimSymbol))[1] ){
+    matr_.reserve(nrows_*ncols_);
+    for(UInt i=0; i<nrows_*ncols_; ++i){
+            matr_.emplace_back(VECTOR_ELT(Robject,i));
         }
+}
+
+HelperMatrix<RIntegerMatrix>::HelperMatrix(SEXP Robject, const RIntegerMatrix& lengths):nrows_( INTEGER(Rf_getAttrib(Robject, R_DimSymbol))[0] ),
+                                                                                        ncols_( INTEGER(Rf_getAttrib(Robject, R_DimSymbol))[1] ){
+    matr_.reserve(nrows_*ncols_);
+    for(UInt i=0; i<nrows_*ncols_; ++i){
+        SET_VECTOR_ELT(Robject,i,Rf_allocMatrix(INTSXP,1,lengths[i]));
+        matr_.emplace_back(VECTOR_ELT(Robject,i));
     }
+}
+
+HelperMatrix<RIntegerMatrix>::value_type& HelperMatrix<RIntegerMatrix>::operator[](UInt j){
+    return matr_[j];
+}
+
+const HelperMatrix<RIntegerMatrix>::value_type& HelperMatrix<RIntegerMatrix>::operator[] (UInt j) const{
+    return matr_[j];
+}
+
+HelperMatrix<RIntegerMatrix>::value_type& HelperMatrix<RIntegerMatrix>::operator()(UInt i , UInt j){
+    return matr_[i+nrows_*j];
+}
+
+const HelperMatrix<RIntegerMatrix>::value_type& HelperMatrix<RIntegerMatrix>::operator()(UInt i , UInt j)const{
+    return matr_[i+nrows_*j];
 }
 
 #endif //__HELPER_MATRIX_H__
