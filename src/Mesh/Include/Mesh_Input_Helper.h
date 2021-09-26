@@ -75,6 +75,12 @@ public:
   void compute_neighbors(SEXP Routput, UInt index) const;
   void order2extend(SEXP Routput, UInt index) const;
 
+
+  // Return a vector containing the indexes (greater than or equal to index)
+  // of all the simplexes sharing the same simplex (a node in 1D, an edge in 2D, a face in 3D)
+  // It is supposed to be used in mydim==1
+  // NB after sorting of simplexes all the edges sharing a node are in a row!
+  std::vector<UInt> ranges(UInt index) const;
 private:
   simplex_container_t simplexes;
   std::vector<bool> duplicates;
@@ -254,6 +260,8 @@ void split1D(SEXP Routput, SEXP Rnodes, SEXP Redges, UInt index){
   
   
 }
+
+
 
 #include "Mesh_Input_Helper_imp.h"
 

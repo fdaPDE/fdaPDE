@@ -183,7 +183,7 @@ SEXP CPP_EdgeMeshHelper(SEXP Redges, SEXP Rnodes){
     
     
     SEXP result = NILSXP;
-    result = PROTECT(Rf_allocVector(VECSXP, 3));
+    result = PROTECT(Rf_allocVector(VECSXP, 4));
     
     {
       simplex_container<1> nodes_list(Redges, Rnodes, NODES_ORDERING);
@@ -203,18 +203,19 @@ SEXP CPP_EdgeMeshOrder2(SEXP Redges, SEXP Rnodes){
 
 
     SEXP result = NILSXP;
-    result = PROTECT(Rf_allocVector(VECSXP, 5));
+    result = PROTECT(Rf_allocVector(VECSXP, 6));
 
     {
         simplex_container<1> nodes_list(Redges, Rnodes, NODES_ORDERING);
         nodes_list.assemble_subs(result, 0);
         nodes_list.mark_boundary(result, 1);
+        //compute_neighbors fills index 2 and index 3
         nodes_list.compute_neighbors(result, 2);
-        compute_midpoints(result, Rnodes,Redges,3);
+        compute_midpoints(result, Rnodes,Redges,4);
 
         //midpoints global numbering
-        SET_VECTOR_ELT(result,4, Rf_allocMatrix(INTSXP, nodes_list.get_num_elements(),1 ));
-        RIntegerMatrix midpoints(VECTOR_ELT(result,4));
+        SET_VECTOR_ELT(result,5, Rf_allocMatrix(INTSXP, nodes_list.get_num_elements(),1 ));
+        RIntegerMatrix midpoints(VECTOR_ELT(result,5));
         UInt num_points = nodes_list.get_num_points();
         for(UInt i=0; i<nodes_list.get_num_elements(); ++i, ++num_points)
             midpoints[i]=num_points;

@@ -184,35 +184,67 @@ void simplex_container<mydim>::order2extend(SEXP Routput, UInt index) const {
   }
 }
 
+template<UInt mydim>
+std::vector<UInt> simplex_container<mydim>::ranges(UInt index) const{
+    static_assert(mydim==1,
+                  "ERROR! RANGES IS INTENDED FOR POINTS CONTAINERS ONLY! See mesh_input_helper_imp");
+
+    std::vector<UInt> res;
+
+     UInt curr_idx = index;
+     while( curr_idx < simplexes.size() && simplexes[index] == simplexes[curr_idx] )
+     {
+        //res is never empty!
+        res.push_back( curr_idx );
+        ++curr_idx;
+     }
+    return res;
+}
+
+//Specialization is needed.
+//One could not set a priori the numbers of neighbors that each element has
 template<>
 void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
-  
-  //SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(VECSXP, elements.nrows(), 2));
 
-  //     * - - - - *        edge
-  //     0         1        nodes
-  //    (1)       (0)       sides
-  //each row contains two lists of the edges to which the node belongs
-  //j = 0 there is the "left" list (current node is on the left of the edge)
-  //j = 1 there is the "right" list(current node is on the right of the edge)
-  HelperMatrix<UInt> nodes_neighbors(nodes.nrows(),2);
-  // matrix of neighbors
-  HelperMatrix<UInt> neighbors(elements.nrows(),2);
+    //Matrix storing how many neighbors each element has, according to the side
+    SET_VECTOR_ELT(Routput,index,Rf_allocMatrix(INTSXP,elements.nrows(),2));
+    RIntegerMatrix lengths(VECTOR_ELT(Routput,index));
 
-  for(const auto& curr : simplexes){
-      nodes_neighbors(curr[0],curr.j()).push_back( curr.i() );
-  }
-  //filling neighbors matrix
-  helper_neighbors( neighbors, nodes_neighbors);
-  std::vector<UInt> number_neighbors = compute_lengths(neighbors);
+    for(UInt i : this->distinct_indexes){
+        //vector of all indexes of simplexes sharing  the same node (i.e. simplexes[distinc_indexes[i]].node[0])
+        //nb) currents is never empty.
+        std::vector<UInt> currents = this->ranges(i);
+        UInt tot_neighbors =  currents.size() - 1;
+        for( UInt idx : currents ){
+            lengths( simplexes[idx].i() , simplexes[idx].j() ) = tot_neighbors;
+        }
+    }
 
-  //filling R Data Structure
-  SET_VECTOR_ELT(Routput, index, Rf_allocMatrix(VECSXP, elements.nrows(), 2));
-  for(UInt i=0; i<2*elements.nrows(); ++i){
-      SET_VECTOR_ELT( VECTOR_ELT(Routput, index), i , Rf_allocMatrix(INTSXP, 1, number_neighbors[i]));
-      RIntegerMatrix neigh( VECTOR_ELT( VECTOR_ELT(Routput, index), i ));
-      for(UInt j=0; j<number_neighbors[i]; ++j)
-          neigh[j] = neighbors[i][j] + 1;   //Indexes in R starts from 1, in C++ from 0, needed transformations!
+
+    //
+    //     * - - e1 - - * - - e2 - - *        edges
+    //     0           1  0          1 nodes (local numbering)
+    //    (1)        (0)  (1)       (0) sides (local numbering)
+    //each row of neighbors matrix contains two lists of edges
+    //j = 0 there is the "left" list
+    //j = 1 there is the "right" list
+    SET_VECTOR_ELT(Routput,index+1,Rf_allocMatrix(VECSXP,elements.nrows(),2));
+    HelperMatrix<RIntegerMatrix> neighbors(VECTOR_ELT(Routput,index+1),lengths);
+
+    //Filling neighbors matrix
+    for(UInt i : this->distinct_indexes) {
+        std::vector <UInt> currents = this->ranges(i);
+
+        for (UInt j: currents) {
+            UInt pos = 0;
+            for (UInt k: currents) {
+                if (k != j) {
+                    //Indexes in R starts from 1, in C++ from 0, needed transformations!
+                    neighbors(simplexes[j].i(), simplexes[j].j())[pos] = simplexes[k].i() + 1;
+                    ++pos;
+                }
+            }
+        }
     }
 }
 
