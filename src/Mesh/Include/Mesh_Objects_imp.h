@@ -416,7 +416,7 @@ inline Real Element<NNODES,1,2>::evaluate_point(const Point<2>& point, const Eig
 template <UInt NNODES>
 inline Real Element<NNODES,1,2>::integrate(const Eigen::Matrix<Real,NNODES,1>& coefficients) const
 {
-    using Integrator = typename ElementLineIntegratorHelper::Integrator<NNODES>;
+    using Integrator = typename ElementIntegratorHelper::Integrator<NNODES,1>;
     Real integral=0.;
     for (UInt i=0; i<Integrator::NNODES; ++i)
         integral += Integrator::WEIGHTS[i]*evaluate_point(makeBaryCoord(Integrator::NODES[i].eigenView()), coefficients);

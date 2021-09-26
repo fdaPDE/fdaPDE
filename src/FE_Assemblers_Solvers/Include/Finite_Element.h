@@ -1,4 +1,4 @@
-#ifndef __FINITE_ELEMENT_H__
+ #ifndef __FINITE_ELEMENT_H__
 #define __FINITE_ELEMENT_H__
 
 #include "../../FdaPDE.h"

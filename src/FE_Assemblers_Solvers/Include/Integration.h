@@ -159,18 +159,19 @@ struct IntegratorTetrahedronP4{
 		Point<3>({0.094499687435353,0.405500312564648,0.405500312564648})
 	};
 };
-
+/*
 //mydim == 1
 struct ElementLineIntegratorHelper{
     template<UInt NNODES>
     using Integrator = typename std::conditional<NNODES == 2, IntegratorEdgeP1, IntegratorEdgeP2>::type;
 };
-
+*/
 struct ElementIntegratorHelper{
 	template<UInt NNODES, UInt mydim>
-	using Integrator = typename std::conditional<mydim==2,
-												typename std::conditional<NNODES==3, IntegratorTriangleP1, IntegratorTriangleP2>::type,
-												typename std::conditional<NNODES==4, IntegratorTetrahedronP1, IntegratorTetrahedronP2>::type>::type;
+	using Integrator =
+            typename std::conditional<mydim==1, typename std::conditional<NNODES == 2, IntegratorEdgeP1, IntegratorEdgeP2>::type,
+                                                typename std::conditional<mydim==2, typename std::conditional<NNODES==3, IntegratorTriangleP1, IntegratorTriangleP2>::type,
+                                                                                    typename std::conditional<NNODES==4, IntegratorTetrahedronP1, IntegratorTetrahedronP2>::type>::type>::type;
 };
 
 struct SpaceIntegratorHelper{
