@@ -229,7 +229,7 @@ void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
     //j = 0 there is the "left" list
     //j = 1 there is the "right" list
     SET_VECTOR_ELT(Routput,index+1,Rf_allocMatrix(VECSXP,elements.nrows(),2));
-    HelperMatrix<RIntegerMatrix> neighbors(VECTOR_ELT(Routput,index+1),lengths);
+    RIntVectorMatrix neighbors(VECTOR_ELT(Routput,index+1),lengths);
 
     //Filling neighbors matrix
     for(UInt i : this->distinct_indexes) {

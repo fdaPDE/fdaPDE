@@ -5,7 +5,6 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
-#include "Helper_Matrix.h"
 
 template<UInt mydim>
 class simplex{

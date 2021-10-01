@@ -288,9 +288,9 @@ public:
 
     // Note: these don't really mean anything, they're just here for compatibility
     // with the adtree implementation
-    static constexpr UInt dp() {return 3;} //  2 (?!)
-    static constexpr UInt dt() {return 6;} // 4  (?!)
-    static constexpr UInt coordsize() {return 9;} // ... (?!)
+    static constexpr UInt dp() {return 2;} //  physical dim         (?!)
+    static constexpr UInt dt() {return 4;} //  2*physical dim       (?!)
+    static constexpr UInt coordsize() {return 4;} // nvertex*ndim   (?!)
 
     //! This constructor creates an "empty" Element, with an Id Not Valid
     Element()=default;

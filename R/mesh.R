@@ -860,21 +860,40 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
   
   out <- NULL
   
+  # length(out) == 11, according to create.mesh.2.5D / create.mesh.3D
+  
   if(order == 1 && ncol(edges) == 2){
     outCPP <- .Call("CPP_EdgeMeshHelper", edges, nodes, PACKAGE = "fdaPDE") 
     
+    #out <- list(nodes = nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
+    #            edges=edges+1,
+    #            order=order, neighbors=outCPP[[4]], num_neighbors=outCPP[[3]]) 
     out <- list(nodes = nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
-                edges=edges+1,
-                order=order, neighbors=outCPP[[4]], num_neighbors=outCPP[[3]]) 
+                edges=edges+1)
+    
+    out[[9]]<- outCPP[[4]]
+    names(out)[9] = "neighbors"
+    
+    out[[11]]<- order
+    names(out)[11] <- "order"                        
     
   }
   else if(order==2 && ncol(edges) == 3){
     outCPP <- .Call("CPP_EdgeMeshHelper", edges[,1:2], nodes, PACKAGE = "fdaPDE")
     
-    out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
-                edges=edges+1,
-                order=order,neighbors=outCPP[[4]], num_neighbors=outCPP[[3]])
-  
+    #out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
+    #            edges=edges+1,
+    #            order=order,neighbors=outCPP[[4]], num_neighbors=outCPP[[3]])
+    
+    out <- list(nodes = nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
+                edges=edges+1)
+    
+    out[[9]]<- outCPP[[4]]
+    names(out)[9] = "neighbors"
+    
+    out[[11]]<- order
+    names(out)[11] <- "order"                        
+    
   }
   else if( order==2 && ncol(edges)==2){
     print("You set order=2 but passed a matrix of edges with just 2 columns. The midpoints for each edge will be computed.")
@@ -882,9 +901,13 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
     edges = cbind( edges , outCPP[[6]])
     nodes=rbind(nodes, outCPP[[5]])
     out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
-                edges=edges+1,
-                order=order, neighbors=outCPP[[4]], num_neighbors=outCPP[[3]])
-  }
+                edges=edges+1)
+    out[[9]]<- outCPP[[4]]
+    names(out)[9] = "neighbors"
+    
+    out[[11]]<- order
+    names(out)[11] <- "order" 
+    }
   class(out) <- "mesh.1D"
   return(out)
 }  
