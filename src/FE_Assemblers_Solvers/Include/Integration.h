@@ -20,7 +20,7 @@ struct IntegratorEdgeP1{
 //Cavalieri-Simpson Rule
 struct IntegratorEdgeP2{
     static constexpr UInt NNODES = 3;
-    static constexpr std::array<Real,NNODES> WEIGHTS{{1., 1., 2.0/3.0}};
+    static constexpr std::array<Real,NNODES> WEIGHTS{{1./6., 1./6., 2./3.}};
     //Point locations (in barycentric coordinates)
     static constexpr std::array<Point<1>,NNODES> NODES{
         Point<1>({0.0}),
@@ -35,7 +35,7 @@ struct IntegratorEdgeP4{
                                                                 7./90.,
                                                                 12./90.,
                                                                 32./90.,
-                                                                 32/90.}};
+                                                                 32./90.}};
     static constexpr std::array<Point<1>, NNODES> NODES{
         Point<1>({0.0}),
         Point<1>({1.0}),

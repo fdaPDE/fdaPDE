@@ -879,7 +879,10 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
     
   }
   else if(order==2 && ncol(edges) == 3){
-    outCPP <- .Call("CPP_EdgeMeshHelper", edges[,1:2], nodes, PACKAGE = "fdaPDE")
+    
+    edges_adj = matrix(edges[,1:2], nrow=dim(edges)[1],ncol=2,byrow=TRUE)
+    storage.mode(edges_adj) <-"integer"
+    outCPP <- .Call("CPP_EdgeMeshHelper", edges_adj, nodes, PACKAGE = "fdaPDE")
     
     #out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,
     #            edges=edges+1,
@@ -897,7 +900,7 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
   }
   else if( order==2 && ncol(edges)==2){
     print("You set order=2 but passed a matrix of edges with just 2 columns. The midpoints for each edge will be computed.")
-    outCPP <- .Call("CPP_EdgeMeshOrder2", edges[,1:2], nodes, PACKAGE = "fdaPDE")
+    outCPP <- .Call("CPP_EdgeMeshOrder2", edges, nodes, PACKAGE = "fdaPDE")
     edges = cbind( edges , outCPP[[6]])
     nodes=rbind(nodes, outCPP[[5]])
     out <- list(nodes=nodes, nodesmarkers=outCPP[[2]], nodesattributes=nodesattributes,

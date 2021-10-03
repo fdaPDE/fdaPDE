@@ -396,13 +396,17 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
     mydim = 2
+  }else if( class(FEMbasis$mesh) == "mesh.1D"){
+    ndim = 2
+    mydim = 1
+  
   }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.3D"){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
   }
 
-
+  if(ndim == 2 && mydim == 2){
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
 
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
@@ -418,7 +422,14 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(ndim)<-"integer"
   storage.mode(mydim)<-"integer"
-
+  }else if( ndim == 2 && mydim == 1){
+    FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+    storage.mode(FEMbasis$mesh$nodes) <- "double"
+    storage.mode(FEMbasis$mesh$edges) <- "integer"
+    storage.mode(FEMbasis$order) <- "integer"
+    storage.mode(ndim)<-"integer"
+    storage.mode(mydim)<-"integer"
+  }
   ## Call C++ function
   triplets <- .Call("get_FEM_mass_matrix", FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim,
@@ -433,6 +444,9 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
     mydim = 2
+    }else if(class(FEMbasis$mesh) == "mesh.1D"){
+      ndim = 2
+      mydim = 1
   }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.3D"){
     stop('Function not yet implemented for this mesh class')
   }else{
@@ -440,11 +454,11 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
   }
 
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
-
+  if(ndim ==2 && mydim==2){
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
-
+  
   ## Set propr type for correct C++ reading
   storage.mode(locations) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
@@ -454,7 +468,16 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(ndim)<-"integer"
   storage.mode(mydim)<-"integer"
-
+  
+  }else if(ndim==2 && mydim==1){
+    FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+    storage.mode(FEMbasis$mesh$nodes) <- "double"
+    storage.mode(FEMbasis$mesh$edges) <- "integer"
+    storage.mode(FEMbasis$order) <- "integer"
+    storage.mode(ndim)<-"integer"
+    storage.mode(mydim)<-"integer"
+  }
+  
   ## Call C++ function
   triplets <- .Call("get_FEM_stiff_matrix", FEMbasis$mesh,
                     FEMbasis$order, mydim, ndim,

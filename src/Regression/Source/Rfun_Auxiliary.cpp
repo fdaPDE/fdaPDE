@@ -44,11 +44,16 @@ extern "C"
 
         	typedef EOExpr<Mass> ETMass;   Mass EMass;   ETMass mass(EMass);
 
-                if(order==1 && ndim==2)
+                if(order==1 && ndim==2 && mydim ==2)
                         return(get_FEM_Matrix_skeleton<1,2,2>(Rmesh, mass));
-                if(order==2 && ndim==2)
+                if(order==2 && ndim==2 && mydim ==2)
                         return(get_FEM_Matrix_skeleton<2,2,2>(Rmesh, mass));
-                return(NILSXP);
+                if(order==1 && ndim==2 && mydim ==1)
+                        return(get_FEM_Matrix_skeleton<1,1,2>(Rmesh, mass));
+                if(order==2 && ndim==2 && mydim ==1)
+                        return(get_FEM_Matrix_skeleton<2,1,2>(Rmesh, mass));
+
+            return(NILSXP);
         }
 
         //! A utility, not used for system solution, may be used for debugging
@@ -62,10 +67,15 @@ extern "C"
 
         	typedef EOExpr<Stiff> ETMass;   Stiff EStiff;   ETMass stiff(EStiff);
 
-                if(order==1 && ndim==2)
-                        return(get_FEM_Matrix_skeleton<1,2,2>(Rmesh, stiff));
-                if(order==2 && ndim==2)
-                        return(get_FEM_Matrix_skeleton<2,2,2>(Rmesh, stiff));
+            if(order==1 && ndim==2 && mydim ==2)
+                return(get_FEM_Matrix_skeleton<1,2,2>(Rmesh, stiff));
+            if(order==2 && ndim==2 && mydim ==2)
+                return(get_FEM_Matrix_skeleton<2,2,2>(Rmesh, stiff));
+            if(order==1 && ndim==2 && mydim ==1)
+                return(get_FEM_Matrix_skeleton<1,1,2>(Rmesh, stiff));
+            if(order==2 && ndim==2 && mydim ==1)
+                return(get_FEM_Matrix_skeleton<2,1,2>(Rmesh, stiff));
+
                 return(NILSXP);
         }
 }
