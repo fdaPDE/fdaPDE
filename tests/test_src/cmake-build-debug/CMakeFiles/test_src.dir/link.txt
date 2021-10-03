@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/test_src.dir/main.cpp.o CMakeFiles/test_src.dir/prova.cpp.o -o test_src 

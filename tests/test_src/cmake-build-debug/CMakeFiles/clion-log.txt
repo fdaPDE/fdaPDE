@@ -1,4 +1,0 @@
-/snap/clion/164/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/aldo/Scrivania/fdaPDE/tests/test_src
--- Configuring done
--- Generating done
--- Build files have been written to: /home/aldo/Scrivania/fdaPDE/tests/test_src/cmake-build-debug
