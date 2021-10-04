@@ -7,13 +7,14 @@
  \param exact_Inference_ parameter for the method used to invert E matrix in Woodbury decomposition for inference
  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
  \param beta_0_ vector for the null hypotesis (if a test is required)
+ \param f_var_ parameter used to decide whether to compute local f variance or not
  \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
  \param n_Flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
  \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
  \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
-			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_,
+			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_var_,
 			     SEXP inference_Quantile_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -78,6 +79,12 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
    beta_0[i]=REAL(beta_0_)[i];
  }
 
+ //f_var
+ if(INTEGER(f_var_)[0]==1)
+    this->set_f_var(true);
+  else
+    this->set_f_var(false);
+ 
  //inference_Quantile
  UInt size_inference_Quantile=Rf_length(inference_Quantile_);
  inference_Quantile.resize(size_inference_Quantile);
@@ -125,6 +132,9 @@ void InferenceData::print_inference_data() const{
   for(UInt i=0; i < beta_0.size(); ++i){
     Rprintf(" %f \n", beta_0(i));
   }
+
+  Rprintf("f_var: %d\n",f_var);
+  
   Rprintf("\n");
   Rprintf("inference_Quantile: \n");
   for(UInt i=0; i < inference_Quantile.size(); ++i){

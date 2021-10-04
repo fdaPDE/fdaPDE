@@ -22,6 +22,7 @@ template<typename InputHandler, typename MatrixType>
 class Wald_Base:public Inference_Base<InputHandler, MatrixType>{
 protected:
   MatrixXr S;						//!< Smoothing matrix 
+  MatrixXr Partial_S;                                   //!< (Psi^t*Q*Psi + lambda*P)^-1 * Psi^t computed only if local f variance is required 
   Real tr_S=0; 						//!< Trace of smoothing matrix, needed for the variance-covariance matrix (V) and eventually GCV computation
   Real sigma_hat_sq; 					//!< Estimator for the variance of the residuals (SSres/(n_obs-(q+tr_S)))
   bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not
@@ -41,7 +42,7 @@ public:
   virtual ~ Wald_Base(){};
   
   Real compute_GCV_from_inference(void) const override; //!< Needed to compute exact GCV in case Wald test is required and GCV exact is not provided by lambda optimization (Run after S computation)
-  
+  VectorXr compute_f_var(void) override; //!< Needed to compute local f variance if required
   
   // GETTERS
   inline const MatrixXr * getSp (void) const {return &this->S;}      //!< Getter of Sp \return Sp

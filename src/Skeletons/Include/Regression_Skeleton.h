@@ -258,7 +258,7 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
 
-  inference_output.resize(n_implementations, p+1);
+  inference_output.resize(n_implementations+1, p+1);
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
     // Select the right policy for inversion of MatrixNoCov
@@ -274,6 +274,12 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
 	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
       }
     }
+    
+    // Check if local f variance has to be computed
+    if(inf_car.getInfData()->get_f_var()){
+      std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
+      inference_output(n_implementations,0) = inference_Solver->compute_f_var();
+    }
   }
   else{
     // Select the right policy for inversion of MatrixNoCov
@@ -286,6 +292,12 @@ void inference_wrapper(const OptimizationData & opt_data, output_Data & output, 
       inference_output.row(i) = inference_Solver->compute_inference_output();
 
 
+    }
+    
+    // Check if local f variance has to be computed
+    if(inf_car.getInfData()->get_f_var()){
+      std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
+      inference_output(n_implementations,0) = inference_Solver->compute_f_var();
     }
   }
 

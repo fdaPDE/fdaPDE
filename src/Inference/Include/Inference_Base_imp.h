@@ -39,3 +39,10 @@ MatrixXv Inference_Base<InputHandler, MatrixType>::compute_inference_output(void
   return result;
 };
 
+template<typename InputHandler, typename MatrixType>
+VectorXr Inference_Base<InputHandler, MatrixType>::compute_f_var(void){
+  UInt n_obs = inf_car.getN_obs();
+  VectorXr result = VectorXr::Zero(n_obs);
+
+  return result;
+};
