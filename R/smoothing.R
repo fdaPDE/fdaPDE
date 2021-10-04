@@ -983,7 +983,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       }
     
       if(R_Inference_Data_Object@f_var==1){
-        f_variances = matrix(data = bigsol[[24]], nrow = length(observations), ncol = 1)
+        f_variances = matrix(data = bigsol[[25]], nrow = length(observations), ncol = 1)
         inference$f_var = f_variances
       }  
   
