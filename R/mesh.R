@@ -544,13 +544,12 @@ projection.points.2.5D<-function(mesh, locations) {
   if(class(mesh) !="mesh.2.5D")
   stop("Data projection is only available for 2.5D mesh ")
 
-  if (mesh$order == 2)
-    stop("Data projection is only available for order 1 ")
-
   mesh$triangles = mesh$triangles - 1
   mesh$edges = mesh$edges - 1
   mesh$neighbors[mesh$neighbors != -1] = mesh$neighbors[mesh$neighbors != -1] - 1
-
+  
+  mydim=2
+  ndim=3
   # Imposing types, this is necessary for correct reading from C++
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
@@ -560,9 +559,10 @@ projection.points.2.5D<-function(mesh, locations) {
   storage.mode(mesh$edges) <- "integer"
   storage.mode(mesh$neighbors) <- "integer"
   storage.mode(mesh$order) <- "integer"
-
+  storage.mode(mydim) <- "integer"
+  storage.mode(ndim) <-"integer"
   ## Call C++ function
-  evalmat <- .Call("points_projection", mesh, locations, PACKAGE = "fdaPDE")
+  evalmat <- .Call("points_projection", mesh, locations, mydim, ndim, PACKAGE = "fdaPDE")
 
   #Returning the evaluation matrix
   return(evalmat)
@@ -914,6 +914,52 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
   class(out) <- "mesh.1D"
   return(out)
 }  
+
+#' Project 2D points onto 1D graph mesh
+#'
+#' @param mesh A mesh.1D object representing the graph mesh, created by \link{create.mesh.1D}.
+#' @param locations 2D points to be projected onto 1D triangular mesh.
+#' @description This function projects any 2D points onto 1D graph mesh.
+#' @return 2D points projected onto 1D graph mesh.
+#' @export
+#' @examples
+#' library(fdaPDE)
+#'##Create Mesh
+#'
+#'nodes=matrix(c(0.25,0.25,0.5,0.25,0.75,0.5,0.75,0.), nrow = 4, byrow=TRUE)
+#'edges=matrix(c(1,2,2,3,2,4),nrow = 3,byrow = TRUE)
+#'mesh_ = create.mesh.1D(nodes,edges,order=1)
+#'
+#' ## Create 2D points to be projected
+#'locations=matrix(nrow=5,ncol=2)
+#'locations[,1] = runif(5,min=0.25,max=0.75)
+#'locations[,2] = runif(5,min=0.25,max=0.5)
+#'
+#' ## Project the points on the mesh
+#' loc = projection.points.1D(mesh, locations)
+
+projection.points.1D<-function(mesh, locations) {
+  if(class(mesh) !="mesh.1D")
+    stop("Data projection is only available for 1D mesh ")
+  
+  mesh$edges = mesh$edges - 1
+  mydim=1
+  ndim=2
+  # Imposing types, this is necessary for correct reading from C++
+  ## Set proper type for correct C++ reading
+  locations <- as.matrix(locations)
+  storage.mode(locations) <- "double"
+  storage.mode(mesh$nodes) <- "double"
+  storage.mode(mesh$edges) <- "integer"
+  storage.mode(mesh$order) <- "integer"
+  storage.mode(mydim) <- "integer"
+  storage.mode(ndim) <-"integer"
+  ## Call C++ function
+  evalmat <- .Call("points_projection", mesh, locations, mydim, ndim, PACKAGE = "fdaPDE")
+  
+  #Returning the evaluation matrix
+  return(evalmat)
+}
 
 #' Create a \code{mesh.1D} object by splitting each edge of a given mesh into two subedges.
 #'

@@ -64,6 +64,45 @@ SEXP tree_mesh_skeleton(SEXP Rmesh) {
 	return(result);
 }
 
+template<UInt ORDER,UInt mydim,UInt ndim>
+SEXP point_projection_skeleton(SEXP Rmesh, SEXP Rlocations){
+    //RECIEVE PROJECTION INFORMATION FROM R
+    RNumericMatrix locations(Rlocations);
+    UInt n_X = locations.nrows();
+
+    // Cast all computation parameters
+    std::vector<Point<ndim> > deData_(n_X); // the points to be projected
+    std::vector<Point<ndim> > prjData_(n_X); // the projected points
+
+    std::array<Real,ndim> coords;
+    for(UInt i=0; i<n_X; ++i) {
+        for(UInt n=0; n<ndim; ++n)
+            coords[n] = locations(i,n);
+        deData_[i] = Point<ndim>(coords);
+
+    }
+    SEXP result;
+
+    if (n_X>0) //pointwise data
+    {
+        PROTECT(result = Rf_allocMatrix(REALSXP, n_X, ndim));
+        MeshHandler<ORDER,mydim,ndim> mesh(Rmesh);
+        projection<ORDER,mydim,ndim> projector(mesh, deData_);
+        prjData_ = projector.computeProjection();
+
+        RNumericMatrix res(result);
+        for(UInt i=0; i<n_X; ++i){
+            for(UInt n=0; n<ndim; ++n)
+                res(i,n) = prjData_[i][n];
+        }
+
+        UNPROTECT(1);
+        return(result);
+    }
+
+    return(NILSXP);
+}
+
 SEXP CPP_eval_FEM_fd(SEXP Rmesh, double* X,  double* Y,  double* Z, UInt n_X, UInt** incidenceMatrix, UInt nRegions, UInt nElements, double* coef, UInt order, UInt fast, UInt mydim, UInt ndim, int search, SEXP RbaryLocations)
 {
 	SEXP result;
@@ -716,7 +755,7 @@ SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_loca
   	UNPROTECT(1);
   	return(result);
   }
-
+/*
   SEXP points_projection(SEXP Rmesh, SEXP Rlocations)
   {
   	int n_X = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[0];
@@ -764,7 +803,7 @@ SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_loca
     // result matrix
 	return(result);
 }
-
+*/
 SEXP tree_mesh_construction(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim) {
 	UInt ORDER=INTEGER(Rorder)[0];
 	UInt mydim=INTEGER(Rmydim)[0];
@@ -784,6 +823,23 @@ SEXP tree_mesh_construction(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim) {
 		return(tree_mesh_skeleton<2, 3, 3>(Rmesh));
 
 	return(NILSXP);
+}
+
+SEXP points_projection(SEXP Rmesh, SEXP Rlocations,SEXP Rmydim, SEXP Rndim){
+    UInt order = INTEGER(VECTOR_ELT(Rmesh,10))[0];
+    UInt mydim = INTEGER(Rmydim)[0];
+    UInt ndim = INTEGER(Rndim)[0];
+
+    if(order==1 && mydim==1 && ndim==2)
+        return point_projection_skeleton<1,1,2>(Rmesh,Rlocations);
+    else if(order==2 && mydim==1 && ndim==2)
+        return point_projection_skeleton<2,1,2>(Rmesh,Rlocations);
+    else if(order==1 && mydim==2 && ndim==3)
+        return point_projection_skeleton<1,2,3>(Rmesh,Rlocations);
+    else if(order==2 && mydim==2 && ndim==3)
+        return point_projection_skeleton<2,2,3>(Rmesh,Rlocations);
+
+    return(NILSXP);
 }
 
 }

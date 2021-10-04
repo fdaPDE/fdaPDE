@@ -26,6 +26,21 @@ public:
 
 };
 
+template<UInt ORDER>
+class projection<ORDER,1,2>{
+private:
+    const MeshHandler<ORDER,1,2>& mesh_;
+    const std::vector<Point<2> > & deData_; // the points to be projected
+    const UInt num_points;
+
+    std::vector<UInt> computeNodePatch(UInt ) const;
+
+public:
+    projection(const MeshHandler<ORDER,1,2>& m, const std::vector<Point<2> > & d): mesh_(m), deData_(d), num_points(d.size()) {};
+
+    std::vector<Point<2> > computeProjection();
+
+};
 #include "Projection_imp.h"
 
 #endif
