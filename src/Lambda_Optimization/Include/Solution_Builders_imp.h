@@ -41,7 +41,21 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	  p_values=(inference_Output.col(0)).transpose();
           intervals=inference_Output.rightCols(p_inf);
 	}
-	
+
+        // Prepare the local f variance output space
+        MatrixXv f_var;
+        UInt f_size = regressionData.getNumberofObservations();
+        f_var.resize(1,1);
+        f_var(0,0).resize(f_size);
+
+        if(inf_Data.get_f_var()){
+           f_var(0,0) = inference_Output(n_inf_implementations,0);
+        }
+	else{
+           for(long int i=0; i<f_size; ++i){
+              f_var(0,0)(i) = 10e20;
+           }
+        }
 	
         // Define string for optimzation method
         UInt code_string;
@@ -63,7 +77,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
         // ---- Copy results in R memory ----
         SEXP result = NILSXP;  // Define emty term --> never pass to R empty or is "R session aborted"
-        result = PROTECT(Rf_allocVector(VECSXP, 24)); // 24 elements to be allocated
+        result = PROTECT(Rf_allocVector(VECSXP, 25)); // 25 elements to be allocated
 
         // Add solution matrix in position 0
         SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
@@ -238,7 +252,15 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	    } 
 	  }
 	}
-	
+
+        // local f variance
+	SET_VECTOR_ELT(result, 24, Rf_allocMatrix(REALSXP,f_var(0,0).size(),1));
+        Real *rans14=REAL(VECTOR_ELT(result,24));
+        for(long int i=0; i<f_var(0,0).size(); ++i){
+          rans14[i] = f_var(0,0)(i);
+        }
+        
+        
         UNPROTECT(1);
 
         return(result);

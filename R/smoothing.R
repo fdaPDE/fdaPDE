@@ -980,7 +980,12 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           inference$p_values$eigen_sign_flip=as.list(inference$p_values$eigen_sign_flip)
         }
         }
-       }
+      }
+    
+      if(R_Inference_Data_Object@f_var==1){
+        f_variances = matrix(data = bigsol[[24]], nrow = length(observations), ncol = 1)
+        inference$f_var = f_variances
+      }  
   
     reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
                       optimization  = optimization, time = time, bary.locations = bary.locations, inference=inference)
