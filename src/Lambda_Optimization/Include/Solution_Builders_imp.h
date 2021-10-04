@@ -19,11 +19,12 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
         }
 
 	// Prepare the inference output space
+        UInt n_inf_implementations = inf_Data.get_test_type().size();
+	UInt p_inf = inf_Data.get_coeff_inference().rows();
+        MatrixXv inference_beta_Output = inference_Output.topRows(n_inf_implementations);
 	MatrixXv p_values;
 	MatrixXv intervals;
-	UInt n_inf_implementations = inf_Data.get_test_type().size();
-	UInt p_inf = inf_Data.get_coeff_inference().rows();
-
+	
 	if (inf_Data.get_definition()==false){
 	  intervals.resize(1,1);
 	  intervals(0,0).resize(3);
@@ -38,8 +39,8 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	  
 	  p_values.resize(1, n_inf_implementations);
 	  intervals.resize(n_inf_implementations, p_inf);
-	  p_values=(inference_Output.col(0)).transpose();
-          intervals=inference_Output.rightCols(p_inf);
+	  p_values=(inference_beta_Output.col(0)).transpose();
+          intervals=inference_beta_Output.rightCols(p_inf);
 	}
 
         // Prepare the local f variance output space
@@ -254,10 +255,13 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	}
 
         // local f variance
-	SET_VECTOR_ELT(result, 24, Rf_allocMatrix(REALSXP,f_var(0,0).size(),1));
-        Real *rans14=REAL(VECTOR_ELT(result,24));
-        for(long int i=0; i<f_var(0,0).size(); ++i){
-          rans14[i] = f_var(0,0)(i);
+	// Add the vector of lambdas
+        UInt f_size = f_var(0).size();
+        SET_VECTOR_ELT(result, 24, Rf_allocVector(REALSXP, f_size));
+        Real *rans14 = REAL(VECTOR_ELT(result, 24));
+        for(long int j = 0; j < f_size; j++)
+        {
+               rans14[j] = f_var(0)[j];
         }
         
         

@@ -196,7 +196,7 @@ Real Wald_Base<InputHandler, MatrixType>::compute_GCV_from_inference(void) const
 
 template<typename InputHandler, typename MatrixType>
 VectorXr Wald_Base<InputHandler, MatrixType>::compute_f_var(void){
-  UInt n_obs = inf_car.getN_obs();
+  UInt n_obs = this->inf_car.getN_obs();
   VectorXr result; 
   result.resize(n_obs);
 
@@ -240,13 +240,13 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
   UInt q = this->inf_car.getq(); 
   MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
 
-  if(inf_car.getInfData()->get_f_var()){
+  if(this->inf_car.getInfData()->get_f_var()){
     this->Partial_S.resize(n_nodes, n_obs);
     this->Partial_S = M_inv.block(0,0, n_nodes, n_nodes)*(*Psi_t);
   }
   else{
     this->Partial_S.resize(1,1);
-    Partial_S(0) = 0;
+    this->Partial_S(0) = 0;
   }
   
   this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
@@ -290,13 +290,13 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
   MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
 
-  if(inf_car.getInfData()->get_f_var()){
+  if(this->inf_car.getInfData()->get_f_var()){
     this->Partial_S.resize(n_nodes, n_obs);
     this->Partial_S = M_tilde_inv*(*Psi_t);
   }
   else{
     this->Partial_S.resize(1,1);
-    Partial_S(0) = 0;
+    this->Partial_S(0) = 0;
   }
   
   
