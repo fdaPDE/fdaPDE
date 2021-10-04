@@ -57,6 +57,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
+  f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip=R_Inference_Data_Object@n_flip
   inference_tol_fspai=R_Inference_Data_Object@tol_fspai
@@ -100,6 +101,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_tol_fspai) <- "double"
@@ -109,7 +111,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile, inference_n_flip, inference_tol_fspai, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile, inference_n_flip, inference_tol_fspai, inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
@@ -167,6 +169,7 @@ CPP_smooth.volume.FEM.PDE.basis<-function(locations, observations, FEMbasis, cov
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
+  f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip=R_Inference_Data_Object@n_flip
   inference_tol_fspai=R_Inference_Data_Object@tol_fspai
@@ -218,6 +221,7 @@ CPP_smooth.volume.FEM.PDE.basis<-function(locations, observations, FEMbasis, cov
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_tol_fspai) <- "double"
@@ -227,7 +231,7 @@ CPP_smooth.volume.FEM.PDE.basis<-function(locations, observations, FEMbasis, cov
   bigsol <- .Call("regression_PDE", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
@@ -289,7 +293,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   if(PDE_param_eval$u == rep(0, nrow(points_eval))){
     warning("Inference for linear estimators is implemented only if reaction term is zero, \nInference Data are ignored")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, qauntile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
   
 
@@ -300,6 +304,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
+  f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip= R_Inference_Data_Object@n_flip
   inference_tol_fspai= R_Inference_Data_Object@tol_fspai
@@ -349,8 +354,9 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
-  storage.mode(inference_flip) <- "integer"
+  storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_tol_fspai) <- "double"
   storage.mode(inference_Defined) <- "integer"
 
@@ -358,7 +364,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   bigsol <- .Call("regression_PDE_space_varying", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)

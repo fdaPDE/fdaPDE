@@ -74,6 +74,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
+  f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip=R_Inference_Data_Object@n_flip
   inference_tol_fspai=R_Inference_Data_Object@tol_fspai
@@ -125,6 +126,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_tol_fspai) <- "double"
@@ -168,7 +170,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
       as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
       PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
@@ -181,7 +183,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
        as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
-       test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+       test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
        PACKAGE = "fdaPDE")
     }
     else
@@ -196,7 +198,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
          as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile, inference_n_flip, inference_tol_fspai, inference_Defined,
+         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile, inference_n_flip, inference_tol_fspai, inference_Defined,
          PACKAGE = "fdaPDE")
       }
     }
@@ -327,6 +329,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
+  f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip=R_Inference_Data_Object@n_flip
   inference_tol_fspai=R_Inference_Data_Object@tol_fspai
@@ -380,6 +383,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_tol_fspai) <- "double"
@@ -407,7 +411,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
     ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
       mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
       incidence_matrix, areal.data.avg, search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
       PACKAGE = "fdaPDE")
 
     if(ICsol[[6]]==1)
@@ -418,7 +422,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
       ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
        mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
        incidence_matrix, areal.data.avg, search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-       test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+       test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
        PACKAGE = "fdaPDE")
     }
     else
@@ -431,7 +435,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
         ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
          mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
          incidence_matrix, areal.data.avg, search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
          PACKAGE = "fdaPDE")
       }
     }
@@ -575,6 +579,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   exact_Inference<-R_Inference_Data_Object@exact
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
   beta_0=as.vector(R_Inference_Data_Object@beta0)
+  f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
   inference_n_flip=R_Inference_Data_Object@n_flip
   inference_tol_fspai=R_Inference_Data_Object@tol_fspai
@@ -628,6 +633,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   storage.mode(exact_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_n_flip) <- "integer"
   storage.mode(inference_tol_fspai) <- "double"
@@ -657,7 +663,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
       covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
       search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+      test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
       PACKAGE = "fdaPDE")
 
     if(ICsol[[6]]==1)
@@ -669,7 +675,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
        covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
        search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-       test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+       test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
        PACKAGE = "fdaPDE")
     }
     else
@@ -683,7 +689,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
          covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
          search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+         test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
          PACKAGE = "fdaPDE")
       }
     }

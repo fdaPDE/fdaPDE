@@ -12,6 +12,8 @@
 #'@slot coeff A matrix of numeric coefficients with columns of dimension \code{dim} and each row represents a linear combination of the linear parameters to be tested and/or to be
 #' estimated via confidence interval. 
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
+#'@slot f_var An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
+#'whereas if 2 they will not.
 #'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
 #'@slot n_flip An integer representing the number of permutations in the case of eigen-sign-flip test.
 #'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.
@@ -33,6 +35,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   dim = "integer",
                                                                   coeff = "matrix",
                                                                   beta0 = "numeric",
+                                                                  f_var = "integer",
                                                                   quantile = "numeric",
                                                                   n_flip = "integer",
                                                                   tol_fspai = "numeric",
@@ -59,6 +62,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
 #'If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.
+#'@param f_var A logical used to decide whether to estimate the local variance of the nonlinear part of the model.
+#'The possible values are: FALSE (default) and TRUE. 
 #'@param level Level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
 #'@param n_flip Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.
 #'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to 'False'. The lower is the tolerance, the heavier is the computation.
@@ -73,6 +78,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'dim, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
+#'f_var = FALSE,
 #'level = 0.95,
 #'n_flip = 1000,
 #'tol_fspai = 0.05)
@@ -92,7 +98,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 exact = F, 
                                 dim = NULL, 
                                 coeff = NULL, 
-                                beta0 = NULL, 
+                                beta0 = NULL,
+                                f_var = F,
                                 level = 0.95,
                                 n_flip = 1000,
                                 tol_fspai = 0.05){
@@ -149,7 +156,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'beta0' is zerodimensional")
   }
   
-
+  if(f_var != F){
+    if(class(f_var)!="logical")
+      stop("'f_var' should be either TRUE or FALSE ")
+    if(length(f_var)==0)
+      stop("'f_var' is zero dimensional, should be either TRUE or FALSE")
+    if(f_var!=T)
+      stop("'f_var' should be either TRUE or FALSE")
+    f_var_numeric=as.integer(1)
+  }else{
+    f_var_numeric=as.integer(2)
+  }
+  
   if(level!=0.95){
     if(class(level)!="numeric")
       stop("'level' should be numeric")
@@ -322,11 +340,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("tol_fspai should be a positive value")
   }
   
+  
+  
   definition=as.integer(1)
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), exact = exact_numeric, dim = dim, 
-              coeff = coeff, beta0 = beta0, quantile = quantile, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+              coeff = coeff, beta0 = beta0, f_var = f_var_numeric, quantile = quantile, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   
   return(result)
 }
