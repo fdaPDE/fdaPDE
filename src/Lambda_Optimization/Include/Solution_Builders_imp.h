@@ -256,10 +256,10 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
         // local f variance
 	// Add the vector of lambdas
-        UInt f_size = f_var(0).size();
-        SET_VECTOR_ELT(result, 24, Rf_allocVector(REALSXP, f_size));
+        UInt f_vec_size = f_var(0).size();
+        SET_VECTOR_ELT(result, 24, Rf_allocVector(REALSXP, f_vec_size));
         Real *rans14 = REAL(VECTOR_ELT(result, 24));
-        for(long int j = 0; j < f_size; j++)
+        for(long int j = 0; j < f_vec_size; j++)
         {
                rans14[j] = f_var(0)[j];
         }
