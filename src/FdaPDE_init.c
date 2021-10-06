@@ -18,7 +18,7 @@ extern SEXP get_FEM_PDE_matrix( SEXP,SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, S
 extern SEXP get_FEM_PDE_space_varying_matrix( SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP get_FEM_stiff_matrix(SEXP, SEXP, SEXP, SEXP);
 extern SEXP get_integration_points(SEXP, SEXP, SEXP, SEXP);
-extern SEXP points_projection(SEXP, SEXP);
+extern SEXP points_projection(SEXP, SEXP,SEXP,SEXP);
 extern SEXP R_triangulate_native(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP regression_Laplace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP regression_Laplace_time(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -37,9 +37,13 @@ extern SEXP CPP_TriangleMeshSplitOrder2(SEXP, SEXP);
 extern SEXP CPP_TetraMeshSplit(SEXP, SEXP);
 extern SEXP CPP_TetraMeshSplitOrder2(SEXP, SEXP);
 
+extern SEXP get_meshHandler(SEXP,SEXP,SEXP,SEXP,SEXP);
+extern SEXP reading_RObject(SEXP,SEXP);
+
 extern SEXP CPP_EdgeMeshHelper(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshOrder2(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshSplit(SEXP, SEXP);
+
 
 extern SEXP gam_Laplace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP gam_PDE(SEXP, SEXP, SEXP, SEXP, SEXP,SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -57,7 +61,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"get_FEM_PDE_space_varying_matrix",  (DL_FUNC) &get_FEM_PDE_space_varying_matrix,  16},
     {"get_FEM_stiff_matrix",              (DL_FUNC) &get_FEM_stiff_matrix,               4},
     {"get_integration_points",            (DL_FUNC) &get_integration_points,             4},
-    {"points_projection",                 (DL_FUNC) &points_projection,                  2},
+    {"points_projection",                 (DL_FUNC) &points_projection,                  4},
     {"R_triangulate_native",              (DL_FUNC) &R_triangulate_native,               8},
     {"regression_Laplace",                (DL_FUNC) &regression_Laplace,                20},
     {"regression_Laplace_time",           (DL_FUNC) &regression_Laplace_time,           29},
@@ -81,6 +85,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"gam_Laplace",                       (DL_FUNC) &gam_Laplace,                       25},
     {"gam_PDE",                           (DL_FUNC) &gam_PDE,                           28},
     {"gam_PDE_space_varying",             (DL_FUNC) &gam_PDE_space_varying,             29},
+    {"get_meshHandler",                   (DL_FUNC) &get_meshHandler,                    5},
+    {"reading_RObject",                   (DL_FUNC) &reading_RObject,                    2},
     {NULL, NULL, 0}
 };
 

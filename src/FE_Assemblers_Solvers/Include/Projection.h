@@ -3,44 +3,34 @@
 
 #include "../../Mesh/Include/Mesh.h"
 
-template <UInt ORDER,UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim>
 class projection{
-  public:
-  projection(const MeshHandler<ORDER,mydim,ndim>&, const std::vector<Point<ndim> >&);
-  std::vector<Point<ndim> > computeProjection();
-};
+    static_assert((ORDER==1 || ORDER==2) &&
+    (mydim==1 || mydim==2 || mydim==3) &&
+    mydim <= ndim,
+    "ERROR! TRYING TO INSTANTIATE PROJECTION WITH WRONG NUMBER OF PARAMETERS See projection.h");
 
-template<UInt ORDER>
-class projection<ORDER,2,3>{
 private:
-  const MeshHandler<ORDER,2,3>& mesh_;
-  const std::vector<Point<3> > & deData_; // the points to be projected
-  const UInt num_points;
-  
-  std::vector<UInt> computeNodePatch(UInt ) const;
-
-public:
-  projection(const MeshHandler<ORDER,2,3>& m, const std::vector<Point<3> > & d): mesh_(m), deData_(d), num_points(d.size()) {};
-
-  std::vector<Point<3> > computeProjection();
-
-};
-
-template<UInt ORDER>
-class projection<ORDER,1,2>{
-private:
-    const MeshHandler<ORDER,1,2>& mesh_;
-    const std::vector<Point<2> > & deData_; // the points to be projected
+    const MeshHandler<ORDER,mydim,ndim>& mesh_;
+    const std::vector<Point<ndim> > & deData_; // the points to be projected
     const UInt num_points;
 
-    std::vector<UInt> computeNodePatch(UInt ) const;
+    template<bool isManifold=(ndim!=mydim)>
+    typename std::enable_if<isManifold, std::vector<UInt> >::type
+    computeNodePatch(UInt id_node) const;
 
 public:
-    projection(const MeshHandler<ORDER,1,2>& m, const std::vector<Point<2> > & d): mesh_(m), deData_(d), num_points(d.size()) {};
+    projection(const MeshHandler<ORDER,mydim,ndim>& m, const std::vector<Point<ndim> > & d): mesh_(m), deData_(d), num_points(d.size()) {};
 
-    std::vector<Point<2> > computeProjection();
+    template<bool isManifold=(ndim!=mydim)>
+    typename std::enable_if<isManifold, std::vector<Point<ndim>> >::type
+    computeProjection();
 
+    template<bool isManifold=(ndim!=mydim)>
+    typename std::enable_if<!isManifold, std::vector<Point<ndim>> >::type
+    computeProjection();
 };
+
 #include "Projection_imp.h"
 
 #endif
