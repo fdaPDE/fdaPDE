@@ -146,6 +146,46 @@ class Evaluator<ORDER,3,3>
 
 };
 
+template <UInt ORDER>
+class Evaluator<ORDER,1,2>
+{
+public:
+    //! A constructor. It initializes the constructor given a mesh object.
+    Evaluator(const MeshHandler<ORDER,1,2>& mesh): mesh_(mesh){};
+
+    //! A member that computes the evaluation of a Point in a mesh, given the bases' coefficients.
+    /*!
+    \param X a pointer to the x coordinates to evaluate.
+    \param Y a pointer to the y coordinates to evaluate.
+    \param length a unsigned integer containing the number of points to evaluate.
+    \param coef a pointer to the vector of coefficients of the solution, the value in position i
+    is associated to the basis \phi(i)
+    \param fast a boolean that specifies if the algorithm is completely based on the walking
+            algorithm (can miss locations in case of non convex structures)
+    \param result a double pointer to an already allocated memory space, where the evaluations
+    will be stored
+    */
+    void eval(const RNumericMatrix& locations,const RNumericMatrix& coef, bool redundancy,RNumericMatrix& result, std::vector<bool>& isinside);
+    void evalWithInfo(const RNumericMatrix& locations,const RNumericMatrix& coef, bool redundancy,RNumericMatrix& result, std::vector<bool>& isinside, const RIntegerMatrix& element_id,const RNumericMatrix& barycenters);
+
+    //! A member that computes the integral over regions divided by the measure of the region in a mesh,
+    //  given the bases' coefficients.
+    /*!
+    \param incidenceMatrix a nRegions*nElements array telling which triangle compose each region.
+    \param nRegions an unsigned integer containing the number of regions.
+    \param nElements an unsigned integer containing the number of triangles.
+    \param coef a pointer to the vector of coefficients of the solution, the value in position i
+    is associated to the basis \phi(i).
+    \param result a double pointer to an already allocated memory space, where the evaluations
+    will be stored.
+    */
+    void integrate(const RIntegerMatrix& incidenceMatrix, const RNumericMatrix& coef, RNumericMatrix& result);
+
+private:
+    const MeshHandler<ORDER,1,2> &mesh_;
+
+};
+
 
 #include "Evaluator_imp.h"
 

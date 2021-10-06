@@ -2,6 +2,8 @@
 #define __AUXILIARY_MESH_SKELETONS_H
 #include "../../Mesh/Include/Mesh.h"
 #include "../../FdaPDE.h"
+#include "../../FE_Assemblers_Solvers/Include/Projection.h"
+#include "../../FE_Assemblers_Solvers/Include/Evaluator.h"
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Auxiliary_Mesh_Skeleton(SEXP Rmesh, SEXP Rpoints) {
@@ -46,5 +48,60 @@ SEXP Auxiliary_Mesh_Skeleton(SEXP Rmesh, SEXP Rpoints) {
 
 }
 
+template<UInt ORDER, UInt mydim, UInt ndim>
+SEXP Eval_FEM_fd_Skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
+
+    //NB anche se non viene passato DEVI essere certo di creare un RbaryLocations "NULLO" RbaryLocations è una lista di liste
+    // in modo tale da poter utilizzare gli RObjects!!! (al più sono matrici che hanno righe o colonne = 0
+    // RbaryLocations[0] contiene Rlocations (esattamente uguali a Rlocations!!!!)
+    // RbaryLocations[1] contiene elements_ids
+    // RbaryLocations[2] contiene coordinate dei baricentri degli elementi contenuti in elements_ids
+
+    RNumericMatrix barycenters( VECTOR_ELT(RbaryLocations,2));
+    RIntegerMatrix id_element( VECTOR_ELT(RbaryLocations,1));
+    RIntegerMatrix incidenceMatrix( RincidenceMatrix );
+    RNumericMatrix locations(Rlocations);
+
+    UInt n_X = locations.nrows();
+    UInt nRegions = incidenceMatrix.nrows();
+    RNumericMatrix coef(Rcoef);
+    UInt search;
+    bool fast;
+
+    fast  = INTEGER(Rfast)[0];
+    search  = INTEGER(Rsearch)[0];
+    MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, search);
+    Evaluator<ORDER, mydim, ndim> evaluator(mesh);
+
+    SEXP result;
+
+    if(n_X >0) {
+        PROTECT(result=Rf_allocMatrix(REALSXP,n_X,1));
+        RNumericMatrix result_(result);
+
+        std::vector<bool> isinside(n_X);
+        if (barycenters.nrows() == 0) { //doesn't have location information
+            evaluator.eval(locations, coef, fast, result_, isinside);
+        } else { //have location information
+            evaluator.evalWithInfo(locations, coef, fast, result_, isinside, id_element, barycenters);
+        }
+
+        for (int i = 0; i < n_X; ++i) {
+            if (!(isinside[i])) {
+                result_[i] = NA_REAL;
+            }
+        }
+    }
+    else{
+        PROTECT(result=Rf_allocMatrix(REALSXP, nRegions,1));
+        RNumericMatrix result_(result);
+        evaluator.integrate(incidenceMatrix,coef,result_);
+
+    }
+
+    UNPROTECT(1);
+    return result;
+
+}
 
 #endif //__AUXILIARY_MESH_SKELETONS_H

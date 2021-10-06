@@ -269,5 +269,89 @@ void Evaluator<ORDER, 3, 3>::integrate(UInt** incidenceMatrix, UInt nRegions, UI
 	}
 }
 
+template<UInt ORDER>
+void Evaluator<ORDER,1,2>::eval(const RNumericMatrix& locations,const RNumericMatrix& coef, bool redundancy,RNumericMatrix& result, std::vector<bool>& isinside){
+
+    UInt length = locations.nrows();
+    constexpr UInt Nodes = ORDER + 1;
+    Element<Nodes,1,2> current_element;
+    Point<2> current_point;
+    Eigen::Matrix<Real,Nodes,1> coefficients;
+    UInt search = mesh_.getSearch();
+
+    for (int i = 0; i<length; ++i) {
+        current_point = Point<2>({locations(i,0),locations(i,1)});
+
+        current_element = mesh_.findLocation(current_point);
+
+        if(current_element.getId() == Identifier::NVAL) {
+            isinside[i]=false;
+        } else {
+            isinside[i]=true;
+            for (int j=0; j<(Nodes); ++j) {
+                coefficients[j] = coef[current_element[j].getId()];
+            }
+
+            result[i] = current_element.evaluate_point(current_point, coefficients);
+        }
+    } //end of for loop
+
+}
+
+template<UInt ORDER>
+void Evaluator<ORDER,1,2>::evalWithInfo(const RNumericMatrix& locations,const RNumericMatrix& coef, bool redundancy,RNumericMatrix& result, std::vector<bool>& isinside, const RIntegerMatrix& element_id, const RNumericMatrix& barycenters){
+
+    UInt length = locations.nrows();
+    constexpr UInt Nodes = ORDER + 1;
+    Element<Nodes,1,2> current_element;
+    Point<2> current_point;
+    Eigen::Matrix<Real,Nodes,1> coefficients;
+    Eigen::Matrix<Real,Nodes,1> bary_coeff;
+
+    for (int i = 0; i<length; ++i) {
+        current_point = Point<2>({locations(i,0),locations(i,1)});
+        current_element = mesh_.getElement(element_id[i]);
+
+        if(current_element.getId() == Identifier::NVAL) {
+            isinside[i]=false;
+        } else {
+            isinside[i]=true;
+            for (int j=0; j<Nodes; ++j) {
+                coefficients[j] = coef[current_element[j].getId()];
+            }
+
+            result[i] = current_element.evaluate_point(current_point, coefficients);
+        }
+    } //end of for loop
+}
+
+template<UInt ORDER>
+void Evaluator<ORDER,1,2>::integrate(const RIntegerMatrix& incidenceMatrix, const RNumericMatrix& coef, RNumericMatrix& result){
+
+    UInt nRegions = incidenceMatrix.nrows();
+    UInt nElements = incidenceMatrix.ncols();
+
+    std::vector<Real> Delta(nRegions, 0);
+    std::vector<Real> integral(nRegions, 0);
+    static constexpr UInt NNodes = ORDER + 1;
+    Element<NNodes, 1, 2> current_element;
+    Eigen::Matrix<Real,NNodes,1> coefficients;
+
+    for (int region=0; region<nRegions; ++region)
+    {
+        for (int elem=0; elem<nElements; ++elem)
+        {
+            if (incidenceMatrix(region,elem)==1) //elem is in region
+            {
+                current_element = mesh_.getElement(elem);
+                for (int i=0; i<NNodes; ++i)
+                    coefficients[i]=coef[current_element[i].getId()];
+                Delta[region] += current_element.getMeasure();
+                integral[region] += current_element.integrate(coefficients);
+            }
+        }
+        result[region]=integral[region]/Delta[region];
+    }
+}
 
 #endif
