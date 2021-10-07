@@ -1,4 +1,6 @@
-#NUOVA VERSIONE 
+#NUOVA VERSIONI
+
+#FEMevaluator.R
 eval.FEM_new <- function(FEM, locations = NULL, incidence_matrix = NULL, search = "tree", bary.locations = NULL)
 {
   ##################### Checking parameters, sizes and conversion ################################
@@ -83,7 +85,7 @@ eval.FEM_new <- function(FEM, locations = NULL, incidence_matrix = NULL, search 
   return(as.matrix(res))
 }
 
-
+#smoothing_graph_CPP.R (nuovo file)
 CPP_eval.graph.FEM <-function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations){
   
   FEMbasis = FEM$FEMbasis
@@ -139,6 +141,7 @@ CPP_eval.graph.FEM <-function(FEM, locations, incidence_matrix, redundancy, ndim
   return(evalmat)
 }
 
+# smoothing_CPP.R
 CPP_eval.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
 {
   
@@ -191,6 +194,7 @@ CPP_eval.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, 
   return (evalmat)
 }
 
+# smoothing_manifold_CPP.R
 CPP_eval.manifold.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
 {
   FEMbasis = FEM$FEMbasis
@@ -243,6 +247,7 @@ CPP_eval.manifold.FEM.new = function(FEM, locations, incidence_matrix, redundanc
   return (evalmat)
 }
 
+# smoothing_volume_CPP.R
 CPP_eval.volume.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
 {
   FEMbasis = FEM$FEMbasis
@@ -276,13 +281,12 @@ CPP_eval.volume.FEM.new = function(FEM, locations, incidence_matrix, redundancy,
     element_ids <- as.matrix(bary.locations$element_ids)
     storage.mode(bary.locations$barycenters) <- "double"
     barycenters <- as.matrix(bary.locations$barycenters)
+  }else{
+    bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
+    storage.mode(bary.locations$locations) <- "double"
+    storage.mode(bary.locations$element_ids) <- "integer"
+    storage.mode(bary.locations$barycenters) <- "double"
   }
-  
-  # if (search == 1) { #use Naive search
-  #   print('This is Naive Search')
-  # } else if (search == 2)  { #use Tree search (default)
-  #   print('This is Tree Search')
-  # }
   
   #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
   evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
