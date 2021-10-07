@@ -18,19 +18,26 @@ extern "C"{
         return (NILSXP);
     }
 
-    SEXP reading_RObject(SEXP Rnodes, SEXP Redges){
+    SEXP reading_RObject(SEXP Rmatrix, SEXP Rflag){
 
-        RNumericMatrix nodes(Rnodes);
-        Element<3,1,2> myElement(1,std::array<Point<2> , 3>(
-                {Point<2>({nodes(0,0),nodes(0,1)}),
-                 Point<2>({nodes(1,0),nodes(1,1)}),
-                 Point<2>({nodes(2,0),nodes(2,1)}) }));
-
+        // flag = 0 -> leggo double
+        // flag = 1 -> leggo interi
+        UInt flag = INTEGER(Rflag)[0];
         SEXP result;
-        PROTECT(result = Rf_allocMatrix(REALSXP,1,1));
-
-        RNumericMatrix tmp(result);
-        tmp[0] = myElement.getMeasure();
+        PROTECT(result = Rf_allocMatrix(INTSXP,1,2));
+        RIntegerMatrix result_(result);
+        if(flag == 0){
+            RNumericMatrix matrix_(Rmatrix);
+            result_[0] = matrix_.nrows();
+            result_[1] = matrix_.ncols();
+        }
+        else if( flag == 1){
+            RIntegerMatrix matrix_(Rmatrix);
+            result_[0] = matrix_.nrows();
+            result_[1] = matrix_.ncols();
+        }
+        else
+            return NILSXP;
 
         UNPROTECT(1);
         return result;
@@ -49,6 +56,32 @@ extern "C"{
             return Eval_FEM_fd_Skeleton<2,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
 
         return NILSXP;
+    }
+
+    SEXP eval_FEM_fd_Auxiliary_new(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
+
+    UInt order = INTEGER(Rorder)[0];
+    UInt mydim = INTEGER(Rmydim)[0];
+    UInt ndim  = INTEGER(Rndim)[0];
+
+    if(order==1 && mydim==1 && ndim==2)
+        return Eval_FEM_fd_Skeleton_new<1,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==1 && ndim==2)
+        return Eval_FEM_fd_Skeleton_new<2,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==1 && mydim==2 && ndim==2)
+        return Eval_FEM_fd_Skeleton_new<1,2,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==2 && ndim==2)
+        return Eval_FEM_fd_Skeleton_new<2,2,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==1 && mydim==2 && ndim==3)
+        return Eval_FEM_fd_Skeleton_new<1,2,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==2 && ndim==3)
+        return Eval_FEM_fd_Skeleton_new<2,2,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==1 && mydim==3 && ndim==3)
+        return Eval_FEM_fd_Skeleton_new<1,3,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==3 && ndim==3)
+        return Eval_FEM_fd_Skeleton_new<2,3,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+
+    return NILSXP;
     }
 
 }

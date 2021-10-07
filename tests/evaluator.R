@@ -64,16 +64,16 @@ eval.FEM_new <- function(FEM, locations = NULL, incidence_matrix = NULL, search 
   if(class(FEM$FEMbasis$mesh)=='mesh.2D'){
     ndim = 2
     mydim = 2
-    res = fdaPDE::CPP_eval.FEM(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
+    res = CPP_eval.FEM.new(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
     
   }else if(class(FEM$FEMbasis$mesh)=='mesh.2.5D'){
     ndim = 3
     mydim = 2
-    res = fdaPDE::CPP_eval.manifold.FEM(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
+    res = CPP_eval.manifold.FEM.new(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
   }else if(class(FEM$FEMbasis$mesh)=='mesh.3D'){
     ndim = 3
     mydim = 3
-    res = fdaPDE::CPP_eval.volume.FEM(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
+    res = CPP_eval.volume.FEM.new(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
   }else if(class(FEM$FEMbasis$mesh)=='mesh.1D'){
     ndim = 2
     mydim = 1
@@ -115,11 +115,9 @@ CPP_eval.graph.FEM <-function(FEM, locations, incidence_matrix, redundancy, ndim
     storage.mode(bary.locations$barycenters) <- "double"
     barycenters <- as.matrix(bary.locations$barycenters)
   }else{   # to use RObjects! 
-    bary.locations = list(locations=locations, element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
+    bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
     storage.mode(bary.locations$element_ids) <- "integer"
-    element_ids <- as.matrix(bary.locations$element_ids)
     storage.mode(bary.locations$barycenters) <- "double"
-    barycenters <- as.matrix(bary.locations$barycenters)
   }
   
   # if (search == 1) { #use Naive search
@@ -133,11 +131,168 @@ CPP_eval.graph.FEM <-function(FEM, locations, incidence_matrix, redundancy, ndim
   #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
   evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
   for (i in 1:ncol(coeff)){# as.matrix(coeff[,i]) Altrimenti non riesco ad utilizzare RObject!
-    evalmat[,i] <- .Call("eval_FEM_fd_Auxiliary", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
+    evalmat[,i] <- .Call("eval_FEM_fd_Auxiliary_new", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
                          FEMbasis$order, redundancy, mydim, ndim, search, bary.locations, PACKAGE = "fdaPDE")
   }
   
   #Returning the evaluation matrix
   return(evalmat)
 }
+
+CPP_eval.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
+{
+  
+  FEMbasis = FEM$FEMbasis
+  # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
+  
+  FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
+  FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
+  
+  # Imposing types, this is necessary for correct reading from C++
+  ## Set proper type for correct C++ reading
+  locations <- as.matrix(locations)
+  storage.mode(locations) <- "double"
+  incidence_matrix <- as.matrix(incidence_matrix)
+  storage.mode(incidence_matrix) <- "integer"
+  storage.mode(FEMbasis$mesh$nodes) <- "double"
+  storage.mode(FEMbasis$mesh$triangles) <- "integer"
+  storage.mode(FEMbasis$mesh$edges) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
+  storage.mode(FEMbasis$order) <- "integer"
+  coeff <- as.matrix(FEM$coeff)
+  storage.mode(coeff) <- "double"
+  storage.mode(ndim) <- "integer"
+  storage.mode(mydim) <- "integer"
+  storage.mode(locations) <- "double"
+  storage.mode(redundancy) <- "integer"
+  storage.mode(search) <- "integer"
+  
+  if(!is.null(bary.locations)){
+    storage.mode(bary.locations$element_ids) <- "integer"
+    element_ids <- as.matrix(bary.locations$element_ids)
+    storage.mode(bary.locations$barycenters) <- "double"
+    barycenters <- as.matrix(bary.locations$barycenters)
+  }else{
+    bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
+    storage.mode(bary.locations$locations) <- "double"
+    storage.mode(bary.locations$element_ids) <- "integer"
+    storage.mode(bary.locations$barycenters) <- "double"
+  }
+  
+  #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
+  evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
+  for (i in 1:ncol(coeff)){
+    evalmat[,i] <- .Call("eval_FEM_fd_Auxiliary_new", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
+                         FEMbasis$order, redundancy, mydim, ndim, search, bary.locations, PACKAGE = "fdaPDE")
+  }
+  
+  #Returning the evaluation matrix
+  return (evalmat)
+}
+
+CPP_eval.manifold.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
+{
+  FEMbasis = FEM$FEMbasis
+  
+  FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
+  FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
+  
+  
+  # Imposing types, this is necessary for correct reading from C++
+  ## Set proper type for correct C++ reading
+  locations <- as.matrix(locations)
+  storage.mode(locations) <- "double"
+  incidence_matrix <- as.matrix(incidence_matrix)
+  storage.mode(incidence_matrix) <- "integer"
+  storage.mode(FEMbasis$mesh$nodes) <- "double"
+  storage.mode(FEMbasis$mesh$triangles) <- "integer"
+  storage.mode(FEMbasis$mesh$edges) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
+  storage.mode(FEMbasis$order) <- "integer"
+  coeff <- as.matrix(FEM$coeff)
+  storage.mode(coeff) <- "double"
+  storage.mode(ndim) <- "integer"
+  storage.mode(mydim) <- "integer"
+  storage.mode(locations) <- "double"
+  storage.mode(redundancy) <- "integer"
+  storage.mode(search) <- "integer"
+  
+  if(!is.null(bary.locations))
+  {
+    storage.mode(bary.locations$element_ids) <- "integer"
+    element_ids <- as.matrix(bary.locations$element_ids)
+    storage.mode(bary.locations$barycenters) <- "double"
+    barycenters <- as.matrix(bary.locations$barycenters)
+  }else{
+    bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
+    storage.mode(bary.locations$locations) <- "double"
+    storage.mode(bary.locations$element_ids) <- "integer"
+    storage.mode(bary.locations$barycenters) <- "double"
+  }
+  
+  #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
+  evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
+  for (i in 1:ncol(coeff)){
+    evalmat[,i] <- .Call("eval_FEM_fd_Auxiliary_new", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
+                         FEMbasis$order, redundancy, mydim, ndim, search, bary.locations, PACKAGE = "fdaPDE")
+  }
+  
+  #Returning the evaluation matrix
+  return (evalmat)
+}
+
+CPP_eval.volume.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
+{
+  FEMbasis = FEM$FEMbasis
+  
+  FEMbasis$mesh$tetrahedrons = FEMbasis$mesh$tetrahedrons - 1
+  FEMbasis$mesh$faces = FEMbasis$mesh$faces - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
+  
+  # Imposing types, this is necessary for correct reading from C++
+  ## Set proper type for correct C++ reading
+  locations <- as.matrix(locations)
+  storage.mode(locations) <- "double"
+  incidence_matrix <- as.matrix(incidence_matrix)
+  storage.mode(incidence_matrix) <- "integer"
+  storage.mode(FEMbasis$mesh$nodes) <- "double"
+  storage.mode(FEMbasis$mesh$tetrahedrons) <- "integer"
+  storage.mode(FEMbasis$mesh$faces) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
+  storage.mode(FEMbasis$order) <- "integer"
+  coeff <- as.matrix(FEM$coeff)
+  storage.mode(coeff) <- "double"
+  storage.mode(ndim) <- "integer"
+  storage.mode(mydim) <- "integer"
+  storage.mode(locations) <- "double"
+  storage.mode(redundancy) <- "integer"
+  storage.mode(search) <- "integer"
+  
+  if(!is.null(bary.locations))
+  {
+    storage.mode(bary.locations$element_ids) <- "integer"
+    element_ids <- as.matrix(bary.locations$element_ids)
+    storage.mode(bary.locations$barycenters) <- "double"
+    barycenters <- as.matrix(bary.locations$barycenters)
+  }
+  
+  # if (search == 1) { #use Naive search
+  #   print('This is Naive Search')
+  # } else if (search == 2)  { #use Tree search (default)
+  #   print('This is Tree Search')
+  # }
+  
+  #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
+  evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
+  for (i in 1:ncol(coeff)){
+    evalmat[,i] <- .Call("eval_FEM_fd_Auxiliary_new", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
+                         FEMbasis$order, redundancy, mydim, ndim, search, bary.locations, PACKAGE = "fdaPDE")
+  }
+  
+  #Returning the evaluation matrix
+  return(evalmat)
+}
+
 
