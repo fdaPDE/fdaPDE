@@ -39,6 +39,7 @@ extern SEXP CPP_TetraMeshSplitOrder2(SEXP, SEXP);
 
 extern SEXP get_meshHandler(SEXP,SEXP,SEXP,SEXP,SEXP);
 extern SEXP reading_RObject(SEXP,SEXP);
+extern SEXP reading_RIntMatrixMatrix(SEXP);
 extern SEXP eval_FEM_fd_Auxiliary(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP eval_FEM_fd_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
@@ -90,7 +91,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"get_meshHandler",                   (DL_FUNC) &get_meshHandler,                    5},
     {"reading_RObject",                   (DL_FUNC) &reading_RObject,                    2},
     {"eval_FEM_fd_Auxiliary",             (DL_FUNC) &eval_FEM_fd_Auxiliary,             10},
-    {"eval_FEM_fd_Auxiliary_new",             (DL_FUNC) &eval_FEM_fd_Auxiliary_new,             10},
+    {"eval_FEM_fd_Auxiliary_new",         (DL_FUNC) &eval_FEM_fd_Auxiliary_new,         10},
+    {"reading_RIntMatrixMatrix",          (DL_FUNC) &reading_RIntMatrixMatrix,          1},
     {NULL, NULL, 0}
 };
 

@@ -880,7 +880,7 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
   }
   else if(order==2 && ncol(edges) == 3){
     
-    edges_adj = matrix(edges[,1:2], nrow=dim(edges)[1],ncol=2,byrow=TRUE)
+    edges_adj = matrix(edges[,1:2], nrow=dim(edges)[1],ncol=2)
     storage.mode(edges_adj) <-"integer"
     outCPP <- .Call("CPP_EdgeMeshHelper", edges_adj, nodes, PACKAGE = "fdaPDE")
     

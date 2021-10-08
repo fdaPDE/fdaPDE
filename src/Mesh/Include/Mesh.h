@@ -188,7 +188,7 @@ private:
 
     const RNumericMatrix points_;
     const RIntegerMatrix elements_;
-    const RIntVectorMatrix neighbors_;
+    const RIntMatrixMatrix neighbors_;
     const UInt search_;
 
     std::unique_ptr<const ADTree<meshElement> > tree_ptr_;

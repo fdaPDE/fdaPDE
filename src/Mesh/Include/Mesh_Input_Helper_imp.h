@@ -185,9 +185,9 @@ void simplex_container<mydim>::order2extend(SEXP Routput, UInt index) const {
 }
 
 template<UInt mydim>
-std::vector<UInt> simplex_container<mydim>::ranges(UInt index) const{
+std::vector<UInt> simplex_container<mydim>::how_many_neighbors(UInt index) const{
     static_assert(mydim==1,
-                  "ERROR! RANGES IS INTENDED FOR POINTS CONTAINERS ONLY! See mesh_input_helper_imp");
+                  "ERROR! how_many_neighbors IS INTENDED FOR POINTS CONTAINERS ONLY! See mesh_input_helper_imp");
 
     std::vector<UInt> res;
 
@@ -213,7 +213,7 @@ void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
     for(UInt i : this->distinct_indexes){
         //vector of all indexes of simplexes sharing  the same node (i.e. simplexes[distinc_indexes[i]].node[0])
         //nb) currents is never empty.
-        std::vector<UInt> currents = this->ranges(i);
+        std::vector<UInt> currents = this->how_many_neighbors(i);
         UInt tot_neighbors =  currents.size() - 1;
         for( UInt idx : currents ){
             lengths( simplexes[idx].i() , simplexes[idx].j() ) = tot_neighbors;
@@ -228,12 +228,17 @@ void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
     //each row of neighbors matrix contains two lists of edges
     //j = 0 there is the "left" list
     //j = 1 there is the "right" list
+
     SET_VECTOR_ELT(Routput,index+1,Rf_allocMatrix(VECSXP,elements.nrows(),2));
-    RIntVectorMatrix neighbors(VECTOR_ELT(Routput,index+1),lengths);
+    for(UInt i=0; i<elements.nrows() * 2; ++i){
+        SET_VECTOR_ELT( VECTOR_ELT(Routput,index+1) ,i,Rf_allocMatrix(INTSXP,1,lengths[i]));
+    }
+
+    RIntMatrixMatrix neighbors(VECTOR_ELT(Routput,index+1));
 
     //Filling neighbors matrix
     for(UInt i : this->distinct_indexes) {
-        std::vector <UInt> currents = this->ranges(i);
+        std::vector <UInt> currents = this->how_many_neighbors(i);
 
         for (UInt j: currents) {
             UInt pos = 0;

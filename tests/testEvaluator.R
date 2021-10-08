@@ -27,7 +27,7 @@ data(horseshoe2D)
 boundary_nodes = horseshoe2D$boundary_nodes
 boundary_segments = horseshoe2D$boundary_segments
 locations = horseshoe2D$locations
-mesh = create.mesh.2D(nodes = rbind(boundary_nodes, locations), segments = boundary_segments,order = 2)
+mesh = create.mesh.2D(nodes = rbind(boundary_nodes, locations), segments = boundary_segments,order = 1)
 
 FEMbasis = fdaPDE::create.FEM.basis(mesh)
 coeff = fs.test(mesh$nodes[,1], mesh$nodes[,2])
@@ -66,7 +66,7 @@ locations = projection.points.2.5D(mesh,points_)
 
 res2.5D_loc_fdaPDE = fdaPDE::eval.FEM(FEMfunction, locations = locations, search = 'naive')
 res2.5D_loc_new = eval.FEM_new(FEMfunction, locations = locations, search = 'naive')
-err2.5D_loc = (res2D_loc_fdaPDE - res2D_loc_new)/res2D_loc_fdaPDE
+err2.5D_loc = (res2.5D_loc_fdaPDE - res2.5D_loc_new)/res2.5D_loc_fdaPDE
 err2.5D_loc
 
 ## Evaluate the mean of the finite element function over the fifth triangle of the mesh

@@ -18,27 +18,41 @@ extern "C"{
         return (NILSXP);
     }
 
-    SEXP reading_RObject(SEXP Rmatrix, SEXP Rflag){
+    SEXP reading_RObject(SEXP Rmatrix, SEXP Rflag) {
 
-        // flag = 0 -> leggo double
-        // flag = 1 -> leggo interi
+        // flag = 0 -> leggo matrici di double
+        // flag = 1 -> leggo matrici interi
         UInt flag = INTEGER(Rflag)[0];
         SEXP result;
-        PROTECT(result = Rf_allocMatrix(INTSXP,1,2));
+        PROTECT(result = Rf_allocMatrix(INTSXP, 1, 2));
         RIntegerMatrix result_(result);
-        if(flag == 0){
+        if (flag == 0) {
             RNumericMatrix matrix_(Rmatrix);
             result_[0] = matrix_.nrows();
             result_[1] = matrix_.ncols();
-        }
-        else if( flag == 1){
+        } else if (flag == 1) {
             RIntegerMatrix matrix_(Rmatrix);
             result_[0] = matrix_.nrows();
             result_[1] = matrix_.ncols();
-        }
-        else
+        } else
             return NILSXP;
 
+        UNPROTECT(1);
+        return result;
+    }
+
+    SEXP reading_RIntMatrixMatrix(SEXP Rmatrix){
+
+        RIntMatrixMatrix matrix_(Rmatrix);
+        SEXP result;
+        PROTECT(result=Rf_allocMatrix(INTSXP,matrix_.nrows()*matrix_.ncols(),2));
+
+        RIntegerMatrix result_(result);
+
+        for(UInt i=0; i<matrix_.nrows()*matrix_.ncols(); ++i) {
+            result_(i, 0) = matrix_[i].nrows();
+            result_(i,1)  = matrix_[i].ncols();
+        }
         UNPROTECT(1);
         return result;
     }

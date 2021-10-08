@@ -189,6 +189,7 @@ SEXP CPP_EdgeMeshHelper(SEXP Redges, SEXP Rnodes){
       simplex_container<1> nodes_list(Redges, Rnodes, NODES_ORDERING);
       nodes_list.assemble_subs(result, 0);
       nodes_list.mark_boundary(result, 1);
+      // compute_neighbors fills the index-th and the (index+1)-th positions in resultf
       nodes_list.compute_neighbors(result, 2);
     }
     
