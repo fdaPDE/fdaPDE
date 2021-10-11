@@ -49,7 +49,7 @@ class Inference_Carrier{
 		// LOCAL VALUES
 		const VectorXr * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
 		const VectorXr * zp = nullptr;						//!< Pointer to the observations in the locations [size n_obs]
-		const VectorXr z_hat = nullptr; 					//!< Fitted values in the locations [size n_obs]
+		VectorXr z_hat; 							//!< Fitted values in the locations [size n_obs]
 
 		// SETTERS 								// Private because they will be used just by the constructor.
 		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data

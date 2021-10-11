@@ -76,7 +76,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 		}
 
 		//!Only if inference is actually required
-		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &inferenceData, &beta(bestLambdaS,bestLambdaT), &z_hat, Optimal_lambda_S, Optimal_lambda_T); //Carrier for inference
+		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &inferenceData, &beta(bestLambdaS,bestLambdaT), z_hat, Optimal_lambda_S, Optimal_lambda_T); //Carrier for inference
 		inference_wrapper_time(optimizationData, inf_car, inference_Output);    
         }
 

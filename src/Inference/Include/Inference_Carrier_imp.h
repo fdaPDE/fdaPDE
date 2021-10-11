@@ -38,7 +38,7 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
 };
 
 template<typename InputHandler> 
-Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr * z_hat_, Real lambda_S_, Real lambda_T_){
+Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr z_hat_, Real lambda_S_, Real lambda_T_){
 
   //Setting lambdas (optimal)
   setlambda_S(lambda_S_);
