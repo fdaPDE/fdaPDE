@@ -123,11 +123,25 @@ extern "C"
     \param RDOF_matrix user provided DOF matrix for GCV computation
     \param Rtune a R-double, Tuning parameter used for the estimation of GCV. called 'GCV.inflation.factor' in R code.
     \param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
+    \param RtestType an R-vector defining if hypotesis testing is required, and which type (one at the time, simultaneous)
+    \param RintervalType an R-vector defining if confidence intervals are required, and which type (one at the time, simultaneous, bonferroni)
+    \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, eigen-sign-flip)
+    \param RexactInference an R-integer that defines if an exact inferential analysis is required or not
+    \param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
+    \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
+    \param RfvarInference an R-integer that defines if local f variance has to be estimated or not
+    \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
+    \param RinferenceFlip an R-integer defining the number of sign-flip needed in eigen-sign-flip inference
+    \param RinferenceTolFspai an R-double defining the tolerance of the FSPAI algorithm needed if non-exact implementation of inference is required
+    \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
     \return R-vectors containg the coefficients of the solution, prediction of the values, optimization data and much more
   */
   SEXP regression_PDE_space_varying_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder, SEXP Rmydim, SEXP Rndim,
 					 SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,  SEXP RincidenceMatrix, SEXP RarealDataAvg,
-					 SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch, SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
+					 SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch,
+					 SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
+					 SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
+				         SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set data
     RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK, Rbeta, Rc, Ru,

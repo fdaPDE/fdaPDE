@@ -73,8 +73,11 @@ NULL
 #' It is advised to set it grather than 1 to avoid overfitting.
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
+#' @param R_Inference_Data_Object An [inferenceDataObject] that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+#' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via [inferenceDataObjectBuilder] function, so that the object is guaranteed to be well defined.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
 #' @return A list with the following variables:
+#' \itemize{
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 #' \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
 #' \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
@@ -85,6 +88,18 @@ NULL
 #' \item{\code{bestlambda}}{If GCV is \code{TRUE}, a 2-elements vector with the indices of smoothing parameters returnig the lowest GCV}
 #' \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 #' \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+#' \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
+#'          \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+#'               \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               }
+#'         \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+#'               \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+#'               \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+#'              }
+#'         }
+#' }         
 #' @description Space-time regression  with differential regularization. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
 #' @usage smooth.FEM.time(locations = NULL, time_locations = NULL, observations, FEMbasis, 
 #' time_mesh=NULL, covariates = NULL, PDE_parameters = NULL,  BC = NULL,
@@ -94,7 +109,8 @@ NULL
 #' lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 #' DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05
+#' R_Inference_Data_Object=NULL)
 #' @export
 #' @references #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
 #' spatially dependent functional data via regression with differential regularization. 
@@ -103,6 +119,11 @@ NULL
 #' regression model for spatial functional data with application to the analysis of the 
 #' production of waste in Venice province. 
 #' Stochastic Environmental Research and Risk Assessment, 31(1), 23-38.
+#' Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
+#'    with differential regularization. Journal of Multivariate Analysis, to appear
+#'    
+#' TO BE MODIFIED WITH INFERENCE 
+
 #' @examples
 #' library(fdaPDE)
 #' 
@@ -135,7 +156,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
                           search = "tree", bary.locations = NULL,
                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
-                          lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+                          lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
+                          R_Inference_Data_Object = NULL)
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
@@ -281,7 +303,18 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                   search = search, bary.locations = bary.locations,
                   optim = optim, 
                   lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
-
+  
+  # Checking inference data
+  # Most of the checks have already been carried out by inferenceDataObjectBuilder function
+  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
+  
+  # Check that GCV is set for inference
+  if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
+    warning("Inference is not defined when lambda grid is provided without GCV")
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
+                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+  }
+  
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying==FALSE)
   {
@@ -334,10 +367,15 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       }
     }
   }
-  # Creating an inference data object just for coherence
-  R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                              coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
-
+  # FAMILY CHECK FOR INFERENCE
+  
+  if(R_Inference_Data_Object@definition==1 & (family!= "gaussian"))
+  {
+    warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
+                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+  }
+  
   ################## End checking parameters, sizes and conversion #############################
   if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
   {
