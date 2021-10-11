@@ -32,13 +32,13 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   setG_decp(model_->getGdec_());
 
   //Setting from Output
-  setBeta_hatp(&(out_regression_->betas));
-  setZ_hatp(&(out_regression_->z_hat));
+  setBeta_hatp(&(out_regression_->betas(0)));
+  setZ_hat((out_regression_->z_hat).col(0));
 
 };
 
 template<typename InputHandler> 
-Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr * z_hatp_, Real lambda_S_, Real lambda_T_){
+Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr * z_hat_, Real lambda_S_, Real lambda_T_){
 
   //Setting lambdas (optimal)
   setlambda_S(lambda_S_);
@@ -73,6 +73,6 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
 
   //Setting from Output
   setBeta_hatp(beta_hatp_);
-  setZ_hatp(z_hatp_);
+  setZ_hat(z_hat_);
 
 };

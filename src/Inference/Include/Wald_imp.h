@@ -8,7 +8,7 @@ void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
     this->compute_S();
   }
   
-  VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
   Real SS_res = eps_hat.squaredNorm();
   
   UInt n = this->inf_car.getN_obs();
@@ -71,7 +71,7 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
     // compute the difference
     VectorXr diff = C*beta_hat - beta_0; 
     
@@ -103,7 +103,7 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
       
     // for each row of C matrix
     for(UInt i=0; i<p; ++i){
@@ -153,7 +153,7 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_CI(void){
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   
   // get the estimates of the parameters
-  VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+  VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
   
   // declare the matrix that will store the p-values
   UInt p=C.rows();

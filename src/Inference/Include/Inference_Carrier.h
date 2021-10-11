@@ -47,9 +47,9 @@ class Inference_Carrier{
 		const Eigen::PartialPivLU<MatrixXr> * G_decp = nullptr;			//!< Pointer to the LU decomposition of the G matrix of the Woodbury decomposition of the system
 		
 		// LOCAL VALUES
-		const MatrixXv * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
+		const VectorXr * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
 		const VectorXr * zp = nullptr;						//!< Pointer to the observations in the locations [size n_obs]
-		const MatrixXr * z_hatp = nullptr; 					//!< Pointer to the fitted values in the locations [size n_obs]
+		const VectorXr z_hat = nullptr; 					//!< Fitted values in the locations [size n_obs]
 
 		// SETTERS 								// Private because they will be used just by the constructor.
 		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data
@@ -76,15 +76,15 @@ class Inference_Carrier{
 		inline void setEp (const SpMat * Ep_){Ep = Ep_;}							//!< Setter of Ep \param Ep_ new Ep
 		inline void setE_decp (const Eigen::SparseLU<SpMat> * E_decp_){E_decp = E_decp_;}			//!< Setter of E_decp \param E_decp_ new E_decp
 		inline void setG_decp (const Eigen::PartialPivLU<MatrixXr> * G_decp_){G_decp = G_decp_;}		//!< Setter of G_decp \param G_decp_ new G_decp
-		inline void setBeta_hatp (const MatrixXv * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
+		inline void setBeta_hatp (const VectorXr * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
-		inline void setZ_hatp (const MatrixXr * z_hatp_){z_hatp = z_hatp_;}					//!< Setter of z_hatp \param z_hatp_ new z_hatp
+		inline void setZ_hat (const VectorXr z_hat_){z_hat = z_hat_;}					//!< Setter of z_hat \param z_hat_ new z_hat
 
 	public:
 		// CONSTUCTORS
 		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, Real values are set 0
 		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression_, const InferenceData * inf_data_, Real lambda_S_); //Main constructor of the class in spatial case
-		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr * z_hatp_, Real lambda_S_, Real lambda_T_); //Main constructor of the class in temporal case
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr z_hat_, Real lambda_S_, Real lambda_T_); //Main constructor of the class in temporal case
 
 		// GETTERS
 		inline const InputHandler * getRegData (void) const {return reg_data;}  			        //!< Getter of reg_data \return reg_data
@@ -111,9 +111,9 @@ class Inference_Carrier{
 		inline const SpMat * getEp (void) const {return Ep;} 						        //!< Getter of Ep \return Ep
 		inline const Eigen::SparseLU<SpMat> * getE_decp (void) const {return E_decp;} 				//!< Getter of E_decp \return E_decp
 		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void) const {return G_decp;} 			//!< Getter of G_decp \return G_decp
-		inline const MatrixXv * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
+		inline const VectorXr * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
 		inline const VectorXr * getZp (void) const {return zp;} 						//!< Getter of zp \return zp
-		inline const MatrixXr * getZ_hatp (void) const {return z_hatp;} 					//!< Getter of z_hatp \return z_hatp
+		inline const VectorXr getZ_hat (void) const {return z_hat;} 						//!< Getter of z_hat \return z_hat
 
 
 

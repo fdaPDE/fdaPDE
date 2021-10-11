@@ -90,7 +90,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	if(inferenceData.get_definition()==true){ 
 		//only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
-		inference_wrapper(optimizationData, solution_bricks.second, inf_car, inference_Output);    
+		inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
        }
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }

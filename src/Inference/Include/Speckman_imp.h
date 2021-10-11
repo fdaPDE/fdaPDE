@@ -14,7 +14,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   }
   
   // get the residuals needed
-  VectorXr eps_hat = (*(this->inf_car.getZp())) - (*(this->inf_car.getZ_hatp()));
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
   // build squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
   

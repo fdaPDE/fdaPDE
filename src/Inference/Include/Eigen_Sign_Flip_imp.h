@@ -43,7 +43,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // simultaneous test
   if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
     // Store beta_hat
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
     
     // Build auxiliary matrix for residuals computation
     MatrixXr C_out = MatrixXr::Zero(C.cols(), C.cols());
@@ -100,7 +100,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
     // one-at-the-time tests
 
     // Store beta_hat
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()))(0);
+    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
     
     Partial_res_H0.resize(Lambda.cols(), p);
     for(UInt i=0; i<p; ++i){

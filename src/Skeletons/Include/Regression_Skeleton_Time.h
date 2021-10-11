@@ -68,7 +68,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 
 		//!Recompute the system matrices if not well posed
 		if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
-		if((bestLambdaS != optimizationData.get_size_S()-1) || (bestLambdaT != optimizationData.get_size_T()-1){
+		if((bestLambdaS != optimizationData.get_size_S()-1) || (bestLambdaT != optimizationData.get_size_T()-1)){
 			regression.build_regression_inference(Optimal_lambda_S, Optimal_lambda_T);
 			// for debug only 
 			Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
@@ -77,7 +77,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 
 		//!Only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &inferenceData, &beta(bestLambdaS,bestLambdaT), &z_hat, Optimal_lambda_S, Optimal_lambda_T); //Carrier for inference
-		inference_wrapper(optimizationData, inf_car, inference_Output);    
+		inference_wrapper_time(optimizationData, inf_car, inference_Output);    
         }
 
 	//!Copy result in R memory
