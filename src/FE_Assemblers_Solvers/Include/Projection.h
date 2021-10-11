@@ -5,11 +5,11 @@
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 class projection{
-    static_assert((ORDER==1 || ORDER==2) &&
+    /*static_assert((ORDER==1 || ORDER==2) &&
     (mydim==1 || mydim==2 || mydim==3) &&
     mydim <= ndim,
     "ERROR! TRYING TO INSTANTIATE PROJECTION WITH WRONG NUMBER OF PARAMETERS See projection.h");
-
+    */
 private:
     const MeshHandler<ORDER,mydim,ndim>& mesh_;
     const std::vector<Point<ndim> > & deData_; // the points to be projected

@@ -43,6 +43,8 @@ extern SEXP reading_RIntMatrixMatrix(SEXP);
 extern SEXP eval_FEM_fd_Auxiliary(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP eval_FEM_fd_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
+extern SEXP TimingSearch(SEXP,SEXP,SEXP,SEXP,SEXP);
+
 extern SEXP CPP_EdgeMeshHelper(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshOrder2(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshSplit(SEXP, SEXP);
@@ -93,6 +95,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"eval_FEM_fd_Auxiliary",             (DL_FUNC) &eval_FEM_fd_Auxiliary,             10},
     {"eval_FEM_fd_Auxiliary_new",         (DL_FUNC) &eval_FEM_fd_Auxiliary_new,         10},
     {"reading_RIntMatrixMatrix",          (DL_FUNC) &reading_RIntMatrixMatrix,          1},
+    {"TimingSearch",                   (DL_FUNC) &TimingSearch,                    5},
     {NULL, NULL, 0}
 };
 

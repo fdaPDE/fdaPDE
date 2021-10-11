@@ -2,6 +2,7 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../Include/Auxiliary_Mesh_Skeletons.h"
 #include "../../FE_Assemblers_Solvers/Include/Projection.h"
+#include "../../Mesh/Include/Domain.h"
 
 extern "C"{
 

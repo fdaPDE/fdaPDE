@@ -821,6 +821,10 @@ SEXP tree_mesh_construction(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim) {
 		return(tree_mesh_skeleton<1, 3, 3>(Rmesh));
 	else if(ORDER == 2 && mydim==3 && ndim==3)
 		return(tree_mesh_skeleton<2, 3, 3>(Rmesh));
+    else if(ORDER == 1 && mydim==1 && ndim==2)
+        return tree_mesh_skeleton<1,1,2>(Rmesh);
+    else if(ORDER == 2 && mydim==1 && ndim==2)
+        return tree_mesh_skeleton<2,1,2>(Rmesh);
 
 	return(NILSXP);
 }
