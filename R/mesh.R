@@ -979,12 +979,14 @@ refine.by.splitting.mesh.1D <- function (mesh=NULL){
   storage.mode(mesh$nodes) <- "double"
   
   if(mesh$order==1){
-    outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges[,1:2], mesh$nodes)
+    outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges, mesh$nodes)
     splittedmesh<-create.mesh.1D(nodes=rbind(mesh$nodes, outCPP[[2]]), edges=outCPP[[1]])
   }
   else if(mesh$order==2){
     nnodes<-max(mesh$edges[,1:2])+1
-    outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges[,1:2], mesh$nodes[1:nnodes,])
+    edges_adj = as.matrix(mesh$edges)
+    storage.mode(edges_adj)<- "integer"
+    outCPP <- .Call("CPP_EdgeMeshSplit", edges_adj, mesh$nodes[1:nnodes,])
     splittedmesh <- create.mesh.1D(nodes= rbind(mesh$nodes[1:nnodes,], outCPP[[2]]), edges = outCPP[[1]], order = 2)
   }
   return(splittedmesh)
