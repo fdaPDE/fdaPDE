@@ -28,12 +28,15 @@ class Inference_Carrier{
 		UInt n_obs; 							        //!< Number of observations
 		UInt n_nodes;							        //!< Number of nodes
 		UInt q;								        //!< Number of covariates
-		Real lambda = 0; 							//!< Optimal smoothing parameter 
+		Real lambda_S = 0; 							//!< Optimal spatial smoothing parameter 
+		Real lambda_T = 0; 							//!< Optimal temporal smoothing parameter 
 
   		const MatrixXr * Wp = nullptr;						//!< Pointer to the covariates matrix [size n_obs x n_covariates]
 		const SpMat * Psip = nullptr; 						//!< Pointer to location-to-nodes matrix [size n_obs x n_nodes]	
 		const SpMat * Psi_tp = nullptr; 					//!< Pointer to the transpose of the location-to-nodes matrix [size n_nodes x n_obs]	
 		const Eigen::PartialPivLU<MatrixXr> * WtW_decp = nullptr;		//!< Pointer to the LU decomposition of the WtW matrix
+		const SpMat * Ptkp = nullptr;						//!< Pointer to the kron(Pt,IN) (separable version)
+		const SpMat * LR0kp = nullptr;						//!< Pointer to the kron(L,R0) (parabolic version)
 		const SpMat * R0p = nullptr; 						//!< Pointer to the mass matrix
 		const SpMat * R1p = nullptr; 						//!< Pointer to the stiffness matrix
 		const MatrixXr * Hp = nullptr;						//!< Pointer to the hat matrix [size n_covariates x n_covariates]
@@ -56,12 +59,15 @@ class Inference_Carrier{
 		inline void setN_obs (UInt n_obs_){n_obs = n_obs_;}							//!< Setter of n_obs \param n_obs_ new n_obs
 		inline void setN_nodes (UInt n_nodes_){n_nodes = n_nodes_;}						//!< Setter of n_nodes \param n_nodes_ new n_nodes
 		inline void setq (UInt q_){q = q_;}									//!< Setter of q \param q_ new q
-		inline void setlambda (Real lambda_){lambda=lambda_;}							//!< Setter of lambda \param lambda_ new lambda
+		inline void setlambda_S (Real lambda_S_){lambda_S=lambda_S_;}						//!< Setter of lambda_S \param lambda_S_ new lambda_S
+		inline void setlambda_T (Real lambda_T_){lambda_T=lambda_T_;}						//!< Setter of lambda_T \param lambda_T_ new lambda_T
 
 		inline void setWp (const MatrixXr * Wp_){Wp = Wp_;}							//!< Setter of Wp \param Wp_ new Wp
 		inline void setPsip (const SpMat * Psip_){Psip = Psip_;}						//!< Setter of Psip \param Psip_ new Psip
 		inline void setPsi_tp (const SpMat * Psi_tp_){Psi_tp = Psi_tp_;}					//!< Setter of Psi_tp \param Psi_tp_ new Psi_tp
 		inline void setWtW_decp (const Eigen::PartialPivLU<MatrixXr> * WtW_decp_){WtW_decp = WtW_decp_;}	//!< Setter of WtW_decp \param  WtW_decp_ new  WtW_decp
+		inline void setPtkp (const SpMat * Ptkp_){Ptkp = Ptkp_;}						//!< Setter of Ptkp \param Ptkp_ new Ptkp
+		inline void setLR0kp (const SpMat * LR0kp_){LR0kp = LR0kp_;}						//!< Setter of LR0kp \param LR0kp_ new LR0kp
 		inline void setR0p (const SpMat * R0p_){R0p = R0p_;}							//!< Setter of R0p \param R0p_ new R0p
 		inline void setR1p (const SpMat * R1p_){R1p = R1p_;}							//!< Setter of R1p \param R1p_ new R1p
 		inline void setHp (const MatrixXr * Hp_){Hp = Hp_;}							//!< Setter of Hp \param Hp_ new Hp
@@ -76,8 +82,9 @@ class Inference_Carrier{
 
 	public:
 		// CONSTUCTORS
-		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, lambda is set to 0
-		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression_, const InferenceData * inf_data_, Real lambda_); //Main constructor of the class
+		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, Real values are set 0
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data * out_regression_, const InferenceData * inf_data_, Real lambda_S_); //Main constructor of the class in spatial case
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const InferenceData * inf_data_, VectorXr * beta_hatp_, VectorXr * z_hatp_, Real lambda_S_, Real lambda_T_); //Main constructor of the class in temporal case
 
 		// GETTERS
 		inline const InputHandler * getRegData (void) const {return reg_data;}  			        //!< Getter of reg_data \return reg_data
@@ -87,12 +94,15 @@ class Inference_Carrier{
 		inline UInt getN_obs (void) const {return n_obs;} 							//!< Getter of n_obs \return n_obs
 		inline UInt getN_nodes (void) const {return n_nodes;} 							//!< Getter of n_nodes \return n_nodes
 		inline UInt getq (void) const {return q;} 								//!< Getter of q \return q
-		inline Real getlambda (void) const {return lambda;} 							//!< Getter of lambda \return lambda 
+		inline Real getlambda_S (void) const {return lambda_S;} 						//!< Getter of lambda_S \return lambda_S 
+		inline Real getlambda_T (void) const {return lambda_T;} 						//!< Getter of lambda_T \return lambda_T 
 
 		inline const MatrixXr * getWp (void) const {return Wp;} 						//!< Getter of Wp \return Wp
 		inline const SpMat * getPsip (void) const {return Psip;} 						//!< Getter of Psip \return Psip
 		inline const SpMat * getPsi_tp (void) const {return Psi_tp;} 						//!< Getter of Psi_tp \return Psi_tp
 		inline const Eigen::PartialPivLU<MatrixXr> * getWtW_decp (void) const {return WtW_decp;} 		//!< Getter of WtW_decp \return WtW_decp
+		inline const SpMat * getPtkp (void) const {return Ptkp;} 						//!< Getter of Ptkp \return Ptkp
+		inline const SpMat * getLR0kp (void) const {return LR0kp;} 						//!< Getter of LR0kp \return LR0kp
 		inline const SpMat * getR0p (void) const {return R0p;} 							//!< Getter of R0p \return R0p
 		inline const SpMat * getR1p (void) const {return R1p;} 							//!< Getter of R1p \return R1p
 		inline const MatrixXr * getHp (void) const {return Hp;} 						//!< Getter of Hp \return Hp

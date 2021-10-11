@@ -139,22 +139,23 @@ extern "C"
     RegressionData regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
 				  RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Ric, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];
 
     if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
-      return(regression_skeleton_time<RegressionData, 1, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
+      return(regression_skeleton_time<RegressionData, 1, 2, 2>(regressionData, optimizationData, inferenceData, Rmesh, Rmesh_time));
     else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
-      return(regression_skeleton_time<RegressionData, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
+      return(regression_skeleton_time<RegressionData, 2, 2, 2>(regressionData, optimizationData, inferenceData, Rmesh, Rmesh_time));
     else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
-      return(regression_skeleton_time<RegressionData, 1, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+      return(regression_skeleton_time<RegressionData, 1, 2, 3>(regressionData, optimizationData, inferenceData, Rmesh, Rmesh_time));
     else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
-      return(regression_skeleton_time<RegressionData, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+      return(regression_skeleton_time<RegressionData, 2, 2, 3>(regressionData, optimizationData, inferenceData, Rmesh, Rmesh_time));
     else if(regressionData.getOrder()==1 && mydim==3 && ndim==3)
-      return(regression_skeleton_time<RegressionData, 1, 3, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+      return(regression_skeleton_time<RegressionData, 1, 3, 3>(regressionData, optimizationData, inferenceData, Rmesh, Rmesh_time));
     else if(regressionData.getOrder()==2 && mydim==3 && ndim==3)
-      return(regression_skeleton_time<RegressionData, 2, 3, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+      return(regression_skeleton_time<RegressionData, 2, 3, 3>(regressionData, optimizationData, inferenceData, Rmesh, Rmesh_time));
 
 
     return(NILSXP);

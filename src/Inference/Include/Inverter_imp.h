@@ -17,7 +17,15 @@ void Inverse_Non_Exact<InputHandler>::pre_Inverse(void){
   UInt n_nodes = inf_car.getN_nodes();
   
   // compute the sparse matrix E_tilde
-  this->E_tilde = (inf_car.getEp()->block(0,0, n_nodes, n_nodes)) + inf_car.getlambda()*(inf_car.getR1p()->transpose())*(this->R0_inv_tilde)*(*inf_car.getR1p());
+  if(!(inf_car.getRegData()->isSpaceTime())){ // Space only penalization
+    this->E_tilde = (inf_car.getEp()->block(0,0, n_nodes, n_nodes)) + inf_car.getlambda_S()*(inf_car.getR1p()->transpose())*(this->R0_inv_tilde)*(*inf_car.getR1p());
+  }else{
+    if(inf_car.getRegData()->getFlagParabolic()){// Parabolic Case
+      this->E_tilde = (inf_car.getEp()->block(0,0, n_nodes, n_nodes)) + inf_car.getlambda_S()*(*inf_car.getR1p() + inf_car.getlambda_T()* (*inf_car.getLR0kp())).transpose()*(this->R0_inv_tilde)*(*inf_car.getR1p() + inf_car.getlambda_T()* (*inf_car.getLR0kp()));
+    }else{
+      this->E_tilde = (inf_car.getEp()->block(0,0, n_nodes, n_nodes)) + inf_car.getlambda_S()*(inf_car.getR1p()->transpose())*(this->R0_inv_tilde)*(*inf_car.getR1p());
+    }
+  }
   this->E_tilde.makeCompressed();
 
   return;

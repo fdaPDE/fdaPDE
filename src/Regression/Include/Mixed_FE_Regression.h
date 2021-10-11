@@ -153,7 +153,8 @@ class MixedFERegressionBase
 		//! A method that set WTW flag to false, in order to recompute the matrix WTW.
 		inline void recomputeWTW(void){ this->isWTWfactorized_ = false;}
 		//! A method used to reset the system matrix to the value obtained for a given lambda (used for inference)
-		inline void build_regression_inference(Real lambda_inference_) {this->buildSystemMatrix(lambda_inference_); this->system_factorize();}; // Since inference is not implemente in time-varying case, up to now only one lambda value method is provided
+		inline void build_regression_inference(Real lambda_inference_) {this->buildSystemMatrix(lambda_inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
+		inline void build_regression_inference(Real lambda_S_Inference_, Real lambda_T_Inference_) {this->buildSystemMatrix(lambda_S_Inference_,lambda_T_Inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
 
 		// -- GETTERS --
 		//! A function returning the computed barycenters of the locationss
@@ -174,6 +175,10 @@ class MixedFERegressionBase
 		inline const SpMat * getpsi_(void) const {return &this->psi_;}
 		//! A method returning the psi matrix transposed
 		inline const SpMat * getpsi_t_(void) const {return &this->psi_t_;}
+    		//! A method returning the Ptk matrix
+		inline const SpMat * getPtk_(void) const {return &this->Ptk_;}
+		//! A method returning the LR0k matrix
+		inline const SpMat * getLR0k_(void) const {return &this->LR0k_;}
 		//! A method returning the R0 matrix
 		inline const SpMat * getR0_(void) const {return &this->R0_;}
 		//! A method returning the R1 matrix

@@ -26,7 +26,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 template<typename EvaluationType, typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier);
 template<typename InputHandler>
-void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
+void inference_wrapper_space(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 template<typename InputHandler>
 void lambda_inference_selection(const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference);
 
@@ -253,7 +253,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
   \return void
 */
 template<typename InputHandler>
-void inference_wrapper(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
+void inference_wrapper_space(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
