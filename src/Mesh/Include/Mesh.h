@@ -182,7 +182,7 @@ public:
     */
     meshElement findLocationNaive(const Point<2>&) const;
 
-    // meshElement findLocationTree(const Point<2>&) const;
+    meshElement findLocationTree(const Point<2>&) const;
 
 private:
 

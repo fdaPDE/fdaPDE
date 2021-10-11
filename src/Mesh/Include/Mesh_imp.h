@@ -152,10 +152,10 @@ MeshHandler<ORDER,1,2>::MeshHandler(SEXP Rmesh, UInt search) :
         points_(VECTOR_ELT(Rmesh, 0)),
         elements_(VECTOR_ELT(Rmesh, 3)), neighbors_(VECTOR_ELT(Rmesh, 8)),
         search_(search) {
-    /*
+
     if(search==2)
         tree_ptr_=make_unique<const ADTree<meshElement> > (Rmesh);
-*/
+
 }
 
 template <UInt ORDER>
@@ -190,9 +190,7 @@ std::vector<typename MeshHandler<ORDER,1,2>::meshElement > MeshHandler<ORDER,1,2
 template <UInt ORDER>
 typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::findLocation(const Point<2>& point) const {
     if(search_==2) {
-        // NO findLocationTree
-        //return findLocationTree(point);
-        return meshElement();
+        return findLocationTree(point);
     }
     else
         return findLocationNaive(point);
@@ -208,6 +206,34 @@ typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::findLocatio
     }
     return meshElement(); //default element with NVAL ID
 }
+
+template <UInt ORDER>
+typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::findLocationTree(const Point<2>& point) const {
+    std::set<int> found;
+    std::vector<Real> region;
+    region.reserve(2*2);
+
+    for (UInt i=0; i<2; ++i){
+        region.push_back(point[i]);
+    }
+    for (UInt i=0; i<2; ++i){
+        region.push_back(point[i]);
+    }
+
+    if(!tree_ptr_->search(region, found)) {
+        return meshElement();
+    }
+
+    for (const auto &i : found) {
+        const UInt index = tree_ptr_->pointId(i);
+        meshElement tmp = getElement(index);
+        if(tmp.isPointInside(point)) {
+            return tmp;
+        }
+    }
+    return meshElement();
+}
+
 
 template <UInt ORDER>
 void MeshHandler<ORDER,1,2>::printPoints(std::ostream& os) const
