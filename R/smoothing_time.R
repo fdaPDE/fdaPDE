@@ -452,7 +452,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   if(all(is.na(bigsol[[13]])))
     ICestimated = NULL
   else
-    ICestimated = list(IC.FEM=bigsol[[13]],bestlambdaindex=bigsol[[14]],bestlambda=bigsol[[15]],beta=bigsol[[16]])
+    ICestimated = list(IC.FEM=bigsol[[16]],bestlambdaindex=bigsol[[17]],bestlambda=bigsol[[18]],beta=bigsol[[19]])
 
     # Save information of Tree Mesh
      tree_mesh = list(
@@ -488,8 +488,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Save statistics and intervals
   if(R_Inference_Data_Object@definition==1){
     inference = {}
-    confidence_intervals = matrix(data = bigsol[[24]], nrow = 3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1])
-    p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type))
+    confidence_intervals = matrix(data = bigsol[[14]], nrow = 3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1])
+    p_val = matrix(data = bigsol[[13]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type))
     
     for(i in 1:length(R_Inference_Data_Object@type)){ # each element is a different inferential setting
       if(R_Inference_Data_Object@interval[i]!=0){ # Intervals requested by this setting, adding them to the right implementation position
@@ -553,7 +553,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     }
     
     if(R_Inference_Data_Object@f_var==1){
-      f_variances = matrix(data = bigsol[[25]], nrow = length(observations), ncol = 1)
+      f_variances = matrix(data = bigsol[[15]], nrow = length(observations), ncol = 1)
       inference$f_var = f_variances
     }  
     

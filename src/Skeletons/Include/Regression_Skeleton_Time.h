@@ -82,13 +82,13 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 
 	//!Prepare the structures for retuirning inference objects to R
 	//!Prepare the inference output space
-        UInt n_inf_implementations = inf_Data.get_test_type().size();
-	UInt p_inf = inf_Data.get_coeff_inference().rows();
+        UInt n_inf_implementations = inferenceData.get_test_type().size();
+	UInt p_inf = inferenceData.get_coeff_inference().rows();
         MatrixXv inference_beta_Output = inference_Output.topRows(n_inf_implementations);
 	MatrixXv p_values;
 	MatrixXv intervals;
 	
-	if (inf_Data.get_definition()==false){
+	if (inferenceData.get_definition()==false){
 	  intervals.resize(1,1);
 	  intervals(0,0).resize(3);
 	  intervals(0,0)(0) = 10e20;
@@ -112,7 +112,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
         f_var.resize(1,1);
         f_var(0,0).resize(f_size);
 
-        if(inf_Data.get_f_var()){
+        if(inferenceData.get_f_var()){
            f_var(0,0) = inference_Output(n_inf_implementations,0);
         }
 	else{
