@@ -449,7 +449,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   else
     beta = NULL
 
-  if(all(is.na(bigsol[[13]])))
+  if(all(is.na(bigsol[[16]])))
     ICestimated = NULL
   else
     ICestimated = list(IC.FEM=bigsol[[16]],bestlambdaindex=bigsol[[17]],bestlambda=bigsol[[18]],beta=bigsol[[19]])

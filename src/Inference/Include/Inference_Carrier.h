@@ -92,7 +92,7 @@ class Inference_Carrier{
 		inline const InferenceData * getInfData (void) const {return inf_data;}					//!< Getter of inf_data \return inf_data
 
 		inline UInt getN_obs (void) const {return n_obs;} 							//!< Getter of n_obs \return n_obs
-		inline UInt getN_nodes (void) const {return n_nodes;} 							//!< Getter of n_nodes \return n_nodes
+		inline UInt getN_nodes (void) const {return this->Psip->cols();} 					//!< Getter of n_nodes \return n_nodes
 		inline UInt getq (void) const {return q;} 								//!< Getter of q \return q
 		inline Real getlambda_S (void) const {return lambda_S;} 						//!< Getter of lambda_S \return lambda_S 
 		inline Real getlambda_T (void) const {return lambda_T;} 						//!< Getter of lambda_T \return lambda_T 
