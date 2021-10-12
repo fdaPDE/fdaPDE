@@ -367,14 +367,6 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       }
     }
   }
-  # FAMILY CHECK FOR INFERENCE
-  
-  if(R_Inference_Data_Object@definition==1 & (family!= "gaussian"))
-  {
-    warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
-    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                                coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
-  }
   
   ################## End checking parameters, sizes and conversion #############################
   if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
@@ -429,7 +421,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   N = nrow(FEMbasis$mesh$nodes)
   M = ifelse(FLAG_PARABOLIC,length(time_mesh)-1,length(time_mesh) + 2);
   if(is.null(IC) && FLAG_PARABOLIC)
-    IC = bigsol[[13]]$coeff
+    IC = bigsol[[16]]$coeff
   if(FLAG_PARABOLIC)
   {
     f = array(dim=c(length(IC)+M*N,length(lambdaS),length(lambdaT)))
@@ -493,13 +485,97 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Prepare return list
   reslist = NULL
   
-  if(!is.null(lambda.selection.lossfunction))
-  {
-    stderr=sqrt(GCV_*(sum(!is.na(observations))-dof)/sum(!is.na(observations)))
-    reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time,
-            beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, ICestimated=ICestimated, bary.locations = bary.locations)
+  # Save statistics and intervals
+  if(R_Inference_Data_Object@definition==1){
+    inference = {}
+    confidence_intervals = matrix(data = bigsol[[24]], nrow = 3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1])
+    p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type))
+    
+    for(i in 1:length(R_Inference_Data_Object@type)){ # each element is a different inferential setting
+      if(R_Inference_Data_Object@interval[i]!=0){ # Intervals requested by this setting, adding them to the right implementation position
+        ci=t(confidence_intervals[(3*(i-1)+1):(3*(i-1)+3),])
+        
+        if(R_Inference_Data_Object@type[i]==1){
+          inference$CI$wald[[length(inference$CI$wald)+1]] = ci
+          inference$CI$wald=as.list(inference$CI$wald)
+        }
+        else if(R_Inference_Data_Object@type[i]==2){
+          inference$CI$speckman[[length(inference$CI$speckman)+1]] = ci
+          inference$CI$speckman=as.list(inference$CI$speckman)
+        }
+        else if(R_Inference_Data_Object@type[i]==3){
+          inference$CI$eigen_sign_flip[[length(inference$CI$eigen_sign_flip)+1]] = ci
+          inference$CI$eigen_sign_flip=as.list(inference$CI$eigen_sign_flip)
+        }
+      }
+      
+      if(R_Inference_Data_Object@test[i]!=0){ # Test requested by this setting, adding them to the right implementation position
+        statistics=p_val[,i]
+        p_values = numeric()
+        if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip p-value is already computed in cpp code
+          if(R_Inference_Data_Object@test[i]==1){ 
+            # one-at-the-time tests
+            p_values = statistics
+          }
+          else if(R_Inference_Data_Object@test[i]==2){
+            # simultaneous test
+            p_values = statistics[1]
+          }
+        }else{
+          # Compute p-values
+          if(R_Inference_Data_Object@test[i]==1){ # Wald and Speckman return statistics and needs computation of p-values (no internal use of distributions quantiles)
+            # one-at-the-time-tests
+            p_values = numeric(length(statistics))
+            for(l in 1:length(statistics)){
+              p_values[l] = 2*pnorm(-abs(statistics[l]))
+            }
+          }
+          else if(R_Inference_Data_Object@test[i]==2){
+            # simultaneous tests
+            p = dim(R_Inference_Data_Object@coeff)[1]
+            p_values = 1-pchisq(statistics[1], p)
+          }
+        }
+        # add p-values in the right position
+        if(R_Inference_Data_Object@type[i]==1){
+          inference$p_values$wald[[length(inference$p_values$wald)+1]] = p_values
+          inference$p_values$wald=as.list(inference$p_values$wald)
+        }
+        else if(R_Inference_Data_Object@type[i]==2){
+          inference$p_values$speckman[[length(inference$p_values$speckman)+1]] = p_values
+          inference$p_values$speckman=as.list(inference$p_values$speckman)
+        }
+        else if(R_Inference_Data_Object@type[i]==3){
+          inference$p_values$eigen_sign_flip[[length(inference$p_values$eigen_sign_flip)+1]] = p_values
+          inference$p_values$eigen_sign_flip=as.list(inference$p_values$eigen_sign_flip)
+        }
+      }
+    }
+    
+    if(R_Inference_Data_Object@f_var==1){
+      f_variances = matrix(data = bigsol[[25]], nrow = length(observations), ncol = 1)
+      inference$f_var = f_variances
+    }  
+    
+    if(!is.null(lambda.selection.lossfunction))
+    {
+      stderr=sqrt(GCV_*(sum(!is.na(observations))-dof)/sum(!is.na(observations)))
+      reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time,
+                   beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, ICestimated=ICestimated, bary.locations = bary.locations, inference = inference)
+    }else{
+      reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time, beta = beta, ICestimated=ICestimated, bary.locations = bary.locations, inference = inference)
+    }
+    
   }else{
-    reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time, beta = beta, ICestimated=ICestimated, bary.locations = bary.locations)
+    
+    if(!is.null(lambda.selection.lossfunction))
+    {
+      stderr=sqrt(GCV_*(sum(!is.na(observations))-dof)/sum(!is.na(observations)))
+      reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time,
+                   beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, ICestimated=ICestimated, bary.locations = bary.locations)
+    }else{
+      reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time, beta = beta, ICestimated=ICestimated, bary.locations = bary.locations)
+    }
   }
 
   return(reslist)

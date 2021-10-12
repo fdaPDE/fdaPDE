@@ -80,9 +80,50 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 		inference_wrapper_time(optimizationData, inf_car, inference_Output);    
         }
 
+	//!Prepare the structures for retuirning inference objects to R
+	//!Prepare the inference output space
+        UInt n_inf_implementations = inf_Data.get_test_type().size();
+	UInt p_inf = inf_Data.get_coeff_inference().rows();
+        MatrixXv inference_beta_Output = inference_Output.topRows(n_inf_implementations);
+	MatrixXv p_values;
+	MatrixXv intervals;
+	
+	if (inf_Data.get_definition()==false){
+	  intervals.resize(1,1);
+	  intervals(0,0).resize(3);
+	  intervals(0,0)(0) = 10e20;
+          intervals(0,0)(1) = 10e20; 
+          intervals(0,0)(2) = 10e20;
+	  
+	  p_values.resize(1,1);
+	  p_values(0,0).resize(1);
+	  p_values(0,0)(0)= 10e20;
+	}else{
+	  
+	  p_values.resize(1, n_inf_implementations);
+	  intervals.resize(n_inf_implementations, p_inf);
+	  p_values=(inference_beta_Output.col(0)).transpose();
+          intervals=inference_beta_Output.rightCols(p_inf);
+	}
+
+        //!Prepare the local f variance output space
+        MatrixXv f_var;
+        UInt f_size = regressionData.getNumberofObservations();
+        f_var.resize(1,1);
+        f_var(0,0).resize(f_size);
+
+        if(inf_Data.get_f_var()){
+           f_var(0,0) = inference_Output(n_inf_implementations,0);
+        }
+	else{
+           for(long int i=0; i<f_size; ++i){
+              f_var(0,0)(i) = 10e20;
+           }
+        }
+
 	//!Copy result in R memory
 	SEXP result = NILSXP;
-	result = PROTECT(Rf_allocVector(VECSXP, 5+5+2));
+	result = PROTECT(Rf_allocVector(VECSXP, 5+5+2+3));
 	SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution(0,0).size(), solution.rows()*solution.cols()));
 	SET_VECTOR_ELT(result, 1, Rf_allocMatrix(REALSXP, dof.rows(), dof.cols()));
 	SET_VECTOR_ELT(result, 2, Rf_allocMatrix(REALSXP, GCV.rows(), GCV.cols()));
@@ -182,6 +223,35 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 		for(UInt i = 0; i < barycenters.rows(); i++)
 			rans11[i + barycenters.rows()*j] = barycenters(i,j);
 	}
+
+	// We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
+	SET_VECTOR_ELT(result,12,Rf_allocMatrix(REALSXP,p_values(0).size(),p_values.cols())); // P_values info (inference on betas)
+	Real *rans12=REAL(VECTOR_ELT(result,12));
+	for(UInt j = 0; j<p_values.cols(); j++){
+	  for(UInt i = 0; i<p_values(0).size(); i++){
+	    rans12[i+p_values(0).size()*j]=p_values(j)(i);
+	  }
+	}
+	
+	SET_VECTOR_ELT(result, 13, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (Inference on betas)
+	Real *rans13 = REAL(VECTOR_ELT(result,13));
+	for(UInt j = 0; j<intervals.cols(); j++){
+	  for(UInt k = 0; k<intervals.rows(); k++){
+	    for(UInt i = 0; i<3 ; i++){
+	      rans13[k*3+i+intervals.rows()*3*j]=intervals(k,j)(i);
+	    } 
+	  }
+	}
+
+        // local f variance
+	// Add the vector of lambdas
+        UInt f_vec_size = f_var(0).size();
+        SET_VECTOR_ELT(result, 14, Rf_allocVector(REALSXP, f_vec_size));
+        Real *rans14 = REAL(VECTOR_ELT(result, 14));
+        for(long int j = 0; j < f_vec_size; j++)
+        {
+               rans14[j] = f_var(0)[j];
+        }
 
 	UNPROTECT(1);
 	return(result);
