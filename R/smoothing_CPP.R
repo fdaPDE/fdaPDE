@@ -295,7 +295,7 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   PDE_param_eval$c = (PDE_parameters$c)(points_eval)
   PDE_param_eval$u = (PDE_parameters$u)(points_eval)
   
-  if(PDE_param_eval$u == rep(0, nrow(points_eval))){
+  if(PDE_param_eval$u != rep(0, nrow(points_eval))){
     warning("Inference for linear estimators is implemented only if reaction term is zero, \nInference Data are ignored")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                 coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
