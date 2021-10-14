@@ -26,7 +26,7 @@ class Inference_Carrier{
 
 		// SYSTEM PARAMETERS
 		UInt n_obs; 							        //!< Number of observations
-		UInt n_nodes;							        //!< Number of nodes
+		UInt n_nodes;							        //!< Number of nodes in space-only models, number of nodes times time points in the space-time models
 		UInt q;								        //!< Number of covariates
 		Real lambda_S = 0; 							//!< Optimal spatial smoothing parameter 
 		Real lambda_T = 0; 							//!< Optimal temporal smoothing parameter 

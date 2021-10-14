@@ -56,7 +56,7 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   setZp(Regression_Data_->getObservations());
 
   //Setting from MixedFERegressionBase
-  setN_nodes(model_->getnnodes_());
+  setN_nodes(model_->getnnodes_() * model_->getmnodes_());
   setPsip (model_->getpsi_());
   setPsi_tp (model_->getpsi_t_());
   setWtW_decp(model_->getWTW_());
