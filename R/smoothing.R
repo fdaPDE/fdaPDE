@@ -197,7 +197,7 @@
 #' covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 #' 
-#' #Inferential tests and cofidence intervals
+#' #Inferential tests and confidence intervals
 #' R_inference_data_object = inferenceDataObjectBuilder(test = c('one-at-the-time','simultaneous','one-at-the-time'), interval = c('simultaneous','one-at-the-time','none'), exact = TRUE, type = c('wald','speckman','eigen-sign-flip'), dim = 1)
 #'
 #' solution = smooth.FEM(observations = data, covariates = covariate, 
@@ -208,7 +208,7 @@
 #' solution$solution$beta
 #' # tests over beta estimates p-values:
 #' solution$inference$p_values
-#' # cinfidence intervals for beta estimates:
+#' # confidence intervals for beta estimates:
 #' solution$inference$CI
 #' # non-parametric estimate:
 #' plot(solution$fit.FEM)

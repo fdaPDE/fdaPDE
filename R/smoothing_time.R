@@ -121,9 +121,6 @@ NULL
 #' Stochastic Environmental Research and Risk Assessment, 31(1), 23-38.
 #' Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
 #'    with differential regularization. Journal of Multivariate Analysis, to appear
-#'    
-#' TO BE MODIFIED WITH INFERENCE 
-
 #' @examples
 #' library(fdaPDE)
 #' 
@@ -149,6 +146,32 @@ NULL
 #' solution = smooth.FEM.time(observations = data, time_locations = time_locations,
 #'                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 #' plot(solution$fit.FEM)
+#' 
+#' # with covariates
+#' set.seed(509875)
+#' cov1 = rnorm(ndata, mean = 1, sd = 2)
+#' # Add error to simulate data
+#' set.seed(7893475)
+#' data = sol_exact + 2*cov1 
+#' data = data + rnorm(length(sol_exact), mean = 0, sd =  0.05*diff(range(sol_exact)))
+#' observations = matrix(data,nrow(locations),NumTimeInstants)
+#'
+#' 
+#' #Inferential tests and confidence intervals
+#' inf_obj <- inferenceDataObjectBuilder(test = "one-at-the-time", interval = "simultaneous", type = "wald", dim = 1, exact = T, f_var = T)
+#'
+#' solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+#'                         observations=observations, 
+#'                         covariates = cov1,
+#'                         FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
+#'                         lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = inf_obj)
+#'
+#' # beta estimate:
+#' solution$solution$beta
+#' # tests over beta estimates p-values:
+#' solution$inference$p_values
+#' # confidence intervals for beta estimates:
+#' solution$inference$CI
 
 smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
                           covariates = NULL, PDE_parameters = NULL,  BC = NULL,

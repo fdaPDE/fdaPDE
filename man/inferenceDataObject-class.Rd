@@ -36,6 +36,9 @@ estimated via confidence interval.}
 
 \item{\code{beta0}}{Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.}
 
+\item{\code{f_var}}{An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
+whereas if 2 they will not.}
+
 \item{\code{quantile}}{Quantile needed for confidence intervals. Used only if interval is not 0.}
 
 \item{\code{n_flip}}{An integer representing the number of permutations in the case of eigen-sign-flip test.}

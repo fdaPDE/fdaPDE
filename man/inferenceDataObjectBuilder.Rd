@@ -11,6 +11,7 @@ exact = FALSE,
 dim, 
 coeff = NULL, 
 beta0 = NULL, 
+f_var = FALSE,
 level = 0.95,
 n_flip = 1000,
 tol_fspai = 0.05)
@@ -40,6 +41,9 @@ in the corresponding inferenceDataObject it will be defaulted to an identity mat
 
 \item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
 If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.}
+
+\item{f_var}{A logical used to decide whether to estimate the local variance of the nonlinear part of the model.
+The possible values are: FALSE (default) and TRUE.}
 
 \item{level}{Level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.}
 
