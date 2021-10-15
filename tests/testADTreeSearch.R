@@ -20,8 +20,12 @@ myDim=1
 nDim=2
 storage.mode(myDim)<-"integer"
 storage.mode(nDim)<-"integer"
+
+# res[1] -> Naive Search
+# res[2] -> Tree Search
 res = .Call("TimingSearch", mesh,mesh$order,myDim,nDim,point_)
 res*10^-6 # milliseconds
+
 ### mesh2D ###
 data(horseshoe2D)
 boundary_nodes = horseshoe2D$boundary_nodes
@@ -41,6 +45,9 @@ nDim=2
 
 storage.mode(myDim)<-"integer"
 storage.mode(nDim)<-"integer"
+
+# res[1] -> Naive Search
+# res[2] -> Tree Search
 res = .Call("TimingSearch", mesh,mesh$order,myDim,nDim,point_)
 res*10^-6 # milliseconds
 
@@ -67,7 +74,10 @@ nDim=3
 
 storage.mode(myDim)<-"integer"
 storage.mode(nDim)<-"integer"
-res = .Call("TimingSearch", mesh,mesh$order,myDim,nDim,point_)
+
+# res[1] -> Naive Search
+# res[2] -> Tree Search
+res = .Call("TimingSearch", mesh,mesh$order,myDim,nDim,locations)
 res*10^-6 # milliseconds
 
 ### 3D MESH ###
@@ -89,5 +99,8 @@ nDim=3
 
 storage.mode(myDim)<-"integer"
 storage.mode(nDim)<-"integer"
+
+# res[1] -> Naive Search
+# res[2] -> Tree Search
 res = .Call("TimingSearch", mesh,mesh$order,myDim,nDim,point_)
 res*10^-6 #milliseconds

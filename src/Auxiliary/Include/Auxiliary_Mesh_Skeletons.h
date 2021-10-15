@@ -5,6 +5,7 @@
 #include "../../FE_Assemblers_Solvers/Include/Projection.h"
 #include "../../FE_Assemblers_Solvers/Include/Evaluator.h"
 #include "Evaluator_New.h"
+#include "../../Global_Utilities/Include/Timing.h"
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Auxiliary_Mesh_Skeleton(SEXP Rmesh, SEXP Rpoints) {
@@ -160,6 +161,42 @@ SEXP Eval_FEM_fd_Skeleton_new(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix
     UNPROTECT(1);
     return result;
 
+}
+
+template<UInt ORDER, UInt mydim, UInt ndim>
+SEXP TimingSearch_Skeleton(SEXP Rmesh, SEXP Rpoints){
+
+    MeshHandler<ORDER,mydim,ndim> meshHandler(Rmesh,2); //ADtree
+    RNumericMatrix points(Rpoints);
+    UInt num_points = points.nrows();
+
+    SEXP result;
+    PROTECT(result=Rf_allocMatrix(REALSXP,num_points,2));
+    RNumericMatrix result_(result);
+    timer Timer;
+
+    for(UInt i=0; i<num_points; ++i) {
+        std::array <Real, ndim> coords;
+        for (UInt n = 0; n < ndim; ++n)
+            coords[n] = points(i, n);
+
+        Point<ndim> curr_point(coords);
+
+        //Naive
+        Timer.start();
+        typename MeshHandler<ORDER, mydim, ndim>::meshElement curr1 = meshHandler.findLocationNaive(curr_point);
+        timespec delta_naive = Timer.stop();
+        result_(i,0) = double(delta_naive.tv_nsec);
+
+        //Tree
+        Timer.start();
+        typename MeshHandler<ORDER, mydim, ndim>::meshElement curr2 = meshHandler.findLocationTree(curr_point);
+        timespec delta_tree = Timer.stop();
+        result_(i,1) = double(delta_tree.tv_nsec);
+    }
+
+    UNPROTECT(1);
+    return result;
 }
 
 #endif //__AUXILIARY_MESH_SKELETONS_H
