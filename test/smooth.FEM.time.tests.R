@@ -361,7 +361,14 @@ output_CPP<-smooth.FEM.time(observations=observations,
 plot(output_CPP$fit.FEM.time, t = 1)
 
 #### Test 4.1.2: Forcing term = 0 exact  GCV
-output_CPP<-smooth.FEM.time(observations=observations,
+set.seed(509875)
+cov1 <- rnorm(length(DatiEsatti), 2,2)
+
+set.seed(1)
+data = DatiEsatti + cov1 + rnorm(length(DatiEsatti), sd = 0.1)
+observations=matrix(data,nrow(incidence_matrix),length(time_mesh))
+
+output_CPP<-smooth.FEM.time(observations=observations, covariates = cov1,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
                             lambdaS = lambdaS, lambdaT = lambdaT,
@@ -371,14 +378,16 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
 #### Test 4.1.3: Forcing term = 0  stochastic  GCV
-output_CPP<-smooth.FEM.time(observations=observations,
+inf.obj <- inferenceDataObjectBuilder(test = "one-at-the-time", dim = 1, type = "wald", exact = T, f_var = T)
+cov1 = rnorm(n = length(data), mean = 2, sd = 2)
+output_CPP<-smooth.FEM.time(observations=observations, covariates = cov1,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
                             lambdaS = lambdaS, lambdaT = lambdaT,
                             BC = BC,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE,
-                            lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
+                            lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = inf.obj)
 
 #### Test 4.2.1: Forcing term != 0 without GCV
 # forcing function != 0

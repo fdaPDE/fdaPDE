@@ -332,7 +332,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
   
   # Check that GCV is set for inference
-  if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
+  if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction) && (dim(lambdaS)!=1 || dim(lambdaT)!=1)){
     warning("Inference is not defined when lambda grid is provided without GCV")
     R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                 coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
@@ -576,7 +576,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     }
     
     if(R_Inference_Data_Object@f_var==1){
-      f_variances = matrix(data = bigsol[[15]], nrow = length(observations), ncol = 1)
+      f_variances = matrix(data = bigsol[[15]], nrow = N*M, ncol = 1)
       inference$f_var = f_variances
     }  
     
