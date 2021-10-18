@@ -1,5 +1,6 @@
 #include "../Include/FSPAI_Wrapper.h"
 #include "../../Fspai_Utility/Include/FSPAI_Solver_Wrapper.h"
+#include<string>
 
 bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv, Real tol_Inverse){
   
@@ -18,7 +19,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv, Real tol_Inverse){
   // FSPAI LIBRARY BEGINS
 
   FSPAI_data FSPAI_dat;
-  FSPAI_dat.tol_Inverse=tol_Inverse;
+  FSPAI_dat.tol_Inverse=std::to_string(tol_Inverse);
   FSPAI_dat.out_File = Temp_name_read;
   
   // Vector of parameters that are needed by FSPAI library for the computation of the inverse
