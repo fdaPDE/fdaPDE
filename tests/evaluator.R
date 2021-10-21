@@ -34,7 +34,7 @@ eval.FEM_new <- function(FEM, locations = NULL, incidence_matrix = NULL, search 
   
   if(class(FEM$FEMbasis$mesh)=='mesh.2.5D' && search ==3){
     stop("2.5D search must be either 'tree' or 'naive'")
-  }else if(class(FEM$FEMbasis$mesh)=='mesh.1D' && search != 1){
+  }else if(class(FEM$FEMbasis$mesh)=='mesh.1D' && search ==3){
     stop("search must be either 'tree' or 'naive'")
   }else if (search != 1 && search != 2 && search != 3){
     stop("search must be either 'tree' or 'naive' or 'walking'")

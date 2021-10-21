@@ -49,7 +49,7 @@ SEXP Auxiliary_Mesh_Skeleton(SEXP Rmesh, SEXP Rpoints) {
     return(result);
 
 }
-
+/*
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Eval_FEM_fd_Skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
 
@@ -105,6 +105,7 @@ SEXP Eval_FEM_fd_Skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SE
     return result;
 
 }
+*/
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Eval_FEM_fd_Skeleton_new(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
@@ -197,6 +198,137 @@ SEXP TimingSearch_Skeleton(SEXP Rmesh, SEXP Rpoints){
 
     UNPROTECT(1);
     return result;
+}
+
+template<UInt ORDER, UInt mydim, UInt ndim, UInt DEGREE>
+SEXP Eval_FEM_time_skeleton_new (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations)
+{/*
+    UInt n = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[0];
+    UInt ns = INTEGER(Rf_getAttrib(VECTOR_ELT(Rmesh, 0), R_DimSymbol))[0];
+    UInt nt = Rf_length(Rmesh_time);
+    UInt nRegions = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[0];
+*/
+    RNumericMatrix coef(Rcoef); // ns x M ?
+    RNumericMatrix locations(Rlocations);
+    RIntegerMatrix incidenceMatrix(RincidenceMatrix);
+
+    UInt n = locations.nrows();
+    UInt ns = INTEGER(Rf_getAttrib(VECTOR_ELT(Rmesh, 0), R_DimSymbol))[0];
+    UInt nt = Rf_length(Rmesh_time);
+    UInt nRegions = incidenceMatrix.nrows();
+    UInt nElements = incidenceMatrix.ncols();
+
+    Real *mesh_time, *t; //questi diventano RNumericMatrix... Nope servono a Spline e sticazzi...
+    mesh_time = REAL(Rmesh_time);
+    t = REAL(Rtime_locations);
+
+    UInt M = nt + DEGREE - 1;
+    //SpMat phi(n,M);
+    //UInt N = nRegions==0 ? n : nRegions;
+    UInt N = nRegions==0 ? n : nRegions;
+    SpMat phi(N,M);
+    Spline<DEGREE,DEGREE-1>spline(mesh_time,nt);
+    Real value;
+    for (UInt i = 0; i < N; ++i)
+    {
+        for (UInt j = 0; j < M; ++j)
+        {
+            value = spline.BasisFunction(j, t[i]);
+            if (value!=0)
+            {
+                phi.coeffRef(i,j) = value;
+            }
+        }
+    }
+    phi.makeCompressed();
+
+    SEXP result;
+    PROTECT(result=Rf_allocVector(REALSXP, N));  // 0 Attenzione
+
+    SEXP Rcoef_0;
+    PROTECT(Rcoef_0=Rf_allocMatrix(REALSXP, ns,1)); // 1
+    RNumericMatrix coef_0(Rcoef_0);
+
+    //!evaluates the solution on the given points location at the first
+    //!node of the time mesh to initialize the array of results and retrieve the points out of mesh (NA)
+    for(UInt j=0; j<ns; ++j)
+    {
+        coef_0[j] = coef[j];
+    }
+    //temp non va protetto?
+    SEXP temp = Eval_FEM_fd_Skeleton_new<ORDER,mydim,ndim>(Rmesh,Rlocations, RincidenceMatrix,Rcoef_0, Rfast,Rsearch, RbaryLocations);
+    UNPROTECT(1); //UNPROTECT Rcoef_0 ?!
+
+    // nb) temp è una matrice a priori ma non dovrebbero esserci problemi
+    for(UInt k=0; k < N; k++) {
+        REAL(result)[k] = REAL(temp)[k];
+        if (!ISNA(REAL(result)[k]))
+            REAL(result)[k] = REAL(result)[k] * phi.coeff(k, 0);
+    }
+
+    //! loop over time b-splines basis and evaluate the solution only on the points that have
+    //! the coefficient corresponding to that basis different from 0
+    std::vector<UInt> indices;
+    for(UInt i=1; i<M; ++i)
+    {
+
+        SEXP Rcoef_i;
+        PROTECT(Rcoef_i=Rf_allocMatrix(REALSXP, ns,1)); // 1
+        RNumericMatrix coef_i(Rcoef_i);
+        for(UInt j=0; j<ns; ++j)
+        {
+            coef_i[j] = coef[i*ns+j];
+        }
+        // if n > 0
+        UInt num_locations_i = 0; //non entro se n=0
+        for(UInt k=0; k<n; k++) {
+            if (phi.coeff(k, i) != 0 && !ISNA(REAL(result)[k])) {
+                ++num_locations_i;
+                indices.push_back(k);
+            }
+        }
+
+        SEXP Rlocations_i;
+        PROTECT(Rlocations_i = Rf_allocMatrix(REALSXP,num_locations_i,ndim)); //2
+        RNumericMatrix locations_i(Rlocations_i);
+        UInt count_locations_i = 0;
+        for(UInt k=0; k<indices.size(); ++k){
+            for(UInt l=0; l<ndim;++l)
+             locations_i(count_locations_i,l) = locations(indices[k],l);
+            ++count_locations_i;
+        }
+
+        SEXP RincidenceMatrix_i;
+        PROTECT(RincidenceMatrix_i=Rf_allocMatrix(INTSXP,phi.col(i).nonZeros(), nElements)); //3
+        RIntegerMatrix incidenceMatrix_i(RincidenceMatrix_i);
+        UInt count_incidence_i = 0; // non entro se nRegions=0
+        for (UInt k=0; k<nRegions; ++k)
+        {
+            if(phi.coeff(k,i)!=0 && !ISNA(REAL(result)[k]))
+            {
+                for (UInt j=0; j<nElements; j++)
+                {
+                    incidenceMatrix_i(count_incidence_i , j) = incidenceMatrix(k,j);
+                }
+                indices.push_back(k);
+                ++count_incidence_i;
+            }
+        }
+        temp = Eval_FEM_fd_Skeleton_new<ORDER,mydim,ndim>(Rmesh,Rlocations_i, RincidenceMatrix_i,Rcoef_i, Rfast,Rsearch, RbaryLocations);
+        UNPROTECT(3); // UNPROTECT Rcoef_i, Rlocations_i RincidenceMatrix_i
+
+        for(UInt k=0; k<indices.size(); ++k)
+        {
+            REAL(result)[indices[k]] = REAL(result)[indices[k]] + REAL(temp)[k]*phi.coeff(indices[k],i);
+        }
+        indices.clear();
+
+    }
+
+    UNPROTECT(1); //UNPROTECT result;
+    return result;
+
+
 }
 
 #endif //__AUXILIARY_MESH_SKELETONS_H

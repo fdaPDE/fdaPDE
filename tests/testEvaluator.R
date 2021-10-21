@@ -10,7 +10,7 @@ points_[,2] = runif(5,min=0.25,max=0.5)
 locations=projection.points.1D(mesh,points_)
 points(locations[,1],locations[,2], col = 'green')
 
-FEMbasis = fdaPDE::create.FEM.basis(mesh)
+FEMbasis = fdaPDE::create.FEM.basis(mesh,saveTree = TRUE)
 coeff = fs.test(mesh$nodes[,1], mesh$nodes[,2])
 FEM = fdaPDE::FEM(coeff, FEMbasis)
 

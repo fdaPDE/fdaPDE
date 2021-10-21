@@ -58,7 +58,7 @@ extern "C"{
         return result;
     }
 
-
+/*
     SEXP eval_FEM_fd_Auxiliary(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
 
         UInt order = INTEGER(Rorder)[0];
@@ -72,7 +72,7 @@ extern "C"{
 
         return NILSXP;
     }
-
+*/
     SEXP eval_FEM_fd_Auxiliary_new(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
 
     UInt order = INTEGER(Rorder)[0];
@@ -97,6 +97,43 @@ extern "C"{
         return Eval_FEM_fd_Skeleton_new<2,3,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
 
     return NILSXP;
+    }
+
+    SEXP eval_FEM_time_Auxiliary_new(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rflag_parabolic, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations)
+    {
+        UInt order = INTEGER(Rorder)[0];
+        UInt mydim = INTEGER(Rmydim)[0];
+        UInt ndim  = INTEGER(Rndim)[0];
+        UInt flag_par = INTEGER(Rflag_parabolic)[0]; // UInt DEGREE =  flag_par ? 1 : 3
+
+        if(order==1 && mydim==2 && ndim==2 && flag_par==1)
+            return Eval_FEM_time_skeleton_new<1,2,2,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==2 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton_new<1,2,2,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==2 && ndim==2 && flag_par==1)
+            return Eval_FEM_time_skeleton_new<2,2,2,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==2 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton_new<2,2,2,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==2 && ndim==3 && flag_par==1)
+            return Eval_FEM_time_skeleton_new<1,2,3,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==2 && ndim==3 && flag_par!=1)
+            return Eval_FEM_time_skeleton_new<1,2,3,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==2 && ndim==3 && flag_par==1)
+            return Eval_FEM_time_skeleton_new<2,2,3,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==2 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton_new<1,2,3,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==3 && ndim==3 && flag_par==1)
+            return Eval_FEM_time_skeleton_new<1,3,3,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==2 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton_new<1,3,3,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==3 && ndim==3 && flag_par==1)
+            return Eval_FEM_time_skeleton_new<2,3,3,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==2 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton_new<2,3,3,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+
+        return NILSXP;
+
+
     }
 
 }
