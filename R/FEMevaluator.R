@@ -252,6 +252,17 @@ eval.FEM.time <- function(FEM.time, locations = NULL, time.instants = NULL, spac
         space.time.locations=cbind(space.time.locations,rep(locations[,3],length(time.instants)))
     }else{
       space.time.locations <- matrix(nrow=0, ncol=1)
+      
+      check2D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.2D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$triangles)
+      check2.5D = class(FEM.time$FEMbasis$mesh)   == 'mesh.2.5D' && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$triangles)
+      check3D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.3D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$tetrahedrons)
+      
+      if( check2D || check2.5D || check3D )
+        stop("incidence_matrix has wrong number of columns")
+      time_locations = rep(time.instants,each=nrow(incidence_matrix))
+      incidence_matrix = matrix(rep(incidence_matrix,length(time.instants)), nrow = nrow(incidence_matrix)*length(time.instants),
+                                ncol = ncol(incidence_matrix),
+                                byrow = TRUE)
     }
   }else{
     if(dim(space.time.locations)[2]<3)

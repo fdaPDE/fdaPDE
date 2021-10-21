@@ -13,7 +13,8 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../Include/Evaluator.h"
 #include "../Include/Projection.h"
-
+#include "../Include/FE_Skeleton.h"
+/*
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP tree_mesh_skeleton(SEXP Rmesh) {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, 2);
@@ -102,7 +103,7 @@ SEXP point_projection_skeleton(SEXP Rmesh, SEXP Rlocations){
 
     return(NILSXP);
 }
-
+*/
 SEXP CPP_eval_FEM_fd(SEXP Rmesh, double* X,  double* Y,  double* Z, UInt n_X, UInt** incidenceMatrix, UInt nRegions, UInt nElements, double* coef, UInt order, UInt fast, UInt mydim, UInt ndim, int search, SEXP RbaryLocations)
 {
 	SEXP result;
@@ -266,7 +267,33 @@ extern "C" {
 	\param Rorder an R integer containg the order of the solution
 	\param Rfast an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes)
 */
+/*      DEVI AGGIUSTARE CPP_EVAL_FEM_FD perchè utilizza l'Evaluator (vecchia versione!) ed è utilizzata in eval_FEM_time
+SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
 
+    UInt order = INTEGER(Rorder)[0];
+    UInt mydim = INTEGER(Rmydim)[0];
+    UInt ndim  = INTEGER(Rndim)[0];
+
+    if(order==1 && mydim==1 && ndim==2)
+        return Eval_FEM_fd_skeleton<1,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==1 && ndim==2)
+        return Eval_FEM_fd_skeleton<2,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==1 && mydim==2 && ndim==2)
+        return Eval_FEM_fd_Skeleton<1,2,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==2 && ndim==2)
+        return Eval_FEM_fd_skeleton<2,2,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==1 && mydim==2 && ndim==3)
+        return Eval_FEM_fd_skeleton<1,2,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==2 && ndim==3)
+        return Eval_FEM_fd_skeleton<2,2,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==1 && mydim==3 && ndim==3)
+        return Eval_FEM_fd_skeleton<1,3,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+    else if(order==2 && mydim==3 && ndim==3)
+        return Eval_FEM_fd_skeleton<2,3,3>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+
+    return NILSXP;
+}
+*/
 
 SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations)
 {
@@ -465,7 +492,6 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
 	return(result);
 }
 
-
 //! This function evaluates the solution on a set of given points by evaluating the tensorial basis expansion.
 /*!
 	This function is then called from R code.
@@ -540,9 +566,10 @@ SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_loca
 
   // Compute the matrix of temporal basis evaluation in the given points
 	UInt DEGREE = flag_par ? 1 : 3;
-	UInt M = nt + DEGREE - 1;
-	SpMat phi(n,M);
-  UInt N = nRegions==0 ? n : nRegions;
+    UInt M = nt + DEGREE - 1;
+    UInt N = nRegions==0 ? n : nRegions;
+    SpMat phi(N,M);
+    //UInt N = nRegions==0 ? n : nRegions;
 	if(flag_par)
 	{
 		Spline<1,0>spline(mesh_time,nt);
