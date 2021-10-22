@@ -40,9 +40,9 @@ extern SEXP CPP_TetraMeshSplitOrder2(SEXP, SEXP);
 extern SEXP get_meshHandler(SEXP,SEXP,SEXP,SEXP,SEXP);
 extern SEXP reading_RObject(SEXP,SEXP);
 extern SEXP reading_RIntMatrixMatrix(SEXP);
-extern SEXP eval_FEM_fd_Auxiliary(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP eval_FEM_fd_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-
+extern SEXP eval_FEM_time_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP ,SEXP);
+extern SEXP refine1D(SEXP, SEXP,SEXP);
 extern SEXP TimingSearch(SEXP,SEXP,SEXP,SEXP,SEXP);
 
 extern SEXP CPP_EdgeMeshHelper(SEXP, SEXP);
@@ -84,18 +84,19 @@ static const R_CallMethodDef CallEntries[] = {
     {"CPP_TriangleMeshSplitOrder2",       (DL_FUNC) &CPP_TriangleMeshSplitOrder2,        2},
     {"CPP_TetraMeshSplit",                (DL_FUNC) &CPP_TetraMeshSplit,                 2},
     {"CPP_TetraMeshSplitOrder2",          (DL_FUNC) &CPP_TetraMeshSplitOrder2,           2},
-    {"CPP_EdgeMeshHelper",          	  (DL_FUNC) &CPP_EdgeMeshHelper,           	 2},
-    {"CPP_EdgeMeshOrder2",          	  (DL_FUNC) &CPP_EdgeMeshOrder2,           	 2},
+    {"CPP_EdgeMeshHelper",          	  (DL_FUNC) &CPP_EdgeMeshHelper,           	     2},
+    {"CPP_EdgeMeshOrder2",          	  (DL_FUNC) &CPP_EdgeMeshOrder2,           	     2},
     {"CPP_EdgeMeshSplit",                 (DL_FUNC) &CPP_EdgeMeshSplit,                  2},
     {"gam_Laplace",                       (DL_FUNC) &gam_Laplace,                       25},
     {"gam_PDE",                           (DL_FUNC) &gam_PDE,                           28},
     {"gam_PDE_space_varying",             (DL_FUNC) &gam_PDE_space_varying,             29},
     {"get_meshHandler",                   (DL_FUNC) &get_meshHandler,                    5},
     {"reading_RObject",                   (DL_FUNC) &reading_RObject,                    2},
-    {"eval_FEM_fd_Auxiliary",             (DL_FUNC) &eval_FEM_fd_Auxiliary,             10},
     {"eval_FEM_fd_Auxiliary_new",         (DL_FUNC) &eval_FEM_fd_Auxiliary_new,         10},
     {"reading_RIntMatrixMatrix",          (DL_FUNC) &reading_RIntMatrixMatrix,          1},
-    {"TimingSearch",                   (DL_FUNC) &TimingSearch,                    5},
+    {"TimingSearch",                      (DL_FUNC) &TimingSearch,                      5},
+    {"eval_FEM_time_Auxiliary_new",       (DL_FUNC) &eval_FEM_time_Auxiliary_new,      13},
+    {"refine1D",                          (DL_FUNC) &refine1D,                          3},
     {NULL, NULL, 0}
 };
 

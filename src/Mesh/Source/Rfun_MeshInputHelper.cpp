@@ -246,4 +246,123 @@ SEXP CPP_EdgeMeshSplit(SEXP Redges, SEXP Rnodes){
   return result;
   }
 
+//! A function to refine a 1D mesh passing the maximum allowed length.
+//! \param Rnodes a #nodes x 2
+//! \param Redges a #edges x 2
+//! \param Rdelta max allowed length
+SEXP refine1D(SEXP Rnodes, SEXP Redges, SEXP Rdelta){
+
+    const RIntegerMatrix edges_old(Redges);
+    const RNumericMatrix nodes(Rnodes);
+    Real delta = REAL(Rdelta)[0];
+    // stores the length of the i-th old edge;
+    std::vector<Real> lengths(edges_old.nrows(),0);
+    // stores the number of sub edges in which the i-th old edge is splitted into
+    std::vector<UInt> num_subs(edges_old.nrows(),0);
+
+    UInt num_new_nodes = 0;
+    UInt num_tot_edges = 0;
+    for(UInt i=0; i<edges_old.nrows(); ++i)
+    {
+        Real x0 = nodes(edges_old(i,0),0);
+        Real y0 = nodes(edges_old(i,0),1);
+        Real x1 = nodes(edges_old(i,1),0);
+        Real y1 = nodes(edges_old(i,1),1);
+
+        lengths[i] = std::sqrt( (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0) );
+
+        // number of sub_edges
+        num_subs[i] = lengths[i] > delta ? std::ceil( lengths[i]/delta ) : 1;
+
+        // number of new nodes
+        num_new_nodes += num_subs[i] - 1;
+        // number of edges
+        num_tot_edges += num_subs[i];
+    }
+
+    SEXP result = PROTECT(Rf_allocVector(VECSXP,2));
+
+    SET_VECTOR_ELT(result, 1, Rf_allocMatrix(INTSXP, num_tot_edges, 2));
+    RIntegerMatrix edges( VECTOR_ELT(result,1));
+
+    SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, num_new_nodes,2));
+    RNumericMatrix nodes_new(VECTOR_ELT(result,0));
+
+    UInt total_nodes = nodes.nrows();
+    UInt edges_count = 0;
+    UInt nodes_new_count = 0;
+
+    static constexpr Real eps = 10 * std::numeric_limits<Real>::epsilon();
+
+    for( UInt i=0; i<edges_old.nrows(); ++i)
+    {
+        if( num_subs[i] == 1)
+        {
+            edges( edges_count,0) = edges_old(i,0);
+            edges( edges_count,1) = edges_old(i,1);
+            ++edges_count;
+        }
+        else // there is at least one new internal node!
+        {
+            Real x0 = nodes(edges_old(i,0),0);
+            Real y0 = nodes(edges_old(i,0),1);
+            Real x1 = nodes(edges_old(i,1),0);
+            Real y1 = nodes(edges_old(i,1),1);
+
+            Real cos_;
+            Real sin_;
+
+            if( std::abs(x1-x0) < eps && (y1-y0) > 0  ){
+                cos_ = 0.0;
+                sin_ = 1.0;
+            }else if( std::abs( x1-x0) < eps && (y1-y0) < 0 ){
+                cos_ = 0.0;
+                sin_ = -1.0;
+            }else if( std::abs( y1-y0)<eps && (x1-x0) > 0 ) {
+                cos_ = 1.0;
+                sin_ = 0.0;
+            }else if( std::abs( y1-y0)<eps && (x1-x0) > 0 ){
+                cos_ = -1.0;
+                sin_ =  0.0;
+            }else{
+                Real slope = (y1-y0)/(x1-x0);
+                cos_ = std::sqrt(1 / (1+slope*slope));
+                sin_ = std::sqrt(slope*slope / (1+slope*slope) );
+            }
+
+            Real delta_ = lengths[i]/num_subs[i];
+            // vector storing the global numbers of the new nodes which belong to old current edges
+            // If N = num_subs[i] then there are N-1 internal nodes (the newest ones)
+            std::vector<UInt> nodes_global_num( num_subs[i] + 1,0);
+
+            //Fixing the first and the last nodes
+            nodes_global_num[0] = edges_old(i,0);
+            nodes_global_num[ num_subs[i] ] = edges_old(i,1);
+
+            // Computing new nodes coordinates
+            for(UInt n=0; n < num_subs[i]-1 ; ++n)
+            {
+                nodes_global_num[n + 1] = n + total_nodes;
+                nodes_new(nodes_new_count + n,0) = x0 + delta_ * cos_ * (n + 1);
+                nodes_new(nodes_new_count + n,1) = y0 + delta_ * sin_ * (n + 1);
+            }
+
+            nodes_new_count += num_subs[i] - 1;
+            total_nodes+= num_subs[i] - 1;
+
+            for(UInt e=0; e<num_subs[i]; ++e)
+            {
+                // Indexes in R starts from 1, in C++ from 0, needed transformations!
+                edges(edges_count,0) =  nodes_global_num[e] + 1;
+                edges(edges_count,1) = nodes_global_num[e+1] + 1;
+                ++edges_count;
+            }
+        }
+
+    }
+
+    UNPROTECT(1);
+    return result;
+ }
+
 }
