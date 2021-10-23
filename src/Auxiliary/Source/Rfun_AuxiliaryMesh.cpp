@@ -136,4 +136,30 @@ extern "C"{
 
     }
 
+    SEXP isInside(SEXP Rmesh,SEXP Rpoints,SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP Rredundancy)
+    {
+        UInt order = INTEGER(Rorder)[0];
+        UInt mydim = INTEGER(Rmydim)[0];
+        UInt ndim = INTEGER(Rndim)[0];
+
+        if( order==1 && mydim==2 && ndim==2)
+            return isInside_skeleton<1,2,2>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==2 && mydim==2 && ndim==2)
+            return isInside_skeleton<2,2,2>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==1 && mydim==2 && ndim==3)
+            return isInside_skeleton<1,2,3>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==2 && mydim==2 && ndim==3)
+            return isInside_skeleton<2,2,3>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==1 && mydim==3 && ndim==3)
+            return isInside_skeleton<1,3,3>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==2 && mydim==3 && ndim==3)
+            return isInside_skeleton<2,3,3>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==1 && mydim==1 && ndim==2)
+            return isInside_skeleton<1,1,2>(Rmesh, Rpoints, Rsearch, Rredundancy);
+        else if(order==2 && mydim==1 && ndim==2)
+            return isInside_skeleton<2,1,2>(Rmesh, Rpoints, Rsearch, Rredundancy);
+
+        return NILSXP;
+    }
+
 }

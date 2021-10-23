@@ -961,11 +961,46 @@ projection.points.1D<-function(mesh, locations) {
   return(evalmat)
 }
 
+#' Refine 1D mesh
+#'
+#' @param mesh a \code{mesh.1D} object to refine
+#' @param delta the maximum allowed length
+#' @return An object of class mesh.1D with refined edges
+#' @export
+
+refine.mesh.1D <-function(mesh,delta){
+  if(is.null(mesh))
+    stop("No mesh passed as input!")
+  if(class(mesh)!='mesh.1D')
+    stop("Wrong mesh class! Should be mesh.1D")
+  if( delta <= 0)
+    stop("Wrong delta value! Should be a positive number")
+  
+  # Indexes in C++ starts from 0, in R from 1, needed transformations!
+  mesh$edges = mesh$edges - 1
+  edges <- as.matrix(mesh$edges[,1:2])
+  
+  storage.mode(edges) <- "integer"
+  storage.mode(mesh$nodes) <- "double"
+  
+  # outCPP[2] -> edges
+  # outCPP[1] -> new_nodes
+  nnodes<-max(mesh$edges[,1:2])+1
+
+  outCPP <- .Call("refine1D",mesh$nodes[1:nnodes,],edges,delta)
+  nodes <- rbind( mesh$nodes[1:nnodes,], outCPP[[1]])
+  edges <- outCPP[[2]]
+  ref_mesh <- create.mesh.1D(nodes = nodes, edges = edges, order = mesh$order)
+ 
+  return(ref_mesh) 
+}
+
 #' Create a \code{mesh.1D} object by splitting each edge of a given mesh into two subedges.
 #'
 #' @param mesh a \code{mesh.1D} object to split
 #' @return An object of class mesh.1D with splitted edges
 #' @export
+
 refine.by.splitting.mesh.1D <- function (mesh=NULL){
   if(is.null(mesh))
     stop("No mesh passed as input!")

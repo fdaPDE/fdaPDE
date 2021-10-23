@@ -44,7 +44,7 @@ extern SEXP eval_FEM_fd_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, 
 extern SEXP eval_FEM_time_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP ,SEXP);
 extern SEXP refine1D(SEXP, SEXP,SEXP);
 extern SEXP TimingSearch(SEXP,SEXP,SEXP,SEXP,SEXP);
-
+extern SEXP isInside(SEXP,SEXP,SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP CPP_EdgeMeshHelper(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshOrder2(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshSplit(SEXP, SEXP);
@@ -97,6 +97,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"TimingSearch",                      (DL_FUNC) &TimingSearch,                      5},
     {"eval_FEM_time_Auxiliary_new",       (DL_FUNC) &eval_FEM_time_Auxiliary_new,      13},
     {"refine1D",                          (DL_FUNC) &refine1D,                          3},
+    {"isInside",                          (DL_FUNC) &isInside,                          7},
     {NULL, NULL, 0}
 };
 

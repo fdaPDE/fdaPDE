@@ -331,4 +331,37 @@ SEXP Eval_FEM_time_skeleton_new (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, S
 
 }
 
+template<UInt ORDER, UInt mydim, UInt ndim>
+SEXP isInside_skeleton(SEXP Rmesh,SEXP Rpoints, SEXP Rsearch, SEXP Rredundancy)
+{
+    UInt search = INTEGER(Rsearch)[0];
+    MeshHandler<ORDER,mydim,ndim> mesh_(Rmesh,search);
+    const RNumericMatrix points(Rpoints);
+    bool redundancy = INTEGER(Rredundancy)[0];
+
+    SEXP result = PROTECT(Rf_allocMatrix(LGLSXP,points.nrows(),1));
+    RIntegerMatrix isInside(result);
+
+    Point<ndim> current_point;
+    typename MeshHandler<ORDER,mydim,ndim>::meshElement current_element;
+    for(UInt i=0; i<points.nrows(); ++i){
+        std::array<Real,ndim> coords;
+        for(UInt n=0; n<ndim; ++n)
+            coords[n] = points(i,n);
+
+        current_point = Point<ndim>(coords);
+        current_element = mesh_.findLocation(current_point);
+        if(search==3 && current_element.getId()==Identifier::NVAL && redundancy == true )
+            current_element = mesh_.findLocationNaive(current_point);
+
+        if( current_element.getId()==Identifier::NVAL)
+            isInside[i] = false;
+        else
+            isInside[i] = true;
+    }
+
+    UNPROTECT(1);
+    return result;
+}
+
 #endif //__AUXILIARY_MESH_SKELETONS_H
