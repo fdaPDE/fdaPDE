@@ -8,106 +8,6 @@
 #include "../../Global_Utilities/Include/Timing.h"
 
 template<UInt ORDER, UInt mydim, UInt ndim>
-SEXP Auxiliary_Mesh_Skeleton(SEXP Rmesh, SEXP Rpoints) {
-
-    RNumericMatrix PointsToProject(Rpoints);
-
-    UInt num_points = PointsToProject.nrows();
-    MeshHandler<ORDER, mydim, ndim> meshHandler(Rmesh);
-    UInt num_elements = meshHandler.num_elements();
-
-    SEXP result;
-    PROTECT(result = Rf_allocVector(VECSXP, 1 + num_points * 2));
-
-    SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, num_elements, 1));
-    for (UInt i = 1; i < 2 * num_points; i += 2) {
-        SET_VECTOR_ELT(result, i, Rf_allocMatrix(INTSXP, num_elements, 1)); //isPointInside column
-        SET_VECTOR_ELT(result, i + 1, Rf_allocMatrix(REALSXP, num_elements, 2)); //coord of projected point
-    }
-
-    RNumericMatrix MeasuresColumn(VECTOR_ELT(result, 0));
-
-    for (UInt i = 0; i < num_elements; ++i) {
-        typename MeshHandler<ORDER, mydim, ndim>::meshElement curr = meshHandler.getElement(i);
-        MeasuresColumn[i] = curr.getMeasure();
-    }
-
-    for (UInt j = 0; j < num_points; ++j) {
-        RIntegerMatrix PointIsInsideColumn(VECTOR_ELT(result, 1 + 2 * j));
-        RNumericMatrix CoordsColumn(VECTOR_ELT(result, 2 + 2 * j));
-        Point<2> curr_point({PointsToProject(j, 0), PointsToProject(j, 1)});
-        for(UInt i=0;i<num_elements;++i){
-            typename MeshHandler<ORDER, mydim, ndim>::meshElement curr = meshHandler.getElement(i);
-            PointIsInsideColumn[i] = curr.isPointInside(curr_point);
-            Point<2> curr_proj = curr.computeProjection(curr_point);
-            CoordsColumn(i, 0) = curr_proj[0];
-            CoordsColumn(i, 1) = curr_proj[1];
-        }
-    }
-
-    UNPROTECT(1);
-    return(result);
-
-}
-/*
-template<UInt ORDER, UInt mydim, UInt ndim>
-SEXP Eval_FEM_fd_Skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
-
-    //NB anche se non viene passato DEVI essere certo di creare un RbaryLocations "NULLO" RbaryLocations è una lista di liste
-    // in modo tale da poter utilizzare gli RObjects!!! (al più sono matrici che hanno righe o colonne = 0
-    // RbaryLocations[0] contiene Rlocations (esattamente uguali a Rlocations!!!!)
-    // RbaryLocations[1] contiene elements_ids
-    // RbaryLocations[2] contiene coordinate dei baricentri degli elementi contenuti in elements_ids
-
-    RNumericMatrix barycenters( VECTOR_ELT(RbaryLocations,2));
-    RIntegerMatrix id_element( VECTOR_ELT(RbaryLocations,1));
-    RIntegerMatrix incidenceMatrix( RincidenceMatrix );
-    RNumericMatrix locations(Rlocations);
-
-    UInt n_X = locations.nrows();
-    UInt nRegions = incidenceMatrix.nrows();
-    RNumericMatrix coef(Rcoef);
-    UInt search;
-    bool fast;
-
-    fast  = INTEGER(Rfast)[0];
-    search  = INTEGER(Rsearch)[0];
-    MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, search);
-    Evaluator<ORDER, mydim, ndim> evaluator(mesh);
-
-    SEXP result;
-
-    if(n_X >0) {
-        PROTECT(result=Rf_allocMatrix(REALSXP,n_X,1));
-        RNumericMatrix result_(result);
-
-        std::vector<bool> isinside(n_X);
-        if (barycenters.nrows() == 0) { //doesn't have location information
-            evaluator.eval(locations, coef, fast, result_, isinside);
-        } else { //have location information
-            evaluator.evalWithInfo(locations, coef, fast, result_, isinside, id_element, barycenters);
-        }
-
-        for (int i = 0; i < n_X; ++i) {
-            if (!(isinside[i])) {
-                result_[i] = NA_REAL;
-            }
-        }
-    }
-    else{
-        PROTECT(result=Rf_allocMatrix(REALSXP, nRegions,1));
-        RNumericMatrix result_(result);
-        evaluator.integrate(incidenceMatrix,coef,result_);
-
-    }
-
-    UNPROTECT(1);
-    return result;
-
-}
-*/
-
-template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Eval_FEM_fd_Skeleton_new(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
 
     //NB anche se non viene passato DEVI essere certo di creare un RbaryLocations "NULLO" RbaryLocations è una lista di liste
@@ -218,7 +118,7 @@ SEXP Eval_FEM_time_skeleton_new (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, S
     UInt nRegions = incidenceMatrix.nrows();
     UInt nElements = incidenceMatrix.ncols();
 
-    Real *mesh_time, *t; //questi diventano RNumericMatrix... Nope servono a Spline e sticazzi...
+    Real *mesh_time, *t;
     mesh_time = REAL(Rmesh_time);
     t = REAL(Rtime_locations);
 
@@ -243,7 +143,7 @@ SEXP Eval_FEM_time_skeleton_new (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, S
     phi.makeCompressed();
 
     SEXP result;
-    PROTECT(result=Rf_allocVector(REALSXP, N));  // 0 Attenzione
+    PROTECT(result=Rf_allocVector(REALSXP, N));  // 0
 
     SEXP Rcoef_0;
     PROTECT(Rcoef_0=Rf_allocMatrix(REALSXP, ns,1)); // 1
@@ -259,7 +159,6 @@ SEXP Eval_FEM_time_skeleton_new (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, S
     SEXP temp = Eval_FEM_fd_Skeleton_new<ORDER,mydim,ndim>(Rmesh,Rlocations, RincidenceMatrix,Rcoef_0, Rfast,Rsearch, RbaryLocations);
     UNPROTECT(1); //UNPROTECT Rcoef_0 ?!
 
-    // nb) temp è una matrice a priori ma non dovrebbero esserci problemi
     for(UInt k=0; k < N; k++) {
         REAL(result)[k] = REAL(temp)[k];
         if (!ISNA(REAL(result)[k]))

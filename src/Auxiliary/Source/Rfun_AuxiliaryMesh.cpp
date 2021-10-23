@@ -6,19 +6,6 @@
 
 extern "C"{
 
-    SEXP get_meshHandler(SEXP Rmesh_, SEXP order_, SEXP ndim_, SEXP mydim_, SEXP Rpoints_) {
-        UInt order = INTEGER(order_)[0];
-        UInt mydim = INTEGER(mydim_)[0];
-        UInt ndim = INTEGER(ndim_)[0];
-
-        if (order == 1 && mydim == 1 && ndim == 2)
-            return (Auxiliary_Mesh_Skeleton<1, 1, 2>(Rmesh_, Rpoints_));
-        else if (order == 2 && mydim == 1 && ndim == 2)
-            return (Auxiliary_Mesh_Skeleton<2, 1, 2>(Rmesh_, Rpoints_));
-
-        return (NILSXP);
-    }
-
     SEXP reading_RObject(SEXP Rmatrix, SEXP Rflag) {
 
         // flag = 0 -> leggo matrici di double
@@ -58,21 +45,6 @@ extern "C"{
         return result;
     }
 
-/*
-    SEXP eval_FEM_fd_Auxiliary(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
-
-        UInt order = INTEGER(Rorder)[0];
-        UInt mydim = INTEGER(Rmydim)[0];
-        UInt ndim  = INTEGER(Rndim)[0];
-
-        if(order==1 && mydim==1 && ndim==2)
-            return Eval_FEM_fd_Skeleton<1,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
-        else if(order==2 && mydim==1 && ndim==2)
-            return Eval_FEM_fd_Skeleton<2,1,2>(Rmesh, Rlocations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
-
-        return NILSXP;
-    }
-*/
     SEXP eval_FEM_fd_Auxiliary_new(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
 
     UInt order = INTEGER(Rorder)[0];

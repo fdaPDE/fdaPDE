@@ -14,7 +14,7 @@ isInside <- function(mesh,points, search="naive", redundancy=FALSE){
   }else if(class(mesh)=="mesh.3D"){
     mydim=3
     ndim=3
-    }else if(class(mesh)=="mesh.1D"){
+    }else if(class(mesh)=="mesh.1.5D"){
     mydim=1
     ndim=2
     }
@@ -29,7 +29,7 @@ isInside <- function(mesh,points, search="naive", redundancy=FALSE){
   if (search != 1 & search != 2 & search != 3)
     stop("search must be either tree or naive or walking.")
   
-  if((class(mesh)=='mesh.2.5D' || class(mesh)=="mesh.1D") && search ==3)
+  if((class(mesh)=='mesh.2.5D' || class(mesh)=="mesh.1.5D") && search ==3)
     stop("For manifold mesh search must be either tree or naive.")
   
   if(class(mesh)=="mesh.2D" || class(mesh)=="mesh.2.5D"){
@@ -50,7 +50,7 @@ isInside <- function(mesh,points, search="naive", redundancy=FALSE){
     storage.mode(mesh$faces) <- "integer"
     storage.mode(mesh$neighbors) <-"integer"
     
-  }else if(class(mesh)=="mesh.1D"){
+  }else if(class(mesh)=="mesh.1.5D"){
     mesh$edges = mesh$edges - 1
     storage.mode(mesh$edges) <-"integer"
     

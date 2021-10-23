@@ -1,11 +1,11 @@
 ###mesh 1D ###
 nodes=matrix(c(0.0,0.0,1.0,1.0),nrow=2,ncol=2,byrow=TRUE)
 edges=matrix(c(1,2),nrow=1,ncol=2)
-mesh=create.mesh.1D(nodes,edges,order=2)
-plot.mesh.1D(mesh)
+mesh=create.mesh.1.5D(nodes,edges,order=2)
+plot.mesh.1.5D(mesh)
 n = 7
 for(i in 1:n){ 
-  mesh= refine.by.splitting.mesh.1D(mesh)
+  mesh= refine.by.splitting.mesh.1.5D(mesh)
 }
 
 #num_elem=2^n

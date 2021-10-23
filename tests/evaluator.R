@@ -34,7 +34,7 @@ eval.FEM_new <- function(FEM, locations = NULL, incidence_matrix = NULL, search 
   
   if(class(FEM$FEMbasis$mesh)=='mesh.2.5D' && search ==3){
     stop("2.5D search must be either 'tree' or 'naive'")
-  }else if(class(FEM$FEMbasis$mesh)=='mesh.1D' && search ==3){
+  }else if(class(FEM$FEMbasis$mesh)=='mesh.1.5D' && search ==3){
     stop("search must be either 'tree' or 'naive'")
   }else if (search != 1 && search != 2 && search != 3){
     stop("search must be either 'tree' or 'naive' or 'walking'")
@@ -76,7 +76,7 @@ eval.FEM_new <- function(FEM, locations = NULL, incidence_matrix = NULL, search 
     ndim = 3
     mydim = 3
     res = CPP_eval.volume.FEM.new(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
-  }else if(class(FEM$FEMbasis$mesh)=='mesh.1D'){
+  }else if(class(FEM$FEMbasis$mesh)=='mesh.1.5D'){
     ndim = 2
     mydim = 1
     res = CPP_eval.graph.FEM(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)

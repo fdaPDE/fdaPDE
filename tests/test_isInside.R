@@ -2,8 +2,8 @@
 
 nodes=matrix(c(0.25,0.25,0.5,0.25,0.75,0.5,0.75,0.), nrow = 4, byrow=TRUE)
 edges=matrix(c(1,2,2,3,2,4),nrow = 3,byrow = TRUE)
-mesh = create.mesh.1D(nodes,edges,order=1)
-plot.mesh.1D(mesh)
+mesh = create.mesh.1.5D(nodes,edges,order=1)
+plot.mesh.1.5D(mesh)
 points_=matrix(nrow=5,ncol=2)
 points_[,1] = runif(5,min=0.25,max=0.75)
 points_[,2] = runif(5,min=0.25,max=0.5)
@@ -51,3 +51,22 @@ locs[501:1000,] = locations_[501:1000,]
 
 res =isInside(mesh=mesh,points=locs,search="tree",redundancy = TRUE)
 sum(res==FALSE)
+
+### 3D ###
+
+
+data(sphere3Ddata)
+nodes=sphere3Ddata$nodes
+tetrahedrons=sphere3Ddata$tetrahedrons
+mesh=create.mesh.3D(nodes,tetrahedrons,order=1)
+
+xeval=runif(1000,-1.,1.)
+yeval=runif(1000,-1.,1.)
+zeval=runif(1000,-1.,1.)
+points_ = cbind(xeval, yeval, zeval)
+
+res = isInside(mesh=mesh,points=points_,search="tree")
+
+#quasi 50% :')
+sum(res==FALSE)
+sum(res==FALSE) / 1000

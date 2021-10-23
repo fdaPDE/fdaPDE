@@ -821,12 +821,12 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 #' @param edges A #edges-by-2 (when \code{order} = 1) or #triangles-by-3 (when \code{order} = 2) matrix.
 #' This option is used when a triangulation is already available. It specifies the edges giving the row's indices in \code{nodes} of the edges' vertices and (when \code{nodes} = 2) also if the triangles' edges midpoints. The triangles' vertices and midpoints are ordered as
 #' 1---3---2
-#' In this case the function \code{create.mesh.1D} is used to produce a complete mesh.1D object.
+#' In this case the function \code{create.mesh.1.5D} is used to produce a complete mesh.1.5D object.
 #' @param order Either '1' or '2'. It specifies wether each mesh should be represented by 2 nodes (the edges vertices) or by 3 nodes (the edges's vertices and midpoint).
 #' These are
 #' respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements. Default is \code{order} = 1.
-#' @usage create.mesh.1D(nodes, edges = NULL, order = 1, nodesattributes = NULL)
-#' @return An object of the class mesh.1D with the following output:
+#' @usage create.mesh.1.5D(nodes, edges = NULL, order = 1, nodesattributes = NULL)
+#' @return An object of the class mesh.1.5D with the following output:
 #' \itemize{
 #' \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
@@ -839,7 +839,7 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 #' }
 #' @export
 
-create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NULL)
+create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = NULL)
 {
   nodes <- as.matrix(nodes)
   if(ncol(nodes) != 2)
@@ -911,13 +911,13 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
     out[[11]]<- order
     names(out)[11] <- "order" 
     }
-  class(out) <- "mesh.1D"
+  class(out) <- "mesh.1.5D"
   return(out)
 }  
 
 #' Project 2D points onto 1D graph mesh
 #'
-#' @param mesh A mesh.1D object representing the graph mesh, created by \link{create.mesh.1D}.
+#' @param mesh A mesh.1.5D object representing the graph mesh, created by \link{create.mesh.1.5D}.
 #' @param locations 2D points to be projected onto 1D triangular mesh.
 #' @description This function projects any 2D points onto 1D graph mesh.
 #' @return 2D points projected onto 1D graph mesh.
@@ -928,7 +928,7 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
 #'
 #'nodes=matrix(c(0.25,0.25,0.5,0.25,0.75,0.5,0.75,0.), nrow = 4, byrow=TRUE)
 #'edges=matrix(c(1,2,2,3,2,4),nrow = 3,byrow = TRUE)
-#'mesh_ = create.mesh.1D(nodes,edges,order=1)
+#'mesh_ = create.mesh.1.5D(nodes,edges,order=1)
 #'
 #' ## Create 2D points to be projected
 #'locations=matrix(nrow=5,ncol=2)
@@ -939,7 +939,7 @@ create.mesh.1D <- function(nodes, edges = NULL, order = 1, nodesattributes = NUL
 #' loc = projection.points.1D(mesh, locations)
 
 projection.points.1D<-function(mesh, locations) {
-  if(class(mesh) !="mesh.1D")
+  if(class(mesh) !="mesh.1.5D")
     stop("Data projection is only available for 1D mesh ")
   
   mesh$edges = mesh$edges - 1
@@ -963,16 +963,16 @@ projection.points.1D<-function(mesh, locations) {
 
 #' Refine 1D mesh
 #'
-#' @param mesh a \code{mesh.1D} object to refine
+#' @param mesh a \code{mesh.1.5D} object to refine
 #' @param delta the maximum allowed length
-#' @return An object of class mesh.1D with refined edges
+#' @return An object of class mesh.1.5D with refined edges
 #' @export
 
-refine.mesh.1D <-function(mesh,delta){
+refine.mesh.1.5D <-function(mesh,delta){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.1D')
-    stop("Wrong mesh class! Should be mesh.1D")
+  if(class(mesh)!='mesh.1.5D')
+    stop("Wrong mesh class! Should be mesh.1.5D")
   if( delta <= 0)
     stop("Wrong delta value! Should be a positive number")
   
@@ -990,22 +990,22 @@ refine.mesh.1D <-function(mesh,delta){
   outCPP <- .Call("refine1D",mesh$nodes[1:nnodes,],edges,delta)
   nodes <- rbind( mesh$nodes[1:nnodes,], outCPP[[1]])
   edges <- outCPP[[2]]
-  ref_mesh <- create.mesh.1D(nodes = nodes, edges = edges, order = mesh$order)
+  ref_mesh <- create.mesh.1.5D(nodes = nodes, edges = edges, order = mesh$order)
  
   return(ref_mesh) 
 }
 
-#' Create a \code{mesh.1D} object by splitting each edge of a given mesh into two subedges.
+#' Create a \code{mesh.1.5D} object by splitting each edge of a given mesh into two subedges.
 #'
-#' @param mesh a \code{mesh.1D} object to split
-#' @return An object of class mesh.1D with splitted edges
+#' @param mesh a \code{mesh.1.5D} object to split
+#' @return An object of class mesh.1.5D with splitted edges
 #' @export
 
-refine.by.splitting.mesh.1D <- function (mesh=NULL){
+refine.by.splitting.mesh.1.5D <- function (mesh=NULL){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.1D')
-    stop("Wrong mesh class! Should be mesh.1D")
+  if(class(mesh)!='mesh.1.5D')
+    stop("Wrong mesh class! Should be mesh.1.5D")
   
   # Indexes in C++ starts from 0, in R from 1, needed transformations!
   mesh$edges = mesh$edges - 1
@@ -1015,14 +1015,14 @@ refine.by.splitting.mesh.1D <- function (mesh=NULL){
   
   if(mesh$order==1){
     outCPP <- .Call("CPP_EdgeMeshSplit", mesh$edges, mesh$nodes)
-    splittedmesh<-create.mesh.1D(nodes=rbind(mesh$nodes, outCPP[[2]]), edges=outCPP[[1]])
+    splittedmesh<-create.mesh.1.5D(nodes=rbind(mesh$nodes, outCPP[[2]]), edges=outCPP[[1]])
   }
   else if(mesh$order==2){
     nnodes<-max(mesh$edges[,1:2])+1
     edges_adj = as.matrix(mesh$edges)
     storage.mode(edges_adj)<- "integer"
     outCPP <- .Call("CPP_EdgeMeshSplit", edges_adj, mesh$nodes[1:nnodes,])
-    splittedmesh <- create.mesh.1D(nodes= rbind(mesh$nodes[1:nnodes,], outCPP[[2]]), edges = outCPP[[1]], order = 2)
+    splittedmesh <- create.mesh.1.5D(nodes= rbind(mesh$nodes[1:nnodes,], outCPP[[2]]), edges = outCPP[[1]], order = 2)
   }
   return(splittedmesh)
 }

@@ -3,8 +3,8 @@
 
 nodes=matrix(c(0.25,0.25,0.5,0.25,0.75,0.5,0.75,0.), nrow = 4, byrow=TRUE)
 edges=matrix(c(1,2,2,3,2,4),nrow = 3,byrow = TRUE)
-mesh_ = create.mesh.1D(nodes,edges,order=2)
-plot.mesh.1D(mesh_)
+mesh_ = create.mesh.1.5D(nodes,edges,order=2)
+plot.mesh.1.5D(mesh_)
 
 FEMbasis <- create.FEM.basis(mesh = mesh_, saveTree = FALSE)
 
@@ -18,8 +18,8 @@ nodes[,1] = c(0.,1.0)
 nodes[,2] = c(0.,0.)
 
 edges=matrix(c(1,2),nrow = 1,byrow = TRUE)
-mesh_ = create.mesh.1D(nodes,edges,order=2)
-plot.mesh.1D(mesh_)
+mesh_ = create.mesh.1.5D(nodes,edges,order=2)
+plot.mesh.1.5D(mesh_)
 
 FEMbasis <- create.FEM.basis(mesh = mesh_, saveTree = FALSE)
 
