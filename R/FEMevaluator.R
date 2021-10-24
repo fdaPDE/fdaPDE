@@ -1,7 +1,7 @@
 #' Evaluate a FEM object at a set of point locations
 #'
 #' @param FEM A \code{FEM} object to be evaluated.
-#' @param locations A 2-columns (in 2D) or 3-columns (in 2.5D and 3D) matrix with the spatial locations where the
+#' @param locations A 2-columns (in 1.5D and 2D) or 3-columns (in 2.5D and 3D) matrix with the spatial locations where the
 #' FEM object should be evaluated.
 #' @param incidence_matrix In case of areal evaluations, the #regions-by-#elements incidence matrix defining the regions
 #' where the FEM object should be evaluated.
@@ -86,7 +86,8 @@ eval.FEM <- function(FEM, locations = NULL, incidence_matrix = NULL, search = "t
 
   if(class(FEM$FEMbasis$mesh)=='mesh.2.5D' && search ==3)
     stop("2.5D search must be either 'tree' or 'naive'")
-  
+  if(class(FEM$FEMbasis$mesh)=='mesh.1.5D' && search ==3)
+    stop("1.5D search must be either 'tree' or 'naive'")
   if (search != 1 && search != 2 && search != 3)
     stop("search must be either 'tree' or 'naive' or 'walking'")
 
@@ -113,7 +114,7 @@ eval.FEM <- function(FEM, locations = NULL, incidence_matrix = NULL, search = "t
 
   ################## End checking parameters, sizes and conversion #############################
   res <- NULL
-
+  
   if(class(FEM$FEMbasis$mesh)=='mesh.2D'){
     ndim = 2
     mydim = 2
@@ -127,6 +128,10 @@ eval.FEM <- function(FEM, locations = NULL, incidence_matrix = NULL, search = "t
     ndim = 3
     mydim = 3
     res = CPP_eval.volume.FEM(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
+  }else if(class(FEM$FEMbasis$mesh)=='mesh.1.5D'){
+    ndim = 2
+    mydim = 1
+    res = CPP_eval.graph.FEM(FEM, locations, incidence_matrix, TRUE, ndim, mydim, search, bary.locations)
   }
 
   return(as.matrix(res))

@@ -93,15 +93,12 @@ SEXP point_projection_skeleton(SEXP Rmesh, SEXP Rlocations){
 
     return(NILSXP);
 }
-/*
+
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Eval_FEM_fd_skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
 
-    //NB anche se non viene passato DEVI essere certo di creare un RbaryLocations "NULLO" RbaryLocations è una lista di liste
-    // in modo tale da poter utilizzare gli RObjects!!! (al più sono matrici che hanno righe o colonne = 0
-    // RbaryLocations[0] contiene Rlocations (esattamente uguali a Rlocations!!!!)
-    // RbaryLocations[1] contiene elements_ids
-    // RbaryLocations[2] contiene coordinate dei baricentri degli elementi contenuti in elements_id
+    // RbaryLocations is a list of list, it has to be passed from R in order to use RObjects.
+    // RbaryLocations could be dummy.
     RNumericMatrix barycenters( VECTOR_ELT(RbaryLocations,2));
     RIntegerMatrix id_element( VECTOR_ELT(RbaryLocations,1));
     RIntegerMatrix incidenceMatrix( RincidenceMatrix );
@@ -116,7 +113,7 @@ SEXP Eval_FEM_fd_skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SE
     fast  = INTEGER(Rfast)[0];
     search  = INTEGER(Rsearch)[0];
     MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, search);
-    //NB unico cambio rispetto allo skeleton di prima
+
     Evaluator<ORDER, mydim, ndim> evaluator(mesh);
 
     SEXP result;
@@ -149,5 +146,126 @@ SEXP Eval_FEM_fd_skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SE
     return result;
 
 }
-*/
+
+template<UInt ORDER, UInt mydim, UInt ndim, UInt DEGREE>
+SEXP Eval_FEM_time_skeleton (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations)
+{
+    RNumericMatrix coef(Rcoef);
+    RNumericMatrix locations(Rlocations);
+    RIntegerMatrix incidenceMatrix(RincidenceMatrix);
+
+    UInt n_X = locations.nrows();
+    UInt n_nodes = INTEGER(Rf_getAttrib(VECTOR_ELT(Rmesh, 0), R_DimSymbol))[0];
+    UInt n_t = Rf_length(Rmesh_time);
+    UInt nRegions = incidenceMatrix.nrows();
+    UInt nElements = incidenceMatrix.ncols();
+
+    Real *mesh_time, *t;
+    mesh_time = REAL(Rmesh_time);
+    t = REAL(Rtime_locations);
+
+    UInt M = n_t + DEGREE - 1;
+    UInt N = nRegions==0 ? n_X : nRegions;
+    SpMat phi(N,M);
+    Spline<DEGREE,DEGREE-1>spline(mesh_time,n_t);
+    Real value;
+    for (UInt i = 0; i < N; ++i)
+    {
+        for (UInt j = 0; j < M; ++j)
+        {
+            value = spline.BasisFunction(j, t[i]);
+            if (value!=0)
+            {
+                phi.coeffRef(i,j) = value;
+            }
+        }
+    }
+    phi.makeCompressed();
+
+    SEXP result;
+    PROTECT(result=Rf_allocVector(REALSXP, N));  // 0
+
+    SEXP Rcoef_0;
+    PROTECT(Rcoef_0=Rf_allocMatrix(REALSXP, n_nodes,1)); // 1
+    RNumericMatrix coef_0(Rcoef_0);
+
+    //!evaluates the solution on the given points location at the first
+    //!node of the time mesh to initialize the array of results and retrieve the points out of mesh (NA)
+    for(UInt j=0; j<n_nodes; ++j)
+    {
+        coef_0[j] = coef[j];
+    }
+    //does not temp need protection ?!
+    SEXP temp = Eval_FEM_fd_skeleton<ORDER,mydim,ndim>(Rmesh,Rlocations, RincidenceMatrix,Rcoef_0, Rfast,Rsearch, RbaryLocations);
+    UNPROTECT(1); //UNPROTECT Rcoef_0 ?!
+
+    for(UInt k=0; k < N; k++) {
+        REAL(result)[k] = REAL(temp)[k];
+        if (!ISNA(REAL(result)[k]))
+            REAL(result)[k] = REAL(result)[k] * phi.coeff(k, 0);
+    }
+
+    //! loop over time b-splines basis and evaluate the solution only on the points that have
+    //! the coefficient corresponding to that basis different from 0
+    std::vector<UInt> indices;
+    for(UInt i=1; i<M; ++i)
+    {
+
+        SEXP Rcoef_i;
+        PROTECT(Rcoef_i=Rf_allocMatrix(REALSXP, n_nodes,1)); // 1
+        RNumericMatrix coef_i(Rcoef_i);
+        for(UInt j=0; j<n_nodes; ++j)
+        {
+            coef_i[j] = coef[i*n_nodes+j];
+        }
+        // if n_X > 0
+        UInt n_i = 0;
+        for(UInt k=0; k<n_X; k++) {
+            if (phi.coeff(k, i) != 0 && !ISNA(REAL(result)[k])) {
+                ++n_i;
+                indices.push_back(k);
+            }
+        }
+
+        SEXP Rlocations_i;
+        PROTECT(Rlocations_i = Rf_allocMatrix(REALSXP,n_i,ndim)); //2
+        RNumericMatrix locations_i(Rlocations_i);
+        n_i = 0;
+        for(UInt k=0; k<indices.size(); ++k){
+            for(UInt l=0; l<ndim;++l)
+                locations_i(n_i,l) = locations(indices[k],l);
+            ++n_i;
+        }
+
+        SEXP RincidenceMatrix_i;
+        PROTECT(RincidenceMatrix_i=Rf_allocMatrix(INTSXP,phi.col(i).nonZeros(), nElements)); //3
+        RIntegerMatrix incidenceMatrix_i(RincidenceMatrix_i);
+        UInt nRegions_i = 0;
+        for (UInt k=0; k<nRegions; ++k)
+        {
+            if(phi.coeff(k,i)!=0 && !ISNA(REAL(result)[k]))
+            {
+                for (UInt j=0; j<nElements; j++)
+                {
+                    incidenceMatrix_i(nRegions_i , j) = incidenceMatrix(k,j);
+                }
+                indices.push_back(k);
+                ++nRegions_i;
+            }
+        }
+        temp = Eval_FEM_fd_skeleton<ORDER,mydim,ndim>(Rmesh,Rlocations_i, RincidenceMatrix_i,Rcoef_i, Rfast,Rsearch, RbaryLocations);
+        UNPROTECT(3); // UNPROTECT Rcoef_i, Rlocations_i RincidenceMatrix_i
+
+        for(UInt k=0; k<indices.size(); ++k)
+        {
+            REAL(result)[indices[k]] = REAL(result)[indices[k]] + REAL(temp)[k]*phi.coeff(indices[k],i);
+        }
+        indices.clear();
+
+    }
+
+    UNPROTECT(1); //UNPROTECT result;
+    return result;
+}
+
 #endif

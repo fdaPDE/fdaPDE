@@ -183,7 +183,7 @@ CPP_eval.FEM.new = function(FEM, locations, incidence_matrix, redundancy, ndim, 
     storage.mode(bary.locations$barycenters) <- "double"
   }
   
-  #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
+  #Calling the C++ function "eval_FEM_fd" in FEM_Eval.cpp
   evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
   for (i in 1:ncol(coeff)){
     evalmat[,i] <- .Call("eval_FEM_fd_Auxiliary_new", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
