@@ -938,7 +938,7 @@ create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = N
 #' ## Project the points on the mesh
 #' loc = projection.points.1D(mesh, locations)
 
-projection.points.1D<-function(mesh, locations) {
+projection.points.1.5D<-function(mesh, locations) {
   if(class(mesh) !="mesh.1.5D")
     stop("Data projection is only available for 1D mesh ")
   

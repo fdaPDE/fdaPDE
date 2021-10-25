@@ -313,21 +313,21 @@ SEXP refine1D(SEXP Rnodes, SEXP Redges, SEXP Rdelta){
             Real sin_;
 
             if( std::abs(x1-x0) < eps && (y1-y0) > 0  ){
-                cos_ = 0.0;
-                sin_ = 1.0;
+                cos_ =  0.;
+                sin_ =  1.;
             }else if( std::abs( x1-x0) < eps && (y1-y0) < 0 ){
-                cos_ = 0.0;
-                sin_ = -1.0;
+                cos_ =  0.;
+                sin_ = -1.;
             }else if( std::abs( y1-y0)<eps && (x1-x0) > 0 ) {
-                cos_ = 1.0;
-                sin_ = 0.0;
-            }else if( std::abs( y1-y0)<eps && (x1-x0) > 0 ){
-                cos_ = -1.0;
-                sin_ =  0.0;
+                cos_ =  1.;
+                sin_ =  0.;
+            }else if( std::abs( y1-y0)<eps && (x1-x0) < 0 ){
+                cos_ = -1.;
+                sin_ =  0.;
             }else{
                 Real slope = (y1-y0)/(x1-x0);
-                cos_ = std::sqrt(1 / (1+slope*slope));
-                sin_ = std::sqrt(slope*slope / (1+slope*slope) );
+                cos_ = (x1-x0)>0. ? std::sqrt(1./(1.+slope*slope)) : -std::sqrt(1./(1.+slope*slope)) ;
+                sin_ = (y1-y0)>0. ? std::sqrt(slope*slope/(1.+slope*slope)) : -std::sqrt(slope*slope/(1.+slope*slope)) ;
             }
 
             Real delta_ = lengths[i]/num_subs[i];
