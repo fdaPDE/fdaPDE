@@ -13,13 +13,8 @@ find.boundary(M)
 x11()
 plot(simplenet)
 L = as.linnet(simplenet)
-delta = 0.0001
-
-### fdaPDE ###
-mesh.fdaPDE = fdaPDE::create.mesh.1.5D(vertices,edges)
-mesh.fdaPDE = fdaPDE::refine.mesh.1.5D(mesh.fdaPDE, delta)
-FEMbasis.fdaPDE = fdaPDE::create.FEM.basis(mesh.fdaPDE)
-###
+# delta > 0.0001 altrimenti PHI...
+delta = 0.01
 
 mesh = create.mesh.1D.vertices(vertices, edges, delta)
 mesh$nnodes
@@ -33,6 +28,16 @@ points_y = nodes_y
 nobs = mesh$nnodes
 
 FEMbasis = create.FEM.basis.1D(mesh) 
+
+
+### fdaPDE ### 
+mesh.fdaPDE = fdaPDE::create.mesh.1.5D(nodes=mesh$nodes,edges=mesh$segments)
+FEMbasis.fdaPDE = fdaPDE::create.FEM.basis(mesh.fdaPDE)
+
+## controllo se ho stessi nodi
+dim(mesh.fdaPDE$nodes)[1]
+sum( abs(mesh.fdaPDE$nodes - mesh$nodes) > .Machine$double.eps )
+###
 
 
 # CAMPO f 
@@ -102,12 +107,11 @@ for(i in 1:length(lambdas)){
   err_[i,2]     = norm(beta_ex - output.fdaPDE$solution$beta,type="2")
   
   times[i,1] = end.time - start.time
-  times[i,2] = output.fdaPDE$time #sto barando così?
+  times[i,2] = output.fdaPDE$time 
   
   }
 
-# :)
-precision   = sum(err_[,2] < err_[,1])/length(lambdas)  
+precision   = sum( abs(err_[,2] -  err_[,1]) < 10 * .Machine$double.eps) /length(lambdas)  
 performance = sum( times[,2] < times[,1]) /length(lambdas)
 
 precision
