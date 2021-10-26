@@ -42,3 +42,21 @@ plot.mesh.1.5D(mesh2)
 mesh2_refined <- refine.by.splitting.mesh.1.5D(mesh2)
 plot.mesh.1.5D(mesh2_refined)
 
+
+### refine on bifurcation ###
+
+nodes=matrix(c(0.25,0.25,0.5,0.25,0.75,0.5,0.75,0.), nrow = 4, byrow=TRUE)
+edges=matrix(c(1,2,2,3,2,4),nrow = 3,byrow = TRUE)
+mesh = create.mesh.1.5D(nodes,edges,order=1)
+plot(mesh)
+
+mesh_ref = refine.mesh.1.5D(mesh,0.1)
+plot(mesh_ref)
+
+## al contrario ##
+nodes = matrix(c(0.75,0.,0.75,0.5,0.5,0.25,0.25,0.25), nrow = 4, byrow=TRUE)
+edges=matrix(c(1,3,2,3,3,4),nrow = 3,byrow = TRUE)
+mesh = create.mesh.1.5D(nodes,edges,order=1)
+plot(mesh)
+mesh_ref = refine.mesh.1.5D(mesh,0.1)
+plot(mesh_ref)
