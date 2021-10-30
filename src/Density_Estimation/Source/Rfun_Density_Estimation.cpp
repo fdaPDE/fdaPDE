@@ -48,7 +48,7 @@ extern "C" {
         	 SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RstepMethod, SEXP RdirectionMethod, SEXP RpreprocessMethod, SEXP Rsearch)
         {
         	UInt order= INTEGER(Rorder)[0];
-          UInt mydim=INTEGER(Rmydim)[0];
+            UInt mydim=INTEGER(Rmydim)[0];
         	UInt ndim=INTEGER(Rndim)[0];
 
         	std::string step_method=CHAR(STRING_ELT(RstepMethod, 0));
@@ -67,8 +67,12 @@ extern "C" {
         		return(DE_skeleton<1, 3, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
         	else if(order == 2 && mydim==3 && ndim==3)
                 return(DE_skeleton<2, 3, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+            else if(order == 1 && mydim==1 && ndim==2)
+                return(DE_skeleton<1, 1, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+            else if(order == 2 && mydim==1 && ndim==2)
+                return(DE_skeleton<2, 1, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
 
-        	return(NILSXP);
+            return(NILSXP);
         }
 
 
@@ -76,7 +80,7 @@ extern "C" {
         	 SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rinit, SEXP Rinit_fold)
         {
         	UInt order= INTEGER(Rorder)[0];
-          UInt mydim=INTEGER(Rmydim)[0];
+            UInt mydim=INTEGER(Rmydim)[0];
         	UInt ndim=INTEGER(Rndim)[0];
 
         	UInt init_fold=INTEGER(Rinit_fold)[0];

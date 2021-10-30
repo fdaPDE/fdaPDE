@@ -194,7 +194,9 @@ struct SpaceIntegratorHelper{
 
 struct DensityIntegratorHelper{
 	template<UInt mydim>
-	using Integrator = typename std::conditional<mydim==2, IntegratorTriangleP4, IntegratorTetrahedronP4>::type;
+	using Integrator =
+            typename std::conditional<mydim==1, IntegratorEdgeP4,
+                                      typename std::conditional<mydim==2, IntegratorTriangleP4, IntegratorTetrahedronP4>::type >::type;
 };
 
 
