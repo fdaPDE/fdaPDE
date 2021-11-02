@@ -387,7 +387,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
       MatrixXr TildeX_loc= TildeX.row(i);
   
       if(!converged_up[i]){
-	if(local_p_values(1,i)>aplha){ // Upper-Upper bound excessively tight
+	if(local_p_values(1,i)>alpha){ // Upper-Upper bound excessively tight
 
 	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
   
@@ -397,7 +397,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   
 	}else{
  
-	  if(local_p_values(2,i)<aplha){ // Upper-Lower bound excessively tight
+	  if(local_p_values(2,i)<alpha){ // Upper-Lower bound excessively tight
 	    UL(i)=beta_hat(i)+0.5*(UL(i)-beta_hat(i));
   
 	    // compute the partial residuals
@@ -426,7 +426,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
 
       if(!converged_low[i]){
-	if(local_p_values(3,i)<aplha){ // Lower-Upper bound excessively tight
+	if(local_p_values(3,i)<alpha){ // Lower-Upper bound excessively tight
 
 	  LU(i)=beta_hat(i)-0.5*(beta_hat(i)-LU(i));
   
@@ -436,7 +436,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   
 	}else{
  
-	  if(local_p_values(4,i)>aplha){ // Lower-Lower bound excessively tight
+	  if(local_p_values(4,i)>alpha){ // Lower-Lower bound excessively tight
 	    LL(i)=beta_hat(i)-0.5*(UL(i)-LL(i));
   
 	    // compute the partial residuals
