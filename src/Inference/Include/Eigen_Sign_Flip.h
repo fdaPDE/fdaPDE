@@ -31,7 +31,7 @@ protected:
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
   MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
   
-  Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const  MatrixXr &) const  //!< Computes the p value for a generic beta proposed in the research algorithm for CI 
+  Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const  MatrixXr &) const;  //!< Computes the p value for a generic beta proposed in the research algorithm for CI 
   
 public:
   // CONSTUCTOR

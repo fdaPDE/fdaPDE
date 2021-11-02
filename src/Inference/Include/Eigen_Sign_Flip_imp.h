@@ -12,13 +12,13 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
     this->compute_Lambda();
   }
 
-  // compute the decomposition of W^T*Lambda^2*W
+  // extract W and W^T
   const MatrixXr * W = this->inf_car.getWp();
   const MatrixXr W_t = W->transpose();
   
   // Decomposition of [W^t * Lambda^2 * W] 
   Eigen::PartialPivLU<MatrixXr> WLW_dec; 
-  WLW_dec.compute((*W_t)*((this->Lambda)*(this->Lambda))*(*W));
+  WLW_dec.compute((W_t)*((this->Lambda)*(this->Lambda))*(*W));
   is_WLW_computed=true;
   
   // get the residuals needed
@@ -65,11 +65,16 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
 template<typename InputHandler, typename MatrixType> 
 Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const VectorXr & partial_res_H0_CI, const MatrixXr & TildeX, const  MatrixXr & Tilder_star) const {
   
+  // extract matrix C 
+  // (in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
+  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+  UInt p = C.rows(); 
+
   // declare the vector that will store the p-values
   Real result;
     
   // compute the vectors needed for the statistic 
-  MatriXr Tilder = Tilder_star * partial_res_H0_CI;
+  MatrixXr Tilder = Tilder_star * partial_res_H0_CI;
 
   // Observed statistic
   MatrixXr stat=TildeX*Tilder;
@@ -82,6 +87,9 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
     
   MatrixXr Tilder_perm=Tilder;
     
+  // get the number of permutations
+  unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
+
   for(unsigned long int i=0;i<n_flip;i++){
     for(unsigned long int j=0;j<TildeX.cols();j++){
       UInt flip=2*distr(eng)-1;
@@ -221,7 +229,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
 
     // Random sign-flips
     std::default_random_engine eng;
-    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
     VectorXr count = VectorXr::Zero(p);
     
     MatrixXr Tilder_perm=Tilder;
@@ -280,6 +288,12 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   UInt p=C.rows();
 
+  // compute eigenvectors and eigenvalues of Lambda
+  Eigen::SelfAdjointEigenSolver<MatrixType> Lambda_dec(Lambda);
+  
+  // extract covariates matrices
+  const MatrixXr * W = this->inf_car.getWp();
+
   // declare the matrix that will store the p-values
   MatrixXv result;
   result.resize(1,p);
@@ -312,11 +326,11 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     
     // compute the limits of the interval
     result(i)(0) = result(i)(1) - half_range;
-    LU(i)=result(i)(0)+0.5*half_rage;
-    LL(i)=result(i)(0)-0.5*half_rage;
+    LU(i)=result(i)(0)+0.5*half_range;
+    LL(i)=result(i)(0)-0.5*half_range;
     result(i)(2) = result(i)(1) + half_range;
-    UU(i)=result(i)(2)+0.5*half_rage;
-    UL(i)=result(i)(2)-0.5*half_rage; 	
+    UU(i)=result(i)(2)+0.5*half_range;
+    UL(i)=result(i)(2)-0.5*half_range; 	
   }
 
   // define booleans used to unserstand which CI need to be computed forward on
@@ -330,7 +344,10 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   
   // compute the vectors needed for the statistic
   MatrixXr TildeX = (C.row * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-  MatrixXr Tilder = Lambda_dec.eigenvectors().transpose();   			        		                // V^t
+  MatrixXr Tilder_star = Lambda_dec.eigenvectors().transpose();   			        		                // V^t
+
+  VectorXr Partial_res_H0_CI;
+  Partial_res_H0_CI.resize(Lambda-cols());
 
   // fill the p_values matrix
   for (UInt i=0; i<p; i++){
@@ -341,20 +358,20 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     MatrixXr TildeX_loc= TildeX.row(i);
 
     // compute the partial residuals and p value
-    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-    local_p_values(1,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
     // compute the partial residuals and p value
-    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
-    local_p_values(2,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
+    local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
     // compute the partial residuals and p value
-    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
-    local_p_values(3,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
+    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
     // compute the partial residuals and p value
-    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
-    local_p_values(4,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
+    local_p_values(4,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
   }
 
@@ -366,6 +383,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     // Compute all p_values (only those needed)
     for (UInt i=0; i<p; i++){
 
+      VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
+
       MatrixXr TildeX_loc= TildeX.row(i);
   
       if(!converged_up(i)){
@@ -374,8 +393,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
   
 	  // compute the partial residuals
-	  VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-	  local_p_values(1,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+	  Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+	  local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
   
 	}else{
  
@@ -383,8 +402,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	    UL(i)=beta_hat(i)+0.5*(UL(i)-beta_hat(i));
   
 	    // compute the partial residuals
-	    VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-	    local_p_values(2,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+	    local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -397,8 +416,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	      Real proposal=0.5*(UU(i)-UL(i));
    
 	      // compute the partial residuals
-	      VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*UL[i](in test))
-	      Real prop_p_val=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*UL[i](in test))
+	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
 	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(1,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(2,i)=prop_p_val;}
 	    }
@@ -413,8 +432,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	  LU(i)=beta_hat(i)-0.5*(beta_hat(i)-LU(i));
   
 	  // compute the partial residuals
-	  VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
-	  local_p_values(3,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+	  Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
+	  local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
   
 	}else{
  
@@ -422,8 +441,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	    LL(i)=beta_hat(i)-0.5*(UL(i)-LL(i));
   
 	    // compute the partial residuals
-	    VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
-	    local_p_values(4,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
+	    local_p_values(4,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -436,8 +455,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	      Real proposal=0.5*(LU(i)-LL(i));
    
 	      // compute the partial residuals
-	      VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-	      Real prop_p_val=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star);
 
 	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(4,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(3,i)=prop_p_val;}
 	    }
@@ -455,21 +474,20 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
       all_betas_converged=false;
     }
   }
-}
    
-// for each row of C matrix
-for(UInt i=0; i<p; ++i){
-  result(i).resize(3);
+  // for each row of C matrix
+  for(UInt i=0; i<p; ++i){
+    result(i).resize(3);
 
-  // Central element
-  result(i)(1)=col.adjoint()*beta_hat;
+    // Central element
+    result(i)(1)=col.adjoint()*beta_hat;
     
-  // Limits of the interval
-  result(i)(0) = 0.5*(UU(i)+UL(i)); 
-  result(i)(2) = 0.5*(LU(i)+LL(i)); 
- }
+    // Limits of the interval
+    result(i)(0) = 0.5*(UU(i)+UL(i)); 
+    result(i)(2) = 0.5*(LU(i)+LL(i)); 
+  }
 
-return result;
+  return result;
   
 };
 
