@@ -19,7 +19,6 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
   // Decomposition of [W^t * Lambda^2 * W] 
   Eigen::PartialPivLU<MatrixXr> WLW_dec; 
   WLW_dec.compute((W_t)*((this->Lambda)*(this->Lambda))*(*W));
-  is_WLW_computed=true;
   
   // get the residuals needed
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
@@ -343,11 +342,11 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   local_p_values.resize(4,p);
   
   // compute the vectors needed for the statistic
-  MatrixXr TildeX = (C.row * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
+  MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
   MatrixXr Tilder_star = Lambda_dec.eigenvectors().transpose();   			        		                // V^t
 
   VectorXr Partial_res_H0_CI;
-  Partial_res_H0_CI.resize(Lambda-cols());
+  Partial_res_H0_CI.resize(Lambda.cols());
 
   // fill the p_values matrix
   for (UInt i=0; i<p; i++){
@@ -376,7 +375,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   }
 
   //Real alpha = this->inf_car.getInfData()->get_alpha(); // TO BE ADDED
-  Real aplha=0.05;
+  Real alpha=0.05;
     
   while(!all_betas_converged){
   
@@ -387,7 +386,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
       MatrixXr TildeX_loc= TildeX.row(i);
   
-      if(!converged_up(i)){
+      if(!converged_up[i]){
 	if(local_p_values(1,i)>aplha){ // Upper-Upper bound excessively tight
 
 	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
@@ -409,7 +408,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
 	    if(UU(i)-UL(i)<ESF_bisection_tolerances(i)){
 
-	      converged_up(i)=true;
+	      converged_up[i]=true;
 
 	    }else{
 
@@ -426,7 +425,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
       }
 
 
-      if(!converged_low(i)){
+      if(!converged_low[i]){
 	if(local_p_values(3,i)<aplha){ // Lower-Upper bound excessively tight
 
 	  LU(i)=beta_hat(i)-0.5*(beta_hat(i)-LU(i));
@@ -448,7 +447,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
 	    if(LU(i)-LL(i)<ESF_bisection_tolerances(i)){
 
-	      converged_low(i)=true;
+	      converged_low[i]=true;
 
 	    }else{
 
@@ -470,7 +469,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   all_betas_converged =true;
   for(UInt j=0; j<p; j++){
 
-    if(!converged_up(i) || !converged_low(i)){
+    if(!converged_up[i] || !converged_low[i]){
       all_betas_converged=false;
     }
   }
@@ -480,7 +479,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     result(i).resize(3);
 
     // Central element
-    result(i)(1)=col.adjoint()*beta_hat;
+    result(i)(1)=beta_hat(i);
     
     // Limits of the interval
     result(i)(0) = 0.5*(UU(i)+UL(i)); 
