@@ -2,12 +2,113 @@
 #include <cmath>
 #include <random>
 #include <type_traits>
+#include <vector>
+
+template<typename InputHandler, typename MatrixType>
+void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
+    
+  //check if Lambda has been computed
+  if(!is_Lambda_computed){
+    this->compute_Lambda();
+  }
+
+  // compute the decomposition of W^T*Lambda^2*W
+  const MatrixXr * W = this->inf_car.getWp();
+  const MatrixXr W_t = W->transpose();
+  
+  // Decomposition of [W^t * Lambda^2 * W] 
+  Eigen::PartialPivLU<MatrixXr> WLW_dec; 
+  WLW_dec.compute((*W_t)*((this->Lambda)*(this->Lambda))*(*W));
+  is_WLW_computed=true;
+  
+  // get the residuals needed
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
+  // build squared residuals
+  VectorXr Res2=eps_hat.array()*eps_hat.array();
+  
+  // resize the variance-covariance matrix
+  UInt q = this->inf_car.getq();
+  MatrixXr V;
+  V.resize(q,q);
+  
+  
+  MatrixXr diag = Res2.asDiagonal();
+  
+  V = (WLW_dec).solve((W_t)*(Lambda*Lambda)*Res2.asDiagonal()*(Lambda*Lambda)*(*W)*(WLW_dec).solve(MatrixXr::Identity(q,q))); // V = [(W*Lambda2*W)^-1 * Res2 * (W*Lambda2*W)^-1]
+
+  // Extract the quantile needed for the computation of upper and lower bounds
+  Real quant = this->inf_car.getInfData()->get_inference_quantile()[this->pos_impl];
+
+  // extract matrix C 
+  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+  UInt p = C.rows(); 
+  
+  Speckman_aux_ranges.resize(p);
+ 
+  // for each row of C matrix
+  for(UInt i=0; i<p; ++i){
+    VectorXr col = C.row(i);
+    
+    // compute the standard deviation of the linear combination and half range of the interval
+    Real sd_comb = std::sqrt(col.adjoint()*V*col);
+    Real half_range=sd_comb*quant;
+    
+    // save the half range
+    Speckman_aux_ranges(i)=half_range;  	
+  }
+
+  this->is_speckman_aux_computed = true;
+
+  return;
+}
+
+template<typename InputHandler, typename MatrixType> 
+Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const VectorXr & partial_res_H0_CI, const MatrixXr & TildeX, const  MatrixXr & Tilder_star) const {
+  
+  // declare the vector that will store the p-values
+  Real result;
+    
+  // compute the vectors needed for the statistic 
+  MatriXr Tilder = Tilder_star * partial_res_H0_CI;
+
+  // Observed statistic
+  MatrixXr stat=TildeX*Tilder;
+  MatrixXr stat_perm=stat;
+
+  // Random sign-flips
+  std::default_random_engine eng;
+  std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+  UInt count = 0;
+    
+  MatrixXr Tilder_perm=Tilder;
+    
+  for(unsigned long int i=0;i<n_flip;i++){
+    for(unsigned long int j=0;j<TildeX.cols();j++){
+      UInt flip=2*distr(eng)-1;
+      Tilder_perm.row(j)=Tilder.row(j)*flip;
+    }
+    stat_perm=TildeX*Tilder_perm; // Flipped statistic
+      
+    for(UInt k=0; k<p; ++k){
+      if(fabs(stat_perm(k,k)) > fabs(stat(k,k))){
+	++count;
+      } 
+    } 
+  }
+    
+  Real pval = count/n_flip;
+
+  result = pval;
+
+  return result;
+  
+};
 
 template<typename InputHandler, typename MatrixType> 
 VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
   
   // extract matrix C 
-  //(in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
+  // (in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   UInt p = C.rows(); 
   
@@ -150,11 +251,225 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
 
 template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
+
+  // compute Lambda
+  if(!is_Lambda_computed){
+    compute_Lambda();
+    if(!is_Lambda_computed){
+      Rprintf("error: failed FSPAI inversion in confidence intervals computation, discarding inference");
+      MatrixXv result;
+      MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+      for(UInt i=0; i<C.rows(); ++i){
+	result(i).resize(3);
+
+	//Central element
+	result(i)(1)=10e20;
+
+	// compute the limits of the interval
+	result(i)(0) = 10e20;
+	result(i)(2) = 10e20; 	
+      }
+      return result;
+    }  
+  }
+  
+  // Store beta_hat
+  VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
+
+  // get the matrix of coefficients
+  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+  UInt p=C.rows();
+
+  // declare the matrix that will store the p-values
   MatrixXv result;
+  result.resize(1,p);
 
-  // Not implemented yet //
+  // compute the initial ranges from speckman's CI (initial guess for )
+  if(!is_speckman_aux_computed){
+    this->Compute_speckman_aux();
+  }
+ 
+  // this vector will store the tolerance for each interval upper/lower limit
+  VectorXr ESF_bisection_tolerances = 0.1*Speckman_aux_ranges; // 0.05 of the speckman CI as maximum tolerance
 
-  return result;
+  // define storage structures for bisection algorithms
+  VectorXr UU; // Upper limit for Upper bound
+  UU.resize(p);
+  VectorXr UL; // Lower limit for Upper bound
+  UL.resize(p);
+  VectorXr LU; // Upper limit for Lower bound
+  LU.resize(p);
+  VectorXr LL; // Lower limit for Lower bound
+  LL.resize(p);
+
+
+ 
+  // speckman intervals initialization
+  for(UInt i=0; i<p; ++i){
+    result(i).resize(3);
+    VectorXr col = C.row(i);
+    Real half_range = Speckman_aux_ranges(i);
+    
+    // compute the limits of the interval
+    result(i)(0) = result(i)(1) - half_range;
+    LU(i)=result(i)(0)+0.5*half_rage;
+    LL(i)=result(i)(0)-0.5*half_rage;
+    result(i)(2) = result(i)(1) + half_range;
+    UU(i)=result(i)(2)+0.5*half_rage;
+    UL(i)=result(i)(2)-0.5*half_rage; 	
+  }
+
+  // define booleans used to unserstand which CI need to be computed forward on
+  std::vector<bool> converged_up(p,false);
+  std::vector<bool> converged_low(p,false);
+  bool all_betas_converged=false;
+
+  // matrix that stores p_values of the bounds at actual step
+  MatrixXr local_p_values;
+  local_p_values.resize(4,p);
+  
+  // compute the vectors needed for the statistic
+  MatrixXr TildeX = (C.row * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
+  MatrixXr Tilder = Lambda_dec.eigenvectors().transpose();   			        		                // V^t
+
+  // fill the p_values matrix
+  for (UInt i=0; i<p; i++){
+  
+    // Build auxiliary vector for residuals computation
+    VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
+
+    MatrixXr TildeX_loc= TildeX.row(i);
+
+    // compute the partial residuals and p value
+    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+    local_p_values(1,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+
+    // compute the partial residuals and p value
+    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
+    local_p_values(2,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+
+    // compute the partial residuals and p value
+    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
+    local_p_values(3,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+
+    // compute the partial residuals and p value
+    VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
+    local_p_values(4,i)=compute_CI_aux_pvalue(partial_res_H0_CI, TildeX_loc, Tilder_star);
+
+  }
+
+  //Real alpha = this->inf_car.getInfData()->get_alpha(); // TO BE ADDED
+  Real aplha=0.05;
+    
+  while(!all_betas_converged){
+  
+    // Compute all p_values (only those needed)
+    for (UInt i=0; i<p; i++){
+
+      MatrixXr TildeX_loc= TildeX.row(i);
+  
+      if(!converged_up(i)){
+	if(local_p_values(1,i)>aplha){ // Upper-Upper bound excessively tight
+
+	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
+  
+	  // compute the partial residuals
+	  VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+	  local_p_values(1,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+  
+	}else{
+ 
+	  if(local_p_values(2,i)<aplha){ // Upper-Lower bound excessively tight
+	    UL(i)=beta_hat(i)+0.5*(UL(i)-beta_hat(i));
+  
+	    // compute the partial residuals
+	    VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+	    local_p_values(2,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+
+	  }else{//both the Upper bounds are well defined
+
+	    if(UU(i)-UL(i)<ESF_bisection_tolerances(i)){
+
+	      converged_up(i)=true;
+
+	    }else{
+
+	      Real proposal=0.5*(UU(i)-UL(i));
+   
+	      // compute the partial residuals
+	      VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*UL[i](in test))
+	      Real prop_p_val=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+
+	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(1,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(2,i)=prop_p_val;}
+	    }
+	  }
+	}
+      }
+
+
+      if(!converged_low(i)){
+	if(local_p_values(3,i)<aplha){ // Lower-Upper bound excessively tight
+
+	  LU(i)=beta_hat(i)-0.5*(beta_hat(i)-LU(i));
+  
+	  // compute the partial residuals
+	  VectorXr Partial_res_H0_CI_1 = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
+	  local_p_values(3,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+  
+	}else{
+ 
+	  if(local_p_values(4,i)>aplha){ // Lower-Lower bound excessively tight
+	    LL(i)=beta_hat(i)-0.5*(UL(i)-LL(i));
+  
+	    // compute the partial residuals
+	    VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
+	    local_p_values(4,i)=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+
+	  }else{//both the Upper bounds are well defined
+
+	    if(LU(i)-LL(i)<ESF_bisection_tolerances(i)){
+
+	      converged_low(i)=true;
+
+	    }else{
+
+	      Real proposal=0.5*(LU(i)-LL(i));
+   
+	      // compute the partial residuals
+	      VectorXr Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*UU[i](in test))
+	      Real prop_p_val=compute_CI_aux_pvalue(partial_res_H0_CI_1, TildeX_loc, Tilder_star);
+
+	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(4,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(3,i)=prop_p_val;}
+	    }
+	  }
+	}
+      }
+    }
+
+  }
+
+  all_betas_converged =true;
+  for(UInt j=0; j<p; j++){
+
+    if(!converged_up(i) || !converged_low(i)){
+      all_betas_converged=false;
+    }
+  }
+}
+   
+// for each row of C matrix
+for(UInt i=0; i<p; ++i){
+  result(i).resize(3);
+
+  // Central element
+  result(i)(1)=col.adjoint()*beta_hat;
+    
+  // Limits of the interval
+  result(i)(0) = 0.5*(UU(i)+UL(i)); 
+  result(i)(2) = 0.5*(LU(i)+LL(i)); 
+ }
+
+return result;
   
 };
 

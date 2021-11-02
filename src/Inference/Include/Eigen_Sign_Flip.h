@@ -24,9 +24,14 @@ protected:
   MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
   MatrixType Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
+  VectorXr Speckman_aux_ranges;                         //!< Speckman auxiliary CI ranges needed for CI method initialization
+  bool is_speckman_aux_computed = false;                //!< Boolean that tells whether Speckman auxiliary ranges have been computed or not
   virtual void compute_Lambda(void) = 0;		//!< Pure virtual method used to compute Lambda, either in an exact or non-exact way
+  void Compute_speckman_aux(void);                      //!< Auxiliary function for CI that computes the speckman ranges
   VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
-  MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals (not implemented yet)
+  MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
+  
+  Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const  MatrixXr &) const  //!< Computes the p value for a generic beta proposed in the research algorithm for CI 
   
 public:
   // CONSTUCTOR
@@ -44,7 +49,7 @@ public:
 // *** Eigen_Sign_Flip_Exact Class ***
 //! Hypothesis testing using Eigen-Sign-Flip implementation in an exact way 
 /*!
-   This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an exact inversion of the MatrixNoCov. 
+  This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an exact inversion of the MatrixNoCov. 
 */
 template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
@@ -59,7 +64,7 @@ public:
 // *** Eigen_Sign_Flip_Non_Exact Class ***
 //! Hypothesis testing using Eigen-Sign-Flip implementation in a non-exact way 
 /*!
-   This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an approximated inversion of the MatrixNoCov. 
+  This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an approximated inversion of the MatrixNoCov. 
 */
 template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Non_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
