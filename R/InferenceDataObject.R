@@ -15,6 +15,7 @@
 #'@slot f_var An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
 #'whereas if 2 they will not.
 #'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
+#'@slot alpha Level of Eigen-Sign-Flip confidence intervals. Used only if interval is not 0.
 #'@slot n_flip An integer representing the number of permutations in the case of eigen-sign-flip test.
 #'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
@@ -37,6 +38,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   beta0 = "numeric",
                                                                   f_var = "integer",
                                                                   quantile = "numeric",
+                                                                  alpha = "numeric",
                                                                   n_flip = "integer",
                                                                   tol_fspai = "numeric",
                                                                   definition="integer")
@@ -49,9 +51,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #''one-at-the-time', the parameters \code{beta0}, \code{dim}, \code{coeff} are taken into account, and one-at-the-time tests will be performed. If it takes value 
 #''simultaneous', a global simultaneous test will be performed.
 #'@param interval A list of strings defining the type of confidence intervals to be computed, with the same length of \code{test} and \code{type} lists. The default is NULL,
-#' and can take values 'one-at-the-time' 'simultaneous' and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
-#'  Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account. Confidence intervals can be 
-#'  computed only in Wald or Speckman implementation.
+#' and can take values 'one-at-the-time', 'simultaneous' (available only for Wald and Speckman cases) and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
+#'  Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account.
 #'@param type A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
 #''wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
@@ -75,7 +76,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'interval = NULL, 
 #'type = 'wald', 
 #'exact = FALSE, 
-#'dim, 
+#'dim = NULL, 
 #'coeff = NULL, 
 #'beta0 = NULL, 
 #'f_var = FALSE,
@@ -88,7 +89,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' @examples 
 #' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 4);
 #' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
-#' obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
+#' obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','one-at-the-time'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
 #'  type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, level=0.99)
 
 
@@ -270,8 +271,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("level should be a positive value smaller or equal to 1")
       }
       
-      if(interval[index]!="none" && type[index]=="eigen-sign-flip"){
-        stop("confidence intervals are not implemented in the eigen-sign-flip case")
+      if(interval[index]!="simultaneous" && type[index]=="eigen-sign-flip"){
+        stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip case")
       }
       
       if(type[index] == "eigen-sign-flip"){
@@ -340,13 +341,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("tol_fspai should be a positive value")
   }
   
+  alpha=1-level
   
   
   definition=as.integer(1)
   
   # Building the output object, returning it
   result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), exact = exact_numeric, dim = dim, 
-              coeff = coeff, beta0 = beta0, f_var = f_var_numeric, quantile = quantile, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+              coeff = coeff, beta0 = beta0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   
   return(result)
 }

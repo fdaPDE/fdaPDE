@@ -61,8 +61,9 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   beta_0=as.vector(R_Inference_Data_Object@beta0)
   f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
-  inference_n_flip=R_Inference_Data_Object@n_flip
-  inference_tol_fspai=R_Inference_Data_Object@tol_fspai
+  inference_Aplha=R_Inference_Data_Object@alpha
+  inference_N_Flip=R_Inference_Data_Object@n_flip
+  inference_Tol_Fspai=R_Inference_Data_Object@tol_fspai
   inference_Defined=R_Inference_Data_Object@definition
 
   ## Set proper type for correct C++ reading
@@ -104,15 +105,16 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   storage.mode(beta_0) <- "double"
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
-  storage.mode(inference_n_flip) <- "integer"
-  storage.mode(inference_tol_fspai) <- "double"
+  storage.mode(inference_Alpha) <- "double"
+  storage.mode(inference_N_Flip) <- "integer"
+  storage.mode(inference_Tol_Fspai) <- "double"
   storage.mode(inference_Defined) <- "integer"
 
   ## Call C++ function
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, 
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_n_flip, inference_tol_fspai, inference_Defined,
+                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
