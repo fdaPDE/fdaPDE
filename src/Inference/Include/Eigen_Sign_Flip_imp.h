@@ -324,10 +324,10 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     Real half_range = Speckman_aux_ranges(i);
     
     // compute the limits of the interval
-    result(i)(0) = result(i)(1) - half_range;
+    result(i)(0) = beta_hat(i) - half_range;
     LU(i)=result(i)(0)+0.5*half_range;
     LL(i)=result(i)(0)-0.5*half_range;
-    result(i)(2) = result(i)(1) + half_range;
+    result(i)(2) = beta_hat(i) + half_range;
     UU(i)=result(i)(2)+0.5*half_range;
     UL(i)=result(i)(2)-0.5*half_range; 	
   }
@@ -343,7 +343,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   
   // compute the vectors needed for the statistic
   MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
-  MatrixXr Tilder_star = Lambda_dec.eigenvectors().transpose();   			        		                // V^t
+  MatrixXr Tilder_star = Lambda_dec.eigenvectors().transpose();   			        		// V^t
 
   VectorXr Partial_res_H0_CI;
   Partial_res_H0_CI.resize(Lambda.cols());
@@ -375,9 +375,11 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   }
 
   //Real alpha = this->inf_car.getInfData()->get_alpha(); // TO BE ADDED
-  Real alpha=0.05;
+  Real alpha=0.05/2;
     
-  while(!all_betas_converged){
+  UInt Max_Iter=20;
+  UInt Count_Iter=0;
+  while(!all_betas_converged & Count_Iter<Max_Iter){
   
     // Compute all p_values (only those needed)
     for (UInt i=0; i<p; i++){
@@ -463,15 +465,13 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	}
       }
     }
-
-  }
-
-  all_betas_converged =true;
+all_betas_converged =true;
   for(UInt j=0; j<p; j++){
 
     if(!converged_up[j] || !converged_low[j]){
       all_betas_converged=false;
     }
+  }
   }
    
   // for each row of C matrix
@@ -485,6 +485,8 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     result(i)(0) = 0.5*(UU(i)+UL(i)); 
     result(i)(2) = 0.5*(LU(i)+LL(i)); 
   }
+
+  Count_Iter++;
 
   return result;
   
