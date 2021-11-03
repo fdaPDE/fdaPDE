@@ -50,6 +50,7 @@ extern "C"
     \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
     \param RfvarInference an R-integer that defines if local f variance has to be estimated or not
     \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
+    \param RinferenceAlpha an R-double defining the significance used to compute the ESF confidence intervals
     \param RinferenceFlip an R-integer defining the number of sign-flip needed in eigen-sign-flip inference
     \param RinferenceTolFspai an R-double defining the tolerance of the FSPAI algorithm needed if non-exact implementation of inference is required
     \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
@@ -59,12 +60,12 @@ extern "C"
 				    SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
 				    SEXP Rsearch, SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
 				    SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
-				    SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
+				    SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile, SEXP RinferenceAlpha, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set data
     RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Ru, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
 
     UInt mydim = INTEGER(Rmydim)[0];
@@ -131,6 +132,7 @@ extern "C"
     \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
     \param RfvarInference an R-integer that defines if local f variance has to be estimated or not
     \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
+    \param RinferenceAlpha an R-double defining the significance used to compute the ESF confidence intervals
     \param RinferenceFlip an R-integer defining the number of sign-flip needed in eigen-sign-flip inference
     \param RinferenceTolFspai an R-double defining the tolerance of the FSPAI algorithm needed if non-exact implementation of inference is required
     \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
@@ -141,13 +143,13 @@ extern "C"
 					 SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch,
 					 SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
 					 SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference, SEXP RcoeffInference,
-				         SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
+				         SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile,SEXP RinferenceAlpha, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set data
     RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK, Rbeta, Rc, Ru,
 						      Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Ric, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];

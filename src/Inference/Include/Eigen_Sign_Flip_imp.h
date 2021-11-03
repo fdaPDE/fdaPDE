@@ -465,13 +465,13 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 	}
       }
     }
-all_betas_converged =true;
-  for(UInt j=0; j<p; j++){
+    all_betas_converged =true;
+    for(UInt j=0; j<p; j++){
 
-    if(!converged_up[j] || !converged_low[j]){
-      all_betas_converged=false;
+      if(!converged_up[j] || !converged_low[j]){
+	all_betas_converged=false;
+      }
     }
-  }
   }
    
   // for each row of C matrix
