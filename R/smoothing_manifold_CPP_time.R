@@ -68,7 +68,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   }
   # Create a null inference object for preliminary computations 
   R_Inference_Data_Object_Null=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
-                                   coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha= = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+                                   coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   
   ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reading
   test_Type<-as.vector(R_Inference_Data_Object@test)

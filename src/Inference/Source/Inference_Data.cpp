@@ -15,7 +15,7 @@
   \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_,
-			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_var_,
+			     SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -81,10 +81,10 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   }
 
   //f_var
-  if(INTEGER(f_var_)[0]==1)
-    this->set_f_var(true);
+  if(INTEGER(f_Var_)[0]==1)
+    this->set_f_Var(true);
   else
-    this->set_f_var(false);
+    this->set_f_Var(false);
  
   //inference_Quantile
   UInt size_inference_Quantile=Rf_length(inference_Quantile_);
@@ -137,7 +137,7 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %f \n", beta_0(i));
   }
 
-  Rprintf("f_var: %d\n",f_var);
+  Rprintf("f_var: %d\n",f_Var);
   
   Rprintf("\n");
   Rprintf("inference_Quantile: \n");
