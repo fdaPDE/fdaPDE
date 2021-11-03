@@ -134,4 +134,26 @@ extern "C"{
         return NILSXP;
     }
 
+    SEXP CPP_integrate_f(SEXP Rmesh, SEXP Rsearch, SEXP Rcoeff){
+        UInt search_ = INTEGER(Rsearch)[0];
+        const RNumericMatrix coef(Rcoeff);
+        MeshHandler<1,1,2> mesh_(Rmesh,search_);
+
+        SEXP result=PROTECT(Rf_allocVector(REALSXP, 1));
+        Real* integral = REAL(result);
+
+        MeshHandler<1,1,2>::meshElement current_element;
+        Eigen::Matrix<Real,2,1> coefficients;
+
+        for(UInt e=0; e<mesh_.num_elements(); ++e){
+            current_element = mesh_.getElement(e);
+            for (UInt i=0; i<2; ++i)
+                coefficients[i]=coef[current_element[i].getId()];
+            (*integral) += current_element.integrate(coefficients);
+        }
+
+        UNPROTECT(1);
+        return result;
+    }
+
 }
