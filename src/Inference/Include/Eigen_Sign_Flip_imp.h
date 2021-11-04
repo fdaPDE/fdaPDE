@@ -420,7 +420,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
 	    }else{
 
-	      Real proposal=0.5*(UU(i)-UL(i));
+	      Real proposal=0.5*(UU(i)+UL(i));
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*proposal)
@@ -459,7 +459,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
 	    }else{
 
-	      Real proposal=0.5*(LU(i)-LL(i));
+	      Real proposal=0.5*(LU(i)+LL(i));
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*proposal)
