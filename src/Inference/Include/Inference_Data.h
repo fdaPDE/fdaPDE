@@ -58,7 +58,7 @@ class InferenceData
   		inline VectorXr get_beta_0() const{return this->beta_0;};				                        //!< Getter for beta0 \return beta0
                 inline bool get_f_var() const{return this->f_Var;};					                        //!< Getter for f_var \return f_var
   		inline VectorXr get_inference_quantile() const{return this->inference_Quantile;};			        //!< Getter for inference_Quantile \return inference_Quantile
-		inline Real get_inference_Alpha() const{return this->inference_Alpha;}; 			                //!< Getter for inference_Alpha \return inference_Alpha
+		inline Real get_inference_alpha() const{return this->inference_Alpha;}; 			                //!< Getter for inference_Alpha \return inference_Alpha
   		inline bool get_definition() const{return this->definition;};					                //!< Getter for definition \return definition
 		inline long int get_n_Flip() const{return this->n_Flip;}; 					                //!< Getter for n_Flip \return n_Flip
 		inline Real get_tol_Fspai() const{return this->tol_Fspai;}; 					                //!< Getter for tol_Fspai \return tol_Fspai

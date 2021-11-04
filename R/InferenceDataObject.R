@@ -259,7 +259,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
           if(test[index]=="simultaneous") test_numeric[index]=as.integer(2)
        }
       
-      if(interval[index]!="none" && (type[index]=="wald" || type[index]=="speckman")){
+      if(interval[index]!="none"){
         if(interval[index]!="one-at-the-time" && interval[index]!="simultaneous" && interval[index]!="bonferroni" && interval[index]!="none"){
           stop("interval should be either 'one-at-the-time' 'simultaneous', 'bonferroni' or 'none'")}else{
             if(interval[index]=="none") interval_numeric[index]=as.integer(0)
@@ -271,7 +271,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("level should be a positive value smaller or equal to 1")
       }
       
-      if(interval[index]!="simultaneous" && type[index]=="eigen-sign-flip"){
+      if(interval[index]=="simultaneous" && type[index]=="eigen-sign-flip"){
         stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip case")
       }
       
