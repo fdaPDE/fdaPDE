@@ -374,11 +374,13 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
 
   }
 
-  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time");{
-    Real alpha=0.5 * (this->inf_car.getInfData()->get_inference_alpha());
-  }else{
+  // extract the CI significance (1-confidence)
+  Real alpha=0;
 
-    Real alpha=0.5/p * (this->inf_car.getInfData()->get_inference_alpha());
+  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
+    alpha=0.5 * (this->inf_car.getInfData()->get_inference_alpha());
+  }else{
+    alpha=0.5/p * (this->inf_car.getInfData()->get_inference_alpha());
   }
     
   UInt Max_Iter=20;
