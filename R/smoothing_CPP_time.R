@@ -148,8 +148,8 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_Alpha) <- "double"
-  storage.mode(inference_n_flip) <- "integer"
-  storage.mode(inference_tol_fspai) <- "double"
+  storage.mode(inference_N_Flip) <- "integer"
+  storage.mode(inference_Tol_Fspai) <- "double"
   storage.mode(inference_Defined) <- "integer"
   
   ## Set proper type for correct C++ reading for preliminary computations inference parameters
@@ -162,8 +162,8 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   storage.mode(f_var_Inference_Null) <- "integer"
   storage.mode(inference_Quantile_Null) <- "double"
   storage.mode(inference_Alpha_Null) <- "double"
-  storage.mode(inference_n_flip_Null) <- "integer"
-  storage.mode(inference_tol_fspai_Null) <- "double"
+  storage.mode(inference_N_Flip_Null) <- "integer"
+  storage.mode(inference_Tol_Fspai_Null) <- "double"
   storage.mode(inference_Defined_Null) <- "integer"
 
   ## IC estimation for parabolic smoothing from the first column of observations
