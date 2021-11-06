@@ -94,7 +94,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   beta_0_Null=as.vector(R_Inference_Data_Object_Null@beta0)
   f_var_Inference_Null<-R_Inference_Data_Object_Null@f_var
   inference_Quantile_Null=as.vector(R_Inference_Data_Object_Null@quantile)
-  inference_Alpha=R_Inference_Data_Object_Null@alpha
+  inference_Alpha_Null=R_Inference_Data_Object_Null@alpha
   inference_N_Flip_Null=R_Inference_Data_Object_Null@n_flip
   inference_Tol_Fspai_Null=R_Inference_Data_Object_Null@tol_fspai
   inference_Defined_Null=R_Inference_Data_Object_Null@definition
