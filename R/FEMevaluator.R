@@ -258,11 +258,12 @@ eval.FEM.time <- function(FEM.time, locations = NULL, time.instants = NULL, spac
     }else{
       space.time.locations <- matrix(nrow=0, ncol=1)
       
-      check2D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.2D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$triangles)
-      check2.5D = class(FEM.time$FEMbasis$mesh)   == 'mesh.2.5D' && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$triangles)
-      check3D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.3D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$tetrahedrons)
+      check.2D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.2D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$triangles)
+      check.2.5D = class(FEM.time$FEMbasis$mesh)   == 'mesh.2.5D' && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$triangles)
+      check.3D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.3D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$tetrahedrons)
+      check.1.5D =   class(FEM.time$FEMbasis$mesh)   == 'mesh.1.5D'   && ncol(incidence_matrix)!=nrow(FEM.time$FEMbasis$mesh$edges)
       
-      if( check2D || check2.5D || check3D )
+      if( check.2D || check.2.5D || check.3D || check.1.5D )
         stop("incidence_matrix has wrong number of columns")
       time_locations = rep(time.instants,each=nrow(incidence_matrix))
       incidence_matrix = matrix(rep(incidence_matrix,length(time.instants)), nrow = nrow(incidence_matrix)*length(time.instants),
@@ -292,6 +293,8 @@ eval.FEM.time <- function(FEM.time, locations = NULL, time.instants = NULL, spac
   
   if(class(FEM.time$FEMbasis$mesh)=='mesh.2.5D' & search ==3)
   	stop("2.5D search must be either tree or naive.")
+  if(class(FEM.time$FEMbasis$mesh)=='mesh.1.5D' & search ==3)
+    stop("1.5D search must be either tree or naive.")
 
 
   if(dim(FEM.time$coeff)[2]>1||dim(FEM.time$coeff)[3]>1)
@@ -318,6 +321,10 @@ eval.FEM.time <- function(FEM.time, locations = NULL, time.instants = NULL, spac
     ndim = 3
     mydim = 3
     res = CPP_eval.volume.FEM.time(f, space.time.locations, time_locations, incidence_matrix, FEM.time$FLAG_PARABOLIC, TRUE, ndim, mydim, search, bary.locations)
+  }else if(class(FEM.time$FEMbasis$mesh)=='mesh.1.5D'){
+    ndim = 2
+    mydim = 1
+    res = CPP_eval.graph.FEM.time(f, space.time.locations, time_locations, incidence_matrix, FEM.time$FLAG_PARABOLIC, TRUE, ndim, mydim, search, bary.locations)
   }
 
   return(as.matrix(res))

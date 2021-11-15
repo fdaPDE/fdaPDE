@@ -48,6 +48,8 @@ if(class(x$FEMbasis$mesh)=="mesh.2D"){
 	R_plot_manifold(x,...)
 }else if(class(x$FEMbasis$mesh)=="mesh.3D"){
 	R_plot_volume(x,...)
+}else if(class(x$FEMbasis$mesh)=="mesh.1.5D"){
+   R_plot_graph(x,...)
 }
 }
 
@@ -202,7 +204,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
       storage.mode(x$FLAG_PARABOLIC) <- "integer"
 
       solution <- .Call("eval_FEM_time_nodes",N,x$mesh_time,time_locations,x$coeff[,lambdaS,lambdaT],x$FLAG_PARABOLIC, PACKAGE = "fdaPDE")
-      for(i in 1:length(t))
+      for(i in 1:length(time_locations))
       {
          plot = FEM(solution[(1+(i-1)*N):(N+(i-1)*N)],x$FEMbasis)
          plot.FEM(plot,num_refinements,...)
@@ -213,7 +215,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
    if (is.null(time_locations) && !is.null(locations)) {
       # plot temporal evolution in the provided locations
 
-      if (class(x$FEMbasis$mesh) == "mesh.2D"){
+      if (class(x$FEMbasis$mesh) == "mesh.2D" | (class(x$FEMbasis$mesh) == "mesh.1.5D")){
          # check locations dimension
          if (is.vector(locations) && length(locations) != 2)
             stop("locations does not have the correct dimension")
@@ -624,6 +626,43 @@ plot.mesh.1.5D<-function(x, show.nodes=FALSE, ...)
    }
 }
 
+ R_plot_graph = function(FEM, ...){
+   
+   nodes <- FEM$FEMbasis$mesh$nodes
+   if(FEM$FEMbasis$order==1){
+      edges <- as.vector(t(FEM$FEMbasis$mesh$edges))
+   }else{
+      edges <- cbind(FEM$FEMbasis$mesh$edges[,1],
+                     FEM$FEMbasis$mesh$edges[,3],
+                     FEM$FEMbasis$mesh$edges[,3],
+                     FEM$FEMbasis$mesh$edges[,2])
+      edges <- as.vector(t(edges))
+   }
+   coeff <- FEM$coeff
+   
+   p <- jet.col(n=128,alpha=0.8)
+   palette(p)
+   ncolor <- length(p)
+   nplots <- ncol(coeff)
+   
+   for (i in 1:nplots){
+      if (i > 1)
+         readline("Press any key for the next plot...")
+      open3d()
+      axes3d()
+      rgl.pop("lights")
+      light3d(specular="black")
+      
+      col <- coeff[edges,i]
+      col <- (ncolor-1)*(col-min(col))/diff(range(col))+1
+      col <- p[col]
+      
+      rgl.lines(nodes[edges,1], nodes[edges,2],rep(0,dim(nodes)[1]),
+                color = col,lwd=1.75,...)
+      rgl.viewpoint(0,0,zoom=0.75)  
+   }
+   
+}
 
  #' Image Plot of a 2D FEM object
  #'

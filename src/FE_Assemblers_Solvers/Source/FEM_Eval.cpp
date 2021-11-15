@@ -102,8 +102,16 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
             return Eval_FEM_time_skeleton<1,3,3,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
         else if(order==2 && mydim==3 && ndim==3 && flag_par==1)
             return Eval_FEM_time_skeleton<2,3,3,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
-        else if(order==2 && mydim==2 && ndim==2 && flag_par!=1)
+        else if(order==2 && mydim==3 && ndim==3 && flag_par!=1)
             return Eval_FEM_time_skeleton<2,3,3,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==1 && ndim==2 && flag_par==1)
+            return Eval_FEM_time_skeleton<1,1,2,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==1 && mydim==1 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton<1,1,2,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==1 && ndim==2 && flag_par==1)
+            return Eval_FEM_time_skeleton<2,1,2,1>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
+        else if(order==2 && mydim==1 && ndim==2 && flag_par!=1)
+            return Eval_FEM_time_skeleton<2,1,2,3>(Rmesh, Rmesh_time, Rlocations, Rtime_locations, RincidenceMatrix, Rcoef, Rfast, Rsearch, RbaryLocations);
 
         return NILSXP;
     }

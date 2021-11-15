@@ -206,3 +206,72 @@ CPP_smooth.graph.FEM.time<-function(locations, time_locations, observations, FEM
   
   return(c(bigsol,ICsol))
 }
+
+CPP_eval.graph.FEM.time = function(FEM.time, locations, time_locations, incidence_matrix, FLAG_PARABOLIC, redundancy, ndim, mydim, search, bary.locations)
+{
+  FEMbasis = FEM.time$FEMbasis
+  # C++ function for manifold works with vectors not with matrices
+  
+  FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+  
+  num_sides = 2*dim(FEMbasis$mesh$edges)[1] 
+  for(i in 1:num_sides){
+    if( dim(FEMbasis$mesh$neighbors[[i]] )[1] > 0)
+      FEMbasis$mesh$neighbors[[i]] = FEMbasis$mesh$neighbors[[i]] - 1
+  }
+  
+  if(is.null(time_locations)){
+    time_locations<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_locations <- as.matrix(time_locations)
+  }
+  
+  # Imposing types, this is necessary for correct reading from C++
+  ## Set proper type for correct C++ reading
+  locations <- as.matrix(locations)
+  storage.mode(locations) <- "double"
+  storage.mode(time_locations) <- "double"
+  incidence_matrix <- as.matrix(incidence_matrix)
+  storage.mode(incidence_matrix) <- "integer"
+  storage.mode(FEMbasis$mesh$nodes) <- "double"
+  storage.mode(FEMbasis$mesh$edges) <- "integer"
+ 
+  for(i in 1:num_sides)
+    storage.mode(FEMbasis$mesh$neighbors[[i]]) <- "integer" 
+  
+  storage.mode(FEMbasis$order) <- "integer"
+  storage.mode(FEM.time$mesh_time) <- "double"
+  coeff <- as.matrix(FEM.time$coeff)
+  storage.mode(coeff) <- "double"
+  storage.mode(ndim) <- "integer"
+  storage.mode(mydim) <- "integer"
+  storage.mode(locations) <- "double"
+  storage.mode(redundancy) <- "integer"
+  storage.mode(FLAG_PARABOLIC) <- "integer"
+  
+  storage.mode(search) <- "integer"
+  
+  if(!is.null(bary.locations))
+  {
+    storage.mode(bary.locations$element_ids) <- "integer"
+    element_ids <- as.matrix(bary.locations$element_ids)
+    storage.mode(bary.locations$barycenters) <- "double"
+    barycenters <- as.matrix(bary.locations$barycenters)
+  }else{
+    bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
+    storage.mode(bary.locations$locations) <- "double"
+    storage.mode(bary.locations$element_ids) <- "integer"
+    storage.mode(bary.locations$barycenters) <- "double"
+  }
+  
+  #Calling the C++ function "eval_FEM_time" in FEM_Eval.cpp
+  evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
+  for (i in 1:ncol(coeff)){
+    evalmat[,i] <- .Call("eval_FEM_time", FEMbasis$mesh, FEM.time$mesh_time, locations, time_locations, incidence_matrix, as.matrix(coeff[,i]),
+                         FEMbasis$order, redundancy, FLAG_PARABOLIC, mydim, ndim, search, bary.locations, PACKAGE = "fdaPDE")
+  }
+  
+  #Returning the evaluation matrix
+  return(evalmat)
+}
