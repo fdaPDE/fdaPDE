@@ -9,7 +9,8 @@ integrate_f <- function(FEM){
   storage.mode(mesh$edges)<-"integer"
   storage.mode(mesh$order)<-"integer"
   storage.mode(search) <-"integer"
-  print("Ok")
-  res <- .Call(" CPP_integrate_f",mesh,search,as.matrix(FEM$coeff))
+  storage.mode(FEM$coeff) <- "double"
+  
+  res <- .Call("CPP_integrate_f",mesh,search,as.matrix(FEM$coeff))
   return(res)
 }

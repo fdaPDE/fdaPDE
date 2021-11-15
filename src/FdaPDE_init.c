@@ -97,7 +97,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"eval_FEM_time_Auxiliary_new",       (DL_FUNC) &eval_FEM_time_Auxiliary_new,      13},
     {"refine1D",                          (DL_FUNC) &refine1D,                          3},
     {"isInside",                          (DL_FUNC) &isInside,                          7},
-    {" CPP_integrate_f",                  (DL_FUNC) & CPP_integrate_f,                  3},
+    {"CPP_integrate_f",                  (DL_FUNC) & CPP_integrate_f,                  3},
     {NULL, NULL, 0}
 };
 

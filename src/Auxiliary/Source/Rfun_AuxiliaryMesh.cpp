@@ -141,6 +141,7 @@ extern "C"{
 
         SEXP result=PROTECT(Rf_allocVector(REALSXP, 1));
         Real* integral = REAL(result);
+        (*integral) = 0. ;
 
         MeshHandler<1,1,2>::meshElement current_element;
         Eigen::Matrix<Real,2,1> coefficients;
