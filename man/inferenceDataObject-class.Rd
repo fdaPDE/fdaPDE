@@ -41,6 +41,8 @@ whereas if 2 they will not.}
 
 \item{\code{quantile}}{Quantile needed for confidence intervals. Used only if interval is not 0.}
 
+\item{\code{alpha}}{Level of Eigen-Sign-Flip confidence intervals. Used only if interval is not 0.}
+
 \item{\code{n_flip}}{An integer representing the number of permutations in the case of eigen-sign-flip test.}
 
 \item{\code{tol_fspai}}{A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.}

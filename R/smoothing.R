@@ -934,6 +934,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
             inference$CI$speckman=as.list(inference$CI$speckman)
           }
           else if(R_Inference_Data_Object@type[i]==3){
+            if(ci[2]> 10^10){
+              warning("ESF CI bisection algorithm did not converge, returning NA")
+              ci[1]=ci[2]=ci[3]=NA
+            }
             inference$CI$eigen_sign_flip[[length(inference$CI$eigen_sign_flip)+1]] = ci
             inference$CI$eigen_sign_flip=as.list(inference$CI$eigen_sign_flip)
           }

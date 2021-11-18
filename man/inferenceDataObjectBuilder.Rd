@@ -8,7 +8,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
 interval = NULL, 
 type = 'wald', 
 exact = FALSE, 
-dim, 
+dim = NULL, 
 coeff = NULL, 
 beta0 = NULL, 
 f_var = FALSE,
@@ -23,9 +23,8 @@ or 'simultaneous'. If the value is NULL, no test is performed, and the \code{int
 'simultaneous', a global simultaneous test will be performed.}
 
 \item{interval}{A list of strings defining the type of confidence intervals to be computed, with the same length of \code{test} and \code{type} lists. The default is NULL,
-and can take values 'one-at-the-time' 'simultaneous' and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
- Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account. Confidence intervals can be 
- computed only in Wald or Speckman implementation.}
+and can take values 'one-at-the-time', 'simultaneous' (available only for Wald and Speckman cases) and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
+ Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account.}
 
 \item{type}{A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
 'wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.}
@@ -61,6 +60,6 @@ that can be used as parameter in [smooth.FEM] function. Notice that this constru
 \examples{
 obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 4);
 obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
-obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','none'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
+obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','one-at-the-time'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
  type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, level=0.99)
 }

@@ -484,15 +484,24 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   // for each row of C matrix
   for(UInt i=0; i<p; ++i){
     result(i).resize(3);
-
-    // Central element
-    result(i)(1)=beta_hat(i);
     
-    // Limits of the interval
-    result(i)(0) = 0.5*(LU(i)+LL(i));
-    result(i)(2) = 0.5*(UU(i)+UL(i)); 
+    if(Count_Iter < Max_Iter){ // No discrepancy between beta_hat(i) and ESF, bisection converged
+      // Central element
+      result(i)(1)=beta_hat(i);
+      
+      // Limits of the interval
+      result(i)(0) = 0.5*(LU(i)+LL(i));
+      result(i)(2) = 0.5*(UU(i)+UL(i)); 
+    }else{ // Not converged in time, give a warning in R
+      // Central element
+      result(i)(1)=10e20;
+      
+      // Limits of the interval
+      result(i)(0) = 10e20;
+      result(i)(2) = 10e20; 
+    }
   }
-
+  
   return result;
   
 };
