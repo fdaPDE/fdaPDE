@@ -527,9 +527,12 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
           inference$CI$speckman=as.list(inference$CI$speckman)
         }
         else if(R_Inference_Data_Object@type[i]==3){
-          for(h in 1:nrow(ci))
-            for(k in 1:ncol(ci))
-              ci[h,k]=NA
+          if(ci[2]> 10^20){
+            warning("ESF CI bisection algorithm did not converge, returning NA")
+            for(h in 1:nrow(ci))
+              for(k in 1:ncol(ci))
+                ci[h,k]=NA
+          }
           inference$CI$eigen_sign_flip[[length(inference$CI$eigen_sign_flip)+1]] = ci
           inference$CI$eigen_sign_flip=as.list(inference$CI$eigen_sign_flip)
         }

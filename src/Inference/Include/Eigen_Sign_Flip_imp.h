@@ -302,7 +302,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   }
  
   // this vector will store the tolerance for each interval upper/lower limit
-  VectorXr ESF_bisection_tolerances = 0.1*Speckman_aux_ranges; // 0.05 of the speckman CI as maximum tolerance
+  VectorXr ESF_bisection_tolerances = 0.2*Speckman_aux_ranges; // 0.1 of the speckman CI as maximum tolerance
 
   // define storage structures for bisection algorithms
   VectorXr UU; // Upper limit for Upper bound
@@ -381,7 +381,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
     alpha=0.5/p * (this->inf_car.getInfData()->get_inference_alpha());
   }
     
-  UInt Max_Iter=20;
+  UInt Max_Iter=50;
   UInt Count_Iter=0;
   while(!all_betas_converged & Count_Iter<Max_Iter){
   
