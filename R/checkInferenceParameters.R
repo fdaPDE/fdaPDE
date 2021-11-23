@@ -8,7 +8,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
           f0_eval = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0)))
   }#define a shadow inferenceDataObject in order tell the cpp code not to perform any inferential analysis.
     
-  if(!is.null(R_Inference_Object_Data) && is.null(checknumber) && R_Inference_Object_Data@component!=2){
+  if(!is.null(R_Inference_Object_Data) && is.null(checknumber) && sum(R_Inference_Object_Data@component!=2)!=0){
     warning("Covariates are not defined, inference data are discarded")
     return(
       new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
@@ -17,12 +17,12 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
   }
   
   #check consistency with covariates dimension (if inference on the linear component is required)
-  if(R_Inference_Object_Data@component!=2 && checknumber!=R_Inference_Object_Data@dim){
+  if(sum(R_Inference_Object_Data@component!=2)!=0 && checknumber!=R_Inference_Object_Data@n_cov){
     stop("Inference data dimension and covariates dimension are not consistent")
   }
   
   #check consistency with locations and evaluate f0 (if inference on the nonparametric component is required)
-  if(R_Inference_Object_Data@component!=1){
+  if(sum(R_Inference_Object_Data@component!=1)!=0){
     
     #if a vector of indices has been provided
     if(dim(R_Inference_Object_Data@locations)[1]==0){
