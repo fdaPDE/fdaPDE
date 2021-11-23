@@ -52,19 +52,23 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
     lambda<-as.vector(lambda)
   }
   
-  ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reding
+  ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reading
   test_Type<-as.vector(R_Inference_Data_Object@test)
   interval_Type<-as.vector(R_Inference_Data_Object@interval)
   implementation_Type<-as.vector(R_Inference_Data_Object@type)
+  component_Type<-as.vector(R_Inference_Data_Object@component)
   exact_Inference<-R_Inference_Data_Object@exact
-  coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
-  beta_0=as.vector(R_Inference_Data_Object@beta0)
+  locs_Inference<-as.matrix(R_Inference_Data_Object@locations)
+  locs_index_Inference<-as.vector(R_Inference_Data_Object@locations_indices - 1) #converting indices from R to c++ ones
+  coeff_Inference<-as.matrix(R_Inference_Data_Object@coeff)
+  beta_0<-as.vector(R_Inference_Data_Object@beta0)
+  f_0_eval<-as.vector(R_Inference_Data_Object@f0_eval)
   f_var_Inference<-R_Inference_Data_Object@f_var
-  inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
-  inference_Aplha=R_Inference_Data_Object@alpha
-  inference_N_Flip=R_Inference_Data_Object@n_flip
-  inference_Tol_Fspai=R_Inference_Data_Object@tol_fspai
-  inference_Defined=R_Inference_Data_Object@definition
+  inference_Quantile<-as.vector(R_Inference_Data_Object@quantile)
+  inference_Aplha<-as.vector(R_Inference_Data_Object@alpha)
+  inference_N_Flip<-R_Inference_Data_Object@n_flip
+  inference_Tol_Fspai<-R_Inference_Data_Object@tol_fspai
+  inference_Defined<-R_Inference_Data_Object@definition
 
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
@@ -100,9 +104,13 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   storage.mode(test_Type) <- "integer"
   storage.mode(interval_Type) <- "integer"
   storage.mode(implementation_Type) <- "integer"
+  storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
+  storage.mode(locs_Inference) <- "double"
+  storage.mode(locs_index_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_0_eval) <- "double"
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_Alpha) <- "double"
@@ -114,7 +122,8 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, 
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
+                  f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
