@@ -26,7 +26,7 @@ class InferenceData
 		VectorXr f0_eval;								//!< Evaluations of the field f under the null hypothesis in the selected locations 
                 bool f_Var                                      = false;             	        //!< Defines whether the local f variance has to be computed or not
   		VectorXr inference_Quantile;		 					//!< Quantiles needed for confidence intervals if interval_Type != not-defined
-		VectorXr inference_Alpha                        = {0.05}; 			//!< Significance used in ESF confidence interval computation;
+		VectorXr inference_Alpha                        = VectorXr::Constant(1,0.05); 	//!< Significance used in ESF confidence interval computation;
   		bool definition					= false;			//!< Defines whether the inference analysis needs to be carried out or not
                 long int n_Flip 				= 1000; 			//!< Number of sign-flips if eigen-sign-flip tests are required
 		Real tol_Fspai 					= 0.05; 			//!< Tolerance given in input to the FSPAI algorithm

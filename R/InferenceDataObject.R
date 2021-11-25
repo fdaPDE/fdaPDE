@@ -270,26 +270,34 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(is.null(test) && is.null(interval))                                        # However, they can be both set
     stop("at least one between 'test' and 'interval' should be not NULL")
   
-  if(is.null(dim))
-    stop("dimension of the problem is needed")                                  # Otherwise the function won't be able to default f0 
-  
-  if(is.null(n_cov) || n_cov <= 0)                                              # Otherwise the function won't be able to default the coeff neither object nor beta0
-    stop("number of covariates is needed")
+  if(sum(component == "parametric")!=length(component)){
+    if(is.null(dim)
+      stop("dimension of the problem is needed")                                # Otherwise the function won't be able to default f0
+  }
   else{
-    if(is.null(coeff)){                                                         # If it is left as NULL, all the parameters are individually taken into account without any linear combination.
-      coeff = diag(1, nrow=n_cov, ncol=n_cov)
-      }
+    if(is.null(dim))
+      dim = 0                                                                   # Inference on f is not required, we set dim to zero by default since it won't be required
+  }
+  
+  if(sum(component == "nonparametric")!=length(component)){
+    if((is.null(n_cov) || n_cov <= 0))                                          # Otherwise the function won't be able to default the coeff neither object nor beta0
+      stop("number of covariates is needed")
     else{
-      if(dim(coeff)[2]!=n_cov)
-        stop("number of covariates and coefficients do not match")
-      for (i in 1:dim(coeff)[1]){
-        for(j in 1:dim(coeff)[2]){
-        if(class(coeff[i,j])!="numeric")
-          stop("'coeff' should be composed by numeric values")
+      if(is.null(coeff)){                                                       # If it is left as NULL, all the parameters are individually taken into account without any linear combination.
+        coeff = diag(1, nrow=n_cov, ncol=n_cov)
         }
+      else{
+        if(dim(coeff)[2]!=n_cov)
+          stop("number of covariates and coefficients do not match")
+        for (i in 1:dim(coeff)[1]){
+          for(j in 1:dim(coeff)[2]){
+          if(class(coeff[i,j])!="numeric")
+            stop("'coeff' should be composed by numeric values")
+          }
+        }
+        rm(list = ("i"))
+        rm(list = ("j"))
       }
-      rm(list = ("i"))
-      rm(list = ("j"))
     }
   }
   
@@ -496,6 +504,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("dimension of 'coeff' and 'beta0' are not consistent")
   }
   
+  if(sum(component == "parametric")!=length(component)){
   if(is.null(f0)){                  # If left to NULL, f0 is set to a null function.
     if(dim==2){
       f0 <- function(x,y){
@@ -518,6 +527,11 @@ inferenceDataObjectBuilder<-function(test = NULL,
     if(non_defaulted_args != dim)
       stop("Number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
     rm(list = c("non_defaulted_args", "i"))
+  }
+  }
+  else{
+    # inference on the nonparametric component is not required, just setting f0 to a zero function
+    f0 <- function(){return(0)}
   }
   
   if(!is.null(n_flip)){

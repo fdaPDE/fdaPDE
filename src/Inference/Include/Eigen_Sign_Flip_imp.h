@@ -376,9 +376,9 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
   Real alpha=0;
 
   if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
-    alpha=0.5*(this->inf_car.getInfData()->get_inference_alpha());
+    alpha=0.5*(this->inf_car.getInfData()->get_inference_alpha()(this->pos_impl));
   }else{
-    alpha=0.5/p * (this->inf_car.getInfData()->get_inference_alpha());
+    alpha=0.5/p * (this->inf_car.getInfData()->get_inference_alpha()(this->pos_impl));
   }
     
   UInt Max_Iter=50;
