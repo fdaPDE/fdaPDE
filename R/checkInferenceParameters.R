@@ -5,7 +5,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     return(
       new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
           locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
-          f0_eval = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0)))
+          f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0)))
   }#define a shadow inferenceDataObject in order tell the cpp code not to perform any inferential analysis.
     
   if(!is.null(R_Inference_Object_Data) && is.null(checknumber) && sum(R_Inference_Object_Data@component!=2)!=0){
@@ -13,7 +13,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     return(
       new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
           locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
-          f0_eval = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))) 
+          f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))) 
   }
   
   #check consistency with covariates dimension (if inference on the linear component is required)
@@ -74,6 +74,13 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
       R_Inference_Object_Data@f0_eval <- as.vector(f0(locs[,1], locs[,2]))
     else
       R_Inference_Object_Data@f0_eval <- as.vector(f0(locs[,1], locs[,2], locs[,3]))
+  }
+  else{
+    # in case only inference on parametric component is requested, set f0_eval and locations with default values, just for transmission safety
+    R_Inference_Object_Data@locations <- matrix(data = 0)
+    R_Inference_Object_Data@locations_indices <- as.integer(0)
+    R_Inference_Object_Data@f0_eval <- 0
+    
   }
   
   return(R_Inference_Object_Data)    #return the original object

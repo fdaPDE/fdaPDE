@@ -271,7 +271,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     stop("at least one between 'test' and 'interval' should be not NULL")
   
   if(sum(component == "parametric")!=length(component)){
-    if(is.null(dim)
+    if(is.null(dim))
       stop("dimension of the problem is needed")                                # Otherwise the function won't be able to default f0
   }
   else{
