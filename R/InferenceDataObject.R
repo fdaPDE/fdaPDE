@@ -299,6 +299,10 @@ inferenceDataObjectBuilder<-function(test = NULL,
         rm(list = ("j"))
       }
     }
+  }else{
+    # inference on beta is not required, set n_cov to 0 and coeff to a 1x1 matrix
+    n_cov = as.integer(0)
+    coeff = matrix(data=0, nrow=1, ncol=1)
   }
   
   if(is.null(locations) && is.null(locations_indices)){
@@ -475,6 +479,15 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
         }
       }
+    
+      if((test[index]=="one-at-the-time" || interval[index] == "one-at-the-time") && component[index] != "parametric"){
+        warning("Only simultaneous tests and confidence intervals are available for the nonparametric component, proceeding with simultaneous inference")
+        if(test[index]=="one-at-the-time")
+          test_numeric[index] = as.integer(2)
+        if(interval[index] == "one-at-the-time")
+          interval_numeric[index] = as.integer(2)
+      }
+    
       
       # Build the quantile for confidence intervals (for the parametric component) if needed ---> TO BE MODIFIED FOR THE NONPARAMETRIC CASE 
       if(interval[index]=="none"){
@@ -496,14 +509,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
       
   } # End of for cycle over the different implementation
-  
+if(sum(component == "nonparametric")!=length(component)){  
   if(is.null(beta0))                 # If left to NULL, beta0 is set to a vector of zeros.
     beta0<-rep(0, dim(coeff)[1])
   else{
     if(length(beta0)!=dim(coeff)[1])
       stop("dimension of 'coeff' and 'beta0' are not consistent")
   }
-  
+}else{
+  # inference on beta is not required, just setting it to zero
+  beta0<-0
+}
+
   if(sum(component == "parametric")!=length(component)){
   if(is.null(f0)){                  # If left to NULL, f0 is set to a null function.
     if(dim==2){

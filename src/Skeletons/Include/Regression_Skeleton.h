@@ -20,6 +20,7 @@
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 #include "../../Global_Utilities/Include/FSPAI_Wrapper.h"
 #include <memory>
+#include <algorithm>
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -29,6 +30,9 @@ template<typename InputHandler>
 void inference_wrapper_space(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 template<typename InputHandler>
 void lambda_inference_selection(const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference);
+template<typename InputHandler>
+template<UInt ORDER, UInt mydim, UInt ndim>
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh)
@@ -90,6 +94,12 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	if(inferenceData.get_definition()==true){ 
 		//only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
+
+                //if nonparametric inference is required
+                if(std::find(inferenceData.get_component_type().begin(), inferenceData.get_component_type().end(), "nonparametric") != inferenceData.get_component_type().end() || 
+		   std::find(inferenceData.get_component_type().begin(), inferenceData.get_component_type().end(), "both") != inferenceData.get_component_type().end())
+			template compute_nonparametric_inference_matrices<ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
+
 		inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
        }
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
@@ -256,6 +266,7 @@ template<typename InputHandler>
 void inference_wrapper_space(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
+
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
 
   inference_output.resize(n_implementations+1, p+1);
@@ -330,6 +341,26 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
 			}
 		}
 	return; 
+}
+
+//! Function that evaluates the spatial basis functions in a set of new location points, needed for inference on f
+/*
+  \tparam InputHandler the type of regression problem
+  \tparam ORDER the order of the mesh 
+  \tparam mydim specifies if the mesh lie in R^2 or R^3
+  \tparam ndim specifies if the local dimension is 2 or 3
+  \param optimization_data the object containing optimization data
+  \param output_Data the object containing the solution of the optimization problem
+  \param inferenceData the object containing the data needed for for inference
+  \param regression the object containing the model of the problem
+  \param lambda_inference the lambda that will be used to compute the optimal model and the right inferential solutions
+  \return void
+*/
+template<typename InputHandler>
+template<UInt ORDER, UInt mydim, UInt ndim>
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car){
+// It does nothing for the moment
+Rprintf(" 'compute_nonparametric_inference_matrices' called wih success!");
 }
 
 #endif
