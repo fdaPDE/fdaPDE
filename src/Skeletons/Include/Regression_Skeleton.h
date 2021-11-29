@@ -30,8 +30,7 @@ template<typename InputHandler>
 void inference_wrapper_space(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 template<typename InputHandler>
 void lambda_inference_selection(const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference);
-template<typename InputHandler>
-template<UInt ORDER, UInt mydim, UInt ndim>
+template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
@@ -98,7 +97,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
                 //if nonparametric inference is required
                 if(std::find(inferenceData.get_component_type().begin(), inferenceData.get_component_type().end(), "nonparametric") != inferenceData.get_component_type().end() || 
 		   std::find(inferenceData.get_component_type().begin(), inferenceData.get_component_type().end(), "both") != inferenceData.get_component_type().end())
-			template compute_nonparametric_inference_matrices<ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
+	           	compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
 
 		inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
        }
@@ -356,11 +355,92 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
   \param lambda_inference the lambda that will be used to compute the optimal model and the right inferential solutions
   \return void
 */
-template<typename InputHandler>
-template<UInt ORDER, UInt mydim, UInt ndim>
+template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car){
-// It does nothing for the moment
-Rprintf(" 'compute_nonparametric_inference_matrices' called wih success!");
+	// if a matrix of locations has been provided, compute Psi_loc by directly evaluating the spatial basis functions in the provided points
+        // only wald implementation can enter here
+	if(inferenceData.get_locs_index_inference()[0] == -1){
+                // define the psi matrix ---> in future it will be set already inside the carrier
+                SpMat psi;
+		// first fetch the dimensions
+		UInt nnodes = mesh_.num_nodes();
+		UInt nlocations = inferenceData.get_locs_inference().rows();
+		psi.resize(nlocations, nnodes);
+		
+		constexpr UInt Nodes = mydim==2 ? 3*ORDER : 6*ORDER-2;
+		Element<Nodes, mydim, ndim> tri_activated;	// Dummy for element search
+		Eigen::Matrix<Real,Nodes,1> coefficients;	// Dummy for point evaluation
+		Real evaluator;					// Dummy for evaluation storage
+
+		for(UInt i=0; i<nlocations;++i)
+		{ // Update Psi looping on all locations
+			// [[GM missing a defaulted else, raising a WARNING!]]
+			VectorXr coords = inferenceData.get_locs_inference().row(i);
+			if(regressionData_.getSearch() == 1)
+			{ // Use Naive search
+				tri_activated = mesh_.findLocationNaive(Point<ndim>(i, coords));
+			}
+			else if(regressionData_.getSearch() == 2)
+			{ // Use Tree search (default)
+				tri_activated = mesh_.findLocationTree(Point<ndim>(i, coords));
+			}
+
+			// Search the element containing the point
+			if(tri_activated.getId() == Identifier::NVAL)
+			{ // If not found
+				Rprintf("ERROR: Point %d is not in the domain, remove point and re-perform inference\n", i+1);
+			}
+			else
+			{ // tri_activated.getId() found, it's action might be felt a priori by all the psi of the element, one for each node
+				
+				for(UInt node=0; node<Nodes ; ++node)
+				{// Loop on all the nodes of the found element and update the related entries of Psi
+					// Define vector of all zeros but "node" component (necessary for function evaluate_point)
+					coefficients = Eigen::Matrix<Real,Nodes,1>::Zero();
+					coefficients(node) = 1; //Activates only current base-node
+					// Evaluate psi in the node
+					evaluator = tri_activated.evaluate_point(Point<ndim>(i, coords), coefficients);
+					// Insert the value in the column given by the GLOBAL indexing of the evaluated NODE
+					psi_.insert(i, tri_activated[node].getId()) = evaluator;
+				}
+			}
+		} // End of for loop
+        	
+           Rprintf("I've successfully computed matrix Psi_loc!\n");
+	}
+        else{
+        // the locations are chosen among the observed ones, hence Psi_loc can be extracted from Psi
+	SpMat psi; 
+        const VectorXi & row_indices = inferenceData.get_locs_index_inference();
+	
+        UInt nnodes = mesh_.num_nodes();
+	UInt nlocations = row_indices.size();
+
+	psi.resize(nlocations, nnodes);
+
+        // vector storing the non zero elements of Psi
+        std::vector<coeff> coefficients;
+	coefficients.resize(nlocations);
+
+        // loop over the nonzero elements
+        for (UInt k=0; k<*(inf_car.getPsip()).outerSize(); ++k){
+  		for (SpMat::InnerIterator it(*(inf_car.getPsip()),k); it; ++it)
+  		{
+    			if(std::find(row_indices.begin(), row_indices.end(), it.row()) != row_indices().end()){
+      				coefficients.push_back(coeff(it.row(), it.col(), it.value()));
+    			}
+  		}
+	}
+
+  	psi.setFromTriplets(coefficients.begin(), coefficients.end());
+ 
+
+        Rprintf("I've successfully computed matrix Psi_loc!\n");
+         
+	}		
+	
+
+
 }
 
 #endif
