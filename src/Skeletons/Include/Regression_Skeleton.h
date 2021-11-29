@@ -94,9 +94,12 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 		//only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
 
+		//get the component on which inference is required
+		const std::vector<std::string> inf_component = inferenceData.get_component_type(); 
+
                 //if nonparametric inference is required
-                if(std::find(inferenceData.get_component_type().begin(), inferenceData.get_component_type().end(), "nonparametric") != inferenceData.get_component_type().end() || 
-		   std::find(inferenceData.get_component_type().begin(), inferenceData.get_component_type().end(), "both") != inferenceData.get_component_type().end())
+                if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || 
+		   std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end())
 	           	compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
 
 		inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
@@ -348,23 +351,22 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
   \tparam ORDER the order of the mesh 
   \tparam mydim specifies if the mesh lie in R^2 or R^3
   \tparam ndim specifies if the local dimension is 2 or 3
-  \param optimization_data the object containing optimization data
-  \param output_Data the object containing the solution of the optimization problem
-  \param inferenceData the object containing the data needed for for inference
-  \param regression the object containing the model of the problem
-  \param lambda_inference the lambda that will be used to compute the optimal model and the right inferential solutions
+  \param mesh_ the mesh of the problem
+  \param regressionData_ the object containing regression informations 
+  \param inferenceData_ the object containing the data needed for for inference
+  \param inf_car_ the inference carrier object to be modified 
   \return void
 */
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car){
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, const InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
 	// if a matrix of locations has been provided, compute Psi_loc by directly evaluating the spatial basis functions in the provided points
         // only wald implementation can enter here
-	if(inferenceData.get_locs_index_inference()[0] == -1){
+	if((inferenceData_.get_locs_index_inference())[0] == -1){
                 // define the psi matrix ---> in future it will be set already inside the carrier
                 SpMat psi;
 		// first fetch the dimensions
 		UInt nnodes = mesh_.num_nodes();
-		UInt nlocations = inferenceData.get_locs_inference().rows();
+		UInt nlocations = (inferenceData_.get_locs_inference()).rows();
 		psi.resize(nlocations, nnodes);
 		
 		constexpr UInt Nodes = mydim==2 ? 3*ORDER : 6*ORDER-2;
@@ -375,7 +377,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 		for(UInt i=0; i<nlocations;++i)
 		{ // Update Psi looping on all locations
 			// [[GM missing a defaulted else, raising a WARNING!]]
-			VectorXr coords = inferenceData.get_locs_inference().row(i);
+			VectorXr coords = (inferenceData_.get_locs_inference()).row(i);
 			if(regressionData_.getSearch() == 1)
 			{ // Use Naive search
 				tri_activated = mesh_.findLocationNaive(Point<ndim>(i, coords));
@@ -406,25 +408,31 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 			}
 		} // End of for loop
         	
-           Rprintf("I've successfully computed matrix Psi_loc!\n");
+           Rprintf("I've successfully computed matrix Psi_loc in the new spatial points!\n");
 	}
         else{
         // the locations are chosen among the observed ones, hence Psi_loc can be extracted from Psi
 	SpMat psi; 
-        const VectorXi & row_indices = inferenceData.get_locs_index_inference();
+        const std::vector<UInt> row_indices = inferenceData_.get_locs_index_inference();
 	
         UInt nnodes = mesh_.num_nodes();
 	UInt nlocations = row_indices.size();
 
 	psi.resize(nlocations, nnodes);
 
+        if(nlocations == inf_car_getPsip()->rows()){
+		Rprintf("Psi_loc coincides with the whole Psi matrix!\n");
+		psi = *(inf_car.getPsip());
+	}
+	else{
+
         // vector storing the non zero elements of Psi
         std::vector<coeff> coefficients;
 	coefficients.resize(nlocations);
 
         // loop over the nonzero elements
-        for (UInt k=0; k<*(inf_car.getPsip()).outerSize(); ++k){
-  		for (SpMat::InnerIterator it(*(inf_car.getPsip()),k); it; ++it)
+        for (UInt k=0; k<*(inf_car_.getPsip()).outerSize(); ++k){
+  		for (SpMat::InnerIterator it(*(inf_car_.getPsip()),k); it; ++it)
   		{
     			if(std::find(row_indices.begin(), row_indices.end(), it.row()) != row_indices().end()){
       				coefficients.push_back(coeff(it.row(), it.col(), it.value()));
@@ -435,12 +443,14 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
   	psi.setFromTriplets(coefficients.begin(), coefficients.end());
  
 
-        Rprintf("I've successfully computed matrix Psi_loc!\n");
+        Rprintf("I've successfully computed matrix Psi_loc extracting the indicated rows from Psi!\n");
          
-	}		
+	}
+	}
+
+     // for debug purpose: 
+     Rprintf("The dimension of Psi_loc is : %d x %d", psi.rows(), psi.cols());		
 	
-
-
 }
 
 #endif

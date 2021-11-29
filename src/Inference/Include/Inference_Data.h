@@ -20,7 +20,7 @@ class InferenceData
   		std::string exact_Inference			= "non-exact";		        //!< Values: non-exact [default], exact 
 		// Parameters needed
 		MatrixXr locs_Inference;							//!< Matrix of spatial locations to be considered for nonparametric inference
-		VectorXi locs_index_Inference;							//!< Vector of location indices to be considered for nonparametric inference
+		std::vector<UInt> locs_index_Inference;						//!< Vector of location indices to be considered for nonparametric inference
                 MatrixXr coeff_Inference;	        					//!< Matrix of coefficients for the linear combinations of parameters 
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
 		VectorXr f0_eval;								//!< Evaluations of the field f under the null hypothesis in the selected locations 
@@ -51,7 +51,7 @@ class InferenceData
 		inline void set_component_type(const std::vector<std::string> & component_Type_){component_Type = component_Type_;}; //!< Setter for component_Type \param component_Type_ new component_Type
   		inline void set_exact_inference(const std::string && exact_Inference_){exact_Inference = exact_Inference_;};	//!< Setter for exact_Inference \param exact_Inference_ new exact_Inference
                 inline void set_locs_inference(const MatrixXr & locs_inf){locs_Inference = locs_inf;};		        	//!< Setter for locs_Inference \param locs_inf new locs_Inference
-		inline void set_locs_index_inference(const VectorXi & locs_ind_inf){locs_index_Inference = locs_ind_inf;};     	//!< Setter for locs_index_Inference \param locs_ind_inf new locs_index_Inference
+		inline void set_locs_index_inference(const std::vector<UInt> & locs_ind_inf){locs_index_Inference = locs_ind_inf;}; //!< Setter for locs_index_Inference \param locs_ind_inf new locs_index_Inference
   		inline void set_coeff_inference(const MatrixXr & coeff_inf){coeff_Inference = coeff_inf;};		        //!< Setter for coeff_Inference \param coeff_inf new coeff_Inference
   		inline void set_beta_0(const VectorXr & beta_0_){beta_0 = beta_0_;};					        //!< Setter for beta0 \param beta0_ new beta0
 		inline void set_f_0(const VectorXr & f_0_){f0_eval = f_0_;};					        	//!< Setter for f0_eval \param f_0_ new f0_eval
@@ -69,7 +69,7 @@ class InferenceData
 		inline std::vector<std::string> get_component_type() const{return this->component_Type;};			//!< Getter for component_Type \return component_Type
  		inline std::string get_exact_inference() const{return this->exact_Inference;};			                //!< Getter for exact_Inference \return exact_Inference
 		inline MatrixXr get_locs_inference() const{return this->locs_Inference;};		                        //!< Getter for locs_Inference \return locs_Inference
-		inline VectorXi get_locs_index_inference() const{return this->locs_index_Inference;};		                //!< Getter for locs_index_Inference \return locs_index_Inference
+		inline std::vector<UInt> get_locs_index_inference() const{return this->locs_index_Inference;};		        //!< Getter for locs_index_Inference \return locs_index_Inference
  		inline MatrixXr get_coeff_inference() const{return this->coeff_Inference;};		                        //!< Getter for coeff_Inference \return coeff_Inference
   		inline VectorXr get_beta_0() const{return this->beta_0;};				                        //!< Getter for beta0 \return beta0
 		inline VectorXr get_f_0() const{return this->f0_eval;};				                        	//!< Getter for f0_eval \return f0_eval

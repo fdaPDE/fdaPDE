@@ -276,7 +276,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   else{
     if(is.null(dim))
-      dim = 0                                                                   # Inference on f is not required, we set dim to zero by default since it won't be required
+      dim = as.integer(0)                                                       # Inference on f is not required, we set dim to zero by default since it won't be required
   }
   
   if(sum(component == "nonparametric")!=length(component)){

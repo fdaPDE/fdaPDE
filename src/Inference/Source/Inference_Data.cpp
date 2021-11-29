@@ -194,7 +194,7 @@ void InferenceData::print_inference_data() const{
 
   Rprintf("locs_index_inference: \n");
   for(UInt i=0; i < locs_index_Inference.size(); ++i){
-    Rprintf(" %d \n", locs_index_Inference(i));
+    Rprintf(" %d \n", locs_index_Inference[i]);
   }
   
   
