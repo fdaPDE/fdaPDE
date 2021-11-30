@@ -403,11 +403,12 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 					// Evaluate psi in the node
 					evaluator = tri_activated.evaluate_point(Point<ndim>(i, coords), coefficients);
 					// Insert the value in the column given by the GLOBAL indexing of the evaluated NODE
-					psi_.insert(i, tri_activated[node].getId()) = evaluator;
+					psi.insert(i, tri_activated[node].getId()) = evaluator;
 				}
 			}
 		} // End of for loop
-        	
+		
+	   psi.makeCompressed();        	
            Rprintf("I've successfully computed matrix Psi_loc in the new spatial points!\n");
 	}
         else{
@@ -420,36 +421,45 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 
 	psi.resize(nlocations, nnodes);
 
-        if(nlocations == inf_car_getPsip()->rows()){
+        if(nlocations == inf_car_.getPsip()->rows()){
 		Rprintf("Psi_loc coincides with the whole Psi matrix!\n");
-		psi = *(inf_car.getPsip());
+		psi = *(inf_car_.getPsip());
 	}
 	else{
 
-        // vector storing the non zero elements of Psi
+        // vector storing the non zero elements of Psi to be inserted in psi --> they are at most Psi.nonZeros()
         std::vector<coeff> coefficients;
-	coefficients.resize(nlocations);
+	coefficients.reserve(inf_car_.getPsip()->nonZeros());
+
+        // vector that converts global indices into local indices
+        VectorXi rel_rows = VectorXi::Constant(inf_car_.getPsip()->rows(), -1);
+        for(UInt i=0; i < row_indices.size(); ++i){
+		rel_rows(row_indices[i]) = i; 
+	} 
 
         // loop over the nonzero elements
-        for (UInt k=0; k<*(inf_car_.getPsip()).outerSize(); ++k){
+        for (UInt k = 0; k < inf_car_.getPsip()->outerSize(); ++k){
   		for (SpMat::InnerIterator it(*(inf_car_.getPsip()),k); it; ++it)
   		{
-    			if(std::find(row_indices.begin(), row_indices.end(), it.row()) != row_indices().end()){
-      				coefficients.push_back(coeff(it.row(), it.col(), it.value()));
+    			if(std::find(row_indices.begin(), row_indices.end(), it.row()) != row_indices.end()){
+      				coefficients.push_back(coeff(rel_rows(it.row()), it.col(), it.value()));
     			}
   		}
 	}
 
   	psi.setFromTriplets(coefficients.begin(), coefficients.end());
+        psi.makeCompressed();
  
 
         Rprintf("I've successfully computed matrix Psi_loc extracting the indicated rows from Psi!\n");
          
 	}
+
+        // for debug purpose: 
+        Rprintf("The dimension of Psi_loc is : %d x %d", psi.rows(), psi.cols());		
 	}
 
-     // for debug purpose: 
-     Rprintf("The dimension of Psi_loc is : %d x %d", psi.rows(), psi.cols());		
+     
 	
 }
 
