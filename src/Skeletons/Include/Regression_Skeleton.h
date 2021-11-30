@@ -335,7 +335,7 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
 		if(optimizationData.get_last_lS_used() != lambda_inference){
 			regression.build_regression_inference(lambda_inference);
 			// for debug only 
-			Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
+			//Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 			}
 	}else{ 		// supposing we have only one lambda, otherwise inference gets discarded in smoothing.R
 		if(inferenceData.get_definition()==true){
@@ -360,7 +360,7 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, const InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
 	// if a matrix of locations has been provided, compute Psi_loc by directly evaluating the spatial basis functions in the provided points
-        // only wald implementation can enter here
+        // only wald implementation can enter here, no other additional matrices are needed
 	if((inferenceData_.get_locs_index_inference())[0] == -1){
                 // define the psi matrix ---> in future it will be set already inside the carrier
                 SpMat psi;
@@ -409,12 +409,17 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 		} // End of for loop
 		
 	   psi.makeCompressed();        	
-           Rprintf("I've successfully computed matrix Psi_loc in the new spatial points!\n");
 	}
         else{
         // the locations are chosen among the observed ones, hence Psi_loc can be extracted from Psi
 	SpMat psi; 
         const std::vector<UInt> row_indices = inferenceData_.get_locs_index_inference();
+
+        // vector that converts global indices into local indices, common for both Psi_loc and W_loc
+        VectorXi rel_rows = VectorXi::Constant(inf_car_.getPsip()->rows(), -1);
+        for(UInt i=0; i < row_indices.size(); ++i){
+		rel_rows(row_indices[i]) = i; 
+	} 
 	
         UInt nnodes = mesh_.num_nodes();
 	UInt nlocations = row_indices.size();
@@ -422,7 +427,6 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	psi.resize(nlocations, nnodes);
 
         if(nlocations == inf_car_.getPsip()->rows()){
-		Rprintf("Psi_loc coincides with the whole Psi matrix!\n");
 		psi = *(inf_car_.getPsip());
 	}
 	else{
@@ -431,11 +435,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
         std::vector<coeff> coefficients;
 	coefficients.reserve(inf_car_.getPsip()->nonZeros());
 
-        // vector that converts global indices into local indices
-        VectorXi rel_rows = VectorXi::Constant(inf_car_.getPsip()->rows(), -1);
-        for(UInt i=0; i < row_indices.size(); ++i){
-		rel_rows(row_indices[i]) = i; 
-	} 
+        
 
         // loop over the nonzero elements
         for (UInt k = 0; k < inf_car_.getPsip()->outerSize(); ++k){
@@ -449,17 +449,36 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 
   	psi.setFromTriplets(coefficients.begin(), coefficients.end());
         psi.makeCompressed();
- 
-
-        Rprintf("I've successfully computed matrix Psi_loc extracting the indicated rows from Psi!\n");
          
 	}
 
-        // for debug purpose: 
-        Rprintf("The dimension of Psi_loc is : %d x %d", psi.rows(), psi.cols());		
-	}
-
+        
      
+     // in the sign-flip and eigen-sign-flip cases, additional matrices have to be computed
+     if(std::find(inferenceData_.get_implementation_type().begin(), inferenceData_.get_implementation_type().end(), "sign-flip") != inferenceData_.get_implementation_type().end() ||
+	std::find(inferenceData_.get_implementation_type().begin(), inferenceData_.get_implementation_type().end(), "eigen-sign-flip") != inferenceData_.get_implementation_type().end()){
+		// reduced vector of observations		
+		VectorXr z_loc; 
+		z_loc.resize(row_indices.size());
+		
+		for(UInt i=0; i < inf_car_.getZp()->size(); ++i){
+			if(std::find(row_indices.begin(), row_indices.end(), i) != row_indices.end())
+				z_loc(rel_rows(i)) = inf_car_.getZp->coeff(i);
+		}
+                		
+		// reduced design matrix 
+                MatrixXr W_loc; 
+		W_loc.resize(row_indices.size(), inf_car_.getWp()->cols());
+
+		for(UInt i=0; i < inf_car_.getWp()->cols(); ++i){
+			for(UInt j=0; j < inf_car_.getWp()->rows(); ++j){
+				if(std::find(row_indices.begin(), row_indices.end(), j) != row_indices.end())
+					W_loc(rel_rows(j), i) = inf_car_.getWp()->coeff(j,i);
+			}
+		}
+		     		
+	}
+	}
 	
 }
 
