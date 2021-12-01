@@ -421,7 +421,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
     // update the inference carrier
     inf_car_.setPsi_loc(psi);
     inf_car_.setN_loc(psi.rows());
-    inf_car_.setF_hatp(&solution_(0).topRows(nnodes)); // recall that the optimal solution is in first position
+    inf_car_.setF_hatp(&solution_.topRows(nnodes)); // recall that the optimal solution is in first position
                  	
   }
   else{
@@ -477,7 +477,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 		
       for(UInt i=0; i < inf_car_.getZp()->size(); ++i){
 	if(std::find(row_indices.begin(), row_indices.end(), i) != row_indices.end())
-	  z_loc(rel_rows(i)) = inf_car_.getZp->coeff(i);
+	  z_loc(rel_rows(i)) = inf_car_.getZp()->coeff(i);
       }
 		
       inf_car_.setZ_loc(z_loc);
