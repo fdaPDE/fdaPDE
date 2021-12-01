@@ -12,8 +12,9 @@
 // *** Inference_Carrier Class ***
 //! Carrier for Inference Methods
 /*!
- This template class contains all the information needed by inference methods. All the needed objects are wrapped with pointers
- whith the exception of the optimal smoothing parameter lambda and the problem dimensions: the number of observations, the number of nodes and the number of covariates.  
+ This template class contains all the information needed by inference methods. Most of the needed objects are wrapped with pointers
+ with the exception of the local parameters that are computed after the carrier initialization only if inference on f is needed, the optimal smoothing parameter lambda and 
+ the problem dimensions: the number of observations, the number of nodes and the number of covariates.  
  \tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type
 */
 template<typename InputHandler>
@@ -46,10 +47,17 @@ class Inference_Carrier{
 		const Eigen::SparseLU<SpMat> * E_decp = nullptr;			//!< Pointer to the sparse LU decomposition for the no-cov-matrix of the Woodbury decomposition of the system
 		const Eigen::PartialPivLU<MatrixXr> * G_decp = nullptr;			//!< Pointer to the LU decomposition of the G matrix of the Woodbury decomposition of the system
 		
-		// LOCAL VALUES
+		// OBSERVATIONS AND ESTIMATORS
 		const VectorXr * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
+                const VectorXr * f_hatp = nullptr; 					//!< Pointer to the estimate of f evaluated in the nodes for the optimal model 
 		const VectorXr * zp = nullptr;						//!< Pointer to the observations in the locations [size n_obs]
 		VectorXr z_hat; 							//!< Fitted values in the locations [size n_obs]
+
+		// LOCAL PARAMETERS
+		UInt n_loc;                                                             //!< Number of selected locations for inference on f 
+                SpMat Psi_locp; 							//!< Selected location-to-nodes matrix [size n_loc x n_nodes]
+		MatrixXr W_locp; 	                                		//!< Reduced covariates matrix [size n_loc x n_covariates]
+		VectorXr z_locp; 							//!< Reduced observations [size n_loc]
 
 		// SETTERS 								// Private because they will be used just by the constructor.
 		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data
@@ -77,9 +85,15 @@ class Inference_Carrier{
 		inline void setE_decp (const Eigen::SparseLU<SpMat> * E_decp_){E_decp = E_decp_;}			//!< Setter of E_decp \param E_decp_ new E_decp
 		inline void setG_decp (const Eigen::PartialPivLU<MatrixXr> * G_decp_){G_decp = G_decp_;}		//!< Setter of G_decp \param G_decp_ new G_decp
 		inline void setBeta_hatp (const VectorXr * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
+		inline void setF_hatp (const VectorXr * f_hatp_){f_hatp = f_hatp_;}					//!< Setter of f_hatp \param f_hatp_ new f_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
-		inline void setZ_hat (const VectorXr z_hat_){z_hat = z_hat_;}					//!< Setter of z_hat \param z_hat_ new z_hat
+		inline void setZ_hat (const VectorXr z_hat_){z_hat = z_hat_;}						//!< Setter of z_hat \param z_hat_ new z_hat
 
+		inline void setN_loc (UInt n_loc_){n_loc = n_loc_;}							//!< Setter of n_loc \param n_loc_ new n_loc
+		inline void setPsi_loc (const SpMat & Psi_loc_){Psi_loc = Psi_loc_;}					//!< Setter of Psi_loc \param Psi_loc_ new Psi_loc
+		inline void setW_loc (const MatrixXr & W_loc_){W_loc = W_loc_;}						//!< Setter of W_loc \param W_loc_ new W_loc
+                inline void setZ_loc (const VectorXr & z_loc_){z_loc = z_loc_;}						//!< Setter of z_loc \param z_loc_ new z_loc
+	
 	public:
 		// CONSTUCTORS
 		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, Real values are set 0
@@ -92,7 +106,7 @@ class Inference_Carrier{
 		inline const InferenceData * getInfData (void) const {return inf_data;}					//!< Getter of inf_data \return inf_data
 
 		inline UInt getN_obs (void) const {return n_obs;} 							//!< Getter of n_obs \return n_obs
-		inline UInt getN_nodes (void) const {return this->Psip->cols();} 					//!< Getter of n_nodes \return n_nodes
+		inline UInt getN_nodes (void) const {return n_nodes;} 					                //!< Getter of n_nodes \return n_nodes
 		inline UInt getq (void) const {return q;} 								//!< Getter of q \return q
 		inline Real getlambda_S (void) const {return lambda_S;} 						//!< Getter of lambda_S \return lambda_S 
 		inline Real getlambda_T (void) const {return lambda_T;} 						//!< Getter of lambda_T \return lambda_T 
@@ -112,9 +126,14 @@ class Inference_Carrier{
 		inline const Eigen::SparseLU<SpMat> * getE_decp (void) const {return E_decp;} 				//!< Getter of E_decp \return E_decp
 		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void) const {return G_decp;} 			//!< Getter of G_decp \return G_decp
 		inline const VectorXr * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
+		inline const VectorXr * getF_hatp (void) const {return f_hatp;}						//!< Getter of f_hatp \return f_hatp
 		inline const VectorXr * getZp (void) const {return zp;} 						//!< Getter of zp \return zp
 		inline const VectorXr getZ_hat (void) const {return z_hat;} 						//!< Getter of z_hat \return z_hat
 
+		inline UInt getN_loc (void) const {return n_loc;} 							//!< Getter of n_loc \return n_loc
+		inline const SpMat getPsi_loc (void) const {return Psi_loc;}						//!< Getter of Psi_loc \return Psi_loc
+		inline const MatrixXr getW_loc (void) const {return W_loc;} 						//!< Getter of W_loc \return W_loc
+		inline const VectorXr getZ_loc (void) const {return z_loc;} 						//!< Getter of z_loc \return z_loc
 
 
 };
