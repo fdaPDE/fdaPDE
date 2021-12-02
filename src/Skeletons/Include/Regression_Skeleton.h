@@ -31,7 +31,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
 template<typename InputHandler>
 void lambda_inference_selection(const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference);
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const MatrixXv & solution, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car);
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh)
@@ -99,10 +99,15 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
                 //if nonparametric inference is required
                 if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || 
-		   std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end())
-	           	compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, solution_bricks.first, inferenceData, inf_car);
+		   std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end()){
+			// set f_hat inside the inference carrier
+			inf_car.setF_hatp(&(solution_bricks.first));
+                        // compute other local matrices according to the implementation
+	           	compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
+		}
 
-		// debug 
+		// debug
+                Rprintf("From the inference carrier...\n"); 
 		Rprintf("n_loc: %d\n", inf_car.getN_loc());
 		Rprintf("f_hat dim: %d\n", inf_car.getF_hatp()->size());
 		Rprintf("Psi_loc dim: %d x %d\n", inf_car.getPsi_loc().rows(), inf_car.getPsi_loc().cols());
@@ -366,9 +371,9 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
   \return void
 */
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, const MatrixXv & solution_, const InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, const InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
   // if a matrix of locations has been provided, compute Psi_loc by directly evaluating the spatial basis functions in the provided points
-  // only wald implementation can enter here, no other additional matrices are needed, but f_hat estimator has to be set inside the inference carrier
+  // only wald implementation can enter here, no other additional matrices are needed
   if((inferenceData_.get_locs_index_inference())[0] == -1){
     // define the psi matrix
     SpMat psi;
@@ -420,9 +425,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
            
     // update the inference carrier
     inf_car_.setPsi_loc(psi);
-    inf_car_.setN_loc(psi.rows());
-    inf_car_.setF_hatp(&solution_.topRows(nnodes)); // recall that the optimal solution is in first position
-                 	
+    inf_car_.setN_loc(psi.rows());                 	
   }
   else{
     // the locations are chosen among the observed ones, hence psi can be extracted from Psi
@@ -469,8 +472,10 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
     }
 
     // in the sign-flip and eigen-sign-flip cases, additional matrices have to be computed
-    if(std::find(inferenceData_.get_implementation_type().begin(), inferenceData_.get_implementation_type().end(), "sign-flip") != inferenceData_.get_implementation_type().end() ||
-       std::find(inferenceData_.get_implementation_type().begin(), inferenceData_.get_implementation_type().end(), "eigen-sign-flip") != inferenceData_.get_implementation_type().end()){
+    const std::vector<std::string> implementation_type = inferenceData_.get_implementation_type();
+
+    if(std::find(implementation_type.begin(), implementation_type.end(), "sign-flip") != implementation_type.end() ||
+       std::find(implementation_type.begin(), implementation_type.end(), "eigen-sign-flip") != implementation_type.end()){
       // reduced vector of observations		
       VectorXr z_loc; 
       z_loc.resize(row_indices.size());

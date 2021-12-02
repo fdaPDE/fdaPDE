@@ -85,11 +85,11 @@ class Inference_Carrier{
 		inline void setE_decp (const Eigen::SparseLU<SpMat> * E_decp_){E_decp = E_decp_;}			//!< Setter of E_decp \param E_decp_ new E_decp
 		inline void setG_decp (const Eigen::PartialPivLU<MatrixXr> * G_decp_){G_decp = G_decp_;}		//!< Setter of G_decp \param G_decp_ new G_decp
 		inline void setBeta_hatp (const VectorXr * beta_hatp_){beta_hatp = beta_hatp_;}				//!< Setter of beta_hatp \param beta_hatp_ new beta_hatp
-		inline void setF_hatp (const MatrixXr * f_hatp_){f_hatp = f_hatp_;}					//!< Setter of f_hatp \param f_hatp_ new f_hatp
 		inline void setZp (const VectorXr * zp_){zp = zp_;}							//!< Setter of zp \param zp_ new zp
 		inline void setZ_hat (const VectorXr z_hat_){z_hat = z_hat_;}						//!< Setter of z_hat \param z_hat_ new z_hat
 
        public:  // PUBLIC SETTERS                                                        // Public because they will be used after the carrier instantiation
+		inline void setF_hatp (const MatrixXr * f_hatp_){f_hatp = f_hatp_;}					//!< Setter of f_hatp \param f_hatp_ new f_hatp
 		inline void setN_loc (UInt n_loc_){n_loc = n_loc_;}							//!< Setter of n_loc \param n_loc_ new n_loc
 		inline void setPsi_loc (const SpMat & Psi_loc_){Psi_loc = Psi_loc_;}					//!< Setter of Psi_loc \param Psi_loc_ new Psi_loc
 		inline void setW_loc (const MatrixXr & W_loc_){W_loc = W_loc_;}						//!< Setter of W_loc \param W_loc_ new W_loc
