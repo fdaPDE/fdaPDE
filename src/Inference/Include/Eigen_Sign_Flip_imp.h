@@ -111,7 +111,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
 };
 
 template<typename InputHandler, typename MatrixType> 
-VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
+VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
   
   // extract matrix C 
   // (in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
@@ -256,7 +256,24 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_pvalue(void){
 };
 
 template<typename InputHandler, typename MatrixType>
-MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI(void){
+Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
+// not implemented yet
+return 0; 
+};
+
+
+template<typename InputHandler, typename MatrixType>
+MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
+// Eigen-Sign-Flip CI are not implemented for f
+// this function won't be called 
+MatrixXv null_mat; 
+null_mat.resize(1,1);
+null_mat(0) = VectorXr::Constant(3,0);
+return null_mat; 
+};
+
+template<typename InputHandler, typename MatrixType>
+MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
 
   // compute Lambda
   if(!is_Lambda_computed){

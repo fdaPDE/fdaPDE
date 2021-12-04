@@ -49,7 +49,7 @@ class Inference_Carrier{
 		
 		// OBSERVATIONS AND ESTIMATORS
 		const VectorXr * beta_hatp = nullptr; 					//!< Pointer to the estimate of the betas for the optimal model
-                const MatrixXr * f_hatp = nullptr; 					//!< Pointer to the estimate of f evaluated in the nodes for the optimal model 
+                const MatrixXr * solution_p = nullptr; 					//!< Pointer to the solution of the linear system corresponding to the optimal model 
 		const VectorXr * zp = nullptr;						//!< Pointer to the observations in the locations [size n_obs]
 		VectorXr z_hat; 							//!< Fitted values in the locations [size n_obs]
 
@@ -89,7 +89,7 @@ class Inference_Carrier{
 		inline void setZ_hat (const VectorXr z_hat_){z_hat = z_hat_;}						//!< Setter of z_hat \param z_hat_ new z_hat
 
        public:  // PUBLIC SETTERS                                                        // Public because they will be used after the carrier instantiation
-		inline void setF_hatp (const MatrixXr * f_hatp_){f_hatp = f_hatp_;}					//!< Setter of f_hatp \param f_hatp_ new f_hatp
+		inline void setSolutionp (const MatrixXr * solution_p_){solution_p = solution_p_;}			//!< Setter of solution_p \param solution_p_ new solution_p
 		inline void setN_loc (UInt n_loc_){n_loc = n_loc_;}							//!< Setter of n_loc \param n_loc_ new n_loc
 		inline void setPsi_loc (const SpMat & Psi_loc_){Psi_loc = Psi_loc_;}					//!< Setter of Psi_loc \param Psi_loc_ new Psi_loc
 		inline void setW_loc (const MatrixXr & W_loc_){W_loc = W_loc_;}						//!< Setter of W_loc \param W_loc_ new W_loc
@@ -127,7 +127,7 @@ class Inference_Carrier{
 		inline const Eigen::SparseLU<SpMat> * getE_decp (void) const {return E_decp;} 				//!< Getter of E_decp \return E_decp
 		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void) const {return G_decp;} 			//!< Getter of G_decp \return G_decp
 		inline const VectorXr * getBeta_hatp (void) const {return beta_hatp;} 				        //!< Getter of beta_hatp \return beta_hatp
-		inline const MatrixXr * getF_hatp (void) const {return f_hatp;}						//!< Getter of f_hatp \return f_hatp
+		inline const MatrixXr * getSolutionp (void) const {return solution_p;}					//!< Getter of solution_p \return solution_p
 		inline const VectorXr * getZp (void) const {return zp;} 						//!< Getter of zp \return zp
 		inline const VectorXr getZ_hat (void) const {return z_hat;} 						//!< Getter of z_hat \return z_hat
 

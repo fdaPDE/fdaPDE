@@ -23,9 +23,12 @@ protected:
   std::shared_ptr<Inverse_Base<MatrixType>> inverter = nullptr;     //!< Pointer to inverter object that computes the inverse of matrixNoCov in exact/non-exact way
   const Inference_Carrier<InputHandler> & inf_car;	//!< Inference carrier that contains all the information needed for inference 
   UInt pos_impl;					//!< Index that gives the position in all the vectors in infecenceData object
-  virtual VectorXr compute_pvalue(void) = 0;		//!< Pure virtual method used to compute the pvalues of the tests 
-  virtual MatrixXv compute_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals
-  
+  MatrixXv compute_pvalue(void);			//!< Method used to compute the pvalues of the tests 
+  MatrixXv compute_CI(void);		    		//!< Method to compute the confidence intervals
+  virtual VectorXr compute_beta_pvalue(void) = 0;       //!< Pure virtual method to compute the pvalues for the tests on beta parameters
+  virtual MatrixXv compute_beta_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals for the tests on beta parameters
+  virtual Real compute_f_pvalue(void) = 0;		//!< Pure virtual method to compute the pvalues for the tests on f
+  virtual MatrixXv compute_f_CI(void) = 0;		//!< Pure virtual method to compute the confidence intervals for f
 
 public:
   // CONSTUCTOR

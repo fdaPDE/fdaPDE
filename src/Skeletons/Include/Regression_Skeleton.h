@@ -100,20 +100,11 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
                 //if nonparametric inference is required
                 if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || 
 		   std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end()){
-			// set f_hat inside the inference carrier
-			inf_car.setF_hatp(&(solution_bricks.first));
+			// set the solution of the system inside the inference carrier
+			inf_car.setSolutionp(&(solution_bricks.first));
                         // compute other local matrices according to the implementation
 	           	compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
 		}
-
-		// debug
-                Rprintf("From the inference carrier...\n"); 
-		Rprintf("n_loc: %d\n", inf_car.getN_loc());
-		Rprintf("f_hat dim: %d\n", inf_car.getF_hatp()->size());
-		Rprintf("Psi_loc dim: %d x %d\n", inf_car.getPsi_loc().rows(), inf_car.getPsi_loc().cols());
-		Rprintf("W_loc dim: %d x %d\n", inf_car.getW_loc().rows(), inf_car.getW_loc().cols());
-		Rprintf("Z_loc dim: %d\n", inf_car.getZ_loc().size());
-		
 
 		inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
        }
@@ -280,11 +271,15 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 template<typename InputHandler>
 void inference_wrapper_space(const OptimizationData & opt_data, output_Data & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
 {
+  // Get the number of implementations
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
 
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+  UInt n_loc = inf_car.getN_loc();
 
-  inference_output.resize(n_implementations+1, p+1);
+  UInt out_dim = (p > n_loc) ? p : n_loc; 
+
+  inference_output.resize(2*n_implementations+1, out_dim+1);
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
     // Select the right policy for inversion of MatrixNoCov
@@ -294,7 +289,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
       std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-      inference_output.row(i) = inference_Solver->compute_inference_output();
+      inference_output.middleRows(i,2) = inference_Solver->compute_inference_output();
 
       if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
 	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
@@ -315,7 +310,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
       std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-      inference_output.row(i) = inference_Solver->compute_inference_output();
+      inference_output.middleRows(i,2) = inference_Solver->compute_inference_output();
 
 
     }
@@ -323,7 +318,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
     // Check if local f variance has to be computed
     if(inf_car.getInfData()->get_f_var()){
       std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(n_implementations,0) = inference_Solver->compute_f_var();
+      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
     }
   }
 
@@ -464,12 +459,13 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 
       psi.setFromTriplets(coefficients.begin(), coefficients.end());
       psi.makeCompressed();
+    }
 
       // set it into the inference carrier
       inf_car_.setPsi_loc(psi);
       inf_car_.setN_loc(psi.rows());
          
-    }
+    
 
     // in the sign-flip and eigen-sign-flip cases, additional matrices have to be computed
     const std::vector<std::string> implementation_type = inferenceData_.get_implementation_type();

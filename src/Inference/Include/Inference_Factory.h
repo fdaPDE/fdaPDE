@@ -92,7 +92,7 @@ public:
       }
     }
 
-    if(implementation_type_=="eigen-sign-flip"){
+    if(implementation_type_=="eigen-sign-flip" || implementation_type == "sign-flip"){
       // check if it is exact or non-exact according to MatrixType
       if(std::is_same<MatrixType, SpMat>::value==false){
         // look if the object is already present in the factory

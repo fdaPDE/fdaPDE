@@ -63,7 +63,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
+VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
 
@@ -148,7 +148,22 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_pvalue(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_CI(void){
+Real Speckman_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
+// not implemented
+return 0; 
+};
+
+template<typename InputHandler, typename MatrixType> 
+MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_f_CI(void){
+// not implemented
+MatrixXv null_mat; 
+null_mat.resize(1,1);
+null_mat(0) = VectorXr::Constant(3,0);
+return null_mat;
+};
+
+template<typename InputHandler, typename MatrixType> 
+MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
   // compute Lambda2 and V if needed
   if(!is_Lambda2_computed){

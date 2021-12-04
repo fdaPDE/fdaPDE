@@ -305,6 +305,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
     coeff = matrix(data=0, nrow=1, ncol=1)
   }
   
+  if(sum(component == "parametric")==length(component)){
+    if(!is.null(locations) || !is.null(locations_indices))
+      warning("locations are provided but not used, since inference is requested only on the paramteric component")
+    locations_indices = NULL
+    locations = matrix(data = 1, nrow = 1, ncol = 1)
+  }
+  else{
   if(is.null(locations) && is.null(locations_indices)){
     # default case: all observed locations are considered 
     locations <- matrix(data=1, nrow=1, ncol=1)                                 # Just for convenience, the actual default will be set inside checkInferenceParameters
@@ -320,6 +327,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
       warning("'locations' are provided but not used, since 'locations_indices' is not NULL")
     # other dimensional checks on 'locations_indices' will be performed later, inside checkInferenceParameters
   }
+  }  
   
   # Consistency check for number of implementations required (default values assigned in case of NULL)
   n_of_implementations=max(length(type), length(test), length(interval), length(component));
@@ -449,6 +457,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
         if(level[index] <= 0 || level[index] > 1)                                                
           stop("level should be a positive value smaller or equal to 1")
       }
+    
+      if(interval[index]!="none" && type[index]!="wald" && component[index]!="parametric")
+        stop("confidence intervals are not available with sign-flipping implementation")
       
       if(interval[index]=="simultaneous" && type[index]=="eigen-sign-flip"){
         stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip case")

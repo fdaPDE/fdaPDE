@@ -33,8 +33,12 @@ protected:
   void compute_V(void);					//!< Method used to compute V
   void compute_WLW_dec(void); 				//!< Method that computes the decomposition for WLW
   void compute_beta_hat(void);               	        //!< Method used to compute beta estimates for the Speckman test
-  VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
-  MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
+  
+  // methods that compute pvalues and/or CI on beta and on f respectively
+  VectorXr compute_beta_pvalue(void) override;
+  Real compute_f_pvalue(void) override;
+  MatrixXv compute_beta_CI(void) override;
+  MatrixXv compute_f_CI(void) override;
   
 public:
   // CONSTUCTOR

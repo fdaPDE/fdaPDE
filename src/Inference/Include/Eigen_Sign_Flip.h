@@ -28,8 +28,12 @@ protected:
   bool is_speckman_aux_computed = false;                //!< Boolean that tells whether Speckman auxiliary ranges have been computed or not
   virtual void compute_Lambda(void) = 0;		//!< Pure virtual method used to compute Lambda, either in an exact or non-exact way
   void Compute_speckman_aux(void);                      //!< Auxiliary function for CI that computes the speckman ranges
-  VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
-  MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
+  
+  // methods that compute pvalues and/or CI on beta and on f respectively
+  VectorXr compute_beta_pvalue(void) override;
+  Real compute_f_pvalue(void) override;
+  MatrixXv compute_beta_CI(void) override;
+  MatrixXv compute_f_CI(void) override;
   
   Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const  MatrixXr &) const;  //!< Computes the p value for a generic beta proposed in the research algorithm for CI 
   

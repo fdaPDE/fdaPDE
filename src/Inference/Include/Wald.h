@@ -25,14 +25,22 @@ protected:
   MatrixXr Partial_S;                                   //!< (Psi^t*Q*Psi + lambda*P)^-1 * Psi^t computed only if local f variance is required 
   Real tr_S=0; 						//!< Trace of smoothing matrix, needed for the variance-covariance matrix (V) and eventually GCV computation
   Real sigma_hat_sq; 					//!< Estimator for the variance of the residuals (SSres/(n_obs-(q+tr_S)))
+  bool is_sigma_hat_sq_computed = false;                //!< Boolean that tells whether sigma_hat_sq has been computed or not
   bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
   virtual void compute_S(void) = 0;			//!< Pure virtual method used to compute S, either in an exact or non-exact way 
   void compute_V(void);					//!< Method used to compute V
-  VectorXr compute_pvalue(void) override;		//!< Method used to compute the pvalues of the tests 
-  MatrixXv compute_CI(void) override;			//!< Method to compute the confidence intervals
+  MatrixXv V_f;                                         //!< Variance-Covariance matrix of f_hat estimator
+  bool is_V_f_computed = false;                         //!< Boolean that tells whether V_f has been computed or not
+  void compute_V_f(void);                               //!< Method used to compute V_f
   void compute_sigma_hat_sq(void);                      //!< Method to compute the estimator of the variance of the residuals 
+
+  // methods that compute pvalues and/or CI on beta and on f respectively
+  VectorXr compute_beta_pvalue(void) override;
+  Real compute_f_pvalue(void) override;
+  MatrixXv compute_beta_CI(void) override;
+  MatrixXv compute_f_CI(void) override;
   
 public:
   // CONSTUCTOR

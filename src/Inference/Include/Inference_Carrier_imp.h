@@ -35,6 +35,12 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   setBeta_hatp(&(out_regression_->betas(0)));
   setZ_hat((out_regression_->z_hat).col(0));
 
+  //In case only inference on beta is performed, for safety
+  setN_loc(0);
+  setPsi_loc(*(model_->getpsi_()));
+  setW_loc(*(Regression_Data_->getCovariates()));
+  setZ_loc(*(Regression_Data_->getObservations()));
+
 };
 
 template<typename InputHandler> 
