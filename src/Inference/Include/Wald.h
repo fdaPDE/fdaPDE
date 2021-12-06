@@ -31,7 +31,7 @@ protected:
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
   virtual void compute_S(void) = 0;			//!< Pure virtual method used to compute S, either in an exact or non-exact way 
   void compute_V(void);					//!< Method used to compute V
-  MatrixXv V_f;                                         //!< Variance-Covariance matrix of f_hat estimator
+  MatrixXr V_f;                                         //!< Variance-Covariance matrix of f_hat estimator
   bool is_V_f_computed = false;                         //!< Boolean that tells whether V_f has been computed or not
   void compute_V_f(void);                               //!< Method used to compute V_f
   void compute_sigma_hat_sq(void);                      //!< Method to compute the estimator of the variance of the residuals 

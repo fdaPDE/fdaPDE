@@ -289,7 +289,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
       std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-      inference_output.middleRows(i,2) = inference_Solver->compute_inference_output();
+      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
 
       if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
 	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
@@ -310,7 +310,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
       std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-      inference_output.middleRows(i,2) = inference_Solver->compute_inference_output();
+      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
 
 
     }

@@ -24,7 +24,7 @@ MatrixXv Inference_Base<InputHandler, MatrixType>::compute_inference_output(void
     }
     // f pvalue
     result(1,0).resize(1);
-    result(1,0) = 10e20;
+    result(1,0)(0) = 10e20;
 
     result.rightCols(result_dim) = this->compute_CI();
   }
@@ -58,19 +58,27 @@ MatrixXv Inference_Base<InputHandler, MatrixType>::compute_pvalue(void){
   // inference only on beta
   if(this->inf_car.getInfData()->get_component_type()[this->pos_impl] == "parametric"){
   	result(0) = this->compute_beta_pvalue();
-        result(1) = 10e20; // default value (unfeasible)
+        result(1).resize(1);
+        result(1)(0) = 10e20; // default value (unfeasible)
   }
   
   // inference only on f
   if(this->inf_car.getInfData()->get_component_type()[this->pos_impl] == "nonparametric"){
-	result(1) = this->compute_f_pvalue();
-        result(0) = 10e20; // default value (unfeasible)
+	result(1).resize(1);	
+	result(1)(0) = this->compute_f_pvalue();
+        
+	UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+   	result(0).resize(p);
+    	for(UInt k=0;k<p;k++){
+      	  result(0)(k) = 10e20; // Default value (unfeasible)
+    	}
   }
 
   // inference on both beta and f
   if(this->inf_car.getInfData()->get_component_type()[this->pos_impl] == "both"){
   	result(0) = this->compute_beta_pvalue();
-        result(1) = this->compute_f_pvalue();
+        result(1).resize(1);
+        result(1)(0) = this->compute_f_pvalue();
   }
 
   return result; 

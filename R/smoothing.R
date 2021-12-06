@@ -991,7 +991,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         # add p-values in the right position
         if(R_Inference_Data_Object@type[i]==1){
           inference$beta$p_values$wald[[length(inference$beta$p_values$wald)+1]] = p_values
-          inference$beta$p_values$wald=as.list(inference$p_values$wald)
+          inference$beta$p_values$wald=as.list(inference$beta$p_values$wald)
         }
         else if(R_Inference_Data_Object@type[i]==2){
           inference$beta$p_values$speckman[[length(inference$beta$p_values$speckman)+1]] = p_values

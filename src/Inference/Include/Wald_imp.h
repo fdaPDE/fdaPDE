@@ -171,9 +171,13 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 
   // derive the variance-covariance matrix of f_loc_hat
   MatrixXr V_f_loc = Psi_loc * V_f * Psi_loc.transpose();
+  
+  Eigen::PartialPivLU<MatrixXr> V_f_loc_dec;
+  V_f_loc_dec.compute(V_f_loc);
+  
 
   // compute the test statistics 
-  result = (f_loc_hat - f_0).transpose() * V_f_loc.solve(f_loc_hat - f_0);
+  result = (f_loc_hat - f_0).transpose() * V_f_loc_dec.solve(f_loc_hat - f_0);
 
   return result; 	
 };

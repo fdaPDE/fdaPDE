@@ -23,7 +23,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	UInt p_inf = inf_Data.get_coeff_inference().rows();
         UInt n_loc_inf = inf_Data.get_locs_inference().rows();
         UInt inf_out_size = (p_inf > n_loc_inf) ? p_inf : n_loc_inf; 
-        MatrixXv inference_Output = inference_Output.topRows(2*n_inf_implementations);
+        MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
 	MatrixXv p_values;
 	MatrixXv intervals;
 	
@@ -43,11 +43,11 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	  intervals.resize(2*n_inf_implementations, inf_out_size);
 	  
           for(UInt i=0; i < n_inf_implementations; ++i){
-	    p_values.row(0)(i) = inference_Output.col(0)(2*i);
-            p_values.row(1)(i) = inference_Output.col(0)(2*i+1);
+	    p_values.row(0)(i) = inf_Output.col(0)(2*i);
+            p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
           }
 
-          intervals=inference_Output.rightCols(inf_out_size);
+          intervals=inf_Output.rightCols(inf_out_size);
 	}
 
         // Prepare the local f variance output space
@@ -249,7 +249,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	  for(UInt i = 0; i<p_values(0).size(); i++){
 	    rans12[i+p_values(0).size()*j]=p_values(0,j)(i);
 	  }
-            rans12[p_values(0).size()+p_values(0).size()*j] = p_values(1,j);
+            rans12[p_values(0).size()+p_values(0).size()*j] = p_values(1,j)(0);
 	}
 	
 	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (inference)
