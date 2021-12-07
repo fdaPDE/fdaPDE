@@ -56,14 +56,12 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
     compute_sigma_hat_sq();
   }
 
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp();
   UInt q = this->inf_car.getq(); 
   MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
   
   // compute variance-covariance matrix of f_hat
-  V_f = this->sigma_hat_sq * Partial_S * (*Psi_t)*Q*(*Psi) * Partial_S.transpose();
-  is_V_f_computed = true;
+  this->V_f = this->sigma_hat_sq * (this->Partial_S) * Q * (this->Partial_S.transpose());
+  this->is_V_f_computed = true;
    
 };
 
@@ -170,9 +168,9 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   VectorXr f_loc_hat = Psi_loc * f_hat; 
 
   // derive the variance-covariance matrix of f_loc_hat
-  MatrixXr V_f_loc = Psi_loc * V_f * Psi_loc.transpose();
+  MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
   
-  Eigen::PartialPivLU<MatrixXr> V_f_loc_dec;
+  Eigen::FullPivLU<MatrixXr> V_f_loc_dec;
   V_f_loc_dec.compute(V_f_loc);
   
 
@@ -276,7 +274,7 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
     result(i)(1)=f_loc_hat(i);
     
     // compute the half range of the interval
-    Real sd = std::sqrt(V_f(i,i));
+    Real sd = std::sqrt(this->V_f(i,i));
     Real half_range=sd*quant;
     
     // compute the limits of the interval

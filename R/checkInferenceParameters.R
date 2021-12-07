@@ -70,10 +70,14 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     dim <- R_Inference_Object_Data@dim
     locs <- R_Inference_Object_Data@locations
     
-    if(dim == 2)
-      R_Inference_Object_Data@f0_eval <- as.vector(f0(locs[,1], locs[,2]))
-    else
-      R_Inference_Object_Data@f0_eval <- as.vector(f0(locs[,1], locs[,2], locs[,3]))
+    if(dim == 2){
+      for(i in 1:dim(locs)[1])
+        R_Inference_Object_Data@f0_eval <- c(R_Inference_Object_Data@f0_eval, f0(locs[i,1], locs[i,2])) 
+    }
+    else{
+      for(i in 1:dim(locs)[1])
+        R_Inference_Object_Data@f0_eval <- c(R_Inference_Object_Data@f0_eval, f0(locs[i,1], locs[i,2], locs[i,3])) 
+    }
   }
   else{
     # in case only inference on parametric component is requested, set f0_eval and locations with default values, just for transmission safety

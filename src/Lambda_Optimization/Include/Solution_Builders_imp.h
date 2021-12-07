@@ -247,9 +247,9 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 	Real *rans12=REAL(VECTOR_ELT(result,22));
 	for(UInt j = 0; j<p_values.cols(); j++){
 	  for(UInt i = 0; i<p_values(0).size(); i++){
-	    rans12[i+p_values(0).size()*j]=p_values(0,j)(i);
+	    rans12[i+(p_values(0).size()+1)*j]=p_values(0,j)(i);
 	  }
-            rans12[p_values(0).size()+p_values(0).size()*j] = p_values(1,j)(0);
+            rans12[p_values(0).size()+(p_values(0).size()+1)*j] = p_values(1,j)(0);
 	}
 	
 	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (inference)

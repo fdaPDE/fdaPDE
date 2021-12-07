@@ -299,7 +299,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
     // Check if local f variance has to be computed
     if(inf_car.getInfData()->get_f_var()){
       std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(n_implementations,0) = inference_Solver->compute_f_var();
+      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
     }
   }
   else{
