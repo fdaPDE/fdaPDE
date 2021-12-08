@@ -266,7 +266,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   const VectorXr Z_loc = this->inf_car.getZ_loc(); 
   const UInt n_loc = this->inf_car.getN_loc(); 
 
-  const f_0 = this->inf_car.getInfData()->get_f_0(); 
+  const VectorXr f_0 = this->inf_car.getInfData()->get_f_0(); 
   unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
 
   // compute Q_loc

@@ -378,7 +378,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
 
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();  
-  //UInt q = this->inf_car.getq(); 
+  UInt q = this->inf_car.getq(); 
 
   const MatrixType * E_tilde_inv = this->inverter->getInv();
   const MatrixXr U_tilde = this->inf_car.getUp()->topRows(n_nodes);
