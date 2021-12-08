@@ -22,6 +22,7 @@ template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
 protected:
   MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
+  VectorXr Partial_f_res_H0;                            //!< Contains: Q_loc*(z_loc - f_0)
   MatrixType Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
   VectorXr Speckman_aux_ranges;                         //!< Speckman auxiliary CI ranges needed for CI method initialization

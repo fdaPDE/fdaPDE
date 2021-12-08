@@ -65,6 +65,13 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
       }
     }
     
+    # in wald implementation check that the final number of chosen locations doesn't exceed n-q (to ensure var-cov matrix is invertible)
+    if(sum(R_Inference_Object_Data@type!=1)!=0){
+      if(dim(R_Inference_Object_Data@locations)[1] > dim(locations)[1] - checknumber)
+        stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
+             decrease the number of locations or choose eigen-sign-flip inferential approach")
+    }
+    
     # finally evaluate f0 at the chosen locations
     f0 <- R_Inference_Object_Data@f0
     dim <- R_Inference_Object_Data@dim

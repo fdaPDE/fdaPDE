@@ -56,8 +56,8 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
     compute_sigma_hat_sq();
   }
 
-  UInt q = this->inf_car.getq(); 
-  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
+  UInt n = this->inf_car.getN_obs(); 
+  MatrixXr Q = MatrixXr::Identity(n, n) - *(this->inf_car.getHp()); 
   
   // compute variance-covariance matrix of f_hat
   this->V_f = this->sigma_hat_sq * (this->Partial_S) * Q * (this->Partial_S.transpose());
@@ -343,8 +343,8 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
   this->S.resize(n_obs, n_obs);
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  UInt q = this->inf_car.getq(); 
-  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
+  //UInt q = this->inf_car.getq(); 
+  MatrixXr Q = MatrixXr::Identity(n_obs, n_obs) - *(this->inf_car.getHp()); 
 
   if(this->inf_car.getInfData()->get_f_var() || (this->inf_car.getInfData()->get_component_type())[this->pos_impl]!="parametric"){
     this->Partial_S.resize(n_nodes, n_obs);
@@ -378,7 +378,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
 
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();  
-  UInt q = this->inf_car.getq(); 
+  //UInt q = this->inf_car.getq(); 
 
   const MatrixType * E_tilde_inv = this->inverter->getInv();
   const MatrixXr U_tilde = this->inf_car.getUp()->topRows(n_nodes);
@@ -394,7 +394,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   this->S.resize(n_obs, n_obs);
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  MatrixXr Q = MatrixXr::Identity(q, q) - *(this->inf_car.getHp()); 
+  MatrixXr Q = MatrixXr::Identity(n_obs, n_obs) - *(this->inf_car.getHp()); 
 
   if(this->inf_car.getInfData()->get_f_var() || (this->inf_car.getInfData()->get_component_type())[this->pos_impl]!="parametric"){
     this->Partial_S.resize(n_nodes, n_obs);
