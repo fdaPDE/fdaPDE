@@ -29,7 +29,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
       
       #check that there aren't indices repetitions and that each index doesn't exceed n_obs, eventually drop them 
       for(j in 1:length(R_Inference_Object_Data@locations_indices)){
-        if(j %in% R_Inference_Object_Data@locations_indices[-j])
+        if(R_Inference_Object_Data@locations_indices[j] %in% R_Inference_Object_Data@locations_indices[-j])
           R_Inference_Object_Data@locations_indices = R_Inference_Object_Data@locations_indices[-j]
         else if(R_Inference_Object_Data@locations_indices[j] > dim(locations)[1]){
           warning("Removing a location index exceeding the number of observed locations")
@@ -44,7 +44,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
         R_Inference_Object_Data@locations = locations
       }
       else{
-        R_Inference_Object_Data@locations = locations[R_Inference_Object_Data@locations_indices,]
+        R_Inference_Object_Data@locations = matrix(data = locations[R_Inference_Object_Data@locations_indices,], ncol = R_Inference_Object_Data@dim)
       }
     }
     else{
@@ -67,9 +67,16 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     
     # in wald implementation check that the final number of chosen locations doesn't exceed n-q (to ensure var-cov matrix is invertible)
     if(sum(R_Inference_Object_Data@type==1)!=0){
-      if(dim(R_Inference_Object_Data@locations)[1] > dim(locations)[1] - checknumber)
-        stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
+      if(is.null(checknumber)){
+        if(dim(R_Inference_Object_Data@locations)[1] > dim(locations)[1])
+          stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
              decrease the number of locations or choose eigen-sign-flip inferential approach")
+      }
+      else{
+        if(dim(R_Inference_Object_Data@locations)[1] > dim(locations)[1] - checknumber)
+          stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
+             decrease the number of locations or choose eigen-sign-flip inferential approach")
+      }
     }
     
     # finally evaluate f0 at the chosen locations
