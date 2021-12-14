@@ -952,9 +952,13 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           if(R_Inference_Data_Object@component[i]!=1){ # intervals for f were requested
             n_loc = dim(R_Inference_Data_Object@locations)[1]
             ci_f=t(confidence_intervals[(3*(2*i-1)+1):(3*(2*i-1)+3),])
-            if(R_Inference_Data_Object@type[i]==1){ # only wald confidence intervals are allowed for f
+            if(R_Inference_Data_Object@type[i]==1){ # wald confidence intervals for f
               inference$f$CI$wald[[length(inference$f$CI$wald)+1]] = ci_f
               inference$f$CI$wald=as.list(inference$f$CI$wald)
+            }
+            else if(R_Inference_Data_Object@type[i]==5){ # only wald mod confidence intervals for f
+              inference$f$CI$wald_mod[[length(inference$f$CI$wald_mod)+1]] = ci_f
+              inference$f$CI$wald_mod=as.list(inference$f$CI$wald_mod)
             }
           }
         }
@@ -1024,6 +1028,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           else if(R_Inference_Data_Object@type[i]==4){
             inference$f$p_values$sign_flip[[length(inference$f$p_values$sign_flip)+1]] = p_value
             inference$f$p_values$sign_flip=as.list(inference$f$p_values$sign_flip)
+          }
+          else if(R_Inference_Data_Object@type[i]==5){
+            inference$f$p_values$wald_mod[[length(inference$f$p_values$wald_mod)+1]] = p_value
+            inference$f$p_values$wald_mod=as.list(inference$f$p_values$wald_mod)
           }
         }
         }

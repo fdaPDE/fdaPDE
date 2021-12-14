@@ -228,7 +228,7 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   // Rank-r pseudo inverse
   MatrixXr eig_inv = eig_values_red; 
   eig_inv.diagonal() = eig_values_red.diagonal().array().inverse();
-  MatrixXr V_f_loc_red_inv = eig_vector_reduced * eig_inv * eig_vector_reduced.transpose();
+  MatrixXr V_f_loc_red_inv = eig_vector_red * eig_inv * eig_vector_red.transpose();
   
   // compute the test statistics
   Real result_red = (f_loc_hat - f_0).transpose() * V_f_loc_red_inv * (f_loc_hat - f_0);
