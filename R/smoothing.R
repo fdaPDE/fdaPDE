@@ -1005,7 +1005,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         if(R_Inference_Data_Object@component[i]!=1){ # test on f was requested
           f_statistics = statistics[length(statistics)]
           p_value = numeric()
-          if(R_Inference_Data_Object@type[i]==3 || R_Inference_Data_Object@type[i]==4){ # (eigen-)sign-flip p-value is already computed in the cpp code
+          if(R_Inference_Data_Object@type[i]==3 || R_Inference_Data_Object@type[i]==4 || R_Inference_Data_Object@type[i]==5){ # (eigen-)sign-flip and wald-mod p-value are already computed in the cpp code
             p_value = f_statistics
           }
           else{ # Wald test returns statistic, hence computation of p-value is needed

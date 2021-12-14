@@ -1,23 +1,36 @@
 #include "Wald.h"
 #include <cmath>
+#include <boost/math/distributions/chi_squared.hpp>
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
+  
+  VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
+  Real SS_res = eps_hat.squaredNorm();
+  UInt n = this->inf_car.getN_obs();
+  
+  if(this->inf_car.getRegData()->getCovariates()->rows()!=0){ // case with covariates
   //check if S has been computed 
   if(is_S_computed==false){
     this->compute_S();
   }
-  
-  VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
-  Real SS_res = eps_hat.squaredNorm();
-  
-  UInt n = this->inf_car.getN_obs();
+
   UInt q = this->inf_car.getq();
   tr_S = this->S.trace();
   sigma_hat_sq = SS_res/(n - (q + tr_S));
+  }
+
+  else{
+  //check if B has been computed 
+  if(is_B_computed==false){
+    this->compute_B();
+  }
+
+  Real tr_B = this->B.trace();
+  sigma_hat_sq = SS_res/(n - tr_B);
+  }
   
   is_sigma_hat_sq_computed = true;
-  
   
   return; 
 };
@@ -48,8 +61,15 @@ void Wald_Base<InputHandler, MatrixType>::compute_V(void){
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
   // make sure that Partial_S has been computed
-  if(!is_S_computed){
-  compute_S();
+  if(this->inf_car.getRegData()->getCovariates()->rows()==0){ // case with no covariates
+    if(!is_B_computed){
+      compute_B();
+    }
+  }
+  else{ // case with covariates
+    if(!is_S_computed){
+      compute_S();
+    }
   }
   // make sure sigma_hat_sq has been computed
   if(is_sigma_hat_sq_computed==false){
@@ -57,11 +77,16 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
   }
 
   UInt n = this->inf_car.getN_obs(); 
-  MatrixXr Q = MatrixXr::Identity(n, n) - *(this->inf_car.getHp()); 
+  MatrixXr Q = MatrixXr::Identity(n, n); // if there are no covariates Q is just an identity 
+  if(this->inf_car.getRegData()->getCovariates()->rows()!=0){
+    Q = Q - *(this->inf_car.getHp());
+  }
   
   // compute variance-covariance matrix of f_hat
   this->V_f = this->sigma_hat_sq * (this->Partial_S) * Q * (this->Partial_S.transpose());
   this->is_V_f_computed = true;
+
+  return;
    
 };
 
@@ -169,13 +194,52 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 
   // derive the variance-covariance matrix of f_loc_hat
   MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
+
+  if((this->inf_car.getInfData()->get_implementation_type())[this->pos_impl] == "wald"){
   
   Eigen::FullPivLU<MatrixXr> V_f_loc_dec;
   V_f_loc_dec.compute(V_f_loc);
   
-
   // compute the test statistics 
   result = (f_loc_hat - f_0).transpose() * V_f_loc_dec.solve(f_loc_hat - f_0);
+
+  } else{
+
+  // modified wald 
+  // compute eigenvalue decomposition of V_f_loc
+  Eigen::SelfAdjointEigenSolver<MatrixXr> V_f_loc_eig(V_f_loc);
+  MatrixXr eig_values = V_f_loc_eig.eigenvalues().asDiagonal();
+
+  UInt k = 0; 
+  UInt max_it = eig_values.cols();
+    
+  Real threshold = 0.001; 
+  bool stop = false;
+
+  while(!stop){
+  if(k >= max_it || eig_values(k,k) > threshold)
+      stop = true;
+  ++k;
+  }
+
+  MatrixXr eig_values_red = eig_values.bottomRightCorner(max_it - k + 1, max_it - k + 1);
+  MatrixXr eig_vector_red = V_f_loc_eig.eigenvectors().rightCols(max_it - k + 1);
+
+  // Rank-r pseudo inverse
+  MatrixXr eig_inv = eig_values_red; 
+  eig_inv.diagonal() = eig_values_red.diagonal().array().inverse();
+  MatrixXr V_f_loc_red_inv = eig_vector_reduced * eig_inv * eig_vector_reduced.transpose();
+  
+  // compute the test statistics
+  Real result_red = (f_loc_hat - f_0).transpose() * V_f_loc_red_inv * (f_loc_hat - f_0);
+  
+  // generate the distribution
+  boost::math::chi_squared dist(max_it - k + 1);
+  
+  // compute the pvalue
+  result = boost::math::cdf(complement(dist,result_red));
+  
+  }
 
   return result; 	
 };
@@ -409,6 +473,58 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   this->S = (*Psi)*M_tilde_inv*((*Psi_t)*Q);
   
   this->is_S_computed = true;
+  
+  return; 
+};
+
+
+template<typename InputHandler, typename MatrixType> 
+void Wald_Exact<InputHandler, MatrixType>::compute_B(void){
+  this->inverter->Compute_Inv();
+    // extract the inverse of E
+    const MatrixType * E_inv = this->inverter->getInv();
+  
+    UInt n_obs = this->inf_car.getN_obs();
+    UInt n_nodes = this->inf_car.getN_nodes();
+    const SpMat * Psi = this->inf_car.getPsip();
+    const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  
+    this->B.resize(n_obs,n_obs);
+    this->B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
+    this->is_B_computed = true;
+
+    // compute also Partial_S
+    this->Partial_S.resize(n_nodes, n_obs);
+    this->Partial_S = (*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t);
+  
+  return; 
+};
+
+template<typename InputHandler, typename MatrixType> 
+void Wald_Non_Exact<InputHandler, MatrixType>::compute_B(void){
+  this->inverter->Compute_Inv();
+  
+    if(this->inverter->get_status_inverse()==false){
+      this->is_B_computed=false;
+      return;
+    }
+  
+  // extract the inverse of E
+  const MatrixType * E_tilde_inv = this->inverter->getInv();
+  
+  UInt n_obs = this->inf_car.getN_obs();
+  UInt n_nodes = this->inf_car.getN_nodes();
+  const SpMat * Psi = this->inf_car.getPsip();
+  const SpMat * Psi_t = this->inf_car.getPsi_tp();
+    
+  this->B.resize(n_obs,n_obs);
+ 
+  this->B = (*Psi)*((*E_tilde_inv)*(*Psi_t));
+  this->is_B_computed = true;
+
+  // compute also Partial_S
+  this->Partial_S.resize(n_nodes, n_obs);
+  this->Partial_S = (*E_tilde_inv)*(*Psi_t);
   
   return; 
 };

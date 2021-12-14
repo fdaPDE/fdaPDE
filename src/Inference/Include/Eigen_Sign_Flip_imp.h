@@ -270,8 +270,16 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
 
   // compute Q_loc
-  Eigen::PartialPivLU<MatrixXr>  WtW_loc_dec(W_loc.transpose() * W_loc);
-  MatrixXr Q_loc = MatrixXr::Identity(n_loc, n_loc) - W_loc * WtW_loc_dec.solve(W_loc.transpose());
+  MatrixXr Q_loc; 
+  Q_loc.resize(n_loc, n_loc);
+  
+  if(this->inf_car.getRegData()->getCovariates()->rows()==0){ // no covariates case
+    Q_loc = MatrixXr::Identity(n_loc, n_loc);
+  }
+  else{ // covariates case
+    MatrixXr WtW_loc = W_loc.transpose() * W_loc; 
+    Q_loc = MatrixXr::Identity(n_loc, n_loc) - W_loc * WtW_loc.ldlt().solve(W_loc.transpose());
+  }
 
   // compute the residuals under H0
   this->Partial_f_res_H0 = Q_loc*(Z_loc - f_0); 
@@ -280,11 +288,19 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   if(this->inf_car.getInfData()->get_implementation_type()[this->pos_impl] == "eigen-sign-flip"){
     // compute Q_loc decomposition
     Eigen::SelfAdjointEigenSolver<MatrixXr> Q_dec(Q_loc);
+    
+    MatrixXr V = Q_dec.eigenvectors();
+    
+    if(this->inf_car.getRegData()->getCovariates()->rows()!=0){
+      UInt q = this->inf_car.getq();
+      V = Q_dec.eigenvectors().rightCols(n_loc - q);
+    }
+   
     // update residuals to be flipped
-    this->Partial_f_res_H0 = Q_dec.eigenvectors().transpose() * this->Partial_f_res_H0; 
-
+    VectorXr V_Partial_f_res_H0 = V.transpose() * this->Partial_f_res_H0; 
+    
     // observed statistics
-    VectorXr T = std::sqrt(n_loc) * Psi_loc.transpose() * Q_dec.eigenvectors() * this->Partial_f_res_H0; 
+    VectorXr T = std::sqrt(n_loc) * Psi_loc.transpose() * V * V_Partial_f_res_H0; 
     VectorXr T_perm = T;
 
     // observed final statistic (for simultaneous test) --> not standardized for the moment 
@@ -298,14 +314,14 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     std::default_random_engine eng;
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
-    VectorXr res_perm = this->Partial_f_res_H0; 
+    VectorXr res_perm = V_Partial_f_res_H0; 
 
     for(unsigned long int i=0; i < n_flip; ++i){
-      for(unsigned long int j=0; j < n_loc; ++j){
+      for(unsigned long int j=0; j < V_Partial_f_res_H0.size(); ++j){
 	UInt flip=2*distr(eng)-1;
-	res_perm(j)=this->Partial_f_res_H0(j)*flip;
+	res_perm(j)=V_Partial_f_res_H0(j)*flip;
       }
-      T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * Q_dec.eigenvectors() * res_perm;
+      T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * V * res_perm;
       // flipped statistic
       T_perm_sq = T_perm.array() * T_perm.array();
       T_comb_perm = T_perm_sq.sum(); 

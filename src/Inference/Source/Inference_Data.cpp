@@ -58,6 +58,8 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
       implementation_Type[i] = "eigen-sign-flip";
     else if(INTEGER(implementation_Type_)[i]==4)
       implementation_Type[i] = "sign-flip";
+    else if(INTEGER(implementation_Type_)[i]==5)
+      implementation_Type[i] = "wald-mod";
   }
  
   //exact_Inference

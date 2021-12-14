@@ -22,14 +22,17 @@ template<typename InputHandler, typename MatrixType>
 class Wald_Base:public Inference_Base<InputHandler, MatrixType>{
 protected:
   MatrixXr S;						//!< Smoothing matrix 
+  MatrixXr B;                                           //!< Smoothing matrix without covariates
   MatrixXr Partial_S;                                   //!< (Psi^t*Q*Psi + lambda*P)^-1 * Psi^t computed only if local f variance is required 
   Real tr_S=0; 						//!< Trace of smoothing matrix, needed for the variance-covariance matrix (V) and eventually GCV computation
   Real sigma_hat_sq; 					//!< Estimator for the variance of the residuals (SSres/(n_obs-(q+tr_S)))
   bool is_sigma_hat_sq_computed = false;                //!< Boolean that tells whether sigma_hat_sq has been computed or not
   bool is_S_computed = false;				//!< Boolean that tells whether S has been computed or not
+  bool is_B_computed = false;                           //!< Boolean that tells whether B has been computed or not
   MatrixXr V;						//!< Variance-Covariance matrix of the beta parameters
   bool is_V_computed = false;				//!< Boolean that tells whether V has been computed or not
   virtual void compute_S(void) = 0;			//!< Pure virtual method used to compute S, either in an exact or non-exact way 
+  virtual void compute_B(void) = 0;                     //!< Pure virtual method used to compute B, either in an exact or non-exact way
   void compute_V(void);					//!< Method used to compute V
   MatrixXr V_f;                                         //!< Variance-Covariance matrix of f_hat estimator
   bool is_V_f_computed = false;                         //!< Boolean that tells whether V_f has been computed or not
@@ -67,6 +70,7 @@ template<typename InputHandler, typename MatrixType>
 class Wald_Exact:public Wald_Base<InputHandler, MatrixType>{
 private: 
   void compute_S(void) override;
+  void compute_B(void) override;
 public:
   // CONSTUCTOR
   Wald_Exact()=delete;	//The default constructor is deleted
@@ -82,6 +86,7 @@ template<typename InputHandler, typename MatrixType>
 class Wald_Non_Exact:public Wald_Base<InputHandler, MatrixType>{
 private: 
   void compute_S(void) override;
+  void compute_B(void) override;
 public:
   // CONSTUCTOR
   Wald_Non_Exact()=delete;	//The default constructor is deleted
