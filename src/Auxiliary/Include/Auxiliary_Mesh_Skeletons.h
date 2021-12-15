@@ -238,7 +238,7 @@ SEXP isInside_skeleton(SEXP Rmesh,SEXP Rpoints, SEXP Rsearch, SEXP Rredundancy)
     const RNumericMatrix points(Rpoints);
     bool redundancy = INTEGER(Rredundancy)[0];
 
-    SEXP result = PROTECT(Rf_allocMatrix(LGLSXP,points.nrows(),1));
+    SEXP result = PROTECT(Rf_allocMatrix(INTSXP,points.nrows(),1));
     RIntegerMatrix isInside(result);
 
     Point<ndim> current_point;
@@ -254,9 +254,9 @@ SEXP isInside_skeleton(SEXP Rmesh,SEXP Rpoints, SEXP Rsearch, SEXP Rredundancy)
             current_element = mesh_.findLocationNaive(current_point);
 
         if( current_element.getId()==Identifier::NVAL)
-            isInside[i] = false;
+            isInside[i] = -1;
         else
-            isInside[i] = true;
+            isInside[i] = current_element.getId() + 1;
     }
 
     UNPROTECT(1);

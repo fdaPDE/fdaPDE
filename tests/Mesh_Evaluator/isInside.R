@@ -1,4 +1,8 @@
-isInside <- function(mesh,points, search="naive", redundancy=FALSE){
+
+# it returns the ID of the element to which the point belong or -1 if the point is not 
+# on the graph
+
+isInside <- function(mesh,points, search="tree", redundancy=TRUE){
   
   if(is.null(mesh))
     stop("mesh is null")
