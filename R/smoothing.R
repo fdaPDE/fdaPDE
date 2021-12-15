@@ -715,6 +715,19 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
+    }else if(class(FEMbasis$mesh) == 'mesh.1.5D')
+    {
+      bigsol = NULL
+      if(!is.null(locations))
+        stop("The option locations!=NULL for graph domains is currently not implemented")
+      bigsol = CPP_smooth.graph.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+                                              covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+                                              incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+                                              FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+                                              search = search, bary.locations = bary.locations,
+                                              optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
+                                              DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      numnodes = nrow(FEMbasis$mesh$nodes)
     }
   }
 
