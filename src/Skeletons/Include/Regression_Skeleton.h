@@ -91,23 +91,23 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	}
         //Inference
 	if(inferenceData.get_definition()==true){ 
-		//only if inference is actually required
-		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
+	  //only if inference is actually required
+	  Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second, &inferenceData, lambda_inference); //Carrier for inference Data
 
-		//get the component on which inference is required
-		const std::vector<std::string> inf_component = inferenceData.get_component_type(); 
+	  //get the component on which inference is required
+	  const std::vector<std::string> inf_component = inferenceData.get_component_type(); 
 
-                //if nonparametric inference is required
-                if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || 
-		   std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end()){
-			// set the solution of the system inside the inference carrier
-			inf_car.setSolutionp(&(solution_bricks.first));
-                        // compute other local matrices according to the implementation
-	           	compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
-		}
+	  //if nonparametric inference is required
+	  if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || 
+	     std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end()){
+	    // set the solution of the system inside the inference carrier
+	    inf_car.setSolutionp(&(solution_bricks.first));
+	    // compute other local matrices according to the implementation
+	    compute_nonparametric_inference_matrices<InputHandler, ORDER, mydim, ndim>(mesh, regressionData, inferenceData, inf_car);
+	  }
 
-		inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
-       }
+	  inference_wrapper_space(optimizationData, solution_bricks.second, inf_car, inference_Output);    
+	}
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData,inference_Output,inferenceData);
 }
 
@@ -461,9 +461,9 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
       psi.makeCompressed();
     }
 
-      // set it into the inference carrier
-      inf_car_.setPsi_loc(psi);
-      inf_car_.setN_loc(psi.rows());
+    // set it into the inference carrier
+    inf_car_.setPsi_loc(psi);
+    inf_car_.setN_loc(psi.rows());
          
     
 
@@ -483,19 +483,20 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 		
       inf_car_.setZ_loc(z_loc);
                 		
-      // reduced design matrix 
-      MatrixXr W_loc; 
-      W_loc.resize(row_indices.size(), inf_car_.getWp()->cols());
+      // reduced design matrix, only if there are covariates
+      if(inf_car_.getRegData()->getCovariates()->rows()!=0) {
+        MatrixXr W_loc; 
+        W_loc.resize(row_indices.size(), inf_car_.getWp()->cols());
 
-      for(UInt i=0; i < inf_car_.getWp()->cols(); ++i){
-	for(UInt j=0; j < inf_car_.getWp()->rows(); ++j){
-	  if(std::find(row_indices.begin(), row_indices.end(), j) != row_indices.end())
-	    W_loc(rel_rows(j), i) = inf_car_.getWp()->coeff(j,i);
-	}
-      }
+        for(UInt i=0; i < inf_car_.getWp()->cols(); ++i){
+	  for(UInt j=0; j < inf_car_.getWp()->rows(); ++j){
+	    if(std::find(row_indices.begin(), row_indices.end(), j) != row_indices.end())
+	      W_loc(rel_rows(j), i) = inf_car_.getWp()->coeff(j,i);
+	  }
+        }
 		
-      inf_car_.setW_loc(W_loc);
-		     		
+        inf_car_.setW_loc(W_loc);
+      }
     }
   }
 	

@@ -303,11 +303,17 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     VectorXr T = std::sqrt(n_loc) * Psi_loc.transpose() * V * V_Partial_f_res_H0; 
     VectorXr T_perm = T;
 
-    // observed final statistic (for simultaneous test) --> not standardized for the moment 
-    VectorXr T_sq = T.array() * T.array();
-    Real T_comb = T_sq.sum();
+    // observed final statistic (for simultaneous test) 
+    Real T_comb;
     
-    VectorXr T_perm_sq = T_sq; 
+    if(this->inf_car.getRegData()->isLocationsByNodes()){
+      T_comb = T.maxCoeff();
+    }
+    else{
+      VectorXr T_sq = T.array() * T.array();
+      T_comb = T_sq.sum();
+    }
+   
     Real T_comb_perm = T_comb; 
 
     // random sign-flips
@@ -323,11 +329,17 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
       }
       T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * V * res_perm;
       // flipped statistic
-      T_perm_sq = T_perm.array() * T_perm.array();
-      T_comb_perm = T_perm_sq.sum(); 
+      if(this->inf_car.getRegData()->isLocationsByNodes()){
+        T_comb_perm = T_perm.maxCoeff();
+      }
+      else{
+        VectorXr T_perm_sq = T_perm.array() * T_perm.array();
+        T_comb_perm = T_perm_sq.sum();
+      }
+      
       if(T_comb_perm > T_comb){ ++count;} 
     }
-   p_value = count/n_flip;
+    p_value = count/n_flip;
     
   }
   else{ // sign-flip implementation
@@ -335,13 +347,19 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     VectorXr T = std::sqrt(n_loc) * Psi_loc.transpose() * this->Partial_f_res_H0; 
     VectorXr T_perm = T; 
 
-    // observed final statistic (for simultaneous test) --> not standardized for the moment 
-    VectorXr T_sq = T.array() * T.array();
-    Real T_comb = T_sq.sum();
+    // observed final statistic (for simultaneous test) 
+    Real T_comb;
     
-    VectorXr T_perm_sq = T_sq; 
+    if(this->inf_car.getRegData()->isLocationsByNodes()){
+      T_comb = T.maxCoeff();
+    }
+    else{
+      VectorXr T_sq = T.array() * T.array();
+      T_comb = T_sq.sum();
+    }
+   
     Real T_comb_perm = T_comb; 
-
+    
     // random sign-flips
     std::default_random_engine eng;
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
@@ -354,26 +372,32 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 	res_perm(j)=this->Partial_f_res_H0(j)*flip;
       }
       T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * res_perm;
-       // flipped statistic
-      T_perm_sq = T_perm.array() * T_perm.array();
-      T_comb_perm = T_perm_sq.sum(); 
+      // flipped statistic
+      if(this->inf_car.getRegData()->isLocationsByNodes()){
+        T_comb_perm = T_perm.maxCoeff();
+      }
+      else{
+        VectorXr T_perm_sq = T_perm.array() * T_perm.array();
+        T_comb_perm = T_perm_sq.sum();
+      }
+      
       if(T_comb_perm > T_comb){ ++count;} 
     }
-   p_value = count/n_flip; 
+    p_value = count/n_flip; 
   } 
 
-return p_value; 
+  return p_value; 
 };
 
 
 template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
-// Eigen-Sign-Flip CI are not implemented for f
-// this function won't be called 
-MatrixXv null_mat; 
-null_mat.resize(1,1);
-null_mat(0) = VectorXr::Constant(3,0);
-return null_mat; 
+  // Eigen-Sign-Flip CI are not implemented for f
+  // this function won't be called 
+  MatrixXv null_mat; 
+  null_mat.resize(1,1);
+  null_mat(0) = VectorXr::Constant(3,0);
+  return null_mat; 
 };
 
 template<typename InputHandler, typename MatrixType>
