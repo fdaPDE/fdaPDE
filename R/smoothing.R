@@ -524,7 +524,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   
   # Checking inference data
   # Most of the checks have already been carried out by inferenceDataObjectBuilder function
-  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates),locations) #checking inference data consistency, constructing default object in NULL case
+  if(!is.null(locations))
+    R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates),locations) #checking inference data consistency, constructing default object in NULL case
+  else
+    R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates),FEMbasis$mesh$nodes)
   
   # Check that GCV is set for inference
   if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){

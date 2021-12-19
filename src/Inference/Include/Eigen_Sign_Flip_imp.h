@@ -307,11 +307,15 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     Real T_comb;
     
     if(this->inf_car.getRegData()->isLocationsByNodes()){
-      T_comb = T.maxCoeff();
+      VectorXr T_abs = T.array().abs();
+      //T_comb = T_abs.maxCoeff();
+      T_comb = fabs(T.mean());
     }
     else{
       VectorXr T_sq = T.array() * T.array();
       T_comb = T_sq.sum();
+      //VectorXr T_abs = T.array().abs();
+      //T_comb = T_abs.maxCoeff();
     }
    
     Real T_comb_perm = T_comb; 
@@ -330,11 +334,15 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
       T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * V * res_perm;
       // flipped statistic
       if(this->inf_car.getRegData()->isLocationsByNodes()){
-        T_comb_perm = T_perm.maxCoeff();
+        VectorXr T_perm_abs = T_perm.array().abs();
+        //T_comb_perm = T_perm_abs.maxCoeff();
+        T_comb_perm = fabs(T_perm.mean());
       }
       else{
         VectorXr T_perm_sq = T_perm.array() * T_perm.array();
         T_comb_perm = T_perm_sq.sum();
+        //VectorXr T_perm_abs = T_perm.array().abs();
+        //T_comb_perm = T_perm_abs.maxCoeff();
       }
       
       if(T_comb_perm > T_comb){ ++count;} 
@@ -351,11 +359,15 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     Real T_comb;
     
     if(this->inf_car.getRegData()->isLocationsByNodes()){
-      T_comb = T.maxCoeff();
+      VectorXr T_abs = T.array().abs();
+      //T_comb = T_abs.maxCoeff();
+      T_comb = fabs(T.mean());
     }
     else{
       VectorXr T_sq = T.array() * T.array();
       T_comb = T_sq.sum();
+      //VectorXr T_abs = T.array().abs();
+      //T_comb = T_abs.maxCoeff();
     }
    
     Real T_comb_perm = T_comb; 
@@ -374,11 +386,15 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
       T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * res_perm;
       // flipped statistic
       if(this->inf_car.getRegData()->isLocationsByNodes()){
-        T_comb_perm = T_perm.maxCoeff();
+        ectorXr T_perm_abs = T_perm.array().abs();
+        //T_comb_perm = T_perm_abs.maxCoeff();
+        T_comb_perm = fabs(T_perm.mean());
       }
       else{
         VectorXr T_perm_sq = T_perm.array() * T_perm.array();
         T_comb_perm = T_perm_sq.sum();
+        //VectorXr T_perm_abs = T_perm.array().abs();
+        //T_comb_perm = T_perm_abs.maxCoeff();
       }
       
       if(T_comb_perm > T_comb){ ++count;} 
