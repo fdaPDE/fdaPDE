@@ -448,4 +448,132 @@ my_density <- function(data, mesh, PHI, FEMbasis, K0, K1, lambda, epsil, initial
   
 }
 
+
+my_density.aldo <- function(data, mesh, PHI, FEMbasis, K0, K1, lambda, epsil, initialization, ns, 
+                            tolerance=1e-5, Nesterov = FALSE) {
+  
+  # PHI è la matrice valutata nelle osservazioni
+  # cvec <-> g
+  # cvec in ingresso rappresenta il dato iniziale
+  
+  x <- data[, 1]
+  y <- data[, 2]
+  
+  nobs <- dim(PHI)[1]
+  nbasis <- dim(PHI)[2]
+  nsim = ns
+  nelem = mesh$nsegments[1]
+  elements = mesh$segments
+  deltas = mesh$deltas
+  
+  subel_edge = mesh$subel_edge # numero di elementi per ogni ramo
+  
+  len = FEMbasis$len
+  
+  local_to_global = mesh$local_to_global
+  
+  
+  cvec = matrix(0, nrow=nbasis, ncol=nsim+1)
+  cvec[,1] = initialization
+  
+  GGG = matrix(0, nrow=nbasis, ncol=nsim+1)
+  
+  
+  gradient <- matrix(0, nrow=nbasis, ncol=nsim+1)
+  
+  nq = 3
+  xq = c(  0.7745966692414834, 0, -0.7745966692414834   )
+  w = c(  0.5555555555555556, 0.8888888888888888, 0.5555555555555556  )
+  
+  
+  inv_K0 = solve(K0)
+  
+  prod = K1%*%inv_K0%*%K1
+  error = tolerance + 1
+  j = 1
+  
+  pb <- txtProgressBar(min = 0, max = nsim, style = 1, char="=")
+  while (j<=nsim && (!is.na(error) && error>tolerance) ) {
+    # Compute the first term of the log-likelihood
+    #lnintens <- PHI %*% cvec[,j]
+    #Pnum <- exp(lnintens)
+    #first_term <- - sum(lnintens)
+    
+    # calcolo il primo termine della derivata del gradiente -1^T %*% PHI
+    # GGG è il vecchio grad_sum
+    GGG[,j] <- as.matrix(- colSums(PHI) )
+    
+    # Loop through elements and compute integrals over elements
+    #gradient <- matrix(0, nrow=nbasis, ncol=nsim)
+    #second_term = 0
+    #gradient_aux = rep(0, nbasis)
+    #second_term_aux = 0
+    
+    int = matrix(0, nrow=nelem, ncol=1)
+    
+    # calcolo l'approssimazione del secondo termine del funzionale, il termine con l'integrale.
+    # uso semplicemente l'area dei rettangoli.
+    
+    for (i in 1:nelem) {
+      
+      # fisso il segmentino i-esimo. prendo il nodo a sx del segmentino.
+      # sx rappresenta il numero globale di tale nodo.
+      sx = elements[i,1]
+      dx = elements[i,2]
+      
+      
+      current_length = len[i]
+      
+      edge_current = subel_edge[i]
+      n_local_elem = which(local_to_global[[edge_current]]==sx)
+      
+      a = rep ( (n_local_elem - 1)*len[i] , 3)
+      b = rep ( n_local_elem*len[i] , 3)
+      
+      w_tilde = (len[i]/2)*w
+      xq_tilde = ((b-a)/2 ) * xq + (b+a)/2
+      
+      PHI_q = matrix(0, nrow=nq, ncol=nnodes)
+      
+      PHI_q[1:nq, sx] = as.matrix( ( b - xq_tilde )/current_length )
+      PHI_q[1:nq, dx] = as.matrix( ( xq_tilde - a )/current_length )
+      
+      for ( qqq in 1:nq ){
+        gradient[,j] = gradient[,j]  + as.vector( exp(PHI_q[qqq,]%*%cvec[,j]) )* as.matrix(PHI_q[qqq,]) * as.vector(w_tilde[qqq])
+        int[i] = int[i] + as.vector( exp( PHI_q[qqq,] %*%cvec[,j] ) )*  as.vector(w_tilde[qqq])
+      }
+      
+      
+      
+    }
+    
+    int_tot = sum(int)
+    
+    
+    GGG[,j] <- GGG[,j] + nobs*gradient[,j]
+    
+    
+    GGG[,j] <- GGG[,j] + 2*lambda*prod %*% cvec[,j]
+    cvec_update <- -epsil*GGG[,j]
+    cvec[,j+1] <- cvec[,j] + cvec_update
+    
+    if( sum( is.na(cvec[,j+1]) ) != 0 )
+      stop("Warning: there is at least one node containing NaN")
+        
+      error = norm(cvec[,j+1]-cvec[,j], type="2") / norm(cvec[,j],type="2")
+    
+    if(!is.na(error) && error < tolerance)
+      print(paste("Method converged in ", j," iterations",sep=""))
+    
+    setTxtProgressBar(pb, j)
+    j = j + 1
+  }
+  
+  if( j - 1 == nsim)
+    print("Warning: Method stopped for reaching maximum number of iterations")
+  
+  return(list(density=cvec, gradient=gradient, GGG=GGG, int_tot=int_tot, iters = j-1, error = error) )
+  
+}
+
 ######################################################################################
