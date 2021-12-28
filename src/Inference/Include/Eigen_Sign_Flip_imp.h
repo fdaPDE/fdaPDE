@@ -321,7 +321,8 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     Real T_comb_perm = T_comb; 
 
     // random sign-flips
-    std::default_random_engine eng;
+    std::random_device rd; 
+    std::default_random_engine eng{rd()};
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
     VectorXr res_perm = V_Partial_f_res_H0; 
@@ -345,7 +346,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
         //T_comb_perm = T_perm_abs.maxCoeff();
       }
       
-      if(T_comb_perm > T_comb){ ++count;} 
+      if(T_comb_perm >= T_comb){ ++count;} 
     }
     p_value = count/n_flip;
     
@@ -373,7 +374,8 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     Real T_comb_perm = T_comb; 
     
     // random sign-flips
-    std::default_random_engine eng;
+    std::random_device rd; 
+    std::default_random_engine eng{rd()};
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
     VectorXr res_perm = this->Partial_f_res_H0; 
@@ -386,7 +388,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
       T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * res_perm;
       // flipped statistic
       if(this->inf_car.getRegData()->isLocationsByNodes()){
-        ectorXr T_perm_abs = T_perm.array().abs();
+        VectorXr T_perm_abs = T_perm.array().abs();
         //T_comb_perm = T_perm_abs.maxCoeff();
         T_comb_perm = fabs(T_perm.mean());
       }
@@ -397,7 +399,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
         //T_comb_perm = T_perm_abs.maxCoeff();
       }
       
-      if(T_comb_perm > T_comb){ ++count;} 
+      if(T_comb_perm >= T_comb){ ++count;} 
     }
     p_value = count/n_flip; 
   } 
