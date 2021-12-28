@@ -79,7 +79,8 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
   MatrixXr stat_perm=stat;
 
   // Random sign-flips
-  std::default_random_engine eng;
+  std::random_device rd; 
+  std::default_random_engine eng{rd()};
   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
   Real count = 0;
     
@@ -177,11 +178,10 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     VectorXr stat_perm=stat;
     
     //Random sign-flips
-    std::default_random_engine eng;
+    std::random_device rd; 
+    std::default_random_engine eng{rd()};
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
-    VectorXr Pi; // Sign flip matrix preallocation
-    Pi.resize(TildeX.cols());
     VectorXr Tilder_perm=Tilder;
     
     for(unsigned long int i=0;i<n_flip;i++){
@@ -226,7 +226,8 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     MatrixXr stat_perm=stat;
 
     // Random sign-flips
-    std::default_random_engine eng;
+    std::random_device rd; 
+    std::default_random_engine eng{rd()};
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
     VectorXr count = VectorXr::Zero(p);
     
