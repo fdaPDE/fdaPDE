@@ -96,6 +96,19 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints,
 bestlambdas = output_CPP$optimization$lambda_position
 image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
+#### Test 1.4: Newton_fd method with stochastic GCV
+lambdaS = exp(-4)
+lambdaT = exp(-7)
+output_CPP<-smooth.FEM.time(time_mesh = TimePoints, 
+                            time_locations = TimePoints,
+                            observations=observations, 
+                            FEMbasis=FEMbasis, 
+                            lambdaS=lambdaS,lambdaT=lambdaT,
+                            lambda.selection.criterion='newton_fd', 
+                            DOF.evaluation='stochastic', 
+                            lambda.selection.lossfunction='GCV',
+                            lambda.optimization.tolerance = 1e-4)
+
 #### Test 2: c-shaped domain ####
 #            locations != nodes
 #            laplacian
