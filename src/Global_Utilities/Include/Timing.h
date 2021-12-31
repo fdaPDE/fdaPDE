@@ -36,7 +36,7 @@ public:
 
   timespec stop() {
     timespec end;
-    
+
     #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
     clock_serv_t cclock;
     mach_timespec_t mts;
@@ -51,7 +51,7 @@ public:
     #endif
 
     timespec difference = diff(begin, end);
-    Rprintf("It took %u.%09us\n", difference.tv_sec, difference.tv_nsec);
+    //Rprintf("It took %u.%09us\n", difference.tv_sec, difference.tv_nsec);
 //    std::cout << "It took " << difference.tv_sec << "."
 //              << std::setfill('0') << std::setw(9) << difference.tv_nsec
 //              << "s" << std::endl;

@@ -5,7 +5,7 @@ CPP_smooth.FEM.FPCA<-function(locations, bary.locations, datamatrix, FEMbasis, i
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
-  
+
   if(is.null(locations))
   {
     locations<-matrix(nrow = 0, ncol = ndim)
@@ -15,8 +15,8 @@ CPP_smooth.FEM.FPCA<-function(locations, bary.locations, datamatrix, FEMbasis, i
   {
     incidence_matrix<-matrix(nrow = 0, ncol = 1)
   }
-  
-  if(is.null(validation)) 
+
+  if(is.null(validation))
   {
     validation="NoValidation"
   }
@@ -45,11 +45,11 @@ CPP_smooth.FEM.FPCA<-function(locations, bary.locations, datamatrix, FEMbasis, i
   storage.mode(search) <- "integer"
 
   ## Call C++ function
-  bigsol <- .Call("Smooth_FPCA", locations, bary.locations, datamatrix, FEMbasis$mesh, 
-                  FEMbasis$order, incidence_matrix, mydim, ndim, 
+  bigsol <- .Call("Smooth_FPCA", locations, bary.locations, datamatrix, FEMbasis$mesh,
+                  FEMbasis$order, incidence_matrix, mydim, ndim,
                   lambda, nPC, validation, NFolds, GCVmethod, nrealizations, search,
                   PACKAGE = "fdaPDE")
-  
+
   ## Reset them correctly
   #fdobj$basis$params$mesh$triangles = fdobj$basis$params$mesh$triangles + 1
   #fdobj$basis$params$mesh$edges = fdobj$basis$params$mesh$edges + 1

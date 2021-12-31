@@ -3,6 +3,7 @@
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
+
   SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
   SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold,SEXP Rsearch, SEXP Rmesh):
   deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, RnThreads_int, RnThreads_l, RnThreads_fold),
@@ -62,8 +63,10 @@ void DataProblem<ORDER, mydim, ndim>::fillFEMatrices(){
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 void DataProblem<ORDER, mydim, ndim>::fillPsiQuad(){
+
   for(UInt i=0; i<Integrator::NNODES; ++i)
      PsiQuad_.row(i)=reference_eval_point<EL_NNODES, mydim>(Integrator::NODES[i]);
+
 }
 
 
@@ -103,6 +106,7 @@ DataProblem<ORDER, mydim, ndim>::computePsi(const std::vector<UInt>& indices) co
      tolerance = 100 * eps;
 
   UInt nnodes = mesh_.num_nodes();
+
   UInt nlocations = indices.size();
   SpMat psi(nlocations, nnodes);
 
@@ -135,6 +139,7 @@ DataProblem<ORDER, mydim, ndim>::computePsi(const std::vector<UInt>& indices) co
   psi.makeCompressed();
 
   return psi;
+
 }
 
 #endif

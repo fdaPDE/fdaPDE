@@ -120,6 +120,10 @@ CPP_FEM.volume.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatI
   storage.mode(FEMbasis$mesh$tetrahedrons) <- "integer"
   storage.mode(FEMbasis$mesh$faces) <- "integer"
   storage.mode(FEMbasis$mesh$neighbors) <- "integer"
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
   storage.mode(lambda) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"

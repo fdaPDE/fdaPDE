@@ -31,6 +31,7 @@ FEDE<ORDER, mydim, ndim>::apply(){
 
   // final minimization descent
     Rprintf("##### FINAL STEP #####\n");
+
   gcoeff_ = minAlgo_->apply_core(dataProblem_.getGlobalPsi(), bestLambda_, gInit);
 
 }

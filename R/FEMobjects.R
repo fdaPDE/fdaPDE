@@ -4,9 +4,15 @@
 #' @param saveTree a flag to decide to save the tree mesh information in advance (default is FALSE)
 #' @return A \code{FEMbasis} object. This contains the \code{mesh}, along with some additional quantities:
 #' \itemize{
+<<<<<<< HEAD
 #'  \item{\code{order}}{Either "1" or "2" for the 2D and 2.5D case, and "1" for the 3D case.
 #'  Order of the Finite Element basis.}
 #'  \item{\code{nbasis}}{Scalar. The number of basis.}
+=======
+#' 	\item{\code{order}}{Either "1" or "2" for the 2D and 2.5D case, and "1" for the 3D case.
+#' 	Order of the Finite Element basis.}
+#' 	\item{\code{nbasis}}{Scalar. The number of basis.}
+>>>>>>> master
 #' }
 #' @description Sets up a Finite Element basis. It requires a \code{mesh.2D}, \code{mesh.2.5D} or \code{mesh.3D} object,
 #' as input.

@@ -1,4 +1,20 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
+# fdaPDE 1.1-2
+
+## New features
+
+<<<<<<< HEAD
+Iterative method for spatio-temporal regression with PDE regularization (in this framework also two methods for the computation of GCV Exact and Stochastic)
+=======
+Iterative method for spatio-temporal regression with PDE regularization
+(in this framework also two methods for the computation of GCV Exact and Stochastic)
+
+
 # fdaPDE 1.1-1
+>>>>>>> master
 
 ## New features
 
