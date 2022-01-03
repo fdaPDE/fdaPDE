@@ -58,11 +58,13 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 VectorXr
 HeatProcess<ORDER, mydim, ndim>::computeDensityOnlyData(){
 
+
   VectorXr x = VectorXr::Zero(this->dataProblem_.getNumNodes());
 
   for(UInt i : data_index_){
     Element<EL_NNODES, mydim, ndim> current_element = this->dataProblem_.findLocation(this->dataProblem_.data(i));
     for(const auto& node : current_element)
+
         x[node.id()] += 1;
   }
 
@@ -70,12 +72,14 @@ HeatProcess<ORDER, mydim, ndim>::computeDensityOnlyData(){
 
   return (x.array() / this->dataProblem_.FEintegrate(x));
 
+
 }
 
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 void
 HeatProcess<ORDER, mydim, ndim>::computeStartingDensities(){
+
 
   VectorXr x = computeDensityOnlyData();
 
@@ -110,6 +114,7 @@ HeatProcess<ORDER, mydim, ndim>::computeStartingDensities(){
 
     x.swap(x_new);
   }
+
 }
 
 
@@ -122,9 +127,7 @@ HeatProcess<ORDER, mydim, ndim>::chooseInitialization(Real lambda) const{
   UInt index_min;
   sum.minCoeff(&index_min);
 
-
   Rprintf("The initialization selected for lambda %f is the number %d\n", lambda, index_min);
-
 
   return &(init_proposals_[index_min]);
 }
@@ -185,7 +188,7 @@ Heat_CV<ORDER, mydim, ndim>::perform_init_cv(){
 
 
     Rprintf("The initialization selected is the number %d\n", init_best_);
-   
+
 
     // totale
     this->data_index_.resize(this->dataProblem_.dataSize());

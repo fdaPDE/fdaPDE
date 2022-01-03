@@ -1,6 +1,7 @@
 #ifndef __AD_TREE_IMP_H__
 #define __AD_TREE_IMP_H__
 
+
 template<class Shape>
 ADTree<Shape>::ADTree(SEXP Rmesh){
   if((XLENGTH(Rmesh)==11 || TYPEOF(VECTOR_ELT(Rmesh, 11))==0)){
@@ -114,8 +115,11 @@ void ADTree<Shape>::setTree(SEXP Rmesh){
     coord.clear();
   }
 }
+<<<<<<< HEAD:src/Mesh/Include/AD_Tree_imp.h
 
 
+=======
+>>>>>>> master:src/adtree_imp.h
 
 
 template<class Shape>
@@ -137,7 +141,7 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
 
   int iava = header_.getiava();
   int iend = header_.getiend();
-  
+
 
   std::vector<Real> x;
   x.reserve(dimt);
@@ -151,6 +155,10 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
   /* We scale the dimension of the "bounding box" of the Shape object
    * with coordinate values given by coords.
    */
+<<<<<<< HEAD:src/Mesh/Include/AD_Tree_imp.h
+=======
+
+>>>>>>> master:src/adtree_imp.h
   Box<Shape::dp()> shapebox(coords);
   for(int i = 0; i < header_.getndimt(); ++i) {
     Real orig = header_.domainorig(i);
@@ -173,26 +181,26 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
    */
   int currentlev = 0;
   short int edge = 0;
-  
+
   while(ipoi != 0) { // finish while when ipoi == 0
     // Get the current dimension.
     int id = searchdim(currentlev, dimt);
-    
+
     /*
      * We take advantage of the fact that we are only descending
      * the tree. Then we recursively multiply by 2 the coordinate.
      */
-    
+
     x[id] *= 2.;
     ifth = ipoi;
-    
+
     if(x[id] < 1.) {
       // Go to the left.
       edge = 0;
     } else {
       // Go to the right.
       edge = 1;
-      --x[id];    
+      --x[id];
     }
     // Next level.
     ++currentlev;
@@ -225,7 +233,7 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
       throw TreeAlloc<Shape>();
     }
   }
-  
+
 
   // Add the node in the next available location.
   ipoi = iava; // already inserted dummy object at iava
@@ -235,7 +243,7 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
 
   // iava is the next available location.
   iava = data_[ipoi].getchild(0); //should return the position of left child
-  
+
   ++nele;
   if(iava == 0) {
     if( iend > header_.gettreeloc() ) {
@@ -336,7 +344,11 @@ void ADTree<Shape>::gettri(int const & loc, std::vector<Real> & coord, Id & id) 
 template<class Shape>
 bool ADTree<Shape>::search(std::vector<Real> const & region, std::set<int> & found) const {
 
+<<<<<<< HEAD:src/Mesh/Include/AD_Tree_imp.h
 
+=======
+  
+>>>>>>> master:src/adtree_imp.h
     static constexpr Real eps = std::numeric_limits<Real>::epsilon(),
      tolerance = 10 * eps;
 
@@ -423,12 +435,12 @@ bool ADTree<Shape>::search(std::vector<Real> const & region, std::set<int> & fou
 
       // Traverse left subtree.
       ipoiNext = data_[ipoi].getchild(0);
-        
+
       // Check if subtree intersects box.
       if(ipoiNext != 0) {
         int id = searchdim(lev, dimt);
         double amov = delta(lev, dimt);
-          
+
         if (id < dimp) {
             if(xl[id] > box[id+dimp]) {
               ipoiNext = 0;
@@ -439,7 +451,7 @@ bool ADTree<Shape>::search(std::vector<Real> const & region, std::set<int> & fou
           }
         }
       }
-        
+
       /*
        * Left subtree is neither null nor 'external'.
        * Push ipoi onto the stack.

@@ -3,7 +3,9 @@
 
 template<UInt ndim>
 DEData<ndim>::DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
+
   SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rsearch)
+
 {
   setData(Rdata);
 
@@ -41,10 +43,12 @@ DEData<ndim>::DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP R
 template<UInt ndim>
 DEData<ndim>::DEData(const std::vector<Point<ndim> >& data, const UInt& order, const VectorXr& fvec, Real heatStep, UInt heatIter, const std::vector<Real>& lambda,
                const UInt& nfolds, const UInt& nsim, const std::vector<Real>& stepProposals, Real tol1, Real tol2,
+
                bool print, UInt nThreads_int, UInt nThreads_l, UInt nThreads_fold, UInt search):
                 data_(data), order_(order), fvec_(fvec), heatStep_(heatStep), heatIter_(heatIter), lambda_(lambda), Nfolds_(nfolds),
                 nsim_(nsim), stepProposals_(stepProposals), tol1_(tol1), tol2_(tol2), print_(print),
                 nThreads_int_(nThreads_int), nThreads_l_(nThreads_l), nThreads_fold_(nThreads_fold), search_(search)
+
 {
 }
 
@@ -103,6 +107,7 @@ void DEData<ndim>::printData(std::ostream & out) const
   {
     out<<data_[i]<<std::endl;
   }
+
 }
 
 #endif

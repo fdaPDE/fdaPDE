@@ -1,7 +1,7 @@
 CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
                               covariates = NULL, ndim, mydim, BC = NULL,
                               incidence_matrix = NULL, areal.data.avg = TRUE,
-                              FLAG_MASS, FLAG_PARABOLIC, IC,
+                              FLAG_MASS, FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = 10^(-4), max.steps = 50, IC,
                               search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
@@ -9,7 +9,8 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
-
+  max.steps = max.steps - 1
+  
   if(is.null(covariates))
   {
     covariates<-matrix(nrow = 0, ncol = 1)
@@ -50,7 +51,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
-  
+
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
@@ -58,7 +59,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   {
     lambdaS<-as.vector(lambdaS)
   }
-  
+
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
@@ -93,6 +94,10 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   storage.mode(FLAG_MASS) <-"integer"
   FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
   storage.mode(FLAG_PARABOLIC) <-"integer"
+  FLAG_ITERATIVE<-as.integer(FLAG_ITERATIVE)
+  storage.mode(FLAG_ITERATIVE)<-"integer"
+  storage.mode(max.steps) <- "integer"
+  storage.mode(threshold) <- "double"
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
   storage.mode(search) <- "integer"
@@ -107,7 +112,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   storage.mode(lambda.optimization.tolerance) <- "double"
 
   ## IC estimation for parabolic smoothing from the first column of observations
-  ICsol=NA
+  ICsol = NA
   #empty dof matrix
   DOF.matrix_IC<-matrix(nrow = 0, ncol = 1)
   if(nrow(IC)==0 && FLAG_PARABOLIC)
@@ -138,11 +143,11 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
     lambdaSIC <- as.matrix(lambdaSIC)
     storage.mode(lambdaSIC) <- "double"
     ## call the smoothing function with initial observations to estimates the IC
-    print("Estimation of the Initial Conditions")
+
     ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
-                   FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
-                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-                   as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+      FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+      BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
+      as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if(ICsol[[6]]==1)
@@ -150,11 +155,10 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
       lambdaSIC <- 10^seq(-9,-7,0.1)
       lambdaSIC <- as.matrix(lambdaSIC)
       storage.mode(lambdaSIC) <- "double"
-      print("Improving Estimation of the Initial Conditions")
       ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
-                     FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
-                     BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-                     as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
+       as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -164,11 +168,10 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
         lambdaSIC <- 10^seq(3,5,0.1)
         lambdaSIC <- as.matrix(lambdaSIC)
         storage.mode(lambdaSIC) <- "double"
-        print("Improving Estimation of the Initial Conditions")
         ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
-                       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
-                       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-                       as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+         FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+         BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
+         as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
       }
     }
 
@@ -201,15 +204,15 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
 
   ## Call C++ function
   bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
-                  mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
-                  IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+    mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
+    IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
   return(c(bigsol,ICsol))
 }
 
 CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
                                   covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL,
                                   incidence_matrix = NULL, areal.data.avg = TRUE,
-                                  FLAG_MASS, FLAG_PARABOLIC, IC,
+                                  FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, threshold = 10^(-4), max.steps = 50, IC,
                                   search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
 
@@ -218,7 +221,8 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
-
+  max.steps = max.steps - 1
+  
   if(is.null(covariates))
   {
     covariates<-matrix(nrow = 0, ncol = 1)
@@ -260,7 +264,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
-  
+
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
@@ -268,7 +272,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   {
     lambdaS<-as.vector(lambdaS)
   }
-  
+
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
@@ -277,12 +281,25 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
     lambdaT<-as.vector(lambdaT)
   }
 
+  if(is.null(time_locations)){
+    time_locations<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_locations <- as.matrix(time_locations)
+  }
+
+  if(is.null(time_mesh)){
+    time_mesh<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_mesh <- as.matrix(time_mesh)
+  }
+
+
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
-  time_locations <- as.matrix(time_locations)
   storage.mode(time_locations) <- "double"
-  time_mesh <- as.matrix(time_mesh)
   storage.mode(time_mesh) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$triangles) <- "integer"
@@ -306,6 +323,10 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   storage.mode(FLAG_MASS) <-"integer"
   FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
   storage.mode(FLAG_PARABOLIC) <-"integer"
+  FLAG_ITERATIVE<-as.integer(FLAG_ITERATIVE)
+  storage.mode(FLAG_ITERATIVE)<-"integer"
+  storage.mode(max.steps) <- "integer"
+  storage.mode(threshold) <- "double"
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
   storage.mode(search) <- "integer"
@@ -338,20 +359,18 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
     lambdaSIC <- 10^seq(-7,3,0.1)
     lambdaSIC <- as.matrix(lambdaSIC)
     storage.mode(lambdaSIC) <- "double"
-    print("Estimation of the Initial Conditions")
     ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
-                   mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
-                   incidence_matrix, areal.data.avg, search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+      mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
+      incidence_matrix, areal.data.avg, search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
 
     if(ICsol[[6]]==1)
     {
       lambdaSIC <- 10^seq(-9,-7,0.1)
       lambdaSIC <- as.matrix(lambdaSIC)
       storage.mode(lambdaSIC) <- "double"
-      print("Improving Estimation of the Initial Conditions")
       ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
-                     mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
-                     incidence_matrix, areal.data.avg, search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+       mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
+       incidence_matrix, areal.data.avg, search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -360,10 +379,9 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
         lambdaSIC <- 10^seq(3,5,0.1)
         lambdaSIC <- as.matrix(lambdaSIC)
         storage.mode(lambdaSIC) <- "double"
-        print("Improving Estimation of the Initial Conditions")
         ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
-                       mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
-                       incidence_matrix, areal.data.avg, search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+         mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
+         incidence_matrix, areal.data.avg, search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed,  DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
       }
     }
 
@@ -384,7 +402,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
     time_locations=time_locations[2:nrow(time_locations)]
     observations = observations[(NobsIC+1):length(observations)]
   }
-  
+
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
 
@@ -397,7 +415,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   ## Call C++ function
   bigsol <- .Call("regression_PDE_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
                   mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
-                  BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
+                  BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
                   IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
   return(c(bigsol,ICsol))
 }
@@ -405,7 +423,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
 CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
                                      covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL,
                                      incidence_matrix = NULL, areal.data.avg = TRUE,
-                                     FLAG_MASS, FLAG_PARABOLIC, IC,
+                                     FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, threshold = 10^(-4), max.steps = 50, IC,
                                      search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
 
@@ -414,7 +432,8 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
-
+  max.steps = max.steps - 1
+  
   if(is.null(covariates))
   {
     covariates<-matrix(nrow = 0, ncol = 1)
@@ -455,12 +474,12 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
-  
+
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
   }
-  
+
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
@@ -468,7 +487,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   {
     lambdaS<-as.vector(lambdaS)
   }
-  
+
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
@@ -476,7 +495,21 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   {
     lambdaT<-as.vector(lambdaT)
   }
-  
+
+  if(is.null(time_locations)){
+    time_locations<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_locations <- as.matrix(time_locations)
+  }
+
+  if(is.null(time_mesh)){
+    time_mesh<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_mesh <- as.matrix(time_mesh)
+  }
+
 
   PDE_param_eval = NULL
   points_eval = matrix(CPP_get_evaluations_points(mesh = FEMbasis$mesh, order = FEMbasis$order),ncol = 2)
@@ -488,9 +521,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
-  time_locations <- as.matrix(time_locations)
   storage.mode(time_locations) <- "double"
-  time_mesh <- as.matrix(time_mesh)
   storage.mode(time_mesh) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$triangles) <- "integer"
@@ -515,6 +546,10 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   storage.mode(FLAG_MASS) <-"integer"
   FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
   storage.mode(FLAG_PARABOLIC) <-"integer"
+  FLAG_ITERATIVE<-as.integer(FLAG_ITERATIVE)
+  storage.mode(FLAG_ITERATIVE)<-"integer"
+  storage.mode(max.steps) <- "integer"
+  storage.mode(threshold) <- "double"
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
   storage.mode(search) <- "integer"
@@ -548,22 +583,20 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
     lambdaSIC <- as.matrix(lambdaSIC)
     storage.mode(lambdaSIC) <- "double"
 
-    print("Estimation of the Initial Conditions")
     ICsol <- .Call("regression_PDE_space_varying", locations, bary.locations, observations[1:NobsIC],
-                   FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
-                   covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                   search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+      FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
+      covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+      search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
 
     if(ICsol[[6]]==1)
     {
       lambdaSIC <- 10^seq(-9,-7,0.1)
       lambdaSIC <- as.matrix(lambdaSIC)
       storage.mode(lambdaSIC) <- "double"
-      print("Improving Estimation of the Initial Conditions")
       ICsol <- .Call("regression_PDE_space_varying", locations, bary.locations, observations[1:NobsIC],
-                     FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
-                     covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                     search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+       FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
+       covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+       search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -572,11 +605,10 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
         lambdaSIC <- 10^seq(3,5,0.1)
         lambdaSIC <- as.matrix(lambdaSIC)
         storage.mode(lambdaSIC) <- "double"
-        print("Improving Estimation of the Initial Conditions")
         ICsol <- .Call("regression_PDE_space_varying", locations, bary.locations, observations[1:NobsIC],
-                       FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
-                       covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                       search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+         FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
+         covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+         search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
       }
     }
 
@@ -609,9 +641,9 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
 
   ## Call C++ function
   bigsol <- .Call("regression_PDE_space_varying_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
-                  mydim, ndim,PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
-                  BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
-                  IC, search,  optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+    mydim, ndim,PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
+    BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
+    IC, search,  optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
   return(c(bigsol,ICsol))
 }
 
@@ -636,11 +668,18 @@ CPP_eval.FEM.time <- function(FEM.time, locations, time_locations, incidence_mat
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
 
+
+  if(is.null(time_locations)){
+    time_locations<-matrix(ncol=0, nrow=0)
+  }else
+  {
+    time_locations <- as.matrix(time_locations)
+  }
+
   # Imposing types, this is necessary for correct reading from C++
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
-  time_locations <- as.matrix(time_locations)
   storage.mode(time_locations) <- "double"
   incidence_matrix <- as.matrix(incidence_matrix)
   storage.mode(incidence_matrix) <- "integer"

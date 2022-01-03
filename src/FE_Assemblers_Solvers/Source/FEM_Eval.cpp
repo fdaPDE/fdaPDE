@@ -8,6 +8,8 @@
 
 
 
+
+
 #include "../../FdaPDE.h"
 //#include "IO_handler.h"
 #include "../../FE_Assemblers_Solvers/Include/Spline.h"
@@ -147,6 +149,17 @@ SEXP CPP_eval_FEM_fd(SEXP Rmesh, double* X,  double* Y,  double* Z, UInt n_X, UI
 				evaluator.evalWithInfo(X, Y, Z, n_X, coef, fast, REAL(result), isinside, element_id, barycenters);
 			}
 		}
+		else if(order==2 && mydim==3 && ndim==3)
+		{
+			MeshHandler<2,3,3> mesh(Rmesh, search);
+			Evaluator<2,3,3> evaluator(mesh);
+			if (TYPEOF(RbaryLocations) == 0) { //doesn't have location information
+				evaluator.eval(X, Y, Z, n_X, coef, fast, REAL(result), isinside);
+			} else { //have location information
+				evaluator.evalWithInfo(X, Y, Z, n_X, coef, fast, REAL(result), isinside, element_id, barycenters);
+			}
+		}
+
 
 		else if(order==2 && mydim==3 && ndim==3)
 		{
@@ -449,12 +462,14 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
 */
 SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rflag_parabolic, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations)
 {
+
 	UInt mydim = INTEGER(Rmydim)[0];
 	UInt ndim  = INTEGER(Rndim)[0];
   	UInt n = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[0];
   	UInt ns = INTEGER(Rf_getAttrib(VECTOR_ELT(Rmesh, 0), R_DimSymbol))[0];
   	UInt nt = Rf_length(Rmesh_time);
 	
+
 	UInt nRegions = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[0];
 	UInt nElements = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[1]; //number of triangles/tetrahedron if areal data
 	//Declare pointer to access data from C++
@@ -750,7 +765,9 @@ SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_loca
 			prjData_ = projector.computeProjection();
 		}
 
+
 		if (order == 2) {
+
 			MeshHandler<2,2,3> mesh(Rmesh);
 			projection<2,2,3> projector(mesh, deData_);
 			prjData_ = projector.computeProjection();

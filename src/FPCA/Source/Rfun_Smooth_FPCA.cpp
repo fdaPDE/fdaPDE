@@ -33,6 +33,7 @@ extern "C" {
 
         	std::string validation=CHAR(STRING_ELT(Rvalidation,0));
 
+
                 if(fPCAdata.getOrder() == 1 && mydim==2 && ndim==2)
                         return(FPCA_skeleton<1, 2, 2>(fPCAdata, Rmesh, validation));
                 else if(fPCAdata.getOrder() == 2 && mydim==2 && ndim==2)
@@ -45,6 +46,7 @@ extern "C" {
                         return(FPCA_skeleton<1, 3, 3>(fPCAdata, Rmesh, validation));
                 else if(fPCAdata.getOrder() == 2 && mydim==3 && ndim==3)
                         return(FPCA_skeleton<2, 3, 3>(fPCAdata, Rmesh, validation));
+
         	return(NILSXP);
         	 }
 }

@@ -1,5 +1,6 @@
 #Makevars to make the compiler compile in the subdirectories (do not need to modify)
 
+<<<<<<< HEAD
 #Open MP library
 PKG_CXXFLAGS=$(SHLIB_OPENMP_CXXFLAGS) -Wno-ignored-attributes
 PKG_LIBS=$(SHLIB_OPENMP_CXXFLAGS)
@@ -7,6 +8,15 @@ PKG_LIBS=$(SHLIB_OPENMP_CXXFLAGS)
 #Use c++11
 CXX_STD = CXX11
 
+=======
+#Use c++11
+CXX_STD = CXX11
+
+#This flag hides those ugly EIGEN warnings
+#It has been commented out because it is not admissible on CRAN  
+#PKG_CXXFLAGS = -Wno-ignored-attributes
+
+>>>>>>> master
 # Group the source files
 SOURCES =  $(wildcard */*.cpp) #subfolders cpp files
 SOURCES_C= $(wildcard */*.c)   #subfolders c files

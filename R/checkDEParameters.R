@@ -69,7 +69,12 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
   
   if(!is.numeric(search))
     stop("'search' needs to be an integer.")
+<<<<<<< HEAD
     
+=======
+  
+  
+>>>>>>> master
 }
 
 

@@ -18,6 +18,7 @@
 
 extern "C" {
 
+
         // Density estimation (interface with R)
 
 //! This function manages the various options for DE-PDE algorithm
@@ -105,5 +106,6 @@ SEXP Density_Initialization(SEXP Rdata, SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SE
 
        return(NILSXP);
 }
+
 
 }

@@ -14,6 +14,7 @@
 //#include <iomanip>
 #include <limits>
 #include <vector>
+#include <array>
 #include <stack>
 #include <set>
 #include "Global_Utilities/Include/Make_Unique.h"

@@ -1,10 +1,10 @@
 #include "../Include/Kronecker_Product.h"
 
 
-//DENSE 
+//DENSE
 /*
   SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
-{   
+{
 	UInt Nr = A.rows();
 	UInt Nc = A.cols();
 	UInt Mr = B.rows();
@@ -13,8 +13,8 @@
 	MatrixXr AB_dense(Nr*Mr, Nc*Mc);
 	MatrixXr A_dense = Eigen::MatrixXd(A);
 
-	for (UInt i = 0; i < Nr; ++i) 
-		for (UInt j = 0; j < Nc; ++j) 
+	for (UInt i = 0; i < Nr; ++i)
+		for (UInt j = 0; j < Nc; ++j)
 			AB_dense.block(i*Mr, j*Mc, Mr, Mc) =  A_dense.coeffRef(i,j)*B;
 
 	SpMat AB = AB_dense.sparseView();
@@ -28,7 +28,7 @@
 // SPARSE
 /*
 SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
-{   
+{
 		UInt Nr = A.rows();
 		UInt Nc = A.cols();
 		UInt Mr = B.rows();
@@ -42,9 +42,9 @@ SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
 						a = A.coeff(i,j);
 
 						if(a != 0) {
-								for (UInt k = 0; k < Mr; ++k) 
+								for (UInt k = 0; k < Mr; ++k)
 								for (UInt l = 0; l < Mc; ++l) AB.insert(Mr*i+k, Mc*j+l) = a*B.coeff(k,l);
-						} 
+						}
 				}
 		}
 		return(AB);
@@ -52,7 +52,7 @@ SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
 */
 
 SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
-{   
+{
 	UInt Ar = A.rows();
 	UInt Ac = A.cols();
 	UInt Br = B.rows();
@@ -93,7 +93,7 @@ SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
 					ABinner[iijj]  = Ainner[ii] * Br + Binner[jj];
 					ABvalues[iijj] = Avalues[ii] * Bvalues[jj];
 					iijj++;
-				} 
+				}
 			}
 			Bcurrent = Bouter[j];
 		}
@@ -106,7 +106,6 @@ SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
 //	delete[] ABvalues;
 //	delete[] ABinner;
 //	delete[] ABouter;
-	
+
 	return(AB);
 }
-

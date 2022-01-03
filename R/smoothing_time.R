@@ -38,6 +38,11 @@ NULL
 #' @param areal.data.avg Boolean. It involves the computation of Areal Data. If \code{TRUE} the areal data are averaged, otherwise not.
 #' @param FLAG_MASS Boolean. This parameter is considerd only for separable problems i.e. when \code{FLAG_PARABOLIC==FALSE}. If \code{TRUE} the mass matrix in space and in time are used, if \code{FALSE} they are substituted with proper identity matrices.
 #' @param FLAG_PARABOLIC Boolean. If \code{TRUE} the parabolic problem problem is selected, if \code{FALSE} the separable one.
+#' @param FLAG_ITERATIVE Boolean. If \code{TRUE} the iterative method is selected, if \code{FALSE} the monolithic one.
+#' @param threshold This parameter is used for arresting algorithm iterations. Algorithm stops when two successive iterations lead to improvement in penalized log-likelihood smaller than threshold.
+#' Default value \code{threshold = 10^(-4)}.
+#' @param max.steps This parameter is used to limit the maximum number of iteration.
+#' Default value \code{max.steps=50}.
 #' @param IC Initial condition needed in case of parabolic problem i.e. when \code{FLAG_PARABOLIC==TRUE}. 
 #' If \code{FLAG_PARABOLIC==FALSE} this parameter is ignored. If \code{FLAG_PARABOLIC=TRUE} and \code{IC=NULL} it is necessary to provide
 #' also data at the initial time. IC will be estimated from them. 
@@ -46,32 +51,33 @@ NULL
 #'  \code{locations}, location points which are same as the given locations options. (checks whether both locations are the same);
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
-#' @param lambda.selection.criterion This parameter is used to select the optimization method for the smoothing parameter \code{lambda}.
+#' @param lambda.selection.criterion This parameter is used to select the optimization method related to smoothing parameter \code{lambda}.
 #' The following methods are implemented: 'grid', further optimization methods are yet to come. 
-#' The 'grid' is a pure evaluation method. A vector of \code{lambda} testing penalizations must be provided.
+#' The 'grid' is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 #' Default value \code{lambda.selection.criterion='grid'}
-#' @param DOF.evaluation This parameter is used to identify if and how to perform degrees of freedom computation.
+#' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed.
 #' The following possibilities are allowed: NULL, 'exact' and 'stochastic'
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
-#' Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but it is fairly less time consuming. Stochastic evaluation is highly suggested for meshes with more than 5000 nodes.
+#' Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but is highly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
 #' Default value \code{DOF.evaluation=NULL}
-#' @param lambda.selection.lossfunction This parameter is used to determine if some loss function has to be evaluated.
+#' @param lambda.selection.lossfunction This parameter is used to understand if some loss function has to be evaluated.
 #' The following possibilities are allowed: NULL and 'GCV' (generalized cross validation)
+#' The former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
 #' Default value \code{lambda.selection.lossfunction=NULL}
 #' @param lambdaS A scalar or vector of spatial smoothing parameters.
 #' @param lambdaT A scalar or vector of temporal smoothing parameters.
-#' @param DOF.stochastic.realizations This positive integer is considered only when \code{DOF.evaluation = 'stochastic'}.
-#' It is the number of uniform random variables used in stochastic DOF evaluation.
+#' @param DOF.stochastic.realizations This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
+#' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
 #' Default value \code{DOF.stochastic.realizations=100}.
-#' @param DOF.stochastic.seed This positive integer is considered only when \code{DOF.evaluation = 'stochastic'}.
-#' It is a user defined seed employed in stochastic DOF evaluation.
-#' Default value \code{DOF.stochastic.seed = 0} means random.
-#' @param DOF.matrix Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambda} is available from precedent computation. This allows to save time,
-#' since the computation of the DOFs is the most time consuming part of GCV evaluation.
-#' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.0} or \code{1.8} in GAM.
-#' It is advised to set \code{GCV.inflation.factor} larger than 1 to avoid overfitting.
+#' @param DOF.stochastic.seed This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
+#' It is a positive integer that represents user defined seed employed in stochastic GCV computation.
+#' Default value \code{DOF.stochastic.seed=0}.
+#' @param DOF.matrix Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
+#' since the computation of the DOFs is the most expensive part of GCV.
+#' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.0}.
+#' It is advised to set it grather than 1 to avoid overfitting.
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
-#' Not implemented yet.
+#' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
@@ -88,7 +94,7 @@ NULL
 #' @usage smooth.FEM.time(locations = NULL, time_locations = NULL, observations, FEMbasis, 
 #' time_mesh=NULL, covariates = NULL, PDE_parameters = NULL,  BC = NULL,
 #' incidence_matrix = NULL, areal.data.avg = TRUE,
-#' FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
+#' FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, FLAG_ITERATIVE = FALSE,IC = NULL,
 #' search = "tree", bary.locations = NULL,
 #' lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
@@ -131,7 +137,7 @@ NULL
 smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
                           covariates = NULL, PDE_parameters = NULL,  BC = NULL,
                           incidence_matrix = NULL, areal.data.avg = TRUE,
-                          FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
+                          FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE,FLAG_ITERATIVE = FALSE, threshold = 10^(-4), max.steps = 50, IC = NULL,
                           search = "tree", bary.locations = NULL,
                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
                           lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
@@ -153,7 +159,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     stop('Unknown mesh class')
   }
   ##################### Checking parameters, sizes and conversion ################################
-  
+
   # Preliminary consistency of optimization parameters
   
   if(lambda.selection.criterion == "grid")
@@ -241,7 +247,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
   }
 
-  #if locations is null but bary.locations is not null, use the locations in bary.locations
+  # If locations is null but bary.locations is not null, use the locations in bary.locations
   if(is.null(locations) & !is.null(bary.locations))
   {
     locations = bary.locations$locations
@@ -273,16 +279,16 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     lambdaS = as.matrix(lambdaS)
   if(!is.null(lambdaT))
     lambdaT = as.matrix(lambdaT)
-
+  
   space_varying = checkSmoothingParameters_time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh = time_mesh,
-                                                covariates = covariates, PDE_parameters = PDE_parameters, BC = BC, 
-                                                incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg, 
-                                                FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                                search = search, bary.locations = bary.locations,
-                                                optim = optim, 
-                                                lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+                  covariates = covariates, PDE_parameters = PDE_parameters, BC = BC, 
+                  incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg, 
+                  FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
+                  search = search, bary.locations = bary.locations,
+                  optim = optim, 
+                  lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
 
-  # if I have PDE non-sv case I need (constant) matrices as parameters
+  # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying==FALSE)
   {
     PDE_parameters$K = as.matrix(PDE_parameters$K)
@@ -292,12 +298,12 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
 
 
   checkSmoothingParametersSize_time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh = time_mesh,
-                                    covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix,
-                                    BC = BC, space_varying = space_varying, ndim = ndim, mydim = mydim,
-                                    FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                    lambdaS = lambdaS, lambdaT = lambdaT, DOF.matrix = DOF.matrix)
+    covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix,
+    BC = BC, space_varying = space_varying, ndim = ndim, mydim = mydim,
+    FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+    lambdaS = lambdaS, lambdaT = lambdaT, DOF.matrix = DOF.matrix)
   
-  # Further checks
+  # Further check
   observations<-as.vector(observations)
   if(is.null(time_locations))
   {
@@ -316,16 +322,16 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   }
 
   # Check whether the locations coincide with the mesh nodes (should be put after all the validations)
-  if (!is.null(locations)) 
+  if (!is.null(locations))
   {
-    if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2]) 
-    {
+    if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2])
+      {
       sum1=0
       sum2=0
       for (i in 1:nrow(locations)) 
       {
-      sum1 = sum1 + abs(locations[i,1]-FEMbasis$mesh$nodes[i,1])
-      sum2 = sum2 + abs(locations[i,2]-FEMbasis$mesh$nodes[i,2])
+        sum1 = sum1 + abs(locations[i,1]-FEMbasis$mesh$nodes[i,1])
+        sum2 = sum2 + abs(locations[i,2]-FEMbasis$mesh$nodes[i,2])
       }
       if (sum1==0 & sum2==0) 
       {
@@ -339,54 +345,49 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
   {
     bigsol = NULL
-    print('C++ Code Execution')
     bigsol = CPP_smooth.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
-                                 covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
-                                 incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-                                 FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                 search = search, bary.locations = bary.locations,
-                                 optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE)
   {
     bigsol = NULL
-    print('C++ Code Execution')
     bigsol = CPP_smooth.FEM.PDE.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
-                                     covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
-                                     incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-                                     FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                     search = search, bary.locations = bary.locations,
-                                     optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
-    
+       covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
+       search = search, bary.locations = bary.locations,
+       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+                                      
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE)
   {
     bigsol = NULL
-    print('C++ Code Execution')
     bigsol = CPP_smooth.FEM.PDE.sv.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
-                                        covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
-                                        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-                                        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                        search = search, bary.locations = bary.locations,
-                                        optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
   {
     bigsol = NULL
-    print('C++ Code Execution')
     bigsol = CPP_smooth.manifold.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
-                                          covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
-                                          incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-                                          FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                          search = search, bary.locations = bary.locations,
-                                          optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.3D')
   {
     bigsol = NULL
-    print('C++ Code Execution')
     bigsol = CPP_smooth.volume.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
-                                        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
-                                        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-                                        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-                                        search = search, bary.locations = bary.locations,
-                                        optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+      covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }
 
   # ---------- Solution -----------
@@ -456,12 +457,12 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
 
   # Prepare return list
   reslist = NULL
-
+  
   if(!is.null(lambda.selection.lossfunction))
   {
     stderr=sqrt(GCV_*(sum(!is.na(observations))-dof)/sum(!is.na(observations)))
     reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time,
-                 beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, ICestimated=ICestimated, bary.locations = bary.locations)
+            beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, ICestimated=ICestimated, bary.locations = bary.locations)
   }else{
     reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time, beta = beta, ICestimated=ICestimated, bary.locations = bary.locations)
   }

@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "../../FdaPDE.h"
+
 // Note: how_many_nodes constexpr function is defined in mesh_objects.h
 // Also Point and Element
 #include "Mesh_Objects.h"
@@ -78,7 +79,9 @@ public:
   void printPoints(std::ostream &) const;
   void printElements(std::ostream &) const;
   void printNeighbors(std::ostream &) const;
+
   void printTree(std::ostream & out) const;
+
 
 
   template <bool isManifold=(ndim!=mydim)>

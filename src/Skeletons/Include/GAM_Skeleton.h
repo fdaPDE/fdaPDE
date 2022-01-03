@@ -97,7 +97,6 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 			rans4[i + beta(0).size()*j] = beta(j)(i);
 	}
 
-
 	if(GAMData.getSearch()==2){
 
 		//SEND TREE INFORMATION TO R
@@ -136,7 +135,11 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 				rans9[i + num_tree_nodes*j] = mesh.getTree().gettreenode(i).getbox().get()[j];
 		}
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> master
 	//SEND BARYCENTER INFORMATION TO R
 	SET_VECTOR_ELT(result, 10, Rf_allocVector(INTSXP, elementIds.rows())); //element id of the locations point (vector)
 	int *rans10 = INTEGER(VECTOR_ELT(result, 10));
@@ -184,5 +187,8 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 #endif

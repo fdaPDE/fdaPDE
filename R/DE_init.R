@@ -76,8 +76,12 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   direction_method=NULL
   preprocess_method=NULL
 
+<<<<<<< HEAD
 
       # Search algorithm
+=======
+    # Search algorithm
+>>>>>>> master
   if(search=="naive"){
     search=1
   }else if(search=="tree"){
@@ -105,12 +109,12 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   ###################### C++ Code Execution #########################################################
   bigsol = NULL
   if(class(FEMbasis$mesh) == 'mesh.2D'){	  
-    print('C++ Code Execution')
+    
     bigsol = CPP_FEM.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                         stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
     
   } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
-    print('C++ Code Execution')
+    
     bigsol = CPP_FEM.manifold.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                                  stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
     

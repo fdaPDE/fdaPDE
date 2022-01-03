@@ -630,6 +630,8 @@ void GCV_Stochastic<InputCarrier, 1>::set_US_(void)
         this->b = MatrixXr::Zero(2*nnodes, this->US_.cols());
         UInt ret = AuxiliaryOptimizer::universal_b_setter(this->b, this->the_carrier, this->US_, nnodes);
 
+
+
         // Validate the completion of the task
         this->us = true;
         //Debugging purpose
@@ -666,6 +668,7 @@ void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
                         this->set_US_();
                 }
 
+
         	// Solve the system
             	MatrixXr x = this->the_carrier.apply_to_b(b, lambda);
 
@@ -681,7 +684,9 @@ void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
         	// For any realization we calculate the degrees of freedom
         	for (UInt i = 0; i < nr; ++i)
                 {
+
         		edf_vect(i) = USTpsi.row(i).dot(x.col(i).head(nnodes)) + q;
+
         	}
 
         	// Estimates: sample mean, sample variance

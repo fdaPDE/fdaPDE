@@ -16,7 +16,6 @@
 #include "../../Density_Estimation/Include/FE_Density_Estimation.h"
 
 
-
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
 	SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rmesh, SEXP Rsearch, const std::string & init, UInt init_fold)
@@ -91,6 +90,9 @@ SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP 
 }
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> master
 #endif

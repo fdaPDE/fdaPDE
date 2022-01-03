@@ -297,7 +297,11 @@ class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
 
                 // INTERNAL DATA STRUCTURES
                 MatrixXr US_;           //!< binary{+1/-1} random matrix used for stochastic gcv computations [size s x #realizations]
+<<<<<<< HEAD
                 MatrixXr USTpsi ;       //!< US^T*Psi
+=======
+                MatrixXr USTpsi;       //!< US^T*Psi
+>>>>>>> master
                 MatrixXr b;             //! Right hand side o solution
                 bool     us = false;    //!< keeps track of US_ matrix being already computed or not
 
@@ -318,6 +322,7 @@ class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
                 */
                 GCV_Stochastic<InputCarrier, 1>(InputCarrier & the_carrier_, bool flag_used):
                         GCV_Family<InputCarrier, 1>(the_carrier_)
+
                 {
                         MatrixXr m = this->the_carrier.get_opt_data()->get_DOF_matrix();
                         if(m.cols()==0 || m.rows()==0)
@@ -330,6 +335,7 @@ class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
                                 this->set_US_(); // this matrix is unchanged during the whole procedure, thus it's set once and for all
                         }
                 }
+
 
                 // PUBLIC UPDATERS
                 void update_parameters(Real lambda) override;

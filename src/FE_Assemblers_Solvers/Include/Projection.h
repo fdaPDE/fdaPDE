@@ -11,6 +11,8 @@ class projection{
 };
 
 
+
+
 template<UInt ORDER>
 class projection<ORDER,2,3>{
 private:
@@ -26,6 +28,9 @@ public:
   std::vector<Point<3> > computeProjection();
 
 };
+
+
+
 
 
 #include "Projection_imp.h"
