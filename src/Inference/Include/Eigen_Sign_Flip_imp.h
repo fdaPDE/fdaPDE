@@ -528,19 +528,19 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-    local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
+    local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
-    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
+    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
-    local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
+    local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
-    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
+    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
 
   }
 
@@ -571,7 +571,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	  // compute the partial residuals
 	  Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-	  local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
+	  local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
   
 	}else{
  
@@ -580,7 +580,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
-	    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
+	    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -594,7 +594,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*proposal)
-	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
+	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
 
 	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(0,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(1,i)=prop_p_val;}
 	    }
@@ -610,7 +610,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	  // compute the partial residuals
 	  Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
-	  local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
+	  local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
   
 	}else{
  
@@ -619,7 +619,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
-	    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
+	    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -633,7 +633,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*proposal)
-	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 2);
+	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_star, 1);
 
 	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(3,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(2,i)=prop_p_val;}
 	    }
