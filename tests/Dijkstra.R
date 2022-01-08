@@ -20,6 +20,10 @@ Dijkstra <- function( Graph, source)
     neighbors[[ right ]] = append(neighbors[[ right ]], left)
   }
   
+  degree.node = vector(mode="integer", length=nnodes)
+  for( node in 1:nnodes){
+    degree.node[node] = length(neighbors[[node]])
+  }
   distance = vector(mode="numeric", nnodes)
   ordering = order(distance)
   
@@ -71,6 +75,6 @@ Dijkstra <- function( Graph, source)
     }
 
   }
-  return( list(distance = distance, previous = previous, ShortestPaths = ShortestPaths) )
+  return( list(source = source,distance = distance, previous = previous, ShortestPaths = ShortestPaths, degree.nodes = degree.node) )
 }
 
