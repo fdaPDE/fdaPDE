@@ -31,6 +31,8 @@ FEMbasis = create.FEM.basis(mesh)
 # Test function
 f = function(x, y, z)
 {
+  x = x/2
+  y = y/2
   coe = function(x,y) 1/2*sin(5*pi*x)*exp(-x^2)+1
   sin(2*pi*(coe(y,1)*x*cos(z-2)-y*sin(z-2)))*cos(2*pi*(coe(y,1)*x*cos(z-2+pi/2)+coe(x,1)*y*sin((z-2)*pi/2)))
 }
