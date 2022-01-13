@@ -615,7 +615,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
 	}else{
  
 	  if(local_p_values(3,i)>alpha){ // Lower-Lower bound excessively tight
-	    LL(i)=beta_hat(i)-0.5*(UL(i)-LL(i));
+	    LL(i)=LL(i)-0.5*(LU(i)-LL(i));
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
