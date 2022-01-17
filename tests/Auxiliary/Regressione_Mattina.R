@@ -377,3 +377,50 @@ covariate.FEM.1D = function( W, Z, FEMbasis, PHI, lambda ){
 
 
 ########################################################################################
+## aggiunta ##
+
+no.covariate.FEM.1D = function( Z, FEMbasis, PHI, lambda ){
+  
+  #W = as.matrix(W)
+  #nobs = dim(W)[1]
+  
+  if(is.vector(Z))
+    nobs = length(Z)
+  else if( is.matrix(Z))
+    nobs = dim(Z)[1]
+  
+  #WW_inv = solve(t(W)%*%W)
+  #P = W%*% (WW_inv%*%t(W))
+  #Q = diag(nobs) - P
+  
+  Q = diag(nobs)
+  nnodes = mesh$nnodes
+
+  #L_mat = t(PHI)%*%Q%*%PHI
+  L_mat = t(PHI)%*%PHI
+  
+  R0 = R_mass_1D(FEMbasis)
+  R1 = R_stiff_1D(FEMbasis)
+  
+  row1 = cbind(-L_mat, lambda*t(R1))
+  row2 = cbind(-lambda*R1, -lambda*R0)
+  
+  A = rbind(row1, row2)
+  
+  b1 = - t(PHI) %*% ( Q%*%Z )
+  b2 = matrix(0, nrow = nnodes, ncol=1)
+  
+  b = rbind(b1,b2)
+  
+  sol = solve(A, b)
+  
+  output = sol[1:nnodes,]
+  
+  #f_estimate =  PHI%*%output
+  #beta_estimate = WW_inv%*% t(W) %*% (Z-f_estimate)
+  
+  output = list ( beta_estimate = NULL, f_coeff = output )
+  
+  return(output)
+  
+}

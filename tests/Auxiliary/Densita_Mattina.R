@@ -348,6 +348,7 @@ my_density <- function(data, mesh, PHI, FEMbasis, K0, K1, lambda, epsil, initial
   nbasis <- dim(PHI)[2]
   nsim = ns
   nelem = mesh$nsegments[1]
+  nnodes = mesh$nnodes
   elements = mesh$segments
   deltas = mesh$deltas
   
@@ -463,6 +464,7 @@ my_density.aldo <- function(data, mesh, PHI, FEMbasis, K0, K1, lambda, epsil, in
   nbasis <- dim(PHI)[2]
   nsim = ns
   nelem = mesh$nsegments[1]
+  nnodes = mesh$nnodes
   elements = mesh$segments
   deltas = mesh$deltas
   

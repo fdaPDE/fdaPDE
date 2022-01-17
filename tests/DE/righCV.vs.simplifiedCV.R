@@ -3,7 +3,7 @@
 
 # DE test 2 #
 
-source("~/Scrivania/fdaPDE/tests/integrate_f.R")
+source("~/Scrivania/fdaPDE/Auxiliary/integrate_f.R")
 library(spatstat)
 data("dendrite")
 
@@ -82,7 +82,7 @@ tot.start = Sys.time()
 for(i in 1:N){
   for(j in 1:M){
     print(paste("##### nobs = ",nobs[i]," #####",sep=""))
-    print(paste("### ",j,"/",M," ###",sep=""))
+    print(paste("### ",j ,"/M ###",sep=""))
     PPP = rlpp(nobs[i], my_dens)
     points_x = PPP$data$x
     points_y = PPP$data$y
@@ -110,7 +110,7 @@ for(i in 1:N){
     lambda.RightCV.Grad[j,i] = sol$lambda
     
     # RightCV BFGS
-    print("# RightCV - BFGS #")
+    print("# RightCV - BFGS#")
     start <- Sys.time()
     sol = DE.FEM(data=points,FEMbasis=FEMbasis,lambda=lambda, 
                  nsimulations=niter, 
@@ -197,3 +197,182 @@ save(nobs, N, M, coef.ex,niter,
      lambda.RightCV.Grad, lambda.RightCV.BFGS,
      lambda.SimplifiedCV.Grad, lambda.SimplifiedCV.BFGS,
      file = save.file)
+
+# post-processing #
+library(ggplot2)
+library(latex2exp)
+
+date_ = "2021-12-08"
+init_ = "-fdaPDE" # "-null_vector"
+ntest_ = "-test.2.3"
+
+file.name = paste("DE-",date_,init_,ntest_,sep="")
+save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/DE/",file.name,".RData",sep="")
+img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/DE/",file.name,".pdf",sep="")
+
+load(save.file)
+
+mise.RightCV.Grad_ = as.vector(mise.RightCV.Grad)
+mise.RightCV.BFGS_ = as.vector(mise.RightCV.BFGS)
+mise.SimplifiedCV.Grad_ = as.vector(mise.SimplifiedCV.Grad)
+mise.SimplifiedCV.BFGS_ = as.vector(mise.SimplifiedCV.BFGS)
+mise_ = cbind(mise.RightCV.Grad_,
+              mise.RightCV.BFGS_,
+              mise.SimplifiedCV.Grad_,
+              mise.SimplifiedCV.BFGS_)
+mise_ = as.vector(mise_)
+
+times.RightCV.Grad_ = as.vector(times.RightCV.Grad)
+times.RightCV.BFGS_ = as.vector(times.RightCV.BFGS)
+times.SimplifiedCV.Grad_ = as.vector(times.SimplifiedCV.Grad)
+times.SimplifiedCV.BFGS_ = as.vector(times.SimplifiedCV.BFGS)
+times_ = cbind(times.RightCV.Grad_,
+               times.RightCV.BFGS_,
+               times.SimplifiedCV.Grad_,
+               times.SimplifiedCV.BFGS_)
+times_ = as.vector(times_)
+
+err.L2.RightCV.Grad.vs.SimplifiedCV.Grad_  =
+                as.vector(err.L2.RightCV.Grad.vs.SimplifiedCV.Grad)
+err.L2.RightCV.BFGS.vs.SimplifiedCV.BFGS_ =
+                as.vector(err.L2.RightCV.BFGS.vs.SimplifiedCV.BFGS)
+
+nobs_ = rep(nobs,  each=M)
+nobs_ = rep(as.character(nobs_), times=4)
+
+CV_.1 = rep(c("RightCV"),times=2*M*N)
+CV_.2 = rep(c("SimplifiedCV"), times=2*M*N)
+CV_ = cbind( CV_.1, CV_.2)
+CV_ = as.vector( CV_)
+
+Direction_ = rep(c("GD","BFGS"), each = M*N)
+Direction_ = rep(Direction_, times=2)
+
+data.frame.1 = data.frame(mise_, times_, nobs_, CV_, Direction_)
+
+pdf(img.file)
+ggplot( data.frame.1)+
+  geom_boxplot(aes(x=nobs_, y=mise_, group=interaction(nobs_, CV_, Direction_), fill=interaction(CV_ ,Direction_)) )+
+  labs(x="observations",y= "MISE",fill="",title="f")+
+  theme(plot.title = element_text(hjust = 0.5), 
+        axis.text.x = element_text(angle=90, vjust = 0.5, hjust=1) )
+
+sub.data.frame.1 = subset(data.frame.1, Direction_ %in% c("GD"))
+
+ggplot(sub.data.frame.1)+
+  geom_boxplot(aes(x=nobs_, y=mise_, group=interaction(nobs_, CV_), fill=CV_ ))+
+  labs(x="observations",y= "MISE",fill="",title="f")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot( sub.data.frame.1)+
+  geom_boxplot(aes(x=nobs_, y=times_, group=interaction(nobs_, CV_), fill=CV_))+
+  labs(x="observations",y= "",fill="",title="TIME [s]")+
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle=90, vjust = 0.5, hjust=1) )
+
+for(i in 1:N){
+  data.frame.tmp = subset(data.frame.1, nobs_ %in% c(nobs[i]))
+  print(ggplot(data.frame.tmp)+
+        geom_boxplot(aes(x=interaction(CV_, Direction_), y=times_ ))+
+        labs(x="",y= "",fill="",title="Running Time [s]", subtitle=paste("nobs = ",nobs[i],sep=""))+
+        theme(plot.title = element_text(hjust = 0.5), 
+              plot.subtitle = element_text(hjust=0.5),
+              axis.text.x = element_text(angle=90, vjust = 0.5, hjust=1) ) )
+  
+    
+}
+
+nobs_ = rep(nobs, each=M)
+
+data.frame.2 = data.frame(nobs_,
+                    mise.RightCV.Grad_, mise.SimplifiedCV.Grad_,
+                    mise.RightCV.BFGS_, mise.SimplifiedCV.BFGS_,
+                    times.RightCV.Grad_, times.SimplifiedCV.Grad_,
+                    times.RightCV.BFGS_, times.SimplifiedCV.BFGS_,
+                    err.L2.RightCV.Grad.vs.SimplifiedCV.Grad_, 
+                    err.L2.RightCV.BFGS.vs.SimplifiedCV.BFGS_)
+ggplot(data.frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.L2.RightCV.Grad.vs.SimplifiedCV.Grad_, group=nobs_))+
+  labs(x="observations", y="", 
+       title= TeX(" $||f_{RightCV} \ - \ f_{SimplCV} ||_{L_{2}^{2}$"),
+       subtitle="GD")+
+  theme(  plot.title = element_text(hjust=0.5), 
+          plot.subtitle = element_text(hjust=0.5) ) 
+
+ggplot(data.frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.L2.RightCV.BFGS.vs.SimplifiedCV.BFGS_, group=nobs_))+
+  labs(x="observations", y="", 
+       title= TeX(" $||f_{RightCV} \ - \ f_{SimplCV} ||_{L_{2}^{2}$"),
+       subtitle="BFGS")+
+  theme(  plot.title = element_text(hjust=0.5), 
+          plot.subtitle = element_text(hjust=0.5) ) 
+
+for(i in 1:N){
+  data.frame.tmp = subset(data.frame.2, nobs_ %in% c(nobs[i]))
+  
+  x.min = min( data.frame.tmp["mise.RightCV.Grad_"], data.frame.tmp["mise.SimplifiedCV.Grad_"])
+  x.max = max( data.frame.tmp["mise.RightCV.Grad_"], data.frame.tmp["mise.SimplifiedCV.Grad_"])
+  print( ggplot(data.frame.tmp)+
+        geom_point( aes(x=mise.RightCV.Grad_, y= mise.SimplifiedCV.Grad_))+
+        geom_segment(aes(x=x.min, y=x.min, xend=x.max, yend=x.max),color="red",alpha=0.01)+
+        labs(x="RightCV", y="Simplified", 
+        title= TeX("Scatter $MISE$ - GD"), 
+        subtitle= paste("nobs = ",nobs[i],sep="") ) +
+        theme(plot.title = element_text(hjust=0.5), 
+             plot.subtitle = element_text(hjust=0.5) )    )
+  
+  x.min = min( data.frame.tmp["mise.RightCV.BFGS_"], data.frame.tmp["mise.SimplifiedCV.BFGS_"])
+  x.max = max( data.frame.tmp["mise.RightCV.BFGS_"], data.frame.tmp["mise.SimplifiedCV.BFGS_"])
+  print( ggplot(data.frame.tmp)+
+           geom_point( aes(x=mise.RightCV.BFGS_, y= mise.SimplifiedCV.BFGS_))+
+           geom_segment(aes(x=x.min, y=x.min, xend=x.max, yend=x.max),color="red",alpha=0.01)+
+           labs(x="RightCV", y="Simplified", 
+                title= TeX("Scatter $MISE$ - BFGS"), 
+                subtitle= paste("nobs = ",nobs[i],sep="") ) +
+           theme(plot.title = element_text(hjust=0.5), 
+                 plot.subtitle = element_text(hjust=0.5) )    )
+  
+}
+
+
+reps_ = rep(1:M, times = 2)
+type_ = rep(c("RightCV","SimplifiedCV"), each=M)
+for(i in 1:N){
+  lambda.GD_ = cbind(log10(lambda.RightCV.Grad[,i]), log10(lambda.SimplifiedCV.Grad[,i]))
+  lambda.GD_ = as.vector(lambda.GD_)
+  data.frame.3 = data.frame(lambda.GD_, reps_, type_)
+  print(
+    ggplot(data.frame.3, aes(x=reps_,y=lambda.GD_, shape=type_, color=type_))+
+    geom_point(size=2.5)+
+    scale_shape_manual(values=c(16,13))+
+    scale_color_manual(values=c("red","blue"))+
+    labs(x="repetions",y=TeX("$ log_{10}\\lambda $"),
+       title="Smoothing parameter",
+       subtitle = paste("nobs = ",nobs[i],sep="") )+
+  theme(legend.title = element_blank(),
+        plot.title = element_text(hjust=0.5), 
+        plot.subtitle = element_text(hjust=0.5) )  
+)
+}
+
+boxplot(times.RightCV.Grad[,5],times.SimplifiedCV.Grad[,5],
+        times.RightCV.BFGS[,5],times.SimplifiedCV.BFGS[,5],
+        names=c("RighCV Grad","SimplfiedCV Grad","RightCV BFGS","SimplifiedCV BFGS"),
+        main = "Running Time [s]")
+
+
+### densities ### 
+source("~/Scrivania/fdaPDE/tests/R_plot_graph.ggplot2.R")
+
+idxs.min = which( abs(mise.RightCV.BFGS[,5] - min(mise.RightCV.BFGS[,5])) <= .Machine$double.eps)
+
+R_plot_graph.ggplot2(FEM( sols.RightCV.BFGS[idxs.min,5,], FEMbasis ))
+R_plot_graph.ggplot2(FEM( coef.ex, FEMbasis))
+
+plot(lambda.RightCV.Grad[1:30,5],pch=16,col="red",ylab="lambdas",xlab="")
+points(lambda.SimplifiedCV.Grad[1:30,5],pch = 13,col = "blue")
+
+plot(lambda.RightCV.Grad[1:30,5],pch=16,col="red",ylab="lambdas",xlab="")
+points(lambda.SimplifiedCV.Grad[1:30,5],pch = 13,col = "blue")
+
+dev.off()

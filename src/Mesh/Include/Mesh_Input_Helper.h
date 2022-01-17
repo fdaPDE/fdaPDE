@@ -260,8 +260,6 @@ void split1D(SEXP Routput, SEXP Rnodes, SEXP Redges, UInt index){
   
 }
 
-
-
 #include "Mesh_Input_Helper_imp.h"
 
 #endif

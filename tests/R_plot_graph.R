@@ -1,4 +1,5 @@
-R_plot_graph = function(FEM, ...){
+library(ggplot2)
+R_plot_graph.rgl = function(FEM, ...){
   
   nodes <- FEM$FEMbasis$mesh$nodes
   if(FEM$FEMbasis$order==1){
@@ -33,7 +34,7 @@ R_plot_graph = function(FEM, ...){
     
     rgl.lines(nodes[edges,1], nodes[edges,2],rep(0,dim(nodes)[1]),
               color = col,lwd=1.75,...)
-    rgl.viewpoint(0,0,zoom=0.75)  
+    rgl.viewpoint(0,0,zoom=0.85)  
     next3d()
     bgplot3d({
       plot.new()
@@ -132,33 +133,31 @@ R_plot_mesh.1.5D<-function(mesh,alpha=0.){
 }
 
 
-plot.mesh.1.5D.new<-function(x,plot.nodes=FALSE, ...)
+plot.mesh.1.5D.new<-function(x,pch=NULL, ...)
 {
-  if(plot.nodes)
-    type="p"
-  else
-    type="n"
+  if( is.null(pch))
+    type = "n"
+  else 
+    type = "p"
   
   if( x$order == 1 ){
     
-    plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", type=type, ...)
+    plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", type=type,pch=pch, ...)
     segments(x$nodes[x$edges[,1],1], x$nodes[x$edges[,1],2],
              x$nodes[x$edges[,2],1], x$nodes[x$edges[,2],2], ...)
   }
   else{
     
-    plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n",type=type, ...)
+    plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", type=type,pch=pch, ...)
     segments(x$nodes[x$edges[,1],1], x$nodes[x$edges[,1],2],
              x$nodes[x$edges[,2],1], x$nodes[x$edges[,2],2], ...)
-    points(x$nodes[x$edges[,3],1], x$nodes[x$edges[,3],2],col="red",type=type,...)
+    points(x$nodes[x$edges[,3],1], x$nodes[x$edges[,3],2],col="red",type=type,pch=pch,...)
   }
 }
 
-plot.mesh.2.5D.new<-function(x,plot.nodes=FALSE,...){
-  if(plot.nodes) 
-    alpha = 1.0 
-  else 
-    alpha = 0.
+plot.mesh.2.5D.new<-function(x,size=NULL,...){
+  if(is.null(size)) 
+    size=1
   
   nodes <- x$nodes
   edges <- as.vector(t(x$edges))
@@ -168,7 +167,7 @@ plot.mesh.2.5D.new<-function(x,plot.nodes=FALSE,...){
   rgl.pop("lights")
   light3d(specular="black")
   
-  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black",alpha=alpha, ...)
+  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black",size=size, ...)
   rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
   
   aspect3d("iso")

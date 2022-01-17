@@ -4,50 +4,18 @@ source("tests/StimaDensita/Densita_Mattina.R")
 source("tests/integrate_f.R")
 source("tests/R_plot_graph.R")
 
-### Bifurc Domain ### 
-nodes=matrix(c(0.25,0.25,0.5,0.25,0.75,0.5,0.75,0.), nrow = 4, byrow=TRUE)
-edges=matrix(c(1,2,2,3,2,4),nrow = 3,byrow = TRUE)
-mesh = create.mesh.1.5D(nodes,edges,order=2)
-mesh = refine.mesh.1.5D(mesh=mesh,0.1)
-plot(mesh)
-
-FEMbasis=create.FEM.basis(mesh)
-f=function(x,y){ sin(x)*cos(y) + sin(x*y) }
-coef.ex = f(mesh$nodes[,1],mesh$nodes[,2])
-FEM = FEM(coef.ex,FEMbasis)
-
-R_plot_graph(FEM)
-
-x11()
-R_plot_graph.ggplot2(FEM(coef.ex,FEMbasis))
-
-mesh.ref = refine.mesh.1.5D(mesh,0.1/10)
-coef.ref = f(mesh.ref$nodes[,1],mesh.ref$nodes[,2])
-FEM.ref  = FEM( coef.ref, create.FEM.basis(mesh.ref))
-x11()
-R_plot_graph.ggplot2(FEM.ref)
-
-#####
-
-vertices_x = as.matrix(simplenet$vertices$x)
-vertices_y = as.matrix(simplenet$vertices$y)
-vertices = as.matrix(cbind(vertices_x, vertices_y))
+# simplenet #
+vertices = as.matrix(cbind(simplenet$vertices$x, simplenet$vertices$x) )
 start_coord = cbind(simplenet$lines$ends$x0, simplenet$lines$ends$y0)
 end_coord = cbind(simplenet$lines$ends$x1, simplenet$lines$ends$y1)
-start = simplenet$from 
-end = simplenet$to
-edges = cbind(start, end)
-M = simplenet$m
-boundary=find.boundary(M)
-L = as.linnet(simplenet) 
+edges = cbind(simplenet$from,simplenet$to)
+L = as.linnet(simplenet)
 delta=0.03
 
-mesh = create.mesh.1D.vertices(vertices, edges, delta)
+mesh.fdaPDE = create.mesh.1.5D(nodes=vertices,edges=edges)
+mesh.fdaPDE = refine.mesh.1.5D(mesh.fdaPDE, delta)
 
-### fdaPDE ###
-mesh.fdaPDE = create.mesh.1.5D(nodes=mesh$nodes,edges=mesh$segments)
 FEMbasis.fdaPDE = create.FEM.basis(mesh=mesh.fdaPDE)
-###
 
 mu11 = vertices[6,]
 mu22 = vertices[8,]
@@ -62,47 +30,111 @@ aux = function(x, y, seg, tp, x1=mu1[1], y1=mu1[2], x2=mu2[1], y2=mu2[2], sigma_
 { ( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x1)^2 + (1/(2*sigma_y^2))*(y-y1)^2 ))+
     ( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x2)^2 + (1/(2*sigma_y^2))*(y-y2)^2 ))}
 
-integral_ex = integrate_f( FEM( aux(mesh$nodes[,1],mesh$nodes[,2]), FEMbasis=FEMbasis.fdaPDE) )  
+integral_ex = integrate_f( FEM( aux(mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2]), FEMbasis=FEMbasis.fdaPDE) )  
 aux_n = function(x, y, seg, tp, x1=mu1[1], y1=mu1[2], x2=mu2[1], y2=mu2[2], sigma_x=sigmax, sigma_y=sigmay) 
 { 1./integral_ex*( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x1)^2 + (1/(2*sigma_y^2))*(y-y1)^2 ))+
     1./integral_ex*( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x2)^2 + (1/(2*sigma_y^2))*(y-y2)^2 ))}
 
-
-my_dens <- linfun(aux_n, L) # FUNZIONE SU UN NETWORK
-coef.ex = aux_n(mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2])
-x11()
+my_dens = linfun(aux_n,L)
 plot(my_dens)
+coef.ex = aux_n(mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2])
 
-R_plot_graph(FEM(coef.ex, FEMbasis.fdaPDE) )
+AUX = function(x){  1/(2*pi)^1.5 * exp(-x^2/(2*sigmax)) }
 
-x11()
-R_plot_graph.ggplot2(FEM(coef.ex, FEMbasis.fdaPDE))
+res = Dijkstra(mesh.fdaPDE, source=6)
 
-# mesh refinement (or eval.FEM( ref.nodes ... ) ) 
-mesh.ref = refine.mesh.1.5D(mesh.fdaPDE,delta/6)
-coef.ref = aux_n(mesh.ref$nodes[,1],mesh.ref$nodes[,2])
+coef.AUX = AUX( res$distance ) 
+R_plot_graph(FEM(coef.AUX, FEMbasis.fdaPDE))
+plot(mesh.fdaPDE)
 
-x11()
-R_plot_graph.ggplot2(FEM(coef.ref, create.FEM.basis(mesh.ref) ))
+# dendrite #
+library(spatstat)
+data("dendrite")
 
-### 2.5D ###
+vertices = cbind(dendrite$domain$vertices$x, dendrite$domain$vertices$y) 
+edges = cbind(dendrite$domain$from, dendrite$domain$to)
+L = as.linnet(dendrite$domain)
+M = dendrite$domain$m
 
-data(hub2.5D)
-mesh <- create.mesh.2.5D(nodes = hub2.5D$hub2.5D.nodes,triangles = hub2.5D$hub2.5D.triangles,order=2)
-FEMbasis <- create.FEM.basis(mesh)
+### fdaPDE ###
+mesh.fdaPDE = create.mesh.1.5D(nodes=vertices,edges=edges)
+FEMbasis.fdaPDE = create.FEM.basis(mesh=mesh.fdaPDE)
+###
 
-loc = mesh$nodes
-nloc = dim(loc)[1]
-nloc
-# 2.5D random field (function f)
-a1 = rnorm(1,mean = 0, sd = 1)
-a2 = rnorm(1,mean = 0, sd = 1)
-a3 = rnorm(1,mean = 0, sd = 1)
+plot(mesh.fdaPDE)
+points(mesh.fdaPDE$nodes[600,1],mesh.fdaPDE$nodes[600,2],pch=16)
+points(mesh.fdaPDE$nodes[70,1],mesh.fdaPDE$nodes[70,2],pch=16)
+points(mesh.fdaPDE$nodes[10,1],mesh.fdaPDE$nodes[10,2],pch=16)
+# density
+mu1 = mesh.fdaPDE$nodes[70,]
+mu2 = mesh.fdaPDE$nodes[600,]
+mu3 = mesh.fdaPDE$nodes[10,]
+sigmax = 20
+sigmay = 20
+aux = function(x, y, seg, tp, x1=mu1[1], y1=mu1[2], x2=mu2[1], y2=mu2[2], x3=mu3[1], y3=mu3[2], sigma_x=sigmax, sigma_y=sigmay) 
+{   ( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x1)^2 + (1/(2*sigma_y^2))*(y-y1)^2 ))+
+    ( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x2)^2 + (1/(2*sigma_y^2))*(y-y2)^2 ))+ 
+    ( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x3)^2 + (1/(2*sigma_y^2))*(y-y3)^2 ))}
 
-sol_exact = numeric(nloc)
-for (i in 0:(nloc-1)){
-  sol_exact[i+1] = a1* sin(2*pi*loc[i+1,1]) +  a2* sin(2*pi*loc[i+1,2]) +  a3*sin(2*pi*loc[i+1,3]) + 7
+
+integral_ex = integrate_f( FEM(aux(mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2]),FEMbasis.fdaPDE) )
+
+aux_n = function(x, y, seg, tp, x1=mu1[1], y1=mu1[2], x2=mu2[1], y2=mu2[2], x3=mu3[1], y3=mu3[2], sigma_x=sigmax, sigma_y=sigmay) 
+{   1./integral_ex*( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x1)^2 + (1/(2*sigma_y^2))*(y-y1)^2 ))+
+    1./integral_ex*( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x2)^2 + (1/(2*sigma_y^2))*(y-y2)^2 ))+
+    1./integral_ex*( 1/(2*pi*sigma_x*sigma_y)  )*exp(- ( (1/(2*sigma_x^2))*(x-x3)^2 + (1/(2*sigma_y^2))*(y-y3)^2 ))}
+my_dens <- linfun(aux, L) # FUNZIONE SU UN NETWORK
+
+coef.ex = aux_n(mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2])
+
+mesh.ref.2 = refine.mesh.1.5D(mesh.fdaPDE,20)
+coef.ref.2 = aux_n(mesh.ref.2$nodes[,1],mesh.ref$nodes[,2])
+R_plot_graph.ggplot2(FEM(coef.ref.2, create.FEM.basis(mesh.ref.2) ))
+
+
+#### 
+
+
+source("~/Scrivania/fdaPDE/tests/StimaDensita/Densita_Mattina.R")
+source("~/Scrivania/fdaPDE/tests/integrate_f.R")
+source("~/Scrivania/fdaPDE/tests/Mesh_Evaluator/isInside.R")
+source("tests/R_plot_graph.ggplot2.R")
+source("~/Scrivania/fdaPDE/tests/Eval_split_discontinous.R")
+source("~/Scrivania/fdaPDE/tests/Dijkstra.R")
+library(ggplot2)
+
+idx.leaf = which(mesh.fdaPDE$nodesmarkers==TRUE)
+plot(mesh.fdaPDE)
+points(mesh.fdaPDE$nodes[idx.leaf,1], mesh.fdaPDE$nodes[idx.leaf,2], pch=16)
+points(mesh.fdaPDE$nodes[250,1], mesh.fdaPDE$nodes[250,2], pch=16,col="red")
+
+dijkstra.130 = Dijkstra(mesh.fdaPDE,130)
+coef.130 = equal_split_discontinous(mesh.fdaPDE, 12.5, dijkstra.130, mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2])
+
+dijkstra.250 = Dijkstra(mesh.fdaPDE, 250)
+coef.250 = equal_split_discontinous(mesh.fdaPDE, 12.5, dijkstra.250, mesh.fdaPDE$nodes[,1],mesh.fdaPDE$nodes[,2])
+
+R_plot_graph.ggplot2(FEM(coef$coef, FEMbasis.fdaPDE))
+
+integrate_f(FEM(coef.250$coef, FEMbasis.fdaPDE))
+
+aux <- function(x,y,seg,tp){
+    
+    sigma = 12.5
+    res.130 = equal_split_discontinous(mesh.fdaPDE, sigma, dijkstra.130, x, y)
+    res.250 = equal_split_discontinous(mesh.fdaPDE, sigma, dijkstra.250, x, y) 
+    
+    res = 0.5 * res.130$coef + 0.5 * res.250$coef 
+    
+    return(res)
 }
 
-plot( FEM(sol_exact,FEMbasis))
+integrate_f(FEM(aux(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2]), FEMbasis.fdaPDE ))
+my_dens = linfun(aux, L)
+plot(FEM(my_dens(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2]), FEMbasis.fdaPDE) )#questo ok
 
+plot(my_dens)
+
+PP = rlpp(100, my_dens)
+plot(mesh.fdaPDE)
+points(PP$data$x, PP$data$y,pch=16)

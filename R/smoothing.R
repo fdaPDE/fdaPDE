@@ -672,8 +672,6 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
     {
       bigsol = NULL
-      # if(!is.null(locations))
-      #   stop("The option locations!=NULL for manifold domains is currently not implemented")
       bigsol = CPP_smooth.manifold.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
         covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
@@ -718,8 +716,6 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     }else if(class(FEMbasis$mesh) == 'mesh.1.5D')
     {
       bigsol = NULL
-      # if(!is.null(locations))
-      #   stop("The option locations!=NULL for graph domains is currently not implemented")
       bigsol = CPP_smooth.graph.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
                                               covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
                                               incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,

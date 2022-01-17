@@ -58,7 +58,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
     //Rprintf("Start FPIRLS for the lambda number %d \n", i+1);
 
-
     // start the iterative method for the lambda index i
     while(stopping_criterion(i)){
 
@@ -115,7 +114,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(UInt& lambda_
   if(inputData_.getCovariates()->rows()>0){
     _beta_hat(lambda_index,0) = regression_.getBeta()(0,0);
   }
-
   _fn_hat(lambda_index,0) = (*Psi) *_solution(lambda_index,0).topRows(Psi->cols());
 
 
