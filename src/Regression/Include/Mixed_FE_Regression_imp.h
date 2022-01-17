@@ -30,12 +30,12 @@ void MixedFERegressionBase<InputHandler>::addDirichletBC() //adds boundary condi
 			id3=id1+nnodes;
 			id2=id1+N_;
 
-         if (!regressionData_.getFlagIterative())
+         if (!this->isIterative)
          {
              matrixNoCov_.coeffRef(id1,id1)=pen;
              matrixNoCov_.coeffRef(id3, id3) = pen;
          }
-         else if (regressionData_.getFlagIterative() && i<nbc_indices/M_)
+         else if (this->isIterative && i<nbc_indices/M_)
          {
              matrixNoCov_.coeffRef(id1, id1) = pen;
              matrixNoCov_.coeffRef(id2, id2) = pen;
@@ -348,7 +348,7 @@ void MixedFERegressionBase<InputHandler>::setDMat(void)
 		DMat_ = psi_t_*DMat_;
     else
     {
-        if (!regressionData_.getFlagIterative())
+        if (!this->isIterative)
             DMat_ = psi_t_*A_.asDiagonal()*DMat_; // areal data: need to add the diag(|D_1|,...,|D_N|)
         else
         {
@@ -566,7 +566,7 @@ template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock)
 {
     UInt nnodes = N_; // only space and Iterative method
-    if (regressionData_.isSpaceTime() && !regressionData_.getFlagIterative())
+    if (regressionData_.isSpaceTime() && !this->isIterative)
         nnodes *= M_;
 
 	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
@@ -613,14 +613,12 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 
 	// First phase: Factorization of matrixNoCov
 	matrixNoCovdec_.compute(matrixNoCov_);
-
-
-
-	if(regressionData_.getCovariates()->rows() != 0 && !isUVComputed)
+	bool needUpdate = isGAMData ? true : !isUVComputed;
+	if(regressionData_.getCovariates()->rows() != 0 && needUpdate)
 	{ // Needed only if there are covariates, else we can stop before
 		// Second phase: factorization of matrix  G =  C + [V * matrixNoCov^-1 * U]= C + D
 		// Definition of matrix U = [ psi^T * A * W | 0 ]^T and V= [ W^T*psi| 0]
-        isUVComputed=true;
+        	isUVComputed=true;
 
 		MatrixXr W(*(this->regressionData_.getCovariates()));
 		U_ = MatrixXr::Zero(2*nnodes,W.cols());
@@ -651,7 +649,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 				U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*P->asDiagonal()*W;
     	}
 
-		if (!regressionData_.getFlagIterative())
+		if (!this->isIterative)
 		{
             MatrixXr D = V_ * matrixNoCovdec_.solve(U_);
 
@@ -706,7 +704,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBa
 {
 	// Resolution of the system matrixNoCov * x1 = b
 	MatrixXr x1 = matrixNoCovdec_.solve(b);
-	if(regressionData_.getCovariates()->rows() != 0 && !regressionData_.getFlagIterative())
+	if(regressionData_.getCovariates()->rows() != 0 && !this->isIterative)
 	{
 		// Resolution of G * x2 = V * x1
 		MatrixXr x2 = Gdec_.solve(V_*x1);
@@ -726,13 +724,13 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_in
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
 	switch (GCVmethod == "exact") {
 		case 1:
-		  if(regressionData_.getFlagIterative() & !isGAMData)
+		  if(this->isIterative & !isGAMData)
               computeDOFExact_iterative(output_indexS, output_indexT, lambdaS, lambdaT);
 			else
               computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
 			break;
 		case 0:
-			if(regressionData_.getFlagIterative() & !isGAMData)
+			if(this->isIterative & !isGAMData)
                 computeDOFStochastic_iterative(output_indexS, output_indexT, lambdaS, lambdaT);
 			else
                 computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT);
@@ -1182,7 +1180,7 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 		Assembler::forcingTerm(mesh_, fe, u, rhs_ft_correction_);
 	}
 
-	if(regressionData_.isSpaceTime() && !regressionData_.getFlagIterative())
+	if(regressionData_.isSpaceTime() && !this->isIterative)
 	{
 		this->buildSpaceTimeMatrices();
 	}
@@ -1193,7 +1191,7 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	setDMat();
 
 	// Set the matrix needed for the iterative method
-	if(regressionData_.isSpaceTime() && regressionData_.getFlagIterative())
+	if(regressionData_.isSpaceTime() && this->isIterative)
         buildSpaceTimeMatrices_iterative();
 
 	// Define right hand data [rhs]
@@ -1226,11 +1224,11 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
     this->R1_lambda = (-lambdaS) * R1_;
     // Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
     // distinguishing between iterative and monolithic method
-    if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && !regressionData_.getFlagIterative())
+    if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && !this->isIterative)
     {
         this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
     }
-    if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && regressionData_.getFlagIterative())
+    if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && this->isIterative)
     {
         //Recall: with the iterative method the  matrix of the systems have dimension 2N_*2N_ i
         Real delta = mesh_time_[1] - mesh_time_[0];
