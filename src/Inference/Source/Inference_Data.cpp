@@ -128,7 +128,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 //! Space-only main constructor of the class, with inference for f
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
 			     SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
-			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, exact_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
+			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, exact_Inference_, enhanced_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
  
   //component_Type
   UInt size_component_Type=Rf_length(component_Type_);

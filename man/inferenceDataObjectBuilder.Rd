@@ -7,10 +7,16 @@
 inferenceDataObjectBuilder<-function(test = NULL, 
 interval = NULL, 
 type = 'wald', 
+component = 'parametric',
 exact = FALSE, 
+enhanced = FALSE,
 dim = NULL, 
+n_cov = NULL,
+locations = NULL,
+locations_indices = NULL,
 coeff = NULL, 
 beta0 = NULL, 
+f0 = NULL,
 f_var = FALSE,
 level = 0.95,
 n_flip = 1000,
@@ -27,24 +33,38 @@ and can take values 'one-at-the-time', 'simultaneous' (available only for Wald a
  Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account.}
 
 \item{type}{A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
-'wald'(default), 'speckman' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.}
+'wald'(default), 'speckman' 'sign-flip' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.}
+
+\item{component}{A list of strings defining on which model component inference has to be performed. It can take values 'parametric', 'nonparametric' or 'both'. The default is 'parametric'.}
 
 \item{exact}{A logical used to decide the method used to estimate the statistics variance.
 The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
 In the second case the evaluation is exact but computationally expensive.}
 
-\item{dim}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
+\item{enhanced}{A logical used to decide wether to perform enhaned on classical ESF tests.
+The possible values are: FALSE (default) and TRUE. In the first case classical ESF test will be performed.
+In the second case enhanced ESF procedures will be employed leading to a better Type-I error but slight lower power.}
 
-\item{coeff}{A matrix, with \code{dim} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
+\item{dim}{Dimension of the problem, defaulted to NULL. (Must be set by the user)}
+
+\item{n_cov}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
+
+\item{locations}{A matrix of the locations of interest when testing the nonparametric component f}
+
+\item{locations_indices}{A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference. If a vector of indices is provided, then the slot 'locations' is discarded.}
+
+\item{coeff}{A matrix, with \code{n_cov} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
 in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.}
 
 \item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
 If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.}
 
+\item{f0}{A function object representing the expression of the nonparametric component f under the null hypothesis. If NULL, the default is the null function, hence a test on the significance of the nonparametric component is carried out.}
+
 \item{f_var}{A logical used to decide whether to estimate the local variance of the nonlinear part of the model.
 The possible values are: FALSE (default) and TRUE.}
 
-\item{level}{Level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.}
+\item{level}{A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.}
 
 \item{n_flip}{Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.}
 
@@ -58,8 +78,9 @@ A function that build an [inferenceDataObject]. In the process of construction m
 that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
 }
 \examples{
-obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 4);
-obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 5, level = 0.99);
+obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 2, n_cov = 4);
+obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 3, n_cov = 5, level = 0.99);
 obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','one-at-the-time'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
- type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, level=0.99)
+ type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
+obj4<-inferenceDataObjectBuilder(test = "simultaneous", interval = c("one-at-the-time", "simultaneous"), type = "wald", component = c("parametric", "nonparametric"), dim = 2, n_cov = 2, exact = T, locations_indices = 1:10, level = c(0.95, 0.9))
 }

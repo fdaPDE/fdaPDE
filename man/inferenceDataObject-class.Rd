@@ -6,12 +6,12 @@
 \alias{inferenceDataObject}
 \title{Class for inference data}
 \description{
-A class that contains all possible information for inference over linear parameters in spatial regression with
+A class that contains all possible information for inference over linear parameters and/or nonparametric field in spatial regression with
 differential regularization problem. This object can be used as parameter in smoothing function of the fdaPDE library [smooth.FEM].
 }
 \details{
 #Warning
-At least one between test and interval must be nonzero. \code{dim}, \code{coeff} and \code{beta0} need to be coherent.
+At least one between test and interval must be nonzero. \code{n_cov}, \code{coeff} and \code{beta0} need to be coherent.
 The usage of [inferenceDataObjectBuilder] is recommended for the construction of an object of this class.
 }
 \section{Slots}{
@@ -23,25 +23,43 @@ in the third a simultaneous test is performed.}
 \item{\code{interval}}{A vector of integers taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.}
 
-\item{\code{type}}{A vector of integers taking value 1, 2 or 3, corresponding to Wald, speckman or eigen-sign-flip implementation 
+\item{\code{type}}{A vector of integers taking value 1, 2 or 3, corresponding to Wald, Speckman or Eigen-Sign-Flip implementation 
 of the inference analysis.}
 
 \item{\code{exact}}{An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 whereas if 2 an approximated computation will be carried out.}
 
-\item{\code{dim}}{Number of covariates taken into account in the linear part of the regression problem.}
+\item{\code{enhanced}}{An integer taking value 1 or 2. If 1 an enhanced computation of the beta ESF test statistics will be performed,
+whereas if 2 the classical beta ESF test will be perfoermed.}
+
+\item{\code{component}}{A vector of integers taking value 1,2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.}
+
+\item{\code{dim}}{Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases.}
+
+\item{\code{n_cov}}{Number of covariates taken into account in the linear part of the regression problem.}
+
+\item{\code{locations}}{A matrix of numeric coefficients. When nonparametric inference is requested it represents the set of spatial locations for which the inferential analysis should be performed. 
+The default values is a one-dimensional matrix of value 1 indicating that all the observed location points should be considered. 
+In the sign-flip and eigen-sign-flip implementations only observed points are allowed.}
+
+\item{\code{locations_indices}}{A vector of indices indicating the which spatial points have to be considered among the observed ones for nonparametric inference. If a vector of location indices is provided
+then the slot 'location' is discarded.}
 
 \item{\code{coeff}}{A matrix of numeric coefficients with columns of dimension \code{dim} and each row represents a linear combination of the linear parameters to be tested and/or to be
 estimated via confidence interval.}
 
 \item{\code{beta0}}{Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.}
 
+\item{\code{f0}}{Function representing the expression of the nonparametric component f under the null hypothesis.}
+
+\item{\code{f0_eval}}{Vector of f0 evaluations at the choosen test locations. It will be eventually set later in checkInferenceParameters, if nonparametric inference is required.}
+
 \item{\code{f_var}}{An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
 whereas if 2 they will not.}
 
 \item{\code{quantile}}{Quantile needed for confidence intervals. Used only if interval is not 0.}
 
-\item{\code{alpha}}{Level of Eigen-Sign-Flip confidence intervals. Used only if interval is not 0.}
+\item{\code{alpha}}{Level vector of Eigen-Sign-Flip confidence intervals. Used only if interval is not 0.}
 
 \item{\code{n_flip}}{An integer representing the number of permutations in the case of eigen-sign-flip test.}
 
