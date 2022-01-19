@@ -18,6 +18,7 @@ class InferenceData
   		std::vector<std::string> implementation_Type  	= {"wald"}; 	                //!< Values: wald [default], speckman, sign-flip, eigen-sign-flip
 		std::vector<std::string> component_Type		= {"parametric"};		//!< Values: parametric [default], nonparametric, both
   		std::string exact_Inference			= "non-exact";		        //!< Values: non-exact [default], exact 
+		std::string enhanced_Inference			= "classical";		        //!< Values: classical [default], enhanced 
 		// Parameters needed
 		MatrixXr locs_Inference;							//!< Matrix of spatial locations to be considered for nonparametric inference
 		std::vector<UInt> locs_index_Inference;						//!< Vector of location indices to be considered for nonparametric inference
@@ -37,10 +38,10 @@ class InferenceData
   		InferenceData() = default;
                 //! Space constructor (with inference for f)
   		InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
-				SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP f_Var_,
+				SEXP exact_Inference_, SEXP enhanced_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP f_Var_,
 			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
                 //! Space-time constructor (without inference for f --> not implemented yet)
-                InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
+                InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
 			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
                 
                 
@@ -50,6 +51,7 @@ class InferenceData
   		inline void set_implementation_type(const std::vector<std::string> & implementation_Type_){implementation_Type = implementation_Type_;}; //!< Setter for implementation_Type \param implementation_Type_ new implementation_Type	
 		inline void set_component_type(const std::vector<std::string> & component_Type_){component_Type = component_Type_;}; //!< Setter for component_Type \param component_Type_ new component_Type
   		inline void set_exact_inference(const std::string && exact_Inference_){exact_Inference = exact_Inference_;};	//!< Setter for exact_Inference \param exact_Inference_ new exact_Inference
+		inline void set_enhanced_inference(const std::string && enhanced_Inference_){enhanced_Inference = enhanced_Inference_;}; //!< Setter for enhanced_Inference \param enhanced_Inference_ new enhanced_Inference
                 inline void set_locs_inference(const MatrixXr & locs_inf){locs_Inference = locs_inf;};		        	//!< Setter for locs_Inference \param locs_inf new locs_Inference
 		inline void set_locs_index_inference(const std::vector<UInt> & locs_ind_inf){locs_index_Inference = locs_ind_inf;}; //!< Setter for locs_index_Inference \param locs_ind_inf new locs_index_Inference
   		inline void set_coeff_inference(const MatrixXr & coeff_inf){coeff_Inference = coeff_inf;};		        //!< Setter for coeff_Inference \param coeff_inf new coeff_Inference
@@ -68,6 +70,7 @@ class InferenceData
   		inline std::vector<std::string> get_implementation_type() const{return this->implementation_Type;};		//!< Getter for implementation_Type \return implementation_Type
 		inline std::vector<std::string> get_component_type() const{return this->component_Type;};			//!< Getter for component_Type \return component_Type
  		inline std::string get_exact_inference() const{return this->exact_Inference;};			                //!< Getter for exact_Inference \return exact_Inference
+		inline std::string get_enhanced_inference() const{return this->enhanced_Inference;};		                //!< Getter for enhanced_Inference \return enhanced_Inference
 		inline MatrixXr get_locs_inference() const{return this->locs_Inference;};		                        //!< Getter for locs_Inference \return locs_Inference
 		inline std::vector<UInt> get_locs_index_inference() const{return this->locs_index_Inference;};		        //!< Getter for locs_index_Inference \return locs_index_Inference
  		inline MatrixXr get_coeff_inference() const{return this->coeff_Inference;};		                        //!< Getter for coeff_Inference \return coeff_Inference

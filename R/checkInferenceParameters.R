@@ -3,7 +3,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
   #if no inference is required, construct a dummy inference object, where all parameters are set to nonsense values on purpose
   if(is.null(R_Inference_Object_Data) || R_Inference_Object_Data@definition==0){
     return(
-      new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
+      new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
           locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
           f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0)))
   }#define a shadow inferenceDataObject in order tell the cpp code not to perform any inferential analysis.
@@ -11,7 +11,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
   if(!is.null(R_Inference_Object_Data) && is.null(checknumber) && sum(R_Inference_Object_Data@component!=2)!=0){
     warning("Covariates are not defined, inference data are discarded")
     return(
-      new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
+      new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
           locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
           f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))) 
   }

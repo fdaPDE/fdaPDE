@@ -8,6 +8,8 @@
 #'of the inference analysis.
 #'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 #'whereas if 2 an approximated computation will be carried out.
+#'@slot enhanced An integer taking value 1 or 2. If 1 an enhanced computation of the beta ESF test statistics will be performed,
+#'whereas if 2 the classical beta ESF test will be perfoermed.
 #'@slot component A vector of integers taking value 1,2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.  
 #'@slot dim Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases. 
 #'@slot n_cov Number of covariates taken into account in the linear part of the regression problem.
@@ -42,7 +44,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   interval = "integer", 
                                                                   type = "integer", 
                                                                   component = "integer",
-                                                                  exact = "integer", 
+                                                                  exact = "integer",
+                                                                  enhanced = "integer",
                                                                   dim = "integer",
                                                                   n_cov = "integer",
                                                                   locations = "matrix",
@@ -74,6 +77,9 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
 #'The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
 #'In the second case the evaluation is exact but computationally expensive.
+#'@param enhanced A logical used to decide wether to perform enhaned on classical ESF tests.
+#'The possible values are: FALSE (default) and TRUE. In the first case classical ESF test will be performed.
+#'In the second case enhanced ESF procedures will be employed leading to a better Type-I error but slight lower power.
 #'@param dim Dimension of the problem, defaulted to NULL. (Must be set by the user)
 #'@param n_cov Number of the covariates, defaulted to NULL. (Must be set by the user)
 #'@param locations A matrix of the locations of interest when testing the nonparametric component f
@@ -97,6 +103,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'type = 'wald', 
 #'component = 'parametric',
 #'exact = FALSE, 
+#'enhanced = FALSE,
 #'dim = NULL, 
 #'n_cov = NULL,
 #'locations = NULL,
@@ -123,7 +130,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 interval = NULL, 
                                 type = "wald", 
                                 component = "parametric",
-                                exact = F, 
+                                exact = F,
+                                enhanced = F,
                                 dim = NULL,
                                 n_cov = NULL,
                                 locations = NULL,
@@ -178,6 +186,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
     exact_numeric=as.integer(1)
   }else{
     exact_numeric=as.integer(2)
+  }
+  
+  if(enhanced != F){
+    if(class(enhanced)!="logical")
+      stop("'enhanced' should be either TRUE or FALSE ")
+    if(length(enhanced)==0)
+      stop("'enhanced' is zero dimensional, should be either TRUE or FALSE")
+    if(enhanced!=T)
+      stop("'enhanced' should be either TRUE or FALSE")
+    enhanced_numeric=as.integer(1)
+  }else{
+    enhanced_numeric=as.integer(2)
   }
   
   if(!is.null(dim)){
@@ -583,10 +603,10 @@ if(sum(component == "nonparametric")!=length(component)){
   
   # Building the output object, returning it
   if(!is.null(locations_indices))
-    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
+    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
               locations_indices = as.integer(locations_indices), coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   else
-    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
+    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
                 locations = locations, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
     
   

@@ -56,6 +56,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   implementation_Type<-as.vector(R_Inference_Data_Object@type)
   component_Type<-as.vector(R_Inference_Data_Object@component)
   exact_Inference<-R_Inference_Data_Object@exact
+  enhanced_Inference<-R_Inference_Data_Object@enhanced
   locs_Inference<-as.matrix(R_Inference_Data_Object@locations)
   locs_index_Inference<-as.vector(R_Inference_Data_Object@locations_indices - 1) #converting indices from R to c++ ones
   coeff_Inference<-as.matrix(R_Inference_Data_Object@coeff)
@@ -105,6 +106,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   storage.mode(implementation_Type) <- "integer"
   storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
+  storage.mode(enhanced_Inference) <- "integer"
   storage.mode(locs_Inference) <- "double"
   storage.mode(locs_index_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
@@ -121,7 +123,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,enhanced_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
                   f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 
@@ -179,6 +181,7 @@ CPP_smooth.volume.FEM.PDE.basis<-function(locations, observations, FEMbasis, cov
   implementation_Type<-as.vector(R_Inference_Data_Object@type)
   component_Type<-as.vector(R_Inference_Data_Object@component)
   exact_Inference<-R_Inference_Data_Object@exact
+  enhanced_Inference<-R_Inference_Data_Object@enhanced
   locs_Inference<-as.matrix(R_Inference_Data_Object@locations)
   locs_index_Inference<-as.vector(R_Inference_Data_Object@locations_indices - 1) #converting indices from R to c++ ones
   coeff_Inference<-as.matrix(R_Inference_Data_Object@coeff)
@@ -236,6 +239,7 @@ CPP_smooth.volume.FEM.PDE.basis<-function(locations, observations, FEMbasis, cov
   storage.mode(implementation_Type) <- "integer"
   storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
+  storage.mode(enhanced_Inference) <- "integer"
   storage.mode(locs_Inference) <- "double"
   storage.mode(locs_index_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
@@ -252,7 +256,7 @@ CPP_smooth.volume.FEM.PDE.basis<-function(locations, observations, FEMbasis, cov
   bigsol <- .Call("regression_PDE", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,enhanced_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
                   f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 
@@ -314,7 +318,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   
   if(R_Inference_Data_Object@definition==1 && mean(PDE_param_eval$u != rep(0, nrow(points_eval)))!=0){
     warning("Inference for linear estimators is implemented only if reaction term is zero, \nInference Data are ignored")
-    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
                                 f0_eval = -1, f_var = as.integer(0), quantile = -1, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
@@ -326,6 +330,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   implementation_Type<-as.vector(R_Inference_Data_Object@type)
   component_Type<-as.vector(R_Inference_Data_Object@component)
   exact_Inference<-R_Inference_Data_Object@exact
+  enhanced_Inference<-R_Inference_Data_Object@enhanced
   locs_Inference<-as.matrix(R_Inference_Data_Object@locations)
   locs_index_Inference<-as.vector(R_Inference_Data_Object@locations_indices - 1) #converting indices from R to c++ ones
   coeff_Inference<-as.matrix(R_Inference_Data_Object@coeff)
@@ -381,6 +386,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   storage.mode(implementation_Type) <- "integer"
   storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
+  storage.mode(enhanced_Inference) <- "integer"
   storage.mode(locs_Inference) <- "double"
   storage.mode(locs_index_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
@@ -397,7 +403,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   bigsol <- .Call("regression_PDE_space_varying", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,enhanced_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
                   f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 
