@@ -180,6 +180,19 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
     VectorXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        		// V^t * partial_res_H0
+        
+    UInt n_obs = this->inf_car.getN_obs();
+
+    // Seclect eigenvalues that will not be flipped basing on the estimated bias carried
+    VectorXr Tilder_hat = Lambda_dec.eigenvectors().transpose()* (*(this->inf_car.getZp()) - (*W)* beta_hat); // This vector represents Tilder using only beta_hat, needed for bias estimation
+
+    // Estimate the standard error
+    VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
+    Real SS_res = eps_hat.squaredNorm();
+    Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
+
+    Real threshold = 5*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
+    UInt N_Eig_Out=0;
     
     // Observed statistic
     VectorXr stat=TildeX*Tilder;
@@ -189,23 +202,33 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     std::random_device rd; 
     std::default_random_engine eng{rd()};
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-    Real count=0;
+    Real count_Up=0;
+    Real count_Down=0;
+
     VectorXr Tilder_perm=Tilder;
     
     for(unsigned long int i=0;i<n_flip;i++){
       for(unsigned long int j=0;j<TildeX.cols();j++){
-	UInt flip=2*distr(eng)-1;
+	UInt flip;
+        if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
+	  flip=1;
+          ++N_Eig_Out;
+        }else{
+	  flip=2*distr(eng)-1;
+        }
 	Tilder_perm(j)=Tilder(j)*flip;
       }
       stat_perm=TildeX*Tilder_perm; // Flipped statistic
-      if(stat_perm > stat){ ++count; } //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
+      if(is_Unilaterally_Greater(stat_perm,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
+	if(is_Unilaterally_Smaller(stat_perm,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
+      }
     }
     
-    
-    Real pval = count/n_flip;
-    
+    Real pval_Up = count_Up/n_flip;
+    Real pval_Down = count_Down/n_flip;
+
     result.resize(p); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
-    result(0) = pval;
+    result(0) = 2*std::min(pval_Up,pval_Down); // Obtain the blateral p_value starting from the unilateral
     for(UInt k=1;k<p;k++){
       result(k)=10e20;
     }
@@ -229,6 +252,19 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
     MatrixXr Tilder = Lambda_dec.eigenvectors().transpose()*Partial_res_H0;   			        		// V^t * partial_res_H0
     
+    UInt n_obs = this->inf_car.getN_obs();
+
+    // Seclect eigenvalues that will not be flipped basing on the estimated bias carried
+    VectorXr Tilder_hat = Lambda_dec.eigenvectors().transpose()* (*(this->inf_car.getZp()) - (*W)* beta_hat); // This vector represents Tilder using only beta_hat, needed for bias estimation
+
+    // Estimate the standard error
+    VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
+    Real SS_res = eps_hat.squaredNorm();
+    Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
+
+    Real threshold = 5*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
+    UInt N_Eig_Out=0;
+
     // Observed statistic
     MatrixXr stat=TildeX*Tilder;
     MatrixXr stat_perm=stat;
@@ -237,28 +273,37 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     std::random_device rd; 
     std::default_random_engine eng{rd()};
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
-    VectorXr count = VectorXr::Zero(p);
+    VectorXr count_Up = VectorXr::Zero(p);
+    VectorXr count_Down = VectorXr::Zero(p);
     
     MatrixXr Tilder_perm=Tilder;
     
     for(unsigned long int i=0;i<n_flip;i++){
       for(unsigned long int j=0;j<TildeX.cols();j++){
-	UInt flip=2*distr(eng)-1;
+	UInt flip;
+	if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
+	  flip=1 ;
+	}else{
+	  flip=2*distr(eng)-1;
+	}
 	Tilder_perm.row(j)=Tilder.row(j)*flip;
       }
       stat_perm=TildeX*Tilder_perm; // Flipped statistic
       
       for(UInt k=0; k<p; ++k){
-	if(fabs(stat_perm(k,k)) > fabs(stat(k,k))){
-	  ++count(k);
-	} 
+	if(stat_perm(k,k) > stat(k,k)){
+	  ++count_Up(k);
+	}else{
+	  ++count_Down(k);
+	}
       } 
     }
     
-    VectorXr pval = count/n_flip;
+    VectorXr pval_Up = count_Up/n_flip;
+    VectorXr pval_Down = count_Down/n_flip;
     
     result.resize(p);
-    result = pval;
+    result = 2*min(pval_Up,pval_Down); // Obtain the blateral p_value starting from the unilateral
   } 
   return result;
   

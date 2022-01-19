@@ -97,6 +97,50 @@ inline bool operator > (VectorXr v, VectorXr u){
   }
   return true;
 };
-#include "Eigen_Sign_Flip_imp.h"
 
+//We define the naive operator to compare unilaterally two vectors, namely v > u if and only if 
+//each component of v is strictly greater than 
+//the corresponding component of u
+inline bool is_Unilaterally_Greater (VectorXr v, VectorXr u){
+  UInt q=v.size();
+  if(u.size()!=q){
+    Rprintf("Errore: dimensioni non combaciano");
+    return false;
+  }
+  for (UInt i=0; i< q; i++){
+    if(v(i)<=u(i)){
+      return false;
+    }
+  }
+  return true;
+};
+
+//We define the naive operator to compare unilaterally two vectors, namely v < u if and only if 
+//each component of v is strictly greater than 
+//the corresponding component of u
+inline bool is_Unilaterally_Smaller (VectorXr v, VectorXr u){
+  UInt q=v.size();
+  if(u.size()!=q){
+    Rprintf("Errore: dimensioni non combaciano");
+    return false;
+  }
+  for (UInt i=0; i< q; i++){
+    if(v(i)>=u(i)){
+      return false;
+    }
+  }
+  return true;
+};
+
+// minimum between VectorXr (needed in one-at-the-time tests)
+inline VectorXr min(const VectorXr & v, const VectorXr & u){
+  VectorXr result;
+  result.resize(v.size());
+  for(UInt i=0; i<v.size(); ++i){
+    result(i)=std::min(v(i),u(i));
+  }
+  return result;
+}
+
+#include "Eigen_Sign_Flip_imp.h"
 #endif
