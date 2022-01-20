@@ -511,12 +511,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
         }
       }
     
-      if((test[index]=="one-at-the-time" || interval[index] == "one-at-the-time") && component[index] != "parametric"){
-        warning("Only simultaneous tests and confidence intervals are available for the nonparametric component, proceeding with simultaneous inference")
-        if(test[index]=="one-at-the-time")
-          test_numeric[index] = as.integer(2)
-        if(interval[index] == "one-at-the-time")
-          interval_numeric[index] = as.integer(2)
+      if((test[index]=="one-at-the-time") && component[index] != "parametric"){
+        warning("Only simultaneous tests are available for the nonparametric component, proceeding with simultaneous inference")
+        test_numeric[index] = as.integer(2)
       }
     
       

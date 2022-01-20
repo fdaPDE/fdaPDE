@@ -924,7 +924,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     # Save statistics and intervals
     if(R_Inference_Data_Object@definition==1){
       inference = {}
-      confidence_intervals = matrix(data = bigsol[[24]], nrow = 2*3*length(R_Inference_Data_Object@type), ncol = max(dim(R_Inference_Data_Object@coeff)[1]), dim(R_Inference_Data_Object@locations)[1])
+      confidence_intervals = matrix(data = bigsol[[24]], nrow = 2*3*length(R_Inference_Data_Object@type), ncol = max(dim(R_Inference_Data_Object@coeff)[1], dim(R_Inference_Data_Object@locations)[1]))
       p_val = matrix(data = bigsol[[23]], nrow = dim(R_Inference_Data_Object@coeff)[1]+1, ncol = length(R_Inference_Data_Object@type))
   
       for(i in 1:length(R_Inference_Data_Object@type)){ # each element is a different inferential setting

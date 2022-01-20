@@ -1,6 +1,7 @@
 #include "Wald.h"
 #include <cmath>
 #include <boost/math/distributions/chi_squared.hpp>
+#include <boost/math/distributions/normal.hpp>
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
@@ -321,19 +322,19 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   // compute the quantile 
   Real alpha = 0.05; // TO BE MODIFIED, get it from inference data
   Real quant;
-  if(this->inf_car.getInfData()->get_interval_type())[this->pos_impl]=="simultaneous"){
+  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="simultaneous"){
     // generate the distribution
     boost::math::chi_squared dist(n_loc);
     quant = std::sqrt(boost::math::quantile(dist, alpha));
   }
 
-  if(this->inf_car.getInfData()->get_interval_type())[this->pos_impl]=="one-at-the-time"){
+  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
     // generate the distribution
     boost::math::normal dist; // default is a standard normal
     quant = boost::math::quantile(dist, alpha/2);
   }
 
-  if(this->inf_car.getInfData()->get_interval_type())[this->pos_impl]=="bonferroni"){
+  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="bonferroni"){
     // generate the distribution
     boost::math::normal dist; // default is a standard normal
     quant = boost::math::quantile(dist, alpha/(2*n_loc));
