@@ -93,8 +93,8 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
   std::random_device rd; 
   std::default_random_engine eng{rd()};
   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-  Real count_up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
-  Real count_down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
+  Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
+  Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
     
   MatrixXr Tilder_perm=Tilder;
     
@@ -118,8 +118,8 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
     }
   }
     
-  Real pval_up = count_up/n_flip;     // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b>b_0
-  Real pval_down = count_down/n_flip; // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b<b_0
+  Real pval_up = count_Up/n_flip;     // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b>b_0
+  Real pval_down = count_Down/n_flip; // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b<b_0
 
   if(Direction==1){
     result = pval_up;
