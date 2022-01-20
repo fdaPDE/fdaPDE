@@ -298,8 +298,9 @@ SEXP refine1D(SEXP Rnodes, SEXP Redges, SEXP Rdelta){
     {
         if( num_subs[i] == 1)
         {
-            edges( edges_count,0) = edges_old(i,0);
-            edges( edges_count,1) = edges_old(i,1);
+            // Indexes in R starts from 1, in C++ from 0, needed transformations!
+            edges( edges_count,0) = edges_old(i,0) + 1;
+            edges( edges_count,1) = edges_old(i,1) + 1;
             ++edges_count;
         }
         else // there is at least one new internal node!
