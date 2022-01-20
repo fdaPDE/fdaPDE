@@ -102,21 +102,21 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
   unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
 
   for(unsigned long int i=0;i<n_flip;i++){
-     for(unsigned long int j=0;j<TildeX.cols();j++){
-	UInt flip;
-        if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
-	  flip=1;
-          ++N_Eig_Out;
-        }else{
-	  flip=2*distr(eng)-1;
-        }
-	Tilder_perm(j)=Tilder(j)*flip;
+    for(unsigned long int j=0;j<TildeX.cols();j++){
+      UInt flip;
+      if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
+	flip=1;
+	++N_Eig_Out;
+      }else{
+	flip=2*distr(eng)-1;
       }
-      stat_perm=TildeX*Tilder_perm; // Flipped statistic
-      if(is_Unilaterally_Greater(stat_perm,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
-	if(is_Unilaterally_Smaller(stat_perm,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
-      }
+      Tilder_perm(j)=Tilder(j)*flip;
     }
+    stat_perm=TildeX*Tilder_perm; // Flipped statistic
+    if(is_Unilaterally_Greater(stat_perm,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
+      if(is_Unilaterally_Smaller(stat_perm,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
+    }
+  }
     
   Real pval_up = count_up/n_flip;     // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b>b_0
   Real pval_down = count_down/n_flip; // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b<b_0
