@@ -164,7 +164,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
  
    if(length(type) > 1 || type!="wald"){
     if(class(type)!="character")
-      stop("'type' should be a vector of characters: choose among 'wald', 'wald-mod', 'speckman', 'sign-flip' or 'eigen-sign-flip'" )
+      stop("'type' should be a vector of characters: choose among 'wald', 'speckman', 'sign-flip' or 'eigen-sign-flip'" )
   }
   
   
@@ -433,13 +433,12 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   for (index in 1:n_of_implementations){
     
-      if(type[index]!="wald" && type[index]!="wald-mod" && type[index]!="speckman" && type[index]!="eigen-sign-flip" && type[index]!="sign-flip"){
-        stop("type should be chosen between 'wald', 'wald-mod', 'speckman' 'sign-flip' and 'eigen-sign-flip'")}else{
+      if(type[index]!="wald" && type[index]!="speckman" && type[index]!="eigen-sign-flip" && type[index]!="sign-flip"){
+        stop("type should be chosen between 'wald', 'speckman' 'sign-flip' and 'eigen-sign-flip'")}else{
           if(type[index]=="wald") type_numeric[index]=as.integer(1)
           if(type[index]=="speckman") type_numeric[index]=as.integer(2)
           if(type[index]=="eigen-sign-flip") type_numeric[index]=as.integer(3)
           if(type[index]=="sign-flip") type_numeric[index]=as.integer(4)
-          if(type[index]=="wald-mod") type_numeric[index]=as.integer(5)
         }
     
     if(component[index]!="parametric" && component[index]!="nonparametric" && component[index]!="both"){
@@ -451,9 +450,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
       
     if(type[index]=="sign-flip" && component[index]!="nonparametric")
        stop("sign-flip test is implemented only for the nonparametric component")
-    
-    if(type[index]=="wald-mod" && component[index]!="nonparametric")
-      stop("wald-mod test is implemented only for the nonparametric component")
     
     if(type[index]=="speckman" && component[index]!="parametric")
       stop("speckman test and confidence intervals are implemented only for the parametric component")
@@ -524,13 +520,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
     
       
-      # Build the quantile for confidence intervals (for the parametric component) if needed ---> TO BE MODIFIED FOR THE NONPARAMETRIC CASE 
-      if(interval[index]=="none"){
+      # Build the quantile for confidence intervals if needed 
+      if(interval[index]=="none" || component[index]=="nonparametric"){
          quantile[index]=0
         }else{
           if(level[index] > 0){
               if(interval[index] == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
-                quantile[index]=qchisq(level[index], dim(coeff)[1])
+                quantile[index]=sqrt(qchisq(level[index], dim(coeff)[1]))  
               }else{
                 if(interval[index]=="one-at-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
                   quantile[index]=qnorm((1-(1-level[index])/2),0,1)

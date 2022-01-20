@@ -195,52 +195,39 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   // derive the variance-covariance matrix of f_loc_hat
   MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
 
-  if((this->inf_car.getInfData()->get_implementation_type())[this->pos_impl] == "wald"){
-  
-    Eigen::FullPivLU<MatrixXr> V_f_loc_dec;
-    V_f_loc_dec.compute(V_f_loc);
-  
-    // compute the test statistics 
-    result = (f_loc_hat - f_0).transpose() * V_f_loc_dec.solve(f_loc_hat - f_0);
+  // compute eigenvalue decomposition of V_f_loc
+  Eigen::SelfAdjointEigenSolver<MatrixXr> V_f_loc_eig(V_f_loc);
+  MatrixXr eig_values = V_f_loc_eig.eigenvalues().asDiagonal();
 
-  } else{
-
-    // modified wald 
-    // compute eigenvalue decomposition of V_f_loc
-    Eigen::SelfAdjointEigenSolver<MatrixXr> V_f_loc_eig(V_f_loc);
-    MatrixXr eig_values = V_f_loc_eig.eigenvalues().asDiagonal();
-
-    UInt k = 0; 
-    UInt max_it = eig_values.cols();
+  UInt k = 0; 
+  UInt max_it = eig_values.cols();
     
-    Real threshold = 0.001; 
-    bool stop = false;
+  Real threshold = 0.01; 
+  bool stop = false;
 
-    while(!stop){
-      if(k >= max_it || eig_values(k,k) > threshold)
-	stop = true;
-      ++k;
-    }
-
-    MatrixXr eig_values_red = eig_values.bottomRightCorner(max_it - k + 1, max_it - k + 1);
-    MatrixXr eig_vector_red = V_f_loc_eig.eigenvectors().rightCols(max_it - k + 1);
-
-    // Rank-r pseudo inverse
-    MatrixXr eig_inv = eig_values_red; 
-    eig_inv.diagonal() = eig_values_red.diagonal().array().inverse();
-    MatrixXr V_f_loc_red_inv = eig_vector_red * eig_inv * eig_vector_red.transpose();
-  
-    // compute the test statistics
-    Real result_red = (f_loc_hat - f_0).transpose() * V_f_loc_red_inv * (f_loc_hat - f_0);
-  
-    // generate the distribution
-    boost::math::chi_squared dist(max_it - k + 1);
-  
-    // compute the pvalue
-    result = boost::math::cdf(complement(dist,result_red));
-  
+  while(!stop){
+    if(k >= max_it || eig_values(k,k) > threshold)
+      stop = true;
+    ++k;
   }
 
+  MatrixXr eig_values_red = eig_values.bottomRightCorner(max_it - k + 1, max_it - k + 1);
+  MatrixXr eig_vector_red = V_f_loc_eig.eigenvectors().rightCols(max_it - k + 1);
+
+  // Rank-r pseudo inverse
+  MatrixXr eig_inv = eig_values_red; 
+  eig_inv.diagonal() = eig_values_red.diagonal().array().inverse();
+  MatrixXr V_f_loc_red_inv = eig_vector_red * eig_inv * eig_vector_red.transpose();
+  
+  // compute the test statistics
+  Real result_red = (f_loc_hat - f_0).transpose() * V_f_loc_red_inv * (f_loc_hat - f_0);
+  
+  // generate the distribution
+  boost::math::chi_squared dist(max_it - k + 1);
+  
+  // compute the pvalue
+  result = boost::math::cdf(complement(dist,result_red));
+  
   return result; 	
 };
 
@@ -328,9 +315,29 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   // compute local estimator 
   VectorXr f_loc_hat = Psi_loc * f_hat; 
 
-  // get the quantile
-  // TO BE ADDED: Real quant = ...
-  Real quant = 1;  
+  // derive the variance-covariance matrix of f_loc_hat
+  MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
+
+  // compute the quantile 
+  Real alpha = 0.05; // TO BE MODIFIED, get it from inference data
+  Real quant;
+  if(this->inf_car.getInfData()->get_interval_type())[this->pos_impl]=="simultaneous"){
+    // generate the distribution
+    boost::math::chi_squared dist(n_loc);
+    quant = std::sqrt(boost::math::quantile(dist, alpha));
+  }
+
+  if(this->inf_car.getInfData()->get_interval_type())[this->pos_impl]=="one-at-the-time"){
+    // generate the distribution
+    boost::math::normal dist; // default is a standard normal
+    quant = boost::math::quantile(dist, alpha/2);
+  }
+
+  if(this->inf_car.getInfData()->get_interval_type())[this->pos_impl]=="bonferroni"){
+    // generate the distribution
+    boost::math::normal dist; // default is a standard normal
+    quant = boost::math::quantile(dist, alpha/(2*n_loc));
+  }
   
   for(UInt i=0; i<n_loc; ++i){
     result(i).resize(3);
@@ -338,7 +345,7 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
     result(i)(1)=f_loc_hat(i);
     
     // compute the half range of the interval
-    Real sd = std::sqrt(this->V_f(i,i));
+    Real sd = std::sqrt(V_f_loc(i,i));
     Real half_range=sd*quant;
     
     // compute the limits of the interval

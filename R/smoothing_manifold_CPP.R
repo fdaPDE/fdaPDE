@@ -66,7 +66,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   f_0_eval<-as.vector(R_Inference_Data_Object@f0_eval)
   f_var_Inference<-R_Inference_Data_Object@f_var
   inference_Quantile<-as.vector(R_Inference_Data_Object@quantile)
-  inference_Aplha<-as.vector(R_Inference_Data_Object@alpha)
+  inference_Alpha<-as.vector(R_Inference_Data_Object@alpha)
   inference_N_Flip<-R_Inference_Data_Object@n_flip
   inference_Tol_Fspai<-R_Inference_Data_Object@tol_fspai
   inference_Defined<-R_Inference_Data_Object@definition

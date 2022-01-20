@@ -1010,15 +1010,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         }
         }
         if(R_Inference_Data_Object@component[i]!=1){ # test on f was requested
-          f_statistics = statistics[length(statistics)]
-          p_value = numeric()
-          if(R_Inference_Data_Object@type[i]==3 || R_Inference_Data_Object@type[i]==4 || R_Inference_Data_Object@type[i]==5){ # (eigen-)sign-flip and wald-mod p-value are already computed in the cpp code
-            p_value = f_statistics
-          }
-          else{ # Wald test returns statistic, hence computation of p-value is needed
-            n_loc = dim(R_Inference_Data_Object@locations)[1]
-            p_value = 1-pchisq(f_statistics, n_loc)
-          }
+          p_value = statistics[length(statistics)]
+          
           # add p-value in the right position
           if(R_Inference_Data_Object@type[i]==1){
             inference$f$p_values$wald[[length(inference$f$p_values$wald)+1]] = p_value
@@ -1031,10 +1024,6 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           else if(R_Inference_Data_Object@type[i]==4){
             inference$f$p_values$sign_flip[[length(inference$f$p_values$sign_flip)+1]] = p_value
             inference$f$p_values$sign_flip=as.list(inference$f$p_values$sign_flip)
-          }
-          else if(R_Inference_Data_Object@type[i]==5){
-            inference$f$p_values$wald_mod[[length(inference$f$p_values$wald_mod)+1]] = p_value
-            inference$f$p_values$wald_mod=as.list(inference$f$p_values$wald_mod)
           }
         }
         }

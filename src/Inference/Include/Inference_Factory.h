@@ -38,7 +38,7 @@ public:
   {
     std::map<std::string,std::shared_ptr<Inference_Base<InputHandler, MatrixType>>> factory_Store=get_Factory_Store(); // Get the static factory
     
-    if(implementation_type_=="wald" || implementation_type_=="wald-mod"){
+    if(implementation_type_=="wald"){
       // check if it is exact or non-exact according to MatrixType
       if(std::is_same<MatrixType, SpMat>::value==false){
         // look if the object is already present in the factory
