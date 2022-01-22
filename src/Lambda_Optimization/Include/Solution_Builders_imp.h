@@ -34,9 +34,11 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
           intervals(0,0)(1) = 10e20; 
           intervals(0,0)(2) = 10e20;
 	  
-	  p_values.resize(1,1);
+	  p_values.resize(2,1);
 	  p_values(0,0).resize(1);
 	  p_values(0,0)(0)= 10e20;
+          p_values(1,0).resize(1);
+	  p_values(1,0)(0)= 10e20;
 	}else{
 	  
 	  p_values.resize(2, n_inf_implementations);
