@@ -61,6 +61,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   enhanced_Inference<-R_Inference_Data_Object@enhanced
   locs_Inference<-as.matrix(R_Inference_Data_Object@locations)
   locs_index_Inference<-as.vector(R_Inference_Data_Object@locations_indices - 1) #converting indices from R to c++ ones
+  locs_are_nodes_Inference <- R_Inference_Data_Object@locations_are_nodes
   coeff_Inference<-as.matrix(R_Inference_Data_Object@coeff)
   beta_0<-as.vector(R_Inference_Data_Object@beta0)
   f_0_eval<-as.vector(R_Inference_Data_Object@f0_eval)
@@ -110,6 +111,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   storage.mode(enhanced_Inference) <- "integer"
   storage.mode(locs_Inference) <- "double"
   storage.mode(locs_index_Inference) <- "integer"
+  storage.mode(locs_are_nodes_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
   storage.mode(f_0_eval) <- "double"
@@ -124,7 +126,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, 
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
-                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,enhanced_Inference,locs_Inference,locs_index_Inference,coeff_Inference,beta_0,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,enhanced_Inference,locs_Inference,locs_index_Inference,locs_are_nodes_Inference,coeff_Inference,beta_0,
                   f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 

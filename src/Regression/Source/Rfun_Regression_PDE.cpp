@@ -48,6 +48,7 @@ extern "C"
     \param RenhancedInference an R-integer that defines if an enhanced ESF test is required or not
     \param RlocsInference an R-matrix of location points selected for inference on the nonparametric component
     \param RlocsindexInference an R-vector of location indices selected for inference on the nonparametric component
+    \param Rlocsarenodes an R-integer specifying if the selected locations are a subset of mesh nodes
     \param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
     \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
     \param Rf0eval an R-vector containing the evaluation of the nonparametric component under the null hypothesis at the selected locations
@@ -63,12 +64,12 @@ extern "C"
 		      SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
 		      SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
 		      SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RcomponentType, SEXP RexactInference, SEXP RenhancedInference,
-		      SEXP RlocsInference, SEXP RlocsindexInference, SEXP RcoeffInference, SEXP Rbeta0, SEXP Rf0eval, SEXP RfvarInference,
+		      SEXP RlocsInference, SEXP RlocsindexInference, SEXP Rlocsarenodes, SEXP RcoeffInference, SEXP Rbeta0, SEXP Rf0eval, SEXP RfvarInference,
 		      SEXP RinferenceQuantile, SEXP RinferenceAlpha, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RenhancedInference, RlocsInference, RlocsindexInference, RcoeffInference, Rbeta0, Rf0eval, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RenhancedInference, RlocsInference, RlocsindexInference, Rlocsarenodes, RcoeffInference, Rbeta0, Rf0eval, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];

@@ -125,7 +125,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 
 //! Space-only main constructor of the class, with inference for f
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
-			     SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
+			     SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, exact_Inference_, enhanced_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
  
   //component_Type
@@ -158,6 +158,12 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   for(UInt i=0;i<size_locs_index;i++){
     locs_index_Inference[i]=INTEGER(locs_index_Inference_)[i];
   }
+
+  //locations_are_nodes
+  if(INTEGER(locs_are_nodes_)[0]==1)
+    this->set_locs_are_nodes_inference(true);
+  else
+    this->set_locs_are_nodes_inference(false);  
   
   //f0_eval
   UInt size_f_0=Rf_length(f_0_); 
@@ -206,7 +212,9 @@ void InferenceData::print_inference_data() const{
   for(UInt i=0; i < locs_index_Inference.size(); ++i){
     Rprintf(" %d \n", locs_index_Inference[i]);
   }
+
   
+  Rprintf("locations_are_nodes: %d\n",locations_are_nodes);
   
   Rprintf("coeff_inference:");
   for(UInt i=0; i < coeff_Inference.rows(); ++i){

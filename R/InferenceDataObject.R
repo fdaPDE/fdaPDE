@@ -17,7 +17,8 @@
 #' The default values is a one-dimensional matrix of value 1 indicating that all the observed location points should be considered. 
 #' In the sign-flip and eigen-sign-flip implementations only observed points are allowed. 
 #'@slot locations_indices A vector of indices indicating the which spatial points have to be considered among the observed ones for nonparametric inference. If a vector of location indices is provided
-#'then the slot 'location' is discarded.    
+#'then the slot 'location' is discarded. 
+#'@slot locations_are_nodes An integer taking value 1 or 2; in the first case it indicates that the selected locations to perform inference on f are all coinciding with the nodes; otherwise it takes value 2;  
 #'@slot coeff A matrix of numeric coefficients with columns of dimension \code{dim} and each row represents a linear combination of the linear parameters to be tested and/or to be
 #' estimated via confidence interval. 
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
@@ -50,6 +51,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   n_cov = "integer",
                                                                   locations = "matrix",
                                                                   locations_indices = "integer",
+                                                                  locations_are_nodes = "integer",
                                                                   coeff = "matrix",
                                                                   beta0 = "numeric",
                                                                   f0 = "function",
@@ -597,10 +599,10 @@ if(sum(component == "nonparametric")!=length(component)){
   # Building the output object, returning it
   if(!is.null(locations_indices))
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
-              locations_indices = as.integer(locations_indices), coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+              locations_indices = as.integer(locations_indices), locations_are_nodes = as.integer(1), coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   else
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
-                locations = locations, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+                locations = locations, locations_are_nodes = as.integer(1), coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
     
   
   return(result)

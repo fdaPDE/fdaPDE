@@ -37,6 +37,7 @@ protected:
   MatrixXv compute_f_CI(void) override;
   
   Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const VectorXr &, const  MatrixXr &, const UInt Direction) const;  //!< Computes the unilateral p value for a generic beta proposed in the research algorithm for CI 
+  const std::vector<UInt> compute_k_closest_points_2D(const UInt k, const Real x0, const Real y0, const MatrixXr & locations, const std::vector<UInt> & locations_index) const; //!< given a matrix of locations points, this utility finds the k closest points w.r.t a given point, needed to combine the test statistics for f when the locations coincide with the nodes
   
 public:
   // CONSTUCTOR

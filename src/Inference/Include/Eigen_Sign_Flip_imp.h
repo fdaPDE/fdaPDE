@@ -353,6 +353,43 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   // compute the residuals under H0
   this->Partial_f_res_H0 = Q_loc*(Z_loc - f_0); 
 
+  // Matrix that groups close location points, needed only when locations are nodes
+  MatrixXr Group_res = MatrixXr::Constant(this->inf_car.getInfData()->get_locs_inference().rows(), this->inf_car.getInfData()->get_locs_inference().rows(), 0);
+
+  if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){ 
+    // fix the number of residuals to combine 
+    UInt k = 5; 
+
+    // get the selected locations
+    MatrixXr locations = this->inf_car.getInfData()->get_locs_inference();
+    std::vector<UInt> locations_index = this->inf_car.getInfData()->get_locs_index_inference(); 
+
+    std::vector<std::vector<UInt>> NearestIndex; 
+    NearestIndex.resize(locations.rows()); 
+
+    for(UInt i=0; i<locations.rows(); ++i){
+
+      Real x0 = locations(i,0);
+      Real y0 = locations(i,1);
+
+      NearestIndex[i].resize(k);
+      NearestIndex[i] = this->compute_k_closest_points_2D(k, x0, y0, locations, locations_index); 
+    }
+
+
+    // vector that converts global indices into local indices
+    VectorXi rel_rows = VectorXi::Constant(this->inf_car.getPsip()->rows(), -1);
+    for(UInt i=0; i < locations_index.size(); ++i){
+      rel_rows(locations_index[i]) = i; 
+    } 
+
+    for(UInt a=0; a < locations.rows(); ++a){
+      for(UInt b=0; b < k; ++b)
+        Group_res(a, rel_rows(NearestIndex[a][b])) = 1;
+    }
+   
+  }
+  
   // eigen-sign-flip implementation
   if(this->inf_car.getInfData()->get_implementation_type()[this->pos_impl] == "eigen-sign-flip"){
     // compute Q_loc decomposition
@@ -369,24 +406,22 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     VectorXr V_Partial_f_res_H0 = V.transpose() * this->Partial_f_res_H0; 
     
     // observed statistics
-    VectorXr T = std::sqrt(n_loc) * Psi_loc.transpose() * V * V_Partial_f_res_H0; 
+    VectorXr T; 
+ 
+    if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+      T = Group_res * V * V_Partial_f_res_H0; 
+    }
+    else{
+      T = Psi_loc.transpose() * V * V_Partial_f_res_H0;
+    }
+    
     VectorXr T_perm = T;
 
     // observed final statistic (for simultaneous test) 
     Real T_comb;
     
-    if(this->inf_car.getRegData()->isLocationsByNodes()){
-      VectorXr T_abs = T.array().abs();
-      //T_comb = T_abs.maxCoeff();
-      T_comb = fabs(T.mean());
-    }
-    else{
-      VectorXr T_sq = T.array() * T.array();
-      T_comb = T_sq.sum();
-      //VectorXr T_abs = T.array().abs();
-      //T_comb = T_abs.maxCoeff();
-    }
-   
+    VectorXr T_sq = T.array() * T.array();
+    T_comb = T_sq.sum();
     Real T_comb_perm = T_comb; 
 
     // random sign-flips
@@ -401,19 +436,15 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 	UInt flip=2*distr(eng)-1;
 	res_perm(j)=V_Partial_f_res_H0(j)*flip;
       }
-      T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * V * res_perm;
-      // flipped statistic
-      if(this->inf_car.getRegData()->isLocationsByNodes()){
-        VectorXr T_perm_abs = T_perm.array().abs();
-        //T_comb_perm = T_perm_abs.maxCoeff();
-        T_comb_perm = fabs(T_perm.mean());
+      if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+        T_perm = Group_res * V * res_perm; 
       }
       else{
-        VectorXr T_perm_sq = T_perm.array() * T_perm.array();
-        T_comb_perm = T_perm_sq.sum();
-        //VectorXr T_perm_abs = T_perm.array().abs();
-        //T_comb_perm = T_perm_abs.maxCoeff();
+        T_perm = Psi_loc.transpose() * V * res_perm;
       }
+      // flipped statistics
+      VectorXr T_perm_sq = T_perm.array() * T_perm.array();
+      T_comb_perm = T_perm_sq.sum();
       
       if(T_comb_perm >= T_comb){ ++count;} 
     }
@@ -422,24 +453,21 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   }
   else{ // sign-flip implementation
     // observed statistics
-    VectorXr T = std::sqrt(n_loc) * Psi_loc.transpose() * this->Partial_f_res_H0; 
-    VectorXr T_perm = T; 
+    VectorXr T; 
+    if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+      T = Group_res * this->Partial_f_res_H0; 
+    }
+    else{
+      T = Psi_loc.transpose() * this->Partial_f_res_H0;
+    }
+    
+    VectorXr T_perm = T;
 
     // observed final statistic (for simultaneous test) 
     Real T_comb;
     
-    if(this->inf_car.getRegData()->isLocationsByNodes()){
-      VectorXr T_abs = T.array().abs();
-      //T_comb = T_abs.maxCoeff();
-      T_comb = fabs(T.mean());
-    }
-    else{
-      VectorXr T_sq = T.array() * T.array();
-      T_comb = T_sq.sum();
-      //VectorXr T_abs = T.array().abs();
-      //T_comb = T_abs.maxCoeff();
-    }
-   
+    VectorXr T_sq = T.array() * T.array();
+    T_comb = T_sq.sum();
     Real T_comb_perm = T_comb; 
     
     // random sign-flips
@@ -454,19 +482,15 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 	UInt flip=2*distr(eng)-1;
 	res_perm(j)=this->Partial_f_res_H0(j)*flip;
       }
-      T_perm=std::sqrt(n_loc) * Psi_loc.transpose() * res_perm;
-      // flipped statistic
-      if(this->inf_car.getRegData()->isLocationsByNodes()){
-        VectorXr T_perm_abs = T_perm.array().abs();
-        //T_comb_perm = T_perm_abs.maxCoeff();
-        T_comb_perm = fabs(T_perm.mean());
+      if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+        T_perm = Group_res * res_perm; 
       }
       else{
-        VectorXr T_perm_sq = T_perm.array() * T_perm.array();
-        T_comb_perm = T_perm_sq.sum();
-        //VectorXr T_perm_abs = T_perm.array().abs();
-        //T_comb_perm = T_perm_abs.maxCoeff();
+        T_perm = Psi_loc.transpose() * res_perm; 
       }
+      // flipped statistic
+      VectorXr T_perm_sq = T_perm.array() * T_perm.array();
+      T_comb_perm = T_perm_sq.sum();
       
       if(T_comb_perm >= T_comb){ ++count;} 
     }
@@ -785,6 +809,36 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->is_Lambda_computed = true;
   
   return; 
+};
+
+
+template<typename InputHandler, typename MatrixType> 
+const std::vector<UInt> Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_k_closest_points_2D(const UInt k, const Real x0, const Real y0, const MatrixXr & locations, const std::vector<UInt> & locations_index) const{
+
+ // prepare the object to be returned
+ std::vector<UInt> result;
+ result.reserve(k);
+ 
+ // compute the matrix containing the distances in the first column, and the point index in the second one
+ std::vector<std::pair<Real, UInt>> distances; 
+ distances.resize(locations.rows());
+
+ for(UInt l=0; l<locations.rows(); ++l){
+   Real d = (locations(l,0) - x0)*(locations(l,0) - x0) + (locations(l,1) - y0)*(locations(l,1) - y0);
+   d = std::sqrt(d); 
+  
+   distances[l] = std::make_pair(d, locations_index[l]); 
+ }
+
+ // sort the rows according to increasing distance (by default it sorts according to the first element)
+ std::sort(distances.begin(), distances.end());
+ 
+ for(UInt i=0; i<k; ++i){
+   result.push_back(distances[i].second);
+ }
+
+ return result;
+
 };
 
 

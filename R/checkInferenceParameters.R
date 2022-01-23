@@ -1,10 +1,10 @@
-checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locations){
+checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locations,nodes){
   
   #if no inference is required, construct a dummy inference object, where all parameters are set to nonsense values on purpose
   if(is.null(R_Inference_Object_Data) || R_Inference_Object_Data@definition==0){
     return(
       new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
-          locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
+          locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
           f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0)))
   }#define a shadow inferenceDataObject in order tell the cpp code not to perform any inferential analysis.
     
@@ -12,7 +12,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     warning("Covariates are not defined, inference data are discarded")
     return(
       new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
-          locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
+          locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
           f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))) 
   }
   
@@ -77,6 +77,25 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
           stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
              decrease the number of locations or choose eigen-sign-flip inferential approach")
       }
+    }
+    
+    # check if the selected locations coincide with nodes
+    end_loop = FALSE
+    j=1
+    while(!end_loop && j <= dim(R_Inference_Object_Data@locations)[1]){
+      node_found = FALSE
+      l = 1
+      while(!node_found && l <= dim(nodes)[1]){
+        if(R_Inference_Object_Data@locations[j,1]==nodes[l,1] && R_Inference_Object_Data@locations[j,2]==nodes[l,2]){
+          node_found = TRUE
+        }
+        l = l+1 
+      }
+      if(!node_found){
+        end_loop = TRUE
+        R_Inference_Object_Data@locations_are_nodes = as.integer(2)
+      }
+      j = j+1
     }
     
     # finally evaluate f0 at the chosen locations
