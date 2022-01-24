@@ -356,7 +356,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   // Matrix that groups close location points, needed only when locations are nodes
   MatrixXr Group_res = MatrixXr::Constant(this->inf_car.getInfData()->get_locs_inference().rows(), this->inf_car.getInfData()->get_locs_inference().rows(), 0);
 
-  if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){ 
+  if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){ 
     // fix the number of residuals to combine 
     UInt k = 5; 
 
@@ -408,7 +408,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     // observed statistics
     VectorXr T; 
  
-    if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+    if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
       T = Group_res * V * V_Partial_f_res_H0; 
     }
     else{
@@ -436,7 +436,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 	UInt flip=2*distr(eng)-1;
 	res_perm(j)=V_Partial_f_res_H0(j)*flip;
       }
-      if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+      if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
         T_perm = Group_res * V * res_perm; 
       }
       else{
@@ -454,7 +454,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   else{ // sign-flip implementation
     // observed statistics
     VectorXr T; 
-    if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+    if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
       T = Group_res * this->Partial_f_res_H0; 
     }
     else{
@@ -482,7 +482,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 	UInt flip=2*distr(eng)-1;
 	res_perm(j)=this->Partial_f_res_H0(j)*flip;
       }
-      if(this->inf_car.getInfData()->get_locations_are_nodes_inference()){
+      if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
         T_perm = Group_res * res_perm; 
       }
       else{
