@@ -331,13 +331,13 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
     // generate the distribution
     boost::math::normal dist; // default is a standard normal
-    quant = boost::math::quantile(dist, alpha/2);
+    quant = boost::math::quantile(complement(dist, alpha/2));
   }
 
   if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="bonferroni"){
     // generate the distribution
     boost::math::normal dist; // default is a standard normal
-    quant = boost::math::quantile(dist, alpha/(2*n_loc));
+    quant = boost::math::quantile(complement(dist, alpha/(2*n_loc)));
   }
   
   for(UInt i=0; i<n_loc; ++i){
