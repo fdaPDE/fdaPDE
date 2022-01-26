@@ -336,7 +336,6 @@ tD=microbenchmark(smooth.FEM(observations=data, FEMbasis=FEMbasis,
 
 # comparison
 boxplot(log(tA$time),log(tB$time),log(tC$time),log(tD$time), names=c('fdaPDE','mass lumping','lambda','block'),col=c('grey',2,3,4), ylab='log(time)')
-<<<<<<< HEAD
 
 #### Test 2: square domain ####
 #            locations = nodes 
@@ -1574,5 +1573,3 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
                                  lambda = lambda, solver.options="block_preconditioner",
                                  lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV')
 best_lambda4 <- output_CPP$bestlambda
-=======
->>>>>>> 0660f0319cefc7cfa7e147a71fa35dc5e97d4406
