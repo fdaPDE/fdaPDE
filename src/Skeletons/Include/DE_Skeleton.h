@@ -121,17 +121,9 @@ SEXP DE_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP Rheat
 		}
 	}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 	UNPROTECT(1);
 
 	return(result);
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 #endif
