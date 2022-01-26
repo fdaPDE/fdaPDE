@@ -155,7 +155,7 @@
 #'  max.steps.FPIRLS = 15, lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #'  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
 #'  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
-#'  lambda.optimization.tolerance = 0.05, solver.options='mass_lumping')
+#'  lambda.optimization.tolerance = 0.05, solver.options='no_preconditioner')
 #' @export
 
 #' @references

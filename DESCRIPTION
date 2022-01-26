@@ -20,11 +20,13 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		    person("Luca", "Colombo", role = "ctb"),
 		    person("Lorenzo", "Ghilotti", role = "ctb"),
 		    person("Jiyoung", "Kim", role = "ctb"),
+		    person("Martina", "Massardi", role = "ctb"),
 		    person("Giorgio", "Meretti", role = "ctb"),
 		    person("Giulio", "Perin", role = "ctb"),
 		    person("Clara", "Pigolotti", role = "ctb"),
 		    person("Andrea", "Poiatti", role = "ctb"),
 		    person("Gian Matteo", "Rinaldi", role = "ctb"),
+	            person("Stefano", "Spaziani", role = "ctb"),
 		    person("Andrea", "Vicini", role = "ctb")
 		    )
 Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>

@@ -997,6 +997,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			{
 				if(!regressionData_.isSpaceTime())
 				{
+
 					this->template buildSystemMatrix(lambdaS, &solverobj);
 				}
                         	else

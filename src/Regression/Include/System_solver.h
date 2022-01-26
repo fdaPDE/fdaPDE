@@ -22,7 +22,11 @@ protected:
 	// Factorization of the system matrix
 	Eigen::SparseLU<SpMat> Mdec;
 	bool decomposed = false;
-	void system_factorize(const SpMat& M)	{ Mdec.compute(M); decomposed = true; }
+	void system_factorize(const SpMat& M)
+	{
+		Mdec.compute(M);
+		decomposed = true; 
+	}
 
 	// A method assembling the system matrix starting from the four blocks
 	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE);

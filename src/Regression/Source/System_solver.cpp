@@ -4,7 +4,7 @@
 
 SpMat BaseSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	Rprintf("Using base solver");
+	//Rprintf("Using base solver");
 	SpMat R0_lambda = (-lambdaS) * R0; 
 	SpMat R1_lambda = (-lambdaS) * R1;
 
@@ -95,7 +95,7 @@ SpMat MassLumping::lumpMassMatrix(const SpMat& M)
 
 SpMat MassLumping::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	Rprintf("Using mass lumping");
+	//Rprintf("Using mass lumping");
 	SpMat R0_lambda = (-lambdaS) * lumpMassMatrix(R0); 
 	SpMat R1_lambda = (-lambdaS) * R1;
 
@@ -126,7 +126,7 @@ MatrixXr BaseDiagPreconditioner::preconditionRHS(const MatrixXr& b) const
 
 SpMat LambdaPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	Rprintf("Using lambda preconditioner");
+	//Rprintf("Using lambda preconditioner");
 	SpMat R0_lambda = -R0; // build the SouthEast block of the matrix
 	SpMat R1_lambda = (-sqrt(lambdaS)) * R1;
 
@@ -176,7 +176,7 @@ MatrixXr LambdaPreconditioner::preconditionRHS(const MatrixXr& b) const
 
 SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS)
 {
-	Rprintf("Using block preconditioner");
+	//Rprintf("Using block preconditioner");
 	SpMat R0_lambda = (-lambdaS) * R0;
 	SpMat R1_lambda = -R1;
 
