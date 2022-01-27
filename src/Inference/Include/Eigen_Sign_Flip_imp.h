@@ -297,7 +297,8 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
 	if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
-	  flip=1 ;
+	  flip=1;
+          ++N_Eig_Out;
 	}else{
 	  flip=2*distr(eng)-1;
 	}
