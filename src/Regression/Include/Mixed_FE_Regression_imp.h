@@ -360,6 +360,7 @@ void MixedFERegressionBase<InputHandler>::setDMat(void)
             DMat_ = psi_t_ *miniA_.asDiagonal()*DMat_; // areal data for iterative method
         }
 	}
+}
 
 
 
@@ -1241,7 +1242,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
     Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
     UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
     const VectorXr *obsp = regressionData_.getObservations(); // Get observations
-    UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
 
     UInt sizeLambdaS;
     UInt sizeLambdaT;
