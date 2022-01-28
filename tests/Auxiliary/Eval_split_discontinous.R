@@ -244,3 +244,72 @@ equal_split_discontinous.cycle<-function( Graph, sigma, dijkstra, x, y){
   
 }
 
+# connecting the source to this data point with total path length less then bandwidth
+equal_split_discontinous.mollifier<- function(Graph, sigma, dijkstra, x,y){
+  
+  source = dijkstra$source
+  points_ = cbind(x,y)
+  
+  coef = vector(mode="numeric", length=length(x))
+  
+  # index of the edge to which the point belong 
+  # (nb. it is useful if i-th data points is not a vertex)
+  idx = isInside(Graph, points_)
+  
+  # 0,            if points_[i] is not a vertex
+  # vertex.idx,   if points_[i] is a vertex
+  is_vertex = is.vertex(Graph, points_)
+  
+  Previous = vector(mode="integer", length(x))
+  
+  # filled with zeros by default
+  bandwidth = vector(mode="numeric", length=length(x))
+  Dist = vector(mode="numeric", length=length(x))
+  delta = vector(mode="numeric", length=length(x))
+  
+  # points that are vertexes
+  idx.vertex = which( is_vertex != 0)
+  Dist[ idx.vertex ] = dijkstra$distance[ is_vertex[idx.vertex] ]
+  
+  bandwidth[ (Dist[idx.vertex] < 5*sigma) ] = 1.0
+  delta[idx.vertex] = Dist[idx.vertex]
+  
+  # points that not are vertexes
+  idx.not.vertex = which(is_vertex==0)
+  
+  if( length(idx.not.vertex)>0){
+    
+    Dist1 = dijkstra$distance[ Graph$edges[idx[idx.not.vertex], 1]]
+    Dist2 = dijkstra$distance[ Graph$edges[idx[idx.not.vertex], 2]]
+    
+    for( i in 1:length(idx.not.vertex)){
+      if( Dist1[i] < Dist2[i] ){
+        Dist[idx.not.vertex[i]] = Dist1[i]
+        Previous[idx.not.vertex[i]] = Graph$edges[idx[idx.not.vertex[i]], 1]
+      }else{
+        Dist[idx.not.vertex[i]] = Dist2[i]
+        Previous[idx.not.vertex[i]] = Graph$edges[ idx[idx.not.vertex[i]] , 2]
+      }
+      current_length = Dist[idx.not.vertex[i]] + sqrt( (Graph$nodes[Previous[idx.not.vertex[i]], 1]-points_[idx.not.vertex[i], 1])^2 +
+                                                         (Graph$nodes[Previous[idx.not.vertex[i]], 2]-points_[idx.not.vertex[i], 2])^2)
+      if( current_length < 5*sigma ){
+        bandwidth[idx.not.vertex[i]] = 1.  
+      }else{
+        bandwidth[idx.not.vertex[i]] = 0.0
+      }
+      
+      delta[idx.not.vertex[i]] = current_length
+    }
+
+    
+  }
+  coef[which(bandwidth == 1.0)] = 1 * (2 * exp( 1.0/( delta[which(bandwidth == 1.0)]^2/(5*sigma)^2  - 1) + 1) - 1  ) 
+  
+  ret = list( coef = coef, bandwidth=bandwidth, distances=delta)
+  return( ret )
+  
+}
+
+
+
+

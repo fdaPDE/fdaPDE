@@ -402,12 +402,12 @@ no.covariate.FEM.1D = function( Z, FEMbasis, PHI, lambda ){
   R0 = R_mass_1D(FEMbasis)
   R1 = R_stiff_1D(FEMbasis)
   
-  row1 = cbind(-L_mat, lambda*t(R1))
+  row1 = cbind(L_mat, -lambda*t(R1))
   row2 = cbind(-lambda*R1, -lambda*R0)
   
   A = rbind(row1, row2)
   
-  b1 = - t(PHI) %*% ( Q%*%Z )
+  b1 =  t(PHI) %*% ( Q%*%Z )
   b2 = matrix(0, nrow = nnodes, ncol=1)
   
   b = rbind(b1,b2)
