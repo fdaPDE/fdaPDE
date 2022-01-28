@@ -393,7 +393,7 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
     mydim = 2
-  }else if( class(FEMbasis$mesh) == "mesh.1D"){
+  }else if( class(FEMbasis$mesh) == "mesh.1.5D"){
     ndim = 2
     mydim = 1
   
@@ -441,7 +441,7 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
     mydim = 2
-    }else if(class(FEMbasis$mesh) == "mesh.1D"){
+    }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
       ndim = 2
       mydim = 1
   }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.3D"){

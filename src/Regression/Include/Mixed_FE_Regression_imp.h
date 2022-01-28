@@ -613,7 +613,9 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 
 	// First phase: Factorization of matrixNoCov
 	matrixNoCovdec_.compute(matrixNoCov_);
+	
 	bool needUpdate = isGAMData ? true : !isUVComputed;
+	
 	if(regressionData_.getCovariates()->rows() != 0 && needUpdate)
 	{ // Needed only if there are covariates, else we can stop before
 		// Second phase: factorization of matrix  G =  C + [V * matrixNoCov^-1 * U]= C + D
@@ -1381,6 +1383,8 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				}
 				_beta(s,t) = WTW_.solve(beta_rhs);
 			}
+	if (regressionData_.getCovariates()->rows() != 0)
+                isUVComputed = false;
 		}
 	}
 	if(!(isGAMData||regressionData_.isSpaceTime()) && optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
@@ -1533,6 +1537,8 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
                 _dof(s,t) = -1;
                 _GCV(s,t) = -1;
             }
+            if (regressionData_.getCovariates()->rows() != 0)
+                isUVComputed = false;
         }
     }
     _rightHandSide = rhs;
