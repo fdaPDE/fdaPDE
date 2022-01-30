@@ -58,6 +58,7 @@ class Inference_Carrier{
                 SpMat Psi_loc; 							        //!< Selected location-to-nodes matrix [size n_loc x n_nodes]
 		MatrixXr W_loc; 	                                		//!< Reduced covariates matrix [size n_loc x n_covariates]
 		VectorXr z_loc; 							//!< Reduced observations [size n_loc]
+                MatrixXr Group_loc = MatrixXr::Constant(1,1,0);                         //!< Matrix that groups closer locations (needed only if locations coincide with the nodes for eigen-sing-flip and sign-flip implementations) 
 
 		// PRIVATE SETTERS 							// Private because they will be used just by the constructor.
 		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data
@@ -94,6 +95,7 @@ class Inference_Carrier{
 		inline void setPsi_loc (const SpMat & Psi_loc_){Psi_loc = Psi_loc_;}					//!< Setter of Psi_loc \param Psi_loc_ new Psi_loc
 		inline void setW_loc (const MatrixXr & W_loc_){W_loc = W_loc_;}						//!< Setter of W_loc \param W_loc_ new W_loc
                 inline void setZ_loc (const VectorXr & z_loc_){z_loc = z_loc_;}						//!< Setter of z_loc \param z_loc_ new z_loc
+                inline void setGroup_loc(const MatrixXr & Group_loc_){Group_loc = Group_loc_;}                          //!< Setter of Group_loc \param Group_loc_ new Group_loc
 	
 	public:
 		// CONSTUCTORS
@@ -135,7 +137,7 @@ class Inference_Carrier{
 		inline const SpMat getPsi_loc (void) const {return Psi_loc;}						//!< Getter of Psi_loc \return Psi_loc
 		inline const MatrixXr getW_loc (void) const {return W_loc;} 						//!< Getter of W_loc \return W_loc
 		inline const VectorXr getZ_loc (void) const {return z_loc;} 						//!< Getter of z_loc \return z_loc
-
+                inline const MatrixXr getGroup_loc(void) const {return Group_loc;}                                      //!< Getter of Group_loc \return Group_loc
 
 };
 

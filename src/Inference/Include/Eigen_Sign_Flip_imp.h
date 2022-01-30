@@ -355,8 +355,10 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   this->Partial_f_res_H0 = Q_loc*(Z_loc - f_0); 
 
   // Matrix that groups close location points, needed only when locations are nodes
-  MatrixXr Group_res = MatrixXr::Constant(this->inf_car.getInfData()->get_locs_inference().rows(), this->inf_car.getInfData()->get_locs_inference().rows(), 0);
+  //MatrixXr Group_res = MatrixXr::Constant(this->inf_car.getInfData()->get_locs_inference().rows(), this->inf_car.getInfData()->get_locs_inference().rows(), 0);
+  MatrixXr Group_res = this->inf_car.getGroup_loc(); 
 
+/*
   if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){ 
     // fix the number of residuals to combine 
     UInt k = 5; 
@@ -390,6 +392,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     }
    
   }
+*/
   
   // eigen-sign-flip implementation
   if(this->inf_car.getInfData()->get_implementation_type()[this->pos_impl] == "eigen-sign-flip"){
@@ -812,34 +815,31 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   return; 
 };
 
-
+/*
 template<typename InputHandler, typename MatrixType> 
-const std::vector<UInt> Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_k_closest_points_2D(const UInt k, const Real x0, const Real y0, const MatrixXr & locations, const std::vector<UInt> & locations_index) const{
+template<UInt ORDER, UInt mydim, UInt ndim>
+const std::set<UInt> Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_closest_nodes(const UInt & index, const MeshHandler<ORDER, mydim, ndim> & mesh, const std::vector<UInt> & locations_index) const {
 
  // prepare the object to be returned
- std::vector<UInt> result;
- result.reserve(k);
- 
- // compute the matrix containing the distances in the first column, and the point index in the second one
- std::vector<std::pair<Real, UInt>> distances; 
- distances.resize(locations.rows());
+ std::set<UInt> result;
 
- for(UInt l=0; l<locations.rows(); ++l){
-   Real d = (locations(l,0) - x0)*(locations(l,0) - x0) + (locations(l,1) - y0)*(locations(l,1) - y0);
-   d = std::sqrt(d); 
-  
-   distances[l] = std::make_pair(d, locations_index[l]); 
- }
-
- // sort the rows according to increasing distance (by default it sorts according to the first element)
- std::sort(distances.begin(), distances.end());
+ // for sure it contains the current index
+ result.insert(index);
  
- for(UInt i=0; i<k; ++i){
-   result.push_back(distances[i].second);
+ // loop on the mesh elements 
+ for(auto i=0; i < mesh.num_elements(); ++i){
+   auto elem = mesh.getElement(i);
+   // check if the current point is inside the current element
+   if(elem.isPointInside(this->inf_car.getRegData()->getLocations<ndim>(index))){
+     // loop on all the points in the current element and insert them into result
+     for(auto it = elem.begin(); it != elem.end(); ++it){
+       result.insert(it->id());
+     }
+   }
  }
 
  return result;
 
 };
-
+*/
 

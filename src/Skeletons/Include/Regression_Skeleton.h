@@ -21,6 +21,7 @@
 #include "../../Global_Utilities/Include/FSPAI_Wrapper.h"
 #include <memory>
 #include <algorithm>
+#include <set>
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -496,6 +497,44 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
         }
 		
         inf_car_.setW_loc(W_loc);
+      }
+      // if the selected locations coincide with the nodes compute the matrix that groups closer locations, according to the distance induced by the mesh elements
+      if(inferenceData_.get_locs_are_nodes_inference()){
+	MatrixXr Group_locs = MatrixXr::Constant(inferenceData_.get_locs_inference().rows(), inferenceData_.get_locs_inference().rows(), 0);
+	// get the selected location indices
+	std::vector<UInt> locations_index = inferenceData_.get_locs_index_inference(); 
+	// declare the vector that contains, for each location-node, the corresponding neighbors' indices
+	std::vector<std::set<UInt>> NearestIndices; 
+	NearestIndices.resize(locations_index.size()); 
+       
+	for(UInt k=0; k<locations_index.size(); ++k){
+	  // prepare the object to insert
+	  std::set<UInt> neighbors;
+ 
+	  // loop on the mesh elements 
+	  for(auto i=0; i < mesh_.num_elements(); ++i){
+	    auto elem = mesh_.getElement(i);
+	    // check if the current point is inside the current element
+	    if(elem.isPointInside(mesh_.getPoint(locations_index[k]))){
+	      // loop on all the points in the current element and insert them into the set of neighbors
+	      for(auto it = elem.begin(); it != elem.end(); ++it){
+		neighbors.insert(it->id());
+	      }
+	    }
+	  }
+	  // insert the set of neighbors in the final vector
+	  NearestIndices[k] = neighbors;
+	}
+
+	// compute the group matrix
+	for(UInt i=0; i < locations_index.size(); ++i){
+	  for(auto iter=NearestIndices[i].begin(); iter != NearestIndices[i].end(); ++iter)
+	    Group_locs(i, rel_rows(*iter)) = 1;
+	}
+    
+	// set it into inference carrier 
+	inf_car_.setGroup_loc(Group_locs);
+       
       }
     }
   }

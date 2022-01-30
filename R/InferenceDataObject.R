@@ -487,6 +487,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
         stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip case")
       }
       
+      if((interval[index]=="simultaneous" || interval[index]=="bonferroni") && component[index]!="parametric")
+        stop("only one-at-the-time confidence intervals are allowed for the nonparametric component")
+      
       if(type[index] == "eigen-sign-flip" && component[index]!="nonparametric"){
         for(i in 1:dim(coeff)[1]){
           count=0
@@ -514,7 +517,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
     
       if((test[index]=="one-at-the-time") && component[index] != "parametric"){
-        warning("Only simultaneous tests are available for the nonparametric component, proceeding with simultaneous inference")
+        warning("only simultaneous tests are available for the nonparametric component, proceeding with simultaneous inference")
         test_numeric[index] = as.integer(2)
       }
     

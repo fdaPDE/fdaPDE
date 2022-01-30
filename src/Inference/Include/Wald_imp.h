@@ -320,18 +320,14 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
 
   // compute the quantile 
-  Real alpha = 0.05; // TO BE MODIFIED, get it from inference data
+  Real alpha = 1-this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
   Real quant;
+  
+  /* SIMULTANEOUS and BONFERRONI are going to be suppressed 
   if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="simultaneous"){
     // generate the distribution
     boost::math::chi_squared dist(n_loc);
     quant = std::sqrt(boost::math::quantile(dist, alpha));
-  }
-
-  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
-    // generate the distribution
-    boost::math::normal dist; // default is a standard normal
-    quant = boost::math::quantile(complement(dist, alpha/2));
   }
 
   if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="bonferroni"){
@@ -339,7 +335,16 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
     boost::math::normal dist; // default is a standard normal
     quant = boost::math::quantile(complement(dist, alpha/(2*n_loc)));
   }
-  
+  */
+
+
+  //ONE-AT-THE-TIME is the only possible implementation
+  //if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
+    // generate the distribution
+    boost::math::normal dist; // default is a standard normal
+    quant = boost::math::quantile(complement(dist, alpha/2));
+  //}
+
   for(UInt i=0; i<n_loc; ++i){
     result(i).resize(3);
     // central element
