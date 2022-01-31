@@ -138,6 +138,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 n_cov = NULL,
                                 locations = NULL,
                                 locations_indices = NULL,
+                                locations_by_nodes = F,
                                 coeff = NULL, 
                                 beta0 = NULL,
                                 f0 = NULL,
@@ -233,6 +234,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
       rm(list = c("i","j"))
     }
+  }
+  
+  if(locations_by_nodes != F){
+    if(class(locations_by_nodes)!="logical")
+      stop("'locations_by_nodes' should be either TRUE or FALSE ")
+    if(length(locations_by_nodes)==0)
+      stop("'locations_by_nodes' is zero dimensional, should be either TRUE or FALSE")
+    if(locations_by_nodes!=T)
+      stop("'locations_by_nodes' should be either TRUE or FALSE")
+    locations_by_nodes_numeric=as.integer(1)
+  }else{
+    locations_by_nodes_numeric=as.integer(2)
   }
   
   if(!is.null(coeff)){
@@ -602,10 +615,10 @@ if(sum(component == "nonparametric")!=length(component)){
   # Building the output object, returning it
   if(!is.null(locations_indices))
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
-              locations_indices = as.integer(locations_indices), locations_are_nodes = as.integer(1), coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   else
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
-                locations = locations, locations_are_nodes = as.integer(1), coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
     
   
   return(result)

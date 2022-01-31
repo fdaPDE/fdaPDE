@@ -58,7 +58,7 @@ class Inference_Carrier{
                 SpMat Psi_loc; 							        //!< Selected location-to-nodes matrix [size n_loc x n_nodes]
 		MatrixXr W_loc; 	                                		//!< Reduced covariates matrix [size n_loc x n_covariates]
 		VectorXr z_loc; 							//!< Reduced observations [size n_loc]
-                MatrixXr Group_loc = MatrixXr::Constant(1,1,0);                         //!< Matrix that groups closer locations (needed only if locations coincide with the nodes for eigen-sing-flip and sign-flip implementations) 
+                MatrixXr Group_loc = MatrixXr::Zero(1,1);                         	//!< Matrix that groups closer locations (needed only if locations coincide with the nodes for eigen-sing-flip and sign-flip implementations) 
 
 		// PRIVATE SETTERS 							// Private because they will be used just by the constructor.
 		inline void setRegData (const InputHandler * reg_data_){reg_data = reg_data_;}			        //!< Setter of reg_data \param reg_data_ new reg_data

@@ -500,7 +500,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
       }
       // if the selected locations coincide with the nodes compute the matrix that groups closer locations, according to the distance induced by the mesh elements
       if(inferenceData_.get_locs_are_nodes_inference()){
-	MatrixXr Group_locs = MatrixXr::Constant(inferenceData_.get_locs_inference().rows(), inferenceData_.get_locs_inference().rows(), 0);
+	MatrixXr Group_locs = MatrixXr::Zero(inferenceData_.get_locs_inference().rows(), inferenceData_.get_locs_inference().rows());
 	// get the selected location indices
 	std::vector<UInt> locations_index = inferenceData_.get_locs_index_inference(); 
 	// declare the vector that contains, for each location-node, the corresponding neighbors' indices
@@ -528,8 +528,10 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 
 	// compute the group matrix
 	for(UInt i=0; i < locations_index.size(); ++i){
-	  for(auto iter=NearestIndices[i].begin(); iter != NearestIndices[i].end(); ++iter)
-	    Group_locs(i, rel_rows(*iter)) = 1;
+	  for(UInt j : NearestIndices[i]){
+            if(rel_rows(j)>=0) // only if it belongs to the selected locations
+	    	Group_locs(i, rel_rows(j)) = 1;
+          }
 	}
     
 	// set it into inference carrier 
