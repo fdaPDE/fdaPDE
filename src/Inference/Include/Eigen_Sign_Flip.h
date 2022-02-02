@@ -25,10 +25,13 @@ protected:
   VectorXr Partial_f_res_H0;                            //!< Contains: Q_loc*(z_loc - f_0)
   MatrixType Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
   bool is_Lambda_computed = false;			//!< Boolean that tells whether Lambda has been computed or not
-  VectorXr Speckman_aux_ranges;                         //!< Speckman auxiliary CI ranges needed for CI method initialization
+  VectorXr Speckman_aux_ranges;                         //!< Speckman auxiliary CI ranges needed for CI method initialization (for beta)
+  VectorXr Wald_aux_ranges;                             //!< Wald auxiliary CI ranges needed for CI method initialization (for f) 
   bool is_speckman_aux_computed = false;                //!< Boolean that tells whether Speckman auxiliary ranges have been computed or not
+  bool is_wald_aux_computed = false;                    //!< Boolean that tells whether Wald auxiliary ranges have been computed or not
   virtual void compute_Lambda(void) = 0;		//!< Pure virtual method used to compute Lambda, either in an exact or non-exact way
-  void Compute_speckman_aux(void);                      //!< Auxiliary function for CI that computes the speckman ranges
+  void Compute_speckman_aux(void);                      //!< Auxiliary function for beta CI that computes the speckman ranges
+  void Compute_wald_aux(void);                          //!< Auxiliary function for f CI that computes the wald ranges
   
   // methods that compute pvalues and/or CI on beta and on f respectively
   VectorXr compute_beta_pvalue(void) override;
@@ -36,9 +39,9 @@ protected:
   MatrixXv compute_beta_CI(void) override;
   MatrixXv compute_f_CI(void) override;
   
-  Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const VectorXr &, const  MatrixXr &, const UInt Direction) const;  //!< Computes the unilateral p value for a generic beta proposed in the research algorithm for CI 
-  //template<UInt ORDER, UInt mydim, UInt ndim>
-  //const std::set<UInt> compute_closest_nodes(const UInt & index, const MeshHandler<ORDER, mydim, ndim> & mesh, const std::vector<UInt> & locations_index) const; //!< Template function used when all the locations selected to perform inference on f are nodes. Given a location-node index, it finds all the nodes that belong to the same mesh element of the provided node.  
+  Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const VectorXr &, const  MatrixXr &, const UInt current_index) const;  //!< Computes the unilateral p value for a generic beta proposed in the research algorithm for CI 
+  Real compute_CI_aux_f_pvalue(const VectorXr &, const UInt current_index) const;  //!< Computes the unilateral p value for a generic value of f in a given point proposed in the research algorithm for CI  
+    
   
 public:
   // CONSTUCTOR

@@ -959,9 +959,13 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
               inference$f$CI$wald[[length(inference$f$CI$wald)+1]] = ci_f
               inference$f$CI$wald=as.list(inference$f$CI$wald)
             }
-            else if(R_Inference_Data_Object@type[i]==5){ # only wald mod confidence intervals for f
-              inference$f$CI$wald_mod[[length(inference$f$CI$wald_mod)+1]] = ci_f
-              inference$f$CI$wald_mod=as.list(inference$f$CI$wald_mod)
+            else if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip confidence intervals for f
+              inference$f$CI$eigen_sign_flip[[length(inference$f$CI$eigen_sign_flip)+1]] = ci_f
+              inference$f$CI$eigen_sign_flip=as.list(inference$f$CI$eigen_sign_flip)
+            }
+            else if(R_Inference_Data_Object@type[i]==4){ # sign-flip confidence intervals for f
+              inference$f$CI$sign_flip[[length(inference$f$CI$sign_flip)+1]] = ci_f
+              inference$f$CI$sign_flip=as.list(inference$f$CI$sign_flip)
             }
           }
         }

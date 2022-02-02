@@ -104,6 +104,14 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     if(!locs_are_nodes_before_check && R_Inference_Object_Data@locations_are_nodes!=2 && sum(R_Inference_Object_Data@type==1)!=length(R_Inference_Object_Data@type))
       warning("All the locations selected for inference on the nonparametric component coincide with the nodes. 
               Sign-Flip and Eigen-Sign-Flip tests are performed by area, combining neighborhoods of locations according to the distance induced by the mesh")
+    
+    if(R_Inference_Object_Data@locations_are_nodes!=1){
+      # intervals with sign-flip or eigne-sign-flip implementation are not allowed
+      for(k in 1:length(R_Inference_Object_Data@type)){
+        if((R_Inference_Object_Data@type[k]==3 || R_Inference_Object_Data@type[k]==4) && R_Inference_Object_Data@interval[k]!=0 && R_Inference_Object_Data@component[k]!=1)
+          stop("Sign-Flip and Eigen-Sign-Flip confidence intervals on f are implemented only if the selected locations are a subset of the mesh nodes")
+      }
+    }
     # finally evaluate f0 at the chosen locations
     f0 <- R_Inference_Object_Data@f0
     dim <- R_Inference_Object_Data@dim

@@ -493,9 +493,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("level should be a positive value smaller or equal to 1")
       }
     
-      if(interval[index]!="none" && type[index]!="wald" && component[index]!="parametric")
-        stop("confidence intervals are not available with sign-flipping implementation")
-      
       if(interval[index]=="simultaneous" && type[index]=="eigen-sign-flip"){
         stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip case")
       }

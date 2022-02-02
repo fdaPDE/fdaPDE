@@ -1,4 +1,5 @@
 #include "Eigen_Sign_Flip.h"
+#include "Inference_Factory.h"
 #include <cmath>
 #include <random>
 #include <type_traits>
@@ -61,22 +62,52 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
   return;
 }
 
-template<typename InputHandler, typename MatrixType> 
-Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const VectorXr & partial_res_H0_CI, const MatrixXr & TildeX, const VectorXr & Tilder_hat, const  MatrixXr & Tilder_star, const UInt Direction) const {
+template<typename InputHandler, typename MatrixType>
+void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_wald_aux(void){
+
+  // create or get an already existing Wald inference object 
+  std::shared_ptr<Inference_Base<InputHandler,MatrixType>> wald_obj = Inference_Factory<InputHandler,MatrixType>::create_inference_method("wald", this->inverter, this->inf_car, this->pos_impl);
+  MatrixXv wald_output = wald_obj->compute_inference_output(); 
+  // extract the confidence intervals 
+  UInt n_loc = this->inf_car.getN_loc(); 
+  UInt p = this->inf_car.getInfData()->get_coeff_inference().rows();
+  UInt result_dim = (p > n_loc) ? p : n_loc; 
+  // this matrix contains the overall CI, also the ones for beta if they were originally required as retrieved by pos_impl from inferenceData 
+  MatrixXv wald_CI = wald_output.rightCols(result_dim);
+  // extract the confidence intervals for f
+  MatrixXv wald_f_CI = (wald_CI.row(1)).leftCols(n_loc);
   
-  // extract matrix C 
-  // (in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
-  UInt p = TildeX.rows(); 
+  Wald_aux_ranges.resize(n_loc);
+  // for each location point 
+  for(UInt i=0; i<n_loc; ++i){
+    // get the half range 
+    Real half_range = wald_f_CI(i)(2) - wald_f_CI(i)(1);
+    // save the half range
+    Wald_aux_ranges(i) = half_range; 
+  }
+  
+  this->is_wald_aux_computed = true;
+
+  return;
+}
+
+template<typename InputHandler, typename MatrixType> 
+Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const VectorXr & partial_res_H0_CI, const MatrixXr & TildeX, const VectorXr & Tilder_hat, const  MatrixXr & Tilder_star, const UInt current_index) const {
+  // extract current row 
+  MatrixXr TildeXrow;
+  TildeXrow.resize(1, TildeX.cols());
+  TildeXrow.row(0) = TildeX.row(current_index); 
 
   // declare the vector that will store the p-values
   Real result;
     
   // compute the vectors needed for the statistic 
-  MatrixXr Tilder = Tilder_star * partial_res_H0_CI;
+  VectorXr Tilder = Tilder_star * partial_res_H0_CI;
 
   // Observed statistic
-  MatrixXr stat=TildeX*Tilder;
-  MatrixXr stat_perm=stat;
+  MatrixXr stat_temp = TildeXrow*Tilder;
+  Real stat=stat_temp;
+  Real stat_perm=stat;
 
   UInt n_obs = this->inf_car.getN_obs();
 
@@ -96,7 +127,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
   Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
   Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
     
-  MatrixXr Tilder_perm=Tilder;
+  VectorXr Tilder_perm=Tilder;
     
   // get the number of flips
   unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
@@ -113,23 +144,152 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
       }
       Tilder_perm(j)=Tilder(j)*flip;
     }
-    stat_perm=TildeX*Tilder_perm; // Flipped statistic
-    if(is_Unilaterally_Greater(stat_perm,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
-      if(is_Unilaterally_Smaller(stat_perm,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
+    MatrixXr stat_perm_temp = TildeXrow*Tilder_perm; 
+    stat_perm= stat_perm_temp;// Flipped statistic
+    if(stat_perm > stat){ ++count_Up;}else{ 
+      if(stat_perm < stat){ ++count_Down;}  
     }
   }
     
-  Real pval_up = count_Up/n_flip;     // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b>b_0
-  Real pval_down = count_Down/n_flip; // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b<b_0
+  Real pval_Up = count_Up/n_flip;     // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b>b_0
+  Real pval_Down = count_Down/n_flip; // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b<b_0
 
-  if(Direction==1){
-    result = pval_up;
-  }else{
-    result = pval_down;
-  }
+  result = std::min(pval_Up, pval_Down); // Selecting the correct unilateral p_value 
 
   return result;
   
+};
+
+template<typename InputHandler, typename MatrixType> 
+Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_f_pvalue(const VectorXr & partial_res_H0_CI, const UInt current_index) const {
+  // declare the result
+  Real result; 
+
+  // get all the necessary matrices from the inf_car
+  const MatrixXr W_loc = this->inf_car.getW_loc();
+  const SpMat Psi_loc = this->inf_car.getPsi_loc();
+  const VectorXr Z_loc = this->inf_car.getZ_loc(); 
+  const UInt n_loc = this->inf_car.getN_loc(); 
+  unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
+
+  // compute Q_loc
+  MatrixXr Q_loc; 
+  Q_loc.resize(n_loc, n_loc);
+  
+  if(this->inf_car.getRegData()->getCovariates()->rows()==0){ // no covariates case
+    Q_loc = MatrixXr::Identity(n_loc, n_loc);
+  }
+  else{ // covariates case
+    MatrixXr WtW_loc = W_loc.transpose() * W_loc; 
+    Q_loc = MatrixXr::Identity(n_loc, n_loc) - W_loc * WtW_loc.ldlt().solve(W_loc.transpose());
+  }
+
+  // Matrix that groups close location points, needed only when locations are nodes
+  const MatrixXr Group_res = this->inf_car.getGroup_loc();
+
+  // eigen-sign-flip implementation
+  if(this->inf_car.getInfData()->get_implementation_type()[this->pos_impl] == "eigen-sign-flip"){
+    // compute Q_loc decomposition
+    Eigen::SelfAdjointEigenSolver<MatrixXr> Q_dec(Q_loc);
+    
+    MatrixXr V = Q_dec.eigenvectors();
+    
+    if(this->inf_car.getRegData()->getCovariates()->rows()!=0){
+      UInt q = this->inf_car.getq();
+      V = Q_dec.eigenvectors().rightCols(n_loc - q);
+    }
+   
+   // update residuals to be flipped
+   const VectorXr V_partial_res_H0_CI = V.transpose() * partial_res_H0_CI; 
+
+   // observed statistics
+   VectorXr T; 
+ 
+   if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
+     T = Group_res * V * V_partial_res_H0_CI; 
+   }
+   else{
+     T = Psi_loc.transpose() * V * V_partial_res_H0_CI;
+   }
+    
+   VectorXr T_perm = T;
+
+   // Random sign-flips
+   std::random_device rd; 
+   std::default_random_engine eng{rd()};
+   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+   Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
+   Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
+   VectorXr res_perm = V_partial_res_H0_CI; 
+ 
+   for(unsigned long int i=0; i < n_flip; ++i){
+      for(unsigned long int j=0; j < V_partial_res_H0_CI.size(); ++j){
+	UInt flip=2*distr(eng)-1;
+	res_perm(j)=V_partial_res_H0_CI(j)*flip;
+      }
+      if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
+        T_perm = Group_res * V * res_perm; 
+      }
+      else{
+        T_perm = Psi_loc.transpose() * V * res_perm;
+      }
+      // flipped statistics (one-at-the-time tests on the nodes)
+      if(T_perm(current_index) > T(current_index)){++count_Up;}else{
+        if(T_perm(current_index) < T(current_index)){++count_Down;}
+      }     
+    }
+    Real pval_Up = count_Up/n_flip;
+    Real pval_Down = count_Down/n_flip;
+
+    result = std::min(pval_Up, pval_Down);
+
+  }
+  else{ //sign-flip implementation
+      
+   // observed statistics
+   VectorXr T; 
+ 
+   if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
+     T = Group_res * partial_res_H0_CI; 
+   }
+   else{
+     T = Psi_loc.transpose() * partial_res_H0_CI;
+   }
+    
+   VectorXr T_perm = T;
+
+   // Random sign-flips
+   std::random_device rd; 
+   std::default_random_engine eng{rd()};
+   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+   Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
+   Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
+   VectorXr res_perm = partial_res_H0_CI; 
+ 
+   for(unsigned long int i=0; i < n_flip; ++i){
+      for(unsigned long int j=0; j < partial_res_H0_CI.size(); ++j){
+	UInt flip=2*distr(eng)-1;
+	res_perm(j)=partial_res_H0_CI(j)*flip;
+      }
+      if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
+        T_perm = Group_res * res_perm; 
+      }
+      else{
+        T_perm = Psi_loc.transpose() * res_perm;
+      }
+      // flipped statistics (one-at-the-time tests on the nodes)
+      if(T_perm(current_index) > T(current_index)){++count_Up;}else{
+        if(T_perm(current_index) < T(current_index)){++count_Down;}
+      }     
+    }
+    Real pval_Up = count_Up/n_flip;
+    Real pval_Down = count_Down/n_flip;
+
+    result = std::min(pval_Up, pval_Down);
+  }
+
+  return result;
+
 };
 
 template<typename InputHandler, typename MatrixType> 
@@ -242,7 +402,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     Real pval_Down = count_Down/n_flip;
 
     result.resize(p); // Allocate more space so that R receives a well defined object (different implementations may require higher number of pvalues)
-    result(0) = 2*std::min(pval_Up,pval_Down); // Obtain the blateral p_value starting from the unilateral
+    result(0) = 2*std::min(pval_Up,pval_Down); // Obtain the bilateral p_value starting from the unilateral
     for(UInt k=1;k<p;k++){
       result(k)=10e20;
     }
@@ -355,44 +515,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   this->Partial_f_res_H0 = Q_loc*(Z_loc - f_0); 
 
   // Matrix that groups close location points, needed only when locations are nodes
-  //MatrixXr Group_res = MatrixXr::Constant(this->inf_car.getInfData()->get_locs_inference().rows(), this->inf_car.getInfData()->get_locs_inference().rows(), 0);
   MatrixXr Group_res = this->inf_car.getGroup_loc(); 
-
-/*
-  if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){ 
-    // fix the number of residuals to combine 
-    UInt k = 5; 
-
-    // get the selected locations
-    MatrixXr locations = this->inf_car.getInfData()->get_locs_inference();
-    std::vector<UInt> locations_index = this->inf_car.getInfData()->get_locs_index_inference(); 
-
-    std::vector<std::vector<UInt>> NearestIndex; 
-    NearestIndex.resize(locations.rows()); 
-
-    for(UInt i=0; i<locations.rows(); ++i){
-
-      Real x0 = locations(i,0);
-      Real y0 = locations(i,1);
-
-      NearestIndex[i].resize(k);
-      NearestIndex[i] = this->compute_k_closest_points_2D(k, x0, y0, locations, locations_index); 
-    }
-
-
-    // vector that converts global indices into local indices
-    VectorXi rel_rows = VectorXi::Constant(this->inf_car.getPsip()->rows(), -1);
-    for(UInt i=0; i < locations_index.size(); ++i){
-      rel_rows(locations_index[i]) = i; 
-    } 
-
-    for(UInt a=0; a < locations.rows(); ++a){
-      for(UInt b=0; b < k; ++b)
-        Group_res(a, rel_rows(NearestIndex[a][b])) = 1;
-    }
-   
-  }
-*/
   
   // eigen-sign-flip implementation
   if(this->inf_car.getInfData()->get_implementation_type()[this->pos_impl] == "eigen-sign-flip"){
@@ -507,12 +630,267 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 
 template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
-  // Eigen-Sign-Flip CI are not implemented for f
+  
+/*
+// Eigen-Sign-Flip CI are not implemented for f
   // this function won't be called 
   MatrixXv null_mat; 
   null_mat.resize(1,1);
   null_mat(0) = VectorXr::Constant(3,0);
   return null_mat; 
+*/
+    
+  // 1) compute/get all the needed objects from the inference carrier 
+  const MatrixXr W_loc = this->inf_car.getW_loc();
+  const SpMat Psi_loc = this->inf_car.getPsi_loc();
+  const VectorXr Z_loc = this->inf_car.getZ_loc(); 
+  const UInt n_loc = this->inf_car.getN_loc(); 
+  unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
+
+  // compute Q_loc
+  MatrixXr Q_loc; 
+  Q_loc.resize(n_loc, n_loc);
+  
+  if(this->inf_car.getRegData()->getCovariates()->rows()==0){ // no covariates case
+    Q_loc = MatrixXr::Identity(n_loc, n_loc);
+  }
+  else{ // covariates case
+    MatrixXr WtW_loc = W_loc.transpose() * W_loc; 
+    Q_loc = MatrixXr::Identity(n_loc, n_loc) - W_loc * WtW_loc.ldlt().solve(W_loc.transpose());
+  }
+
+  // Matrix that groups close location points, needed only when locations are nodes
+  MatrixXr Group_res = this->inf_car.getGroup_loc();
+
+  // get the estimator for f in the selected locations 
+  UInt nnodes = this->inf_car.getN_nodes();
+  const VectorXr f_hat = this->inf_car.getSolutionp()->topRows(nnodes);
+  const VectorXr f_hat_loc = Psi_loc * f_hat; 
+
+ // 2) declare the matrix that will store the confidence intervals 
+ MatrixXv result; 
+ result.resize(1, n_loc);
+
+ // 3) initialization steps
+ // compute initial ranges from Wald confidence intervals (initial guess) 
+ if(!is_wald_aux_computed){
+   this->Compute_wald_aux(); 
+ }
+  
+ // this vector will store the tolerance for each interval upper/lower limit
+ VectorXr bisection_tolerances = 0.2*Wald_aux_ranges; 
+
+  // define storage structures for bisection algorithms
+  VectorXr UU; // Upper limit for Upper bound
+  UU.resize(n_loc);
+  VectorXr UL; // Lower limit for Upper bound
+  UL.resize(n_loc);
+  VectorXr LU; // Upper limit for Lower bound
+  LU.resize(n_loc);
+  VectorXr LL; // Lower limit for Lower bound
+  LL.resize(n_loc);
+
+  // wald intervals initialization
+  for(UInt i=0; i<n_loc; ++i){
+    result(i).resize(3);
+    Real half_range = Wald_aux_ranges(i);
+    
+    // compute the limits of the interval
+    result(i)(0) = f_hat_loc(i) - half_range;
+    LU(i)=result(i)(0)+0.5*half_range;
+    LL(i)=result(i)(0)-0.5*half_range;
+    result(i)(2) = f_hat_loc(i) + half_range;
+    UU(i)=result(i)(2)+0.5*half_range;
+    UL(i)=result(i)(2)-0.5*half_range; 	
+  }
+
+  // define booleans used to unserstand which CI need to be computed forward on
+  std::vector<bool> converged_up(n_loc,false);
+  std::vector<bool> converged_low(n_loc,false);
+  bool all_f_converged=false;
+
+  // matrix that stores p_values of the bounds at actual step
+  MatrixXr local_p_values;
+  local_p_values.resize(4,n_loc);
+
+  // compute the vectors needed for the statistic
+  
+  VectorXr Partial_res_H0_CI;
+  Partial_res_H0_CI.resize(n_loc);
+
+  // fill the p_values matrix
+  for (UInt i=0; i<n_loc; i++){
+
+    MatrixXr other_locs = MatrixXr::Ones(f_hat_loc.size(), 1);
+    other_locs(i) = 0;
+
+    VectorXr selected_loc_UU = VectorXr::Zero(f_hat_loc.size()); 
+    selected_loc_UU(i) = UU(i); 
+    VectorXr selected_loc_UL = VectorXr::Zero(f_hat_loc.size()); 
+    selected_loc_UL(i) = UL(i);
+    VectorXr selected_loc_LU = VectorXr::Zero(f_hat_loc.size()); 
+    selected_loc_LU(i) = LU(i);
+    VectorXr selected_loc_LL = VectorXr::Zero(f_hat_loc.size()); 
+    selected_loc_LL(i) = LL(i);
+    
+    // compute the partial residuals and p value
+    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UU);
+    local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+    // compute the partial residuals and p value
+    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UL);
+    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+    // compute the partial residuals and p value
+    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LU);
+    local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+    // compute the partial residuals and p value
+    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LL);
+    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+  }
+
+  // extract the CI significance (1-confidence)
+  Real alpha=0;
+  // only one-at-the-time CI are available for f 
+  alpha=0.5*(this->inf_car.getInfData()->get_inference_alpha()(this->pos_impl));
+ 
+  UInt Max_Iter=50;
+  UInt Count_Iter=0;
+  while(!all_f_converged & Count_Iter<Max_Iter){
+  
+    // Compute all p_values (only those needed)
+    for (UInt i=0; i<n_loc; i++){
+
+      MatrixXr other_locs = MatrixXr::Ones(f_hat_loc.size(), 1);
+      other_locs(i) = 0;
+  
+      if(!converged_up[i]){
+	if(local_p_values(0,i)>alpha){ // Upper-Upper bound excessively tight
+
+	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
+          VectorXr selected_loc_UU = VectorXr::Zero(f_hat_loc.size()); 
+          selected_loc_UU(i) = UU(i); 
+	  
+          // compute the partial residuals
+	  Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UU); 
+	  local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+  
+	}else{
+ 
+	  if(local_p_values(1,i)<alpha){ // Upper-Lower bound excessively tight
+	    UL(i)=f_hat_loc(i)+0.5*(UL(i)-f_hat_loc(i));
+            VectorXr selected_loc_UL = VectorXr::Zero(f_hat_loc.size()); 
+            selected_loc_UL(i) = UL(i); 
+  
+	    // compute the partial residuals
+	    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UL); 
+	    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+	  }else{//both the Upper bounds are well defined
+
+	    if(UU(i)-UL(i)<bisection_tolerances(i)){
+
+	      converged_up[i]=true;
+
+	    }else{
+
+	      Real proposal=0.5*(UU(i)+UL(i));
+              VectorXr selected_proposal = VectorXr::Zero(f_hat_loc.size()); 
+              selected_proposal(i) = proposal; 
+ 
+	      // compute the partial residuals
+	      Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_proposal);
+	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(0,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(1,i)=prop_p_val;}
+	    }
+	  }
+	}
+      }
+
+
+      if(!converged_low[i]){
+	if(local_p_values(2,i)<alpha){ // Lower-Upper bound excessively tight
+
+	  LU(i)=f_hat_loc(i)-0.5*(f_hat_loc(i)-LU(i));
+          VectorXr selected_loc_LU = VectorXr::Zero(f_hat_loc.size()); 
+          selected_loc_LU(i) = LU(i); 
+  
+	  // compute the partial residuals
+	  Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LU);
+	  local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+  
+	}else{
+ 
+	  if(local_p_values(3,i)>alpha){ // Lower-Lower bound excessively tight
+	    LL(i)=LL(i)-0.5*(LU(i)-LL(i));
+            VectorXr selected_loc_LL = VectorXr::Zero(f_hat_loc.size()); 
+            selected_loc_LL(i) = LL(i); 
+  
+	    // compute the partial residuals
+	    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LL);
+	    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+	  }else{//both the Upper bounds are well defined
+
+	    if(LU(i)-LL(i)<bisection_tolerances(i)){
+
+	      converged_low[i]=true;
+
+	    }else{
+
+	      Real proposal=0.5*(LU(i)+LL(i));
+              VectorXr selected_proposal = VectorXr::Zero(f_hat_loc.size()); 
+              selected_proposal(i) = proposal; 
+   
+	      // compute the partial residuals
+	      Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_proposal);
+	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
+	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(3,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(2,i)=prop_p_val;}
+	    }
+	  }
+	}
+      }
+    }
+    all_f_converged =true;
+    for(UInt j=0; j<n_loc; j++){
+
+      if(!converged_up[j] || !converged_low[j]){
+	all_f_converged=false;
+      }
+    }
+
+    Count_Iter++;
+
+  }
+   
+  // for each row of C matrix
+  for(UInt i=0; i<n_loc; ++i){
+    result(i).resize(3);
+    
+    if(Count_Iter < Max_Iter){ // No discrepancy between f_hat_loc(i) and ESF, bisection converged
+      // Central element
+      result(i)(1)=f_hat_loc(i);
+      
+      // Limits of the interval
+      result(i)(0) = 0.5*(LU(i)+LL(i));
+      result(i)(2) = 0.5*(UU(i)+UL(i)); 
+    }else{ // Not converged in time, give a warning in R
+      // Central element
+      result(i)(1)=10e20;
+      
+      // Limits of the interval
+      result(i)(0) = 10e20;
+      result(i)(2) = 10e20; 
+    }
+  }
+  
+  return result;  
+
+
 };
 
 template<typename InputHandler, typename MatrixType>
@@ -619,19 +997,19 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-    local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 2);
+    local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
-    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 2);
+    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
-    local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 1);
+    local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
-    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 1);
+    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
   }
 
@@ -662,7 +1040,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	  // compute the partial residuals
 	  Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UU(i)); // (z-W*beta_hat(non in test)-W*UU[i](in test))
-	  local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 2);
+	  local_p_values(0,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
   
 	}else{
  
@@ -671,7 +1049,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (UL(i)); // (z-W*beta_hat(non in test)-W*UL[i](in test))
-	    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 2);
+	    local_p_values(1,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -685,7 +1063,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*proposal)
-	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 2);
+	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
 	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(0,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(1,i)=prop_p_val;}
 	    }
@@ -701,7 +1079,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	  // compute the partial residuals
 	  Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LU(i)); // (z-W*beta_hat(non in test)-W*LU[i](in test))
-	  local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 1);
+	  local_p_values(2,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
   
 	}else{
  
@@ -710,7 +1088,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (LL(i)); // (z-W*beta_hat(non in test)-W*LL[i](in test))
-	    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 1);
+	    local_p_values(3,i)=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -724,7 +1102,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (proposal); // (z-W*beta_hat(non in test)-W*proposal)
-	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, 1);
+	      Real prop_p_val=compute_CI_aux_pvalue(Partial_res_H0_CI, TildeX_loc, Tilder_hat, Tilder_star, i);
 
 	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(3,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(2,i)=prop_p_val;}
 	    }
@@ -815,31 +1193,4 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   return; 
 };
 
-/*
-template<typename InputHandler, typename MatrixType> 
-template<UInt ORDER, UInt mydim, UInt ndim>
-const std::set<UInt> Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_closest_nodes(const UInt & index, const MeshHandler<ORDER, mydim, ndim> & mesh, const std::vector<UInt> & locations_index) const {
-
- // prepare the object to be returned
- std::set<UInt> result;
-
- // for sure it contains the current index
- result.insert(index);
- 
- // loop on the mesh elements 
- for(auto i=0; i < mesh.num_elements(); ++i){
-   auto elem = mesh.getElement(i);
-   // check if the current point is inside the current element
-   if(elem.isPointInside(this->inf_car.getRegData()->getLocations<ndim>(index))){
-     // loop on all the points in the current element and insert them into result
-     for(auto it = elem.begin(); it != elem.end(); ++it){
-       result.insert(it->id());
-     }
-   }
- }
-
- return result;
-
-};
-*/
 
