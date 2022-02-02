@@ -242,6 +242,9 @@ class MixedFERegressionBase
 		bool isSV(void) const {return this->isSpaceVarying;}
 		bool isIter(void) const {return this->isIterative;}
 
+        //! A method checking the correct LU factorization of the system matrix
+        bool isMatrixNoCov_factorized(){return this->matrixNoCovdec_.info() == Eigen::ComputationInfo::Success;}
+
 		//! A function that given a vector u, performs Q*u efficiently
 		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
 
