@@ -106,7 +106,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
 
   // Observed statistic
   MatrixXr stat_temp = TildeXrow*Tilder;
-  Real stat=stat_temp;
+  Real stat=stat_temp(0);
   Real stat_perm=stat;
 
   UInt n_obs = this->inf_car.getN_obs();
@@ -145,7 +145,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
       Tilder_perm(j)=Tilder(j)*flip;
     }
     MatrixXr stat_perm_temp = TildeXrow*Tilder_perm; 
-    stat_perm= stat_perm_temp;// Flipped statistic
+    stat_perm= stat_perm_temp(0);// Flipped statistic
     if(stat_perm > stat){ ++count_Up;}else{ 
       if(stat_perm < stat){ ++count_Down;}  
     }
