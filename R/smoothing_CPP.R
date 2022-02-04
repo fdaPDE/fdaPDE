@@ -1,11 +1,7 @@
 CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> master
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
@@ -81,11 +77,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> master
   ## Call C++ function
   bigsol <- .Call("regression_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
@@ -138,11 +130,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
-<<<<<<< HEAD
   
-=======
-
->>>>>>> master
   if(is.null(lambda))
   {
     lambda<-vector(length=0)
@@ -150,13 +138,8 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   {
     lambda<-as.vector(lambda)
   }
-<<<<<<< HEAD
 
   
-=======
-  
-
->>>>>>> master
   ## Set propr type for correct C++ reading
 
   locations <- as.matrix(locations)
@@ -201,12 +184,8 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
 CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
 
-<<<<<<< HEAD
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
 
-=======
-  # Indexes in C++ starts from 0, in R from 1, opportune transformation
->>>>>>> master
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
@@ -303,10 +282,6 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   return(bigsol)
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> master
 CPP_eval.FEM = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
 {
 
@@ -511,14 +486,9 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
   areal.data.avg = 1
   BC$BC_indices <- vector(length = 0)
   BC$BC_values <- vector(length = 0)
-<<<<<<< HEAD
 
   ## Set proper type for correct C++ reading
   
-=======
-  ## Set proper type for correct C++ reading
-
->>>>>>> master
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
@@ -540,11 +510,7 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
   areal.data.avg <- as.integer(areal.data.avg)
   storage.mode(areal.data.avg) <-"integer"
   storage.mode(search) <- "integer"
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> master
   ## Call C++ function
   triplets <- .Call("get_FEM_PDE_matrix", locations, observations, FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
@@ -596,18 +562,10 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
   storage.mode(FEMbasis$order) <- "integer"
   covariates <- as.matrix(covariates)
   storage.mode(covariates) <- "double"
-<<<<<<< HEAD
-=======
-
->>>>>>> master
   storage.mode(PDE_param_eval$K) <- "double"
   storage.mode(PDE_param_eval$b) <- "double"
   storage.mode(PDE_param_eval$c) <- "double"
   storage.mode(PDE_param_eval$u) <- "double"
-<<<<<<< HEAD
-=======
-
->>>>>>> master
   storage.mode(BC$BC_indices) <- "integer"
   storage.mode(BC$BC_values) <- "double"
   storage.mode(ndim) <- "integer"

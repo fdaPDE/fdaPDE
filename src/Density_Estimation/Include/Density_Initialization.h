@@ -29,10 +29,6 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 class UserInitialization : public DensityInitialization<ORDER, mydim, ndim>{
   private:
     static constexpr UInt EL_NNODES = DensityInitialization<ORDER, mydim, ndim>::EL_NNODES;
-<<<<<<< HEAD:src/Density_Estimation/Include/Density_Initialization.h
-=======
-    // A VectorXr which contains the user initialization
->>>>>>> master:src/DensityInitialization.h
     VectorXr initialization;
 
   public:

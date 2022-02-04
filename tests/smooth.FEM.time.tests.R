@@ -31,6 +31,8 @@ FEMbasis = create.FEM.basis(mesh)
 # Test function
 f = function(x, y, z)
 {
+  x = x/2
+  y = y/2
   coe = function(x,y) 1/2*sin(5*pi*x)*exp(-x^2)+1
   sin(2*pi*(coe(y,1)*x*cos(z-2)-y*sin(z-2)))*cos(2*pi*(coe(y,1)*x*cos(z-2+pi/2)+coe(x,1)*y*sin((z-2)*pi/2)))
 }
@@ -77,8 +79,9 @@ lambdaT = 1e-3
 output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations, 
                             FEMbasis=FEMbasis, lambdaS=lambdaS,lambdaT=lambdaT,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
 #### Test 1.3: grid with stochastic GCV
 lambdaS = 10^seq(-7, -5, length.out=3)
@@ -91,8 +94,22 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints,
                             lambda.selection.criterion='grid', 
                             DOF.evaluation='stochastic', 
                             lambda.selection.lossfunction='GCV')
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+
+#### Test 1.4: Newton_fd method with stochastic GCV
+lambdaS = exp(-4)
+lambdaT = exp(-7)
+output_CPP<-smooth.FEM.time(time_mesh = TimePoints, 
+                            time_locations = TimePoints,
+                            observations=observations, 
+                            FEMbasis=FEMbasis, 
+                            lambdaS=lambdaS,lambdaT=lambdaT,
+                            lambda.selection.criterion='newton_fd', 
+                            DOF.evaluation='stochastic', 
+                            lambda.selection.lossfunction='GCV',
+                            lambda.optimization.tolerance = 1e-4)
 
 #### Test 2: c-shaped domain ####
 #            locations != nodes
@@ -172,13 +189,14 @@ lambdaT = 10^(-6:-4)
 output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                             observations=observations, 
                             covariates = cov1,
-                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-plot(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+plot(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
-output_CPP$beta[,bestlambdas[1],bestlambdas[2]]
+output_CPP$beta
 
 #### Test 2.3: stochastic GCV
 lambdaS = 10^(-2:0)
@@ -189,10 +207,11 @@ output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints,
                             FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-plot(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+plot(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
-output_CPP$beta[,bestlambdas[1],bestlambdas[2]]
+output_CPP$beta
 
 
 

@@ -4,9 +4,7 @@
 #include "Preprocess_Phase.h"
 #include "Preprocess_Factory.h"
 
-
 // This file is useful to perform the Density Estimation problem 
-
 
 /*! @brief A class to perform the whole density estimation problem.
 */

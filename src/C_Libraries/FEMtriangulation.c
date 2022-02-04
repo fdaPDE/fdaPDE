@@ -140,9 +140,9 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
   int *xoT, *xoPB, *xoS, *xoSB, *xoE, *xoEB, *xoEV, *xoNT;
 
   const char *flags = CHAR(STRING_ELT(Rflags,0));
-
+  
   //printf("Flag string is: %s \n", flags);
-
+  
   /* Convert input point matrix into array */
   PROTECT(P = AS_NUMERIC(P));
   /* Convert input boundary markers into array */
@@ -159,7 +159,7 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
   else
 	  in.pointmarkerlist = INTEGER(PB);
 
-  in.numberofpointattributes = Rf_ncols(PA);
+  in.numberofpointattributes = Rf_ncols(PA);   
   in.pointattributelist = REAL(PA);
 
   in.numberofsegments = LENGTH(S)/2;
@@ -170,9 +170,9 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
     in.segmentmarkerlist = INTEGER(SB);
   in.numberofholes = LENGTH(H)/2;
   in.holelist = REAL(H);				/* Not needed if -E switch used. */
-
+  
   in.numberofregions = 0;
-
+  
   in.numberoftriangles 			= INTEGER(getAttrib(T, R_DimSymbol))[1];
   in.numberofcorners 			= INTEGER(getAttrib(T, R_DimSymbol))[0];
   in.trianglelist 				= INTEGER(T);          /* Not needed if -E switch used. */
@@ -203,9 +203,9 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
   mid.edgelist = (int *) NULL;             /* Needed only if -e switch used. */
   mid.edgemarkerlist = (int *) NULL;   /* Needed if -e used and -B not used. */
   mid.holelist 		 = (TRIREAL *) NULL;
-
-
-
+  
+  
+  
   vorout.pointlist = (TRIREAL *) NULL;        /* Needed only if -v switch used. */
   /* Needed only if -v switch used and number of attributes is not zero: */
   vorout.pointattributelist = (TRIREAL *) NULL;
@@ -220,8 +220,8 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
 
   //char flags[200];
   //strcpy(flags, inputflags);
-
-
+	
+  
   triangulate(strdup(flags), &in, &mid, &vorout);
 
 //printf("Initial triangulation:\n\n");
@@ -233,9 +233,9 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
   /*   refining the triangulation.                               */
 
   /* /\* Needed only if -r and -a switches used: *\/ */
-   //mid.trianglearealist = (TRIREAL *) malloc(mid.numberoftriangles * sizeof(TRIREAL));
-   //mid.trianglearealist[0] = 3.0;
-   //mid.trianglearealist[1] = 1.0;
+   //mid.trianglearealist = (TRIREAL *) malloc(mid.numberoftriangles * sizeof(TRIREAL)); 
+   //mid.trianglearealist[0] = 3.0; 
+   //mid.trianglearealist[1] = 1.0; 
 
   /* /\* Make necessary initializations so that Triangle can return a *\/ */
   /* /\*   triangulation in `out'.                                    *\/ */
@@ -356,7 +356,7 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
       xoAV[j * vorout.numberofpoints + i] = vorout.pointattributelist[i * mid.numberofpointattributes + j];
     }
   }
-
+  
   PROTECT(ans = allocVector(VECSXP, 13));
   SET_VECTOR_ELT(ans, 0, oP);
   SET_VECTOR_ELT(ans, 1, oPB);

@@ -13,11 +13,7 @@
  * code for R/C++ data conversion.
 */
 template <UInt ndim>
-<<<<<<< HEAD:src/Density_Estimation/Include/DE_Data.h
 class DEData{
-=======
-class  DEData{
->>>>>>> master:src/DEData.h
 	private:
 		// Data = locations.
 		std::vector<Point<ndim> > data_;
@@ -87,19 +83,11 @@ class  DEData{
 			\param RnThreads_fold an R-integer specifying the number of threads to paralllize the loop over folds during cross-validation.
 			\param Rsearch an R-integer to decide the search algorithm type (tree or naive search algorithm).
 		*/
-<<<<<<< HEAD:src/Density_Estimation/Include/DE_Data.h
-=======
-		explicit DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
-			SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch);
->>>>>>> master:src/DEData.h
 
 		explicit DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
 			SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rsearch);
 
-<<<<<<< HEAD:src/Density_Estimation/Include/DE_Data.h
 
-=======
->>>>>>> master:src/DEData.h
 		// Getters
 		//! A method to access the data.
 		std::vector<Point<ndim> >& data() {return data_;}
@@ -139,15 +127,12 @@ class  DEData{
 		Real getTol2() const {return tol2_;}
 		//! A method returning the boolean print member.
 		bool Print() const {return print_;}
-<<<<<<< HEAD:src/Density_Estimation/Include/DE_Data.h
 		//! A method returning the number of threads to use in the omp parallelization to compute integrals.
 		UInt getNThreads_int() const {return nThreads_int_;}
 		//! A method returning the number of threads to use in the omp parallelization to loop over smoothing parameters.
 		UInt getNThreads_l() const {return nThreads_l_;}
 		//! A method returning the number of threads to use in the omp parallelization to loop over folds during cross-validation.
 		UInt getNThreads_fold() const {return nThreads_fold_;}
-=======
->>>>>>> master:src/DEData.h
 		//! A method returning the integer that specifies the search algorithm type.
 		UInt getSearch() const {return search_;}
 

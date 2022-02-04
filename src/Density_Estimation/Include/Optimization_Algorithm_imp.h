@@ -56,9 +56,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
 
     if(this->dataProblem_.Print()){
 
-
       Rprintf("loss %f, llik %f, pen %f, norm_Lp %f\n", loss, llik, pen, norm_grad);
-
 
     }
 
@@ -86,9 +84,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
       if((loss_old - loss) < 0){
         if(this->dataProblem_.Print()){
 
-
           Rprintf("The loss function increases: not good. Try decreasing the optimization parameter.\n", norm_grad);
-
 
         }
         break;
@@ -96,9 +92,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
 
       if(this->dataProblem_.Print()){
 
-
         Rprintf("Iter %d, loss %f, llik %f, pen %f, norm_Lp %f\n", i+1, loss, llik, pen, norm_grad);
-
 
       }
     }
@@ -109,9 +103,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
     else if(dloss <= toll1 && dllik <= toll1 && dpen <= toll1){
       if(this->dataProblem_.Print()){
 
-
         Rprintf("The algorithm reaches the tollerance in terms of the functional. Norm of Lp: %f, dloss: %f, dllik: %f, dpen: %f\n", norm_grad, dloss, dllik, dpen);
-
 
       }
       return g_curr;
@@ -119,9 +111,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
     else if(norm_grad <= toll2){
       if(this->dataProblem_.Print()){
 
-
         Rprintf("The algorithm reaches the tollerance in terms of the slope. Norm of Lp: %f, dloss: %f, dllik: %f, dpen: %f\n", norm_grad, dloss, dllik, dpen);
-
 
       }
       return g_curr;
@@ -129,9 +119,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
     else if(i == this->dataProblem_.getNsimulations()){
       if(this->dataProblem_.Print()){
 
-
         Rprintf("The algorithm reaches the maximum number of iterations. Norm of Lp: %f, dloss: %f, dllik: %f, dpen: %f\n", norm_grad, dloss, dllik, dpen);
-
 
       }
       return g_curr;
@@ -140,9 +128,7 @@ FixedStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const Vec
 
   // If you arrive here you don't have a good gradient parameter
 
-
   Rprintf("ERROR: The loss function increases: not good. Try decreasing the optimization parameter");
-
 
   //std::abort();
   return VectorXr::Constant(g.size(),0);
@@ -171,9 +157,7 @@ AdaptiveStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const 
 
   if(this->dataProblem_.Print()){
 
-
     Rprintf("loss %f, llik %f, pen %f, norm_Lp %f\n", loss, llik, pen, norm_grad);
-
 
   }
 
@@ -202,9 +186,7 @@ AdaptiveStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const 
 
     if(this->dataProblem_.Print()){
 
-
       Rprintf("Iter %d, loss %f, llik %f, pen %f, norm_Lp %f\n", i+1, loss, llik, pen, norm_grad);
-
 
     }
 
@@ -215,9 +197,7 @@ AdaptiveStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const 
   if(dloss <= toll1 && dllik <= toll1 && dpen <= toll1){
     if(this->dataProblem_.Print()){
 
-
       Rprintf("The algorithm reaches the tollerance in terms of the functional. Norm of Lp: %f, dloss: %f, dllik: %f, dpen: %f\n", norm_grad, dloss, dllik, dpen);
-
 
     }
     return g_curr;
@@ -225,9 +205,7 @@ AdaptiveStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const 
   else if(norm_grad <= toll2){
     if(this->dataProblem_.Print()){
 
-
       Rprintf("The algorithm reaches the tollerance in terms of the slope. Norm of Lp: %f, dloss: %f, dllik: %f, dpen: %f\n", norm_grad, dloss, dllik, dpen);
-
 
     }
     return g_curr;
@@ -235,10 +213,8 @@ AdaptiveStep<ORDER,mydim,ndim>::apply_core(const SpMat& Psi, Real lambda, const 
   else{
     if(this->dataProblem_.Print()){
 
-
       Rprintf("The algorithm reaches the maximum number of iterations. Norm of Lp: %f, dloss: %f, dllik: %f, dpen: %f\n", norm_grad, dloss, dllik, dpen);
       
-
     }
     return g_curr;
   }

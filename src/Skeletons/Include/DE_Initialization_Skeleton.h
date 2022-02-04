@@ -88,11 +88,4 @@ SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP 
 	}
 
 }
-
-
-<<<<<<< HEAD
-
-
-=======
->>>>>>> master
 #endif

@@ -21,9 +21,8 @@ class DescentDirection_factory
 		else{
 
 
-
 			Rprintf("Unknown direction option - using gradient direction");
-
+			
 
 			return make_unique<DirectionGradient<ORDER,mydim,ndim>>(fp);
 		}
