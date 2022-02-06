@@ -195,30 +195,30 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_f_pvalue(con
       V = Q_dec.eigenvectors().rightCols(n_loc - q);
     }
    
-   // update residuals to be flipped
-   const VectorXr V_partial_res_H0_CI = V.transpose() * partial_res_H0_CI; 
+    // update residuals to be flipped
+    const VectorXr V_partial_res_H0_CI = V.transpose() * partial_res_H0_CI; 
 
-   // observed statistics
-   VectorXr T; 
+    // observed statistics
+    VectorXr T; 
  
-   if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
-     T = Group_res * V * V_partial_res_H0_CI; 
-   }
-   else{
-     T = Psi_loc.transpose() * V * V_partial_res_H0_CI;
-   }
+    if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
+      T = Group_res * V * V_partial_res_H0_CI; 
+    }
+    else{
+      T = Psi_loc.transpose() * V * V_partial_res_H0_CI;
+    }
     
-   VectorXr T_perm = T;
+    VectorXr T_perm = T;
 
-   // Random sign-flips
-   std::random_device rd; 
-   std::default_random_engine eng{rd()};
-   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-   Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
-   Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
-   VectorXr res_perm = V_partial_res_H0_CI; 
+    // Random sign-flips
+    std::random_device rd; 
+    std::default_random_engine eng{rd()};
+    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+    Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
+    Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
+    VectorXr res_perm = V_partial_res_H0_CI; 
  
-   for(unsigned long int i=0; i < n_flip; ++i){
+    for(unsigned long int i=0; i < n_flip; ++i){
       for(unsigned long int j=0; j < V_partial_res_H0_CI.size(); ++j){
 	UInt flip=2*distr(eng)-1;
 	res_perm(j)=V_partial_res_H0_CI(j)*flip;
@@ -242,27 +242,27 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_f_pvalue(con
   }
   else{ //sign-flip implementation
       
-   // observed statistics
-   VectorXr T; 
+    // observed statistics
+    VectorXr T; 
  
-   if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
-     T = Group_res * partial_res_H0_CI; 
-   }
-   else{
-     T = Psi_loc.transpose() * partial_res_H0_CI;
-   }
+    if(this->inf_car.getInfData()->get_locs_are_nodes_inference()){
+      T = Group_res * partial_res_H0_CI; 
+    }
+    else{
+      T = Psi_loc.transpose() * partial_res_H0_CI;
+    }
     
-   VectorXr T_perm = T;
+    VectorXr T_perm = T;
 
-   // Random sign-flips
-   std::random_device rd; 
-   std::default_random_engine eng{rd()};
-   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
-   Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
-   Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
-   VectorXr res_perm = partial_res_H0_CI; 
+    // Random sign-flips
+    std::random_device rd; 
+    std::default_random_engine eng{rd()};
+    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
+    Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
+    Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
+    VectorXr res_perm = partial_res_H0_CI; 
  
-   for(unsigned long int i=0; i < n_flip; ++i){
+    for(unsigned long int i=0; i < n_flip; ++i){
       for(unsigned long int j=0; j < partial_res_H0_CI.size(); ++j){
 	UInt flip=2*distr(eng)-1;
 	res_perm(j)=partial_res_H0_CI(j)*flip;
@@ -412,11 +412,14 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     
     Partial_res_H0.resize(Lambda.cols(), p);
     for(UInt i=0; i<p; ++i){
+      // Extract the current row in C
+      VectorXr current_row = C.row(i);
+  
       // Build auxiliary vector for residuals computation
-      VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
+      VectorXr other_covariates = VectorXr::Ones(beta_hat.size())-current_row;
 
       // compute the partial residuals
-      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (C.row(i)) * (beta_0); // (z-W*beta_hat(non in test)-W*beta_0(in test))
+      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (current_row) * (beta_0); // (z-W*beta_hat(non in test)-W*beta_0(in test))
     }
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
@@ -442,7 +445,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     // Random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
-    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)VectorXr other_covariates = MatrixXr::Ones(beta_hat.size(),1)-C.row(i);
+    std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     VectorXr count_Up = VectorXr::Zero(p);
     VectorXr count_Down = VectorXr::Zero(p);
     
@@ -627,14 +630,14 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   
-/*
-// Eigen-Sign-Flip CI are not implemented for f
+  /*
+  // Eigen-Sign-Flip CI are not implemented for f
   // this function won't be called 
   MatrixXv null_mat; 
   null_mat.resize(1,1);
   null_mat(0) = VectorXr::Constant(3,0);
   return null_mat; 
-*/
+  */
     
   // 1) compute/get all the needed objects from the inference carrier 
   const MatrixXr W_loc = this->inf_car.getW_loc();
@@ -663,18 +666,18 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   const VectorXr f_hat = this->inf_car.getSolutionp()->topRows(nnodes);
   const VectorXr f_hat_loc = Psi_loc * f_hat; 
 
- // 2) declare the matrix that will store the confidence intervals 
- MatrixXv result; 
- result.resize(1, n_loc);
+  // 2) declare the matrix that will store the confidence intervals 
+  MatrixXv result; 
+  result.resize(1, n_loc);
 
- // 3) initialization steps
- // compute initial ranges from Wald confidence intervals (initial guess) 
- if(!is_wald_aux_computed){
-   this->Compute_wald_aux(); 
- }
+  // 3) initialization steps
+  // compute initial ranges from Wald confidence intervals (initial guess) 
+  if(!is_wald_aux_computed){
+    this->Compute_wald_aux(); 
+  }
   
- // this vector will store the tolerance for each interval upper/lower limit
- VectorXr bisection_tolerances = 0.2*Wald_aux_ranges; 
+  // this vector will store the tolerance for each interval upper/lower limit
+  VectorXr bisection_tolerances = 0.2*Wald_aux_ranges; 
 
   // define storage structures for bisection algorithms
   VectorXr UU; // Upper limit for Upper bound
@@ -986,7 +989,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   // fill the p_values matrix
   for (UInt i=0; i<p; i++){
     // Extract the current row in C
-    VectorXr current_row = C.row(i)
+    VectorXr current_row = C.row(i);
   
     // Build auxiliary vector for residuals computation
     VectorXr other_covariates = VectorXr::Ones(beta_hat.size())-current_row;
@@ -1028,7 +1031,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
     for (UInt i=0; i<p; i++){
 
       // Extract the current row in C
-      VectorXr current_row = C.row(i)
+      VectorXr current_row = C.row(i);
   
       // Build auxiliary vector for residuals computation
       VectorXr other_covariates = VectorXr::Ones(beta_hat.size())-current_row;
@@ -1194,5 +1197,3 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   
   return; 
 };
-
-
