@@ -101,7 +101,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
   VectorXr Tilder = Tilder_star * partial_res_H0_CI;
 
   // Observed statistic
-  MatrixXr stat_temp = TildeXrow*Tilder;
+  MatrixXr stat_temp = TildeX*Tilder;
   Real stat=stat_temp(0);
   Real stat_perm=stat;
 
@@ -140,7 +140,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_pvalue(const
       }
       Tilder_perm(j)=Tilder(j)*flip;
     }
-    MatrixXr stat_perm_temp = TildeXrow*Tilder_perm; 
+    MatrixXr stat_perm_temp = TildeX*Tilder_perm; 
     stat_perm= stat_perm_temp(0);// Flipped statistic
     if(stat_perm > stat){ ++count_Up;}else{ 
       if(stat_perm < stat){ ++count_Down;}  
@@ -986,7 +986,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   // fill the p_values matrix
   for (UInt i=0; i<p; i++){
     // Extract the current row in C
-    VecotrXr current_row = C.row(i)
+    VectorXr current_row = C.row(i)
   
     // Build auxiliary vector for residuals computation
     VectorXr other_covariates = VectorXr::Ones(beta_hat.size())-current_row;
@@ -1028,7 +1028,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
     for (UInt i=0; i<p; i++){
 
       // Extract the current row in C
-      VecotrXr current_row = C.row(i)
+      VectorXr current_row = C.row(i)
   
       // Build auxiliary vector for residuals computation
       VectorXr other_covariates = VectorXr::Ones(beta_hat.size())-current_row;
