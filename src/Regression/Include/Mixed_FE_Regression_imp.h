@@ -910,6 +910,7 @@ template<typename Solver>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S, Solver* solverobj)
 {
 	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
+	isMatrixNoCov_Computed = true;
 }
 
 
@@ -922,6 +923,7 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
 	else if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic(), false)
 		solverobj->addTimeCorrection(std::make_shared<SpMat>(Ptk_), lambdaT, false);
 	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambdaS);
+	isMatrixNoCov_Computed = true;
 }
 
 //----------------------------------------------------------------------------//
@@ -931,6 +933,8 @@ template<typename Solver>
 MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 {
 	Solver solverobj;
+	if (isMatrixNoCov_Computed)
+		solverobj.compute(matrixNoCov_);
 	const Real last_lambda = optimizationData_.get_last_lS_used();
 	const Real lambda_ = optimizationData_.get_current_lambdaS();
         if(lambda_ != last_lambda)
@@ -956,6 +960,11 @@ template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
 	Solver solverobj;
+	if (isMatrixNoCov_Computed)
+	{
+		solverobj.compute(matrixNoCov_);
+		Rprintf("solverobj init w/ mNC");
+	}
 	UInt nnodes = N_*M_; // Define nuber of nodes
 	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
 

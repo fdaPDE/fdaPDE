@@ -84,6 +84,7 @@ class MixedFERegressionBase
 		bool isPsiComputed = false;
 		bool isR0Computed  = false;
 		bool isR1Computed  = false;
+		bool isMatrixNoCov_Computed = false;
 
 		bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
 		bool isGAMData;
