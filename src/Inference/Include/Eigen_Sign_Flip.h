@@ -39,7 +39,7 @@ protected:
   MatrixXv compute_beta_CI(void) override;
   MatrixXv compute_f_CI(void) override;
   
-  Real compute_CI_aux_pvalue(const VectorXr &, const MatrixXr &, const VectorXr &, const  MatrixXr &, const UInt current_index) const;  //!< Computes the unilateral p value for a generic beta proposed in the research algorithm for CI 
+  Real compute_CI_aux_beta_pvalue(const VectorXr &, const MatrixXr &, const VectorXr &, const  MatrixXr &) const;  //!< Computes the unilateral p value for a generic beta proposed in the research algorithm for CI 
   Real compute_CI_aux_f_pvalue(const VectorXr &, const UInt current_index) const;  //!< Computes the unilateral p value for a generic value of f in a given point proposed in the research algorithm for CI  
     
   
