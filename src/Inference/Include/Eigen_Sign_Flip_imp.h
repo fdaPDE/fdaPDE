@@ -629,23 +629,14 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 
 template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
+  // This function will be called only when the chosen locations are a subset of the mesh nodes  
   
-  /*
-  // Eigen-Sign-Flip CI are not implemented for f
-  // this function won't be called 
-  MatrixXv null_mat; 
-  null_mat.resize(1,1);
-  null_mat(0) = VectorXr::Constant(3,0);
-  return null_mat; 
-  */
-    
-  // 1) compute/get all the needed objects from the inference carrier 
+  // compute/get all the needed objects from the inference carrier 
   const MatrixXr W_loc = this->inf_car.getW_loc();
   const SpMat Psi_loc = this->inf_car.getPsi_loc();
   const VectorXr Z_loc = this->inf_car.getZ_loc(); 
   const UInt n_loc = this->inf_car.getN_loc(); 
-  unsigned long int n_flip=this->inf_car.getInfData()->get_n_Flip();
-
+  
   // compute Q_loc
   MatrixXr Q_loc; 
   Q_loc.resize(n_loc, n_loc);
@@ -720,33 +711,36 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   // fill the p_values matrix
   for (UInt i=0; i<n_loc; i++){
 
-    MatrixXr other_locs = MatrixXr::Ones(f_hat_loc.size(), 1);
-    other_locs(i) = 0;
-
-    VectorXr selected_loc_UU = VectorXr::Zero(f_hat_loc.size()); 
-    selected_loc_UU(i) = UU(i); 
-    VectorXr selected_loc_UL = VectorXr::Zero(f_hat_loc.size()); 
-    selected_loc_UL(i) = UL(i);
-    VectorXr selected_loc_LU = VectorXr::Zero(f_hat_loc.size()); 
-    selected_loc_LU(i) = LU(i);
-    VectorXr selected_loc_LL = VectorXr::Zero(f_hat_loc.size()); 
-    selected_loc_LL(i) = LL(i);
+    VectorXr f_hat_loc_UU = f_hat_loc;
+    VectorXr f_hat_loc_UL = f_hat_loc;
+    VectorXr f_hat_loc_LU = f_hat_loc;
+    VectorXr f_hat_loc_LL = f_hat_loc; 
+    
+    for(UInt j=0; j < n_loc; ++j){
+      if(Group_res(i,j) == 1){
+	f_hat_loc_UU(j) = UU(i);  
+	f_hat_loc_UL(j) = UL(i); 
+	f_hat_loc_LU(j) = LU(i); 
+	f_hat_loc_LL(j) = LL(i); 
+      }
+    }
     
     // compute the partial residuals and p value
-    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UU);
+    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UU); 
     local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
 
     // compute the partial residuals and p value
-    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UL);
+    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UL);
     local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
 
     // compute the partial residuals and p value
-    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LU);
+    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LU);
     local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
 
     // compute the partial residuals and p value
-    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LL);
+    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LL);
     local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
 
   }
 
@@ -757,34 +751,41 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
  
   UInt Max_Iter=50;
   UInt Count_Iter=0;
-  while(!all_f_converged & Count_Iter<Max_Iter){
+  while(!all_f_converged && Count_Iter<Max_Iter){
   
     // Compute all p_values (only those needed)
     for (UInt i=0; i<n_loc; i++){
 
-      MatrixXr other_locs = MatrixXr::Ones(f_hat_loc.size(), 1);
-      other_locs(i) = 0;
+      VectorXr f_hat_loc_UU = f_hat_loc;
+      VectorXr f_hat_loc_UL = f_hat_loc;
+      VectorXr f_hat_loc_LU = f_hat_loc;
+      VectorXr f_hat_loc_LL = f_hat_loc; 
   
       if(!converged_up[i]){
 	if(local_p_values(0,i)>alpha){ // Upper-Upper bound excessively tight
 
 	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
-          VectorXr selected_loc_UU = VectorXr::Zero(f_hat_loc.size()); 
-          selected_loc_UU(i) = UU(i); 
-	  
+	  for(UInt j=0; j < n_loc; ++j){
+	    if(Group_res(i,j) == 1){
+	      f_hat_loc_UU(j) = UU(i);  
+	    }
+	  }
           // compute the partial residuals
-	  Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UU); 
+	  Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UU); 
 	  local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
   
 	}else{
  
 	  if(local_p_values(1,i)<alpha){ // Upper-Lower bound excessively tight
 	    UL(i)=f_hat_loc(i)+0.5*(UL(i)-f_hat_loc(i));
-            VectorXr selected_loc_UL = VectorXr::Zero(f_hat_loc.size()); 
-            selected_loc_UL(i) = UL(i); 
+	    for(UInt j=0; j < n_loc; ++j){
+	      if(Group_res(i,j) == 1){
+		f_hat_loc_UL(j) = UL(i);  
+	      }
+	    } 
   
 	    // compute the partial residuals
-	    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_UL); 
+	    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UL); 
 	    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
 
 	  }else{//both the Upper bounds are well defined
@@ -796,12 +797,18 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 	    }else{
 
 	      Real proposal=0.5*(UU(i)+UL(i));
-              VectorXr selected_proposal = VectorXr::Zero(f_hat_loc.size()); 
-              selected_proposal(i) = proposal; 
+              VectorXr f_hat_loc_proposal = f_hat_loc; 
+
+              for(UInt j=0; j < n_loc; ++j){
+        	if(Group_res(i,j) == 1){
+           	  f_hat_loc_proposal(j) = proposal;
+       		}
+	      }
  
 	      // compute the partial residuals
-	      Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_proposal);
+	      Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_proposal);
 	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+
 
 	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(0,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(1,i)=prop_p_val;}
 	    }
@@ -814,22 +821,28 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 	if(local_p_values(2,i)<alpha){ // Lower-Upper bound excessively tight
 
 	  LU(i)=f_hat_loc(i)-0.5*(f_hat_loc(i)-LU(i));
-          VectorXr selected_loc_LU = VectorXr::Zero(f_hat_loc.size()); 
-          selected_loc_LU(i) = LU(i); 
+          for(UInt j=0; j < n_loc; ++j){
+	    if(Group_res(i,j) == 1){
+	      f_hat_loc_LU(j) = LU(i);  
+	    }
+	  }
   
 	  // compute the partial residuals
-	  Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LU);
+	  Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LU);
 	  local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
   
 	}else{
  
 	  if(local_p_values(3,i)>alpha){ // Lower-Lower bound excessively tight
 	    LL(i)=LL(i)-0.5*(LU(i)-LL(i));
-            VectorXr selected_loc_LL = VectorXr::Zero(f_hat_loc.size()); 
-            selected_loc_LL(i) = LL(i); 
+            for(UInt j=0; j < n_loc; ++j){
+	      if(Group_res(i,j) == 1){
+		f_hat_loc_LL(j) = LL(i);  
+	      }
+	    }
   
 	    // compute the partial residuals
-	    Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_loc_LL);
+	    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LL);
 	    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
 
 	  }else{//both the Upper bounds are well defined
@@ -841,11 +854,17 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 	    }else{
 
 	      Real proposal=0.5*(LU(i)+LL(i));
-              VectorXr selected_proposal = VectorXr::Zero(f_hat_loc.size()); 
-              selected_proposal(i) = proposal; 
+              VectorXr f_hat_loc_proposal = f_hat_loc; 
+
+              for(UInt j=0; j < n_loc; ++j){
+        	if(Group_res(i,j) == 1){
+           	  f_hat_loc_proposal(j) = proposal;
+       		}
+	      }
+ 
    
 	      // compute the partial residuals
-	      Partial_res_H0_CI = Q_loc*(Z_loc - other_locs * f_hat_loc - selected_proposal);
+	      Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_proposal);
 	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
 
 	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(3,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(2,i)=prop_p_val;}
@@ -866,27 +885,27 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 
   }
    
-  // for each row of C matrix
+  // for each point
   for(UInt i=0; i<n_loc; ++i){
     result(i).resize(3);
-    
-    if(Count_Iter < Max_Iter){ // No discrepancy between f_hat_loc(i) and ESF, bisection converged
-      // Central element
-      result(i)(1)=f_hat_loc(i);
-      
-      // Limits of the interval
-      result(i)(0) = 0.5*(LU(i)+LL(i));
-      result(i)(2) = 0.5*(UU(i)+UL(i)); 
-    }else{ // Not converged in time, give a warning in R
+
+    if(!converged_up[i] || !converged_low[i]){
       // Central element
       result(i)(1)=10e20;
-      
       // Limits of the interval
       result(i)(0) = 10e20;
       result(i)(2) = 10e20; 
     }
+    
+    else{ // No discrepancy between f_hat_loc(i) and ESF, bisection converged
+      // Central element
+      result(i)(1)=f_hat_loc(i);
+      // Limits of the interval
+      result(i)(0) = 0.5*(LU(i)+LL(i));
+      result(i)(2) = 0.5*(UU(i)+UL(i)); 
+    }
   }
-  
+
   return result;  
 
 
@@ -927,7 +946,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   beta_in_test.resize(p);
   for(UInt i=0; i<p; i++){
     for(UInt j=0; j<C.cols(); j++){
-       if(C(i,j)>0){beta_in_test[i]=j;}
+      if(C(i,j)>0){beta_in_test[i]=j;}
     }
   }
 

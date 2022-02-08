@@ -65,20 +65,6 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
       }
     }
     
-    # in wald implementation check that the final number of chosen locations doesn't exceed n-q (to ensure var-cov matrix is invertible)
-    if(sum(R_Inference_Object_Data@type==1)!=0){
-      if(is.null(checknumber)){
-        if(dim(R_Inference_Object_Data@locations)[1] > dim(locations)[1])
-          stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
-             decrease the number of locations or choose eigen-sign-flip inferential approach")
-      }
-      else{
-        if(dim(R_Inference_Object_Data@locations)[1] > dim(locations)[1] - checknumber)
-          stop("Number of chosen locations is too high, variance-covariance matrix of the estimator is not invertible: 
-             decrease the number of locations or choose eigen-sign-flip inferential approach")
-      }
-    }
-    
     locs_are_nodes_before_check = (R_Inference_Object_Data@locations_are_nodes == 1)
     R_Inference_Object_Data@locations_are_nodes = as.integer(1)
     
@@ -106,7 +92,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
               Sign-Flip and Eigen-Sign-Flip tests are performed by area, combining neighborhoods of locations according to the distance induced by the mesh")
     
     if(R_Inference_Object_Data@locations_are_nodes!=1){
-      # intervals with sign-flip or eigne-sign-flip implementation are not allowed
+      # intervals with sign-flip or eigen-sign-flip implementation are not allowed
       for(k in 1:length(R_Inference_Object_Data@type)){
         if((R_Inference_Object_Data@type[k]==3 || R_Inference_Object_Data@type[k]==4) && R_Inference_Object_Data@interval[k]!=0 && R_Inference_Object_Data@component[k]!=1)
           stop("Sign-Flip and Eigen-Sign-Flip confidence intervals on f are implemented only if the selected locations are a subset of the mesh nodes")
