@@ -92,7 +92,7 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_wald_aux(void){
 }
 
 template<typename InputHandler, typename MatrixType> 
-Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_beta_aux_pvalue(const VectorXr & partial_res_H0_CI, const MatrixXr & TildeX, const VectorXr & Tilder_hat, const  MatrixXr & Tilder_star) const {
+Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(const VectorXr & partial_res_H0_CI, const MatrixXr & TildeX, const VectorXr & Tilder_hat, const  MatrixXr & Tilder_star) const {
   
   // declare the vector that will store the p-values
   Real result;

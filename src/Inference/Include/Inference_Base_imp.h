@@ -16,7 +16,7 @@ MatrixXv Inference_Base<InputHandler, MatrixType>::compute_inference_output(void
   result.resize(2, result_dim+1);
   
   // if test_type is not defined, only intervals are required
-  if(test_type == "not-defined"){
+  if(test_type == "not-defined" && interval_type != "not-defined"){
     // beta pvalues
     result(0).resize(p);
     for(UInt k=0;k<p;k++){
@@ -30,7 +30,7 @@ MatrixXv Inference_Base<InputHandler, MatrixType>::compute_inference_output(void
   }
 
   // if interval_type is not defined, only test is required
-  if(interval_type == "not-defined"){
+  else if(interval_type == "not-defined" && test_type != "not-defined"){
     result.leftCols(1) = this->compute_pvalue();
     for(UInt k=0;k<result_dim;k++){
     for(UInt i=0; i<result.rows(); ++i){
