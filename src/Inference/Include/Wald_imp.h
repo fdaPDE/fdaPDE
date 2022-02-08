@@ -320,7 +320,7 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
 
   // compute the quantile 
-  Real alpha = 1-this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
+  Real alpha = this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
   Real quant;
   
   /* SIMULTANEOUS and BONFERRONI are going to be suppressed 
