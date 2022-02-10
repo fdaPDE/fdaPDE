@@ -500,14 +500,14 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
       }
       // if the selected locations coincide with the nodes compute the matrix that groups closer locations, according to the distance induced by the mesh elements
       if(inferenceData_.get_locs_are_nodes_inference()){
-	MatrixXr Group_locs = MatrixXr::Zero(inferenceData_.get_locs_inference().rows(), inferenceData_.get_locs_inference().rows());
+	MatrixXr Group_locs = MatrixXr::Zero(mesh_.num_nodes(), inferenceData_.get_locs_inference().rows());
 	// get the selected location indices
 	std::vector<UInt> locations_index = inferenceData_.get_locs_index_inference(); 
 	// declare the vector that contains, for each location-node, the corresponding neighbors' indices
 	std::vector<std::set<UInt>> NearestIndices; 
-	NearestIndices.resize(locations_index.size()); 
+	NearestIndices.resize(mesh_.num_nodes()); 
        
-	for(UInt k=0; k<locations_index.size(); ++k){
+	for(UInt k=0; k<mesh_.num_nodes(); ++k){
 	  // prepare the object to insert
 	  std::set<UInt> neighbors;
  
@@ -515,7 +515,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	  for(auto i=0; i < mesh_.num_elements(); ++i){
 	    auto elem = mesh_.getElement(i);
 	    // check if the current point is inside the current element
-	    if(elem.isPointInside(mesh_.getPoint(locations_index[k]))){
+	    if(elem.isPointInside(mesh_.getPoint(k))){
 	      // loop on all the points in the current element and insert them into the set of neighbors
 	      for(auto it = elem.begin(); it != elem.end(); ++it){
 		neighbors.insert(it->id());
@@ -528,9 +528,9 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 
 	// compute the group matrix
 	for(UInt i=0; i < locations_index.size(); ++i){
-	  for(UInt j : NearestIndices[i]){
+	  for(UInt j : NearestIndices[locations_index[i]]){
             if(rel_rows(j)>=0) // only if it belongs to the selected locations
-	    	Group_locs(i, rel_rows(j)) = 1;
+	    	Group_locs(locations_index[i], rel_rows(j)) = 1;
           }
 	}
     

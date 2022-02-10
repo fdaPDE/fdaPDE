@@ -324,27 +324,22 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
   
   // extract covariates matrices
   const MatrixXr * W = this->inf_car.getWp();
+
+  // Store beta_hat
+  VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
+  VectorXr beta_hat_mod=beta_hat;
   
   // simultaneous test
-  if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){
-    // Store beta_hat
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
-    
-    // Build auxiliary matrix for residuals computation
-    MatrixXr C_out = MatrixXr::Zero(C.cols(), C.cols());
-    
-    for(UInt j = 0; j < C.cols(); ++j){
-      UInt count = 0; 
-      for(UInt i = 0; i < p; ++i){
-	if(C(i,j) == 1)
-	  count++;
+  if(this->inf_car.getInfData()->get_test_type()[this->pos_impl] == "simultaneous"){    
+    // extract the current betas in test
+    for(UInt i=0; i<p; i++){
+      for(UInt j=0; j<C.cols(); j++){
+        if(C(i,j)>0){beta_hat_mod[j]=beta_0[j];}
       }
-      if(count == 0)
-	C_out(j,j) = 1; 
     }
     
     // compute the partial residuals
-    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * (C.transpose()) * (beta_0) - (*W) * (C_out) * beta_hat;
+    Partial_res_H0 = *(this->inf_car.getZp()) - (*W) * beta_hat_mod;
     
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
@@ -405,21 +400,17 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
   }
   else{
     
-    // one-at-the-time tests
-
-    // Store beta_hat
-    VectorXr beta_hat = (*(this->inf_car.getBeta_hatp()));
-    
+    // one-at-the-time tests    
     Partial_res_H0.resize(Lambda.cols(), p);
     for(UInt i=0; i<p; ++i){
-      // Extract the current row in C
-      VectorXr current_row = C.row(i);
-  
-      // Build auxiliary vector for residuals computation
-      VectorXr other_covariates = VectorXr::Ones(beta_hat.size())-current_row;
+      // Extract the current beta in test
+      beta_hat_mod = beta_hat;
 
+      for(UInt j=0; j<C.cols(); j++){
+        if(C(i,j)>0){beta_hat_mod[j]=beta_0[j];}
+      }
       // compute the partial residuals
-      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * (other_covariates) * (beta_hat) - (*W) * (current_row) * (beta_0); // (z-W*beta_hat(non in test)-W*beta_0(in test))
+      Partial_res_H0.col(i) = *(this->inf_car.getZp()) - (*W) * beta_hat_mod; // (z-W*beta_hat(non in test)-W*beta_0(in test))
     }
     // compute the vectors needed for the statistic
     MatrixXr TildeX = (C * W->transpose()) * Lambda_dec.eigenvectors()*Lambda_dec.eigenvalues().asDiagonal();   	// W^t * V * D
@@ -636,6 +627,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   const SpMat Psi_loc = this->inf_car.getPsi_loc();
   const VectorXr Z_loc = this->inf_car.getZ_loc(); 
   const UInt n_loc = this->inf_car.getN_loc(); 
+  const std::vector<UInt> sub_locations_index = this->inf_car.getInfData()->get_locs_index_inference(); 
   
   // compute Q_loc
   MatrixXr Q_loc; 
@@ -717,7 +709,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
     VectorXr f_hat_loc_LL = f_hat_loc; 
     
     for(UInt j=0; j < n_loc; ++j){
-      if(Group_res(i,j) == 1){
+      if(Group_res(sub_locations_index[i],j) == 1){
 	f_hat_loc_UU(j) = UU(i);  
 	f_hat_loc_UL(j) = UL(i); 
 	f_hat_loc_LU(j) = LU(i); 
@@ -766,7 +758,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 
 	  UU(i)=UU(i)+0.5*(UU(i)-UL(i));
 	  for(UInt j=0; j < n_loc; ++j){
-	    if(Group_res(i,j) == 1){
+	    if(Group_res(sub_locations_index[i],j) == 1){
 	      f_hat_loc_UU(j) = UU(i);  
 	    }
 	  }
@@ -779,7 +771,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 	  if(local_p_values(1,i)<alpha){ // Upper-Lower bound excessively tight
 	    UL(i)=f_hat_loc(i)+0.5*(UL(i)-f_hat_loc(i));
 	    for(UInt j=0; j < n_loc; ++j){
-	      if(Group_res(i,j) == 1){
+	      if(Group_res(sub_locations_index[i],j) == 1){
 		f_hat_loc_UL(j) = UL(i);  
 	      }
 	    } 
@@ -800,7 +792,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
               VectorXr f_hat_loc_proposal = f_hat_loc; 
 
               for(UInt j=0; j < n_loc; ++j){
-        	if(Group_res(i,j) == 1){
+        	if(Group_res(sub_locations_index[i],j) == 1){
            	  f_hat_loc_proposal(j) = proposal;
        		}
 	      }
@@ -822,7 +814,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 
 	  LU(i)=f_hat_loc(i)-0.5*(f_hat_loc(i)-LU(i));
           for(UInt j=0; j < n_loc; ++j){
-	    if(Group_res(i,j) == 1){
+	    if(Group_res(sub_locations_index[i],j) == 1){
 	      f_hat_loc_LU(j) = LU(i);  
 	    }
 	  }
@@ -836,7 +828,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 	  if(local_p_values(3,i)>alpha){ // Lower-Lower bound excessively tight
 	    LL(i)=LL(i)-0.5*(LU(i)-LL(i));
             for(UInt j=0; j < n_loc; ++j){
-	      if(Group_res(i,j) == 1){
+	      if(Group_res(sub_locations_index[i],j) == 1){
 		f_hat_loc_LL(j) = LL(i);  
 	      }
 	    }
@@ -857,7 +849,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
               VectorXr f_hat_loc_proposal = f_hat_loc; 
 
               for(UInt j=0; j < n_loc; ++j){
-        	if(Group_res(i,j) == 1){
+        	if(Group_res(sub_locations_index[i],j) == 1){
            	  f_hat_loc_proposal(j) = proposal;
        		}
 	      }
