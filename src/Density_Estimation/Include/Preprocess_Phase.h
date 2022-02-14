@@ -8,10 +8,10 @@
 //! @brief An abtract base class to perform the preprocess phase.
 template<UInt ORDER, UInt mydim, UInt ndim>
 class Preprocess{
-  protected:
-    // A member to acess the data problem methods
+protected:
+    // A member to access the data problem methods
     const DataProblem<ORDER, mydim, ndim>& dataProblem_;
-    // A member to acess the functional methods
+    // A member to access the functional methods
     const FunctionalProblem<ORDER, mydim, ndim>& funcProblem_;
     // A member to do density initialization
     std::unique_ptr<DensityInitialization<ORDER, mydim, ndim>> densityInit_;
@@ -26,10 +26,9 @@ class Preprocess{
     //! A method to fill fInit_.
     void fillFInit();
 
-  public:
+public:
     //! A constructor.
-    Preprocess(const DataProblem<ORDER, mydim, ndim>& dp,
-      const FunctionalProblem<ORDER, mydim, ndim>& fp);
+    Preprocess(const DataProblem<ORDER, mydim, ndim>& dp, const FunctionalProblem<ORDER, mydim, ndim>& fp);
     //! A destructor.
     virtual ~Preprocess(){};
     //! A pure virtual method to perform the preprocess task.
@@ -44,13 +43,12 @@ class Preprocess{
 };
 
 
-//! @brief A class to handle the preprocess phase when there is only one smoothere parameter.
+//! @brief A class to handle the preprocess phase when there is only one smoother parameter.
 template<UInt ORDER, UInt mydim, UInt ndim>
 class NoCrossValidation : public Preprocess<ORDER, mydim, ndim>{
   public:
     //! A constructor
-    NoCrossValidation(const DataProblem<ORDER, mydim, ndim>& dp,
-      const FunctionalProblem<ORDER, mydim, ndim>& fp):
+    NoCrossValidation(const DataProblem<ORDER, mydim, ndim>& dp, const FunctionalProblem<ORDER, mydim, ndim>& fp):
       Preprocess<ORDER, mydim, ndim>(dp, fp){};
 
     //! Overridden method to perform the preprocess phase.
@@ -60,8 +58,8 @@ class NoCrossValidation : public Preprocess<ORDER, mydim, ndim>{
 };
 
 
-/*! @brief An abstract class to handle the preprocess phase when cross-validation needs to be performed to select one smoothing parameter.
-It contanis members useful to perfotm the cross-validation techinque.
+/*! @brief An abstract class to handle the preprocess phase when cross-validation needs to be performed to select one
+ * smoothing parameter. It contains members useful to perform the cross-validation technique.
 */
 template<UInt ORDER, UInt mydim, UInt ndim>
 class CrossValidation : public Preprocess<ORDER, mydim, ndim>{
