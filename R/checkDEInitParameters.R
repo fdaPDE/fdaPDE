@@ -1,6 +1,6 @@
 checkParametersDE_init <- function(data, FEMbasis, lambda, heatStep, heatIter, init, search) 
 {
-  #################### Parameter Check #########################
+  ################################################## Parameters Check ##################################################
   if (is.null(data)) 
     stop("'data' required;  is NULL.")
   else{
@@ -35,7 +35,7 @@ checkParametersDE_init <- function(data, FEMbasis, lambda, heatStep, heatIter, i
   }
   
   if(init=="CV" && length(lambda)>1)
-    stop("The initialization procedure via cross-validation is only for a given lamnda.")
+    stop("The initialization procedure via cross-validation is only for a given lambda.")
 }
 
 

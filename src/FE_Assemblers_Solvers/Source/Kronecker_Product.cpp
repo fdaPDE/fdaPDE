@@ -109,3 +109,21 @@ SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
 
 	return(AB);
 }
+
+MatrixXr kroneckerProduct_Matrix (const MatrixXr& A, const MatrixXr& B)
+{
+    MatrixXr C;
+    C.resize(A.rows()*B.rows(),A.cols()*B.cols());
+    UInt r = 0, c = 0;
+    for (UInt i = 0; i < A.rows(); i++) {
+        for (UInt k = 0; k < B.rows(); k++) {
+            for (UInt j = 0; j < A.cols(); j++) {
+                for (UInt l = 0; l < B.cols(); l++){
+                    C(r,c) = A(i,j) * B(k,l); c++;
+                }
+            }
+            c=0; r++;
+        }
+    }
+    return C;
+}

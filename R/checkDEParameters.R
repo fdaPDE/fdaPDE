@@ -1,6 +1,6 @@
-checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search) 
+checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
 {
-  #################### Parameter Check #########################
+  ################################################### Parameter Check ##################################################
   if (is.null(data)) 
     stop("'data' required;  is NULL.")
   else{
@@ -10,7 +10,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
   
   if (is.null(FEMbasis)) 
     stop("'FEMbasis' required;  is NULL.")
-  if(class(FEMbasis)!= "FEMbasis")
+  if(class(FEMbasis)!="FEMbasis")
     stop("'FEMbasis' is not class 'FEMbasis'.")
   
   if (is.null(lambda))  
@@ -52,7 +52,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
     stop("'nfolds' needs to be an integer greater or equal than two.")
 
   if(!is.numeric(nsimulations) || nsimulations<1)
-    stop("'nrealizations' needs to be a positive integer.")
+    stop("'nsimulations' needs to be a positive integer.")
   
   if(!is.numeric(heatStep) || heatStep<0 || heatStep>1)
     stop("'heatStep' needs to be a positive real number not greater than 1.")
@@ -67,7 +67,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
 }
 
 
-checkParametersSizeDE <- function(data, FEMbasis, ndim, fvec, preprocess_method, nfolds) 
+checkParametersSizeDE <- function(data, FEMbasis, ndim, fvec, preprocess_method, nfolds)
 {
   if(nrow(data) < 1)
     stop("'data' must contain at least one element.")
