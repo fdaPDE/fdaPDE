@@ -7,14 +7,32 @@
 template<UInt ORDER, UInt mydim, UInt ndim>
 class KfoldCV_L2_error{
   private:
-    // A member to acess  data problem methods
+    // A member to access  data problem methods
     const DataProblem<ORDER, mydim, ndim>& dataProblem_;
 
   public:
     //! A constructor.
     KfoldCV_L2_error(const DataProblem<ORDER, mydim, ndim>& dp): dataProblem_(dp) {};
+
     //! A call operator to compute the L2 error.
     Real operator()(const SpMat& Psi, const VectorXr& g);
+
+};
+
+
+//! @brief A class to compute the L2 error during cross-validation.
+template<UInt ORDER, UInt mydim, UInt ndim>
+class KfoldCV_L2_error_time{
+private:
+    // A member to access data problem methods
+    const DataProblem_time<ORDER, mydim, ndim>& dataProblem_;
+
+public:
+    //! A constructor.
+    KfoldCV_L2_error_time(const DataProblem_time<ORDER, mydim, ndim>& dp): dataProblem_(dp) {};
+
+    //! A call operator to compute the L2 error.
+    Real operator()(const SpMat& Upsilon, const VectorXr& g);
 
 };
 

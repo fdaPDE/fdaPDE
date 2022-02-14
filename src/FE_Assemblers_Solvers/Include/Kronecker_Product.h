@@ -5,4 +5,6 @@
 
 SpMat kroneckerProduct(const SpMat&, const SpMat&);
 
+MatrixXr kroneckerProduct_Matrix (const MatrixXr&, const MatrixXr&);
+
 #endif

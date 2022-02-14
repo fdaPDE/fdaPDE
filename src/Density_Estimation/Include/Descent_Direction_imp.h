@@ -1,27 +1,24 @@
 #ifndef __DESCENT_DIRECTION_IMP_H__
 #define __DESCENT_DIRECTION_IMP_H__
 
+template<UInt ORDER, UInt mydim, UInt ndim, typename T>
+std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>>
+DirectionGradient<ORDER, mydim, ndim, T>::clone() const {
 
-template<UInt ORDER, UInt mydim, UInt ndim>
-std::unique_ptr<DirectionBase<ORDER, mydim, ndim>>
-DirectionGradient<ORDER, mydim, ndim>::clone() const {
-
-  return make_unique<DirectionGradient<ORDER, mydim, ndim>>(*this);
+  return make_unique<DirectionGradient<ORDER, mydim, ndim, T>>(*this);
 
 }
 
-
-template<UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim, typename T>
 VectorXr
-DirectionGradient<ORDER, mydim, ndim>::computeDirection(const VectorXr& g, const VectorXr& grad){
+DirectionGradient<ORDER, mydim, ndim, T>::computeDirection(const VectorXr& g, const VectorXr& grad){
 
   return (- grad);
 }
 
-
-template<UInt ORDER, UInt mydim, UInt ndim>
-DirectionBFGS<ORDER, mydim, ndim>::DirectionBFGS(const DirectionBFGS<ORDER, mydim, ndim>& rhs):
-DirectionBase<ORDER, mydim, ndim>(rhs) {
+template<UInt ORDER, UInt mydim, UInt ndim, typename T>
+DirectionBFGS<ORDER, mydim, ndim, T>::DirectionBFGS(const DirectionBFGS<ORDER, mydim, ndim, T>& rhs):
+DirectionBase<ORDER, mydim, ndim, T>(rhs) {
 
   updateH_ = false;
   HInit_ = rhs.HInit_;
@@ -29,19 +26,17 @@ DirectionBase<ORDER, mydim, ndim>(rhs) {
 
 }
 
+template<UInt ORDER, UInt mydim, UInt ndim, typename T>
+std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>>
+DirectionBFGS<ORDER, mydim, ndim, T>::clone() const {
 
-template<UInt ORDER, UInt mydim, UInt ndim>
-std::unique_ptr<DirectionBase<ORDER, mydim, ndim>>
-DirectionBFGS<ORDER, mydim, ndim>::clone() const {
-
-  return make_unique<DirectionBFGS<ORDER, mydim, ndim>>(*this);
+  return make_unique<DirectionBFGS<ORDER, mydim, ndim, T>>(*this);
 
 }
 
-
-template<UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim, typename T>
 VectorXr
-DirectionBFGS<ORDER, mydim, ndim>::computeDirection(const VectorXr& g, const VectorXr& grad){
+DirectionBFGS<ORDER, mydim, ndim, T>::computeDirection(const VectorXr& g, const VectorXr& grad){
 
   if(updateH_){
     const VectorXr delta = g - gOld_;
@@ -62,10 +57,9 @@ DirectionBFGS<ORDER, mydim, ndim>::computeDirection(const VectorXr& g, const Vec
   return (-HOld_*grad);
 }
 
-
-template<UInt ORDER, UInt mydim, UInt ndim>
+template<UInt ORDER, UInt mydim, UInt ndim, typename T>
 void
-DirectionBFGS<ORDER, mydim, ndim>::resetParameters(){
+DirectionBFGS<ORDER, mydim, ndim, T>::resetParameters(){
   updateH_ = false;
   HOld_ = HInit_;
 }
