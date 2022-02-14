@@ -25,7 +25,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 HeatProcess<ORDER, mydim, ndim>::HeatProcess(const DataProblem<ORDER, mydim, ndim>& dp, const FunctionalProblem<ORDER, mydim, ndim>& fp):
   DensityInitialization<ORDER, mydim, ndim>(dp), funcProblem_(fp){
 
-    patch_areas_ = computePatchAreas(dp.getMesh());
+    patch_areas_= VectorXr::Zero(this->dataProblem_.getNumNodes());
     alpha_=dp.getHeatStep();
     niter_=dp.getHeatIter();
     init_proposals_.resize(niter_);
@@ -35,20 +35,22 @@ HeatProcess<ORDER, mydim, ndim>::HeatProcess(const DataProblem<ORDER, mydim, ndi
     data_index_.resize(this->dataProblem_.dataSize());
     std::iota(data_index_.begin(),data_index_.end(),0);
 
+    computePatchAreas();
     computeStartingDensities();
 
 }
 
 
 template<UInt ORDER, UInt mydim, UInt ndim>
-VectorXr HeatProcess<ORDER, mydim, ndim>::computePatchAreas(const MeshHandler<ORDER, mydim, ndim>& mesh){
-    VectorXr patch_areas = VectorXr::Zero(mesh.num_nodes());
-    for(UInt t=0; t<mesh.num_elements(); ++t){
-        Element<EL_NNODES, mydim, ndim> current_element = mesh.getElement(t);
+void HeatProcess<ORDER, mydim, ndim>::computePatchAreas()
+{
+
+    for(UInt t = 0; t < this->dataProblem_.getNumElements(); ++t){
+        Element<EL_NNODES, mydim, ndim> current_element = this->dataProblem_.getElement(t);
         for(const auto& node : current_element)
-            patch_areas[node.id()] += current_element.getMeasure();
+            patch_areas_[node.id()] += current_element.getMeasure();
     }
-    return patch_areas;
+
 }
 
 
@@ -230,7 +232,7 @@ HeatProcess_time<ORDER, mydim, ndim>::HeatProcess_time(const DataProblem_time<OR
                                                        const FunctionalProblem_time<ORDER, mydim, ndim>& fp):
   DensityInitialization_time<ORDER, mydim, ndim>(dp), funcProblem_(fp){
 
-    patch_areas_ = HeatProcess<ORDER,mydim,ndim>::computePatchAreas(dp.getMesh());
+    patch_areas_ = VectorXr::Zero(this->dataProblem_.getNumNodes());
     alpha_ = dp.getHeatStep();
     niter_ = dp.getHeatIter();
     init_proposals_.resize(niter_);
@@ -238,10 +240,24 @@ HeatProcess_time<ORDER, mydim, ndim>::HeatProcess_time(const DataProblem_time<OR
     penSterm_.resize(niter_);
     penTterm_.resize(niter_);
 
-    data_index_.resize(this->dataProblem_.dataSize());
-    std::iota(data_index_.begin(),data_index_.end(),0);
+    //data_index_.resize(this->dataProblem_.dataSize());
+    //std::iota(data_index_.begin(),data_index_.end(),0);
 
+    computePatchAreas();
     computeStartingDensities();
+
+}
+
+
+template<UInt ORDER, UInt mydim, UInt ndim>
+void HeatProcess_time<ORDER, mydim, ndim>::computePatchAreas()
+{
+
+    for(UInt t = 0; t < this->dataProblem_.getNumElements(); ++t) {
+        Element<EL_NNODES, mydim, ndim> current_element = this->dataProblem_.getElement(t);
+        for(const auto& node : current_element)
+            patch_areas_[node.id()] += current_element.getMeasure();
+    }
 
 }
 
@@ -262,6 +278,7 @@ VectorXr HeatProcess_time<ORDER, mydim, ndim>::computeDensityOnlyData(UInt num_b
                 x[node.id()] += 1;
         }
     }
+    else std::cout << "Null size" << std::endl;
 
     x.array() /= patch_areas_.array();
 
@@ -331,7 +348,7 @@ const VectorXr* HeatProcess_time<ORDER, mydim, ndim>::chooseInitialization(Real 
     UInt index_min;
     sum.minCoeff(&index_min);
 
-    //Rprintf("The initialization selected for lambda_S %f and lambda_T %f is the number %d\n", lambda_S, lambda_T, index_min);
+    Rprintf("The initialization selected for lambda_S %f and lambda_T %f is the number %d\n", lambda_S, lambda_T, index_min);
 
     VectorXr g_heat = init_proposals_[index_min].array().log();
 
@@ -395,7 +412,7 @@ void Heat_CV_time<ORDER, mydim, ndim>::perform_init_cv()
 
     init_best_ = std::distance(cv_errors_.cbegin(), std::min_element(cv_errors_.cbegin(), cv_errors_.cend()));
 
-    //Rprintf("The initialization selected is the number %d\n", init_best_);
+    Rprintf("The initialization selected is the number %d\n", init_best_);
 
     // Total
     this->data_index_.resize(this->dataProblem_.dataSize());

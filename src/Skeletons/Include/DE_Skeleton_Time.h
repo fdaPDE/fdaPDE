@@ -24,7 +24,7 @@ SEXP DE_skeleton_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec, SEXP
 
     // Convert Rmesh_time into a vector
     UInt diml = Rf_length(Rmesh_time);
-    std::vector<Real> mesh_time;
+    const std::vector<Real> mesh_time;
     mesh_time.reserve(diml);
     for(UInt i = 0; i < diml; ++i)
     {

@@ -4,7 +4,7 @@
 #include <memory>
 #include "../../Global_Utilities/Include/Make_Unique.h"
 
-//! @brief A Factory class: a class for the choice of the density initialization.
+//! brief@ A Factory class: a class for the choice of the density initialization.
 template<UInt ORDER, UInt mydim, UInt ndim>
 class DensityInitialization_factory{
 public:
@@ -23,7 +23,6 @@ public:
 };
 
 
-//! @brief A Factory class: a class for the choice of the density initialization (spatio-temporal setting).
 template<UInt ORDER, UInt mydim, UInt ndim>
 class DensityInitialization_factory_time{
 public:

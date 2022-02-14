@@ -1,6 +1,6 @@
 checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
 {
-  #################### Parameter Check #########################
+  ################################################### Parameter Check ##################################################
   if (is.null(data)) 
     stop("'data' required;  is NULL.")
   else{
@@ -10,7 +10,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
   
   if (is.null(FEMbasis)) 
     stop("'FEMbasis' required;  is NULL.")
-  if(!is(FEMbasis, "FEMbasis"))
+  if(class(FEMbasis)!="FEMbasis")
     stop("'FEMbasis' is not class 'FEMbasis'.")
   
   if (is.null(lambda))  
@@ -32,8 +32,8 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
   if (is.null(direction_method)) 
     stop("'direction_method' is required;  is NULL.")
   else{
-    if(direction_method!="Gradient" && direction_method!="ConjugateGradientFR" && direction_method!="ConjugateGradientPRP" && direction_method!="ConjugateGradientHS" && direction_method!="ConjugateGradientDY" && direction_method!="ConjugateGradientCD" && direction_method!="ConjugateGradientLS" && direction_method!="BFGS" && direction_method!="L-BFGS5" && direction_method!="L-BFGS10")
-      stop("'direction_method' needs to be 'Gradient', 'ConjugateGradientFR', 'ConjugateGradientPRP', 'ConjugateGradientHS', 'ConjugateGradientDY', 'ConjugateGradientCD', 'ConjugateGradientLS', 'BFGS', 'L-BFGS5' or 'L-BFGS10'.")
+    if(direction_method!="Gradient" && direction_method!="BFGS")
+      stop("'direction_method' needs to be either 'Gradient' or 'BFGS'.")
   }
 
   if(length(lambda)>1 && preprocess_method!="RightCV" && preprocess_method!="SimplifiedCV")

@@ -95,6 +95,7 @@ FunctionalProblem_time<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) 
     Real int1 = 0.;
     VectorXr int2 = VectorXr::Zero(dataProblem_time_.getNumNodes()*dataProblem_time_.getSplineNumber());
     const MatrixXr& PsiQuad = dataProblem_time_.getPsiQuad(); // PsiQuad is the same matrix at any time interval
+    UInt global_idx = 0; // Index that keeps track of the first B-spline basis function that is active in the current time-interval
     for (int time_step = 0; time_step < dataProblem_time_.getNumNodes_time()-1;  ++time_step) {
         MatrixXr PhiQuad = dataProblem_time_.fillPhiQuad(time_step); //PhiQuad changes at each time interval
         MatrixXr Phi_kronecker_Psi = kroneckerProduct_Matrix(PhiQuad, PsiQuad);
@@ -104,7 +105,7 @@ FunctionalProblem_time<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) 
             VectorXr sub_g;
             sub_g.resize(Phi_kronecker_Psi.cols());
             UInt k=0; // Index for sub_g
-            for (int j = time_step; j < time_step+PhiQuad.cols(); ++j) {
+            for (int j = global_idx; j < global_idx+PhiQuad.cols(); ++j) {
                 for (UInt i = 0; i < PsiQuad.cols(); ++i){
                     sub_g[k++] = g[tri_activated[i].getId() + dataProblem_time_.getNumNodes()*j];
                 }
@@ -117,12 +118,13 @@ FunctionalProblem_time<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) 
             sub_int2 = Phi_kronecker_Psi.transpose() *
                        expg.cwiseProduct(weights_kronecker) * tri_activated.getMeasure() * (dataProblem_time_.getMesh_time()[time_step+1]-dataProblem_time_.getMesh_time()[time_step])/2;
             k=0;
-            for (int j = time_step; j < time_step+PhiQuad.cols(); ++j) {
+            for (int j = global_idx; j < global_idx+PhiQuad.cols(); ++j) {
                 for (UInt i = 0; i < PsiQuad.cols(); ++i){
                     int2[tri_activated[i].getId()+dataProblem_time_.getNumNodes()*j] += sub_int2[k++];
                 }
             }
         }
+        ++global_idx;
     }
     return std::pair<Real, VectorXr> (int1, int2);
 }

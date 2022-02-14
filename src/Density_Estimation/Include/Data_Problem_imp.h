@@ -11,7 +11,7 @@ DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec
     std::vector<Point<ndim>>& data = deData_.data();
 
     // PROJECTION
-    if((mydim == 2 && ndim == 3) || (mydim == 1 && ndim == 2)){
+    if(mydim == 2 && ndim == 3){
       Rprintf("##### DATA PROJECTION #####\n");
       projection<ORDER, mydim, ndim> projection(mesh_, data);
       data = projection.computeProjection();
@@ -145,8 +145,8 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec, SEXP RheatStep,
                                                        SEXP RheatIter, SEXP Rlambda, SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim,
                                                        SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch,
-                                                       SEXP Rmesh, const std::vector<Real>& mesh_time, SEXP RisTimeDiscrete,
-                                                       SEXP RflagMass, SEXP RflagLumped, bool isTime):
+                                                       SEXP Rmesh, const std::vector<Real>& mesh_time, bool isTime, SEXP RisTimeDiscrete,
+                                                       SEXP RflagMass, SEXP RflagLumped):
   DataProblem<ORDER, mydim, ndim>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals,
                                     Rtol1, Rtol2, Rprint, Rsearch, Rmesh, isTime),
   deData_time_(Rdata_time, Rlambda_time), mesh_time_(mesh_time), spline_(mesh_time) {
@@ -171,7 +171,8 @@ DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_ti
         }
     }
 
-    Rprintf("WARNING: %d observations used in the algorithm.\n", data_.size());
+    Rprintf("WARNING: %d observations removed.\n", data.size() - data_.size());
+    //Rprintf("WARNING: %d observations used in the algorithm.\n", data_.size());
 
     // FILL SPACE MATRIX
     std::vector <UInt> v(this->deData_.dataSize());
@@ -182,6 +183,9 @@ DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_ti
     if(static_cast<bool> (INTEGER(RisTimeDiscrete)[0])) {
         deData_time_.setTimes2Locations();
         //deData_time_.printTimes2Locations(std::cout);
+
+        // DATA STRUCTURE FOR EFFICIENT UPSILON COMPUTATION (USEFUL DURING CV PREPROCESSING)
+        Upsilon_indices_.resize(deData_time_.getNTimes());
     }
 
     // DATA STRUCTURE FOR HEAT INITIALIZATION
@@ -228,7 +232,6 @@ void DataProblem_time<ORDER, mydim, ndim>::fillGlobalPhi()
 template<UInt ORDER, UInt mydim, UInt ndim>
 void DataProblem_time<ORDER, mydim, ndim>::fillTimeMass(void)
 {
-    Spline<SPLINE_DEGREE, 0> spline_0(mesh_time_);
     Assembler::operKernel(spline_, K0_);
 }
 
@@ -337,13 +340,16 @@ SpMat DataProblem_time<ORDER, mydim, ndim>::computeUpsilon(const SpMat& phi, con
 
     if(deData_time_.getNTimes() != deData_time_.dataSize()) // time duplicates: phi_r < psi_r
     {
+        UInt global_row_counter = 0;
         for(UInt i = 0; i < phi_r; ++i) {
             const std::vector<UInt>& v = deData_time_.getTimes2Locations(i);
             for(UInt j : v) {
+                Upsilon_indices_[j] = global_row_counter;
                 SpMat localKProd_(1, phi_c * psi_c);
                 localKProd_ = kroneckerProduct(phi.row(i), psi.row(j));
                 for (UInt idx = 0; idx < localKProd_.outerSize(); ++idx)
-                    Upsilon_tripletList.emplace_back(j,idx,localKProd_.coeff(0, idx));
+                    Upsilon_tripletList.emplace_back(global_row_counter,idx,localKProd_.coeff(0, idx));
+                ++global_row_counter;
             }
         }
     }
@@ -373,8 +379,17 @@ SpMat DataProblem_time<ORDER, mydim, ndim>::computeUpsilon(const std::vector<UIn
 
     Eigen::SparseMatrix<Real, Eigen::RowMajor> upsilon(indices.size(), Upsilon_.cols());
 
-    for(UInt i = 0; i < indices.size(); ++i) {
-        upsilon.row(i) = Upsilon_.row(indices[i]);
+    if(deData_time_.getNTimes() != deData_time_.dataSize()) // time duplicates
+    {
+        for(UInt i = 0; i < indices.size(); ++i) {
+            upsilon.row(i) = Upsilon_.row(Upsilon_indices_[indices[i]]);
+        }
+    }
+    else // NO time duplicates
+    {
+        for(UInt i = 0; i < indices.size(); ++i) {
+            upsilon.row(i) = Upsilon_.row(indices[i]);
+        }
     }
 
     upsilon.prune(tolerance);

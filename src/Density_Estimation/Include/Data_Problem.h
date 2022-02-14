@@ -22,7 +22,7 @@
 //! @brief A class to store common (spatial) data for the problem.
 template<UInt ORDER, UInt mydim, UInt ndim>
 class DataProblem{
-protected:
+private:
     using Integrator = typename DensityIntegratorHelper::Integrator<mydim>;
     static constexpr UInt EL_NNODES = how_many_nodes(ORDER,mydim);
     DEData<ndim> deData_;
@@ -144,6 +144,10 @@ private:
     std::vector<std::vector<UInt>> data_Heat_;
     // Flags related to penalty matrices.
     bool flagMass_, flagLumped_;
+    // Indices to keep track of how Upsilon_ is filled with respect to the order in which data appear in the dataset.
+    // This data structure is useful in discrete time settings only, in order to efficiently compute Upsilon_ during the
+    // CV preprocessing stage.
+    std::vector<UInt> Upsilon_indices_;
 
     //! A method to compute the matrix which evaluates the temporal basis functions at the time instants.
     void fillGlobalPhi();
@@ -164,8 +168,8 @@ public:
     //! A constructor: it delegates DataProblem, DEData_time and Spline constructors.
     DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
                      SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
-                     SEXP Rsearch, SEXP Rmesh, const std::vector<Real>& mesh_time, SEXP RisTimeDiscrete,
-                     SEXP RflagMass, SEXP RflagLumped, bool isTime = 1);
+                     SEXP Rsearch, SEXP Rmesh, const std::vector<Real>& mesh_time, bool isTime = 1, SEXP RisTimeDiscrete,
+                     SEXP RflagMass, SEXP RflagLumped);
 
     //! A method to compute the integral of a function (over the temporal domain).
     Real FEintegrate_time(const VectorXr& f) const {return (kroneckerProduct(getTimeMass(), this->getMass())*f).sum();}
@@ -177,7 +181,7 @@ public:
     //! A method to compute the Upsilon_ matrix as the Kronecker product between GlobalPhi_ and GlobalPsi_.
     //! In discrete time settings, this method builds Upsilon_indices_ for the efficient extraction of Upsilon_ rows
     //! (for CV preprocessing).
-    SpMat computeUpsilon(const SpMat& phi, const SpMat& psi) const;
+    SpMat computeUpsilon(const SpMat& phi, const SpMat& psi);
     //! A method to compute the Upsilon_ matrix by considering only locations and times in the positions stored in
     //! indices. This method is needed for CV preprocessing (only points that are in the considered fold are used).
     SpMat computeUpsilon(const std::vector<UInt>& indices) const;
@@ -185,7 +189,7 @@ public:
     //! A method returning the matrix needed for the penalizing term in space.
     const SpMat computePen_s() const {return Ps_;}
     //! A method returning the matrix needed for the penalizing term in time.
-    const SpMat computePen_t() const {return Pt_;}
+    const SpMat computePen_t() const {return Pt_};
 
     // Getters
     //! A method to access the data. It calls the same method of DEData_time class.
