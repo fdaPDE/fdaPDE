@@ -240,8 +240,8 @@ HeatProcess_time<ORDER, mydim, ndim>::HeatProcess_time(const DataProblem_time<OR
     penSterm_.resize(niter_);
     penTterm_.resize(niter_);
 
-    //data_index_.resize(this->dataProblem_.dataSize());
-    //std::iota(data_index_.begin(),data_index_.end(),0);
+    data_index_.resize(this->dataProblem_.dataSize());
+    std::iota(data_index_.begin(),data_index_.end(),0);
 
     computePatchAreas();
     computeStartingDensities();

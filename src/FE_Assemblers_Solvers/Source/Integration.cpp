@@ -28,6 +28,8 @@ constexpr std::array<Real,IntegratorGaussP3::NNODES> IntegratorGaussP3::NODES;
 
 constexpr std::array<Real,IntegratorGaussP5::NNODES> IntegratorGaussP5::NODES;
 
+constexpr std::array<Real,IntegratorGaussP9::NNODES> IntegratorGaussP9::NODES;
+
 
 constexpr std::array<Real, IntegratorEdgeP1::NNODES> IntegratorEdgeP1::WEIGHTS;
 
@@ -53,4 +55,4 @@ constexpr std::array<Real,IntegratorGaussP3::NNODES> IntegratorGaussP3::WEIGHTS;
 
 constexpr std::array<Real,IntegratorGaussP5::NNODES> IntegratorGaussP5::WEIGHTS;
 
-
+constexpr std::array<Real,IntegratorGaussP9::NNODES> IntegratorGaussP9::WEIGHTS;

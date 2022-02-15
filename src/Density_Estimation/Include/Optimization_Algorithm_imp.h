@@ -11,7 +11,7 @@ MinimizationAlgorithm<ORDER, mydim, ndim>::MinimizationAlgorithm(const DataProbl
 
     direction_ = DescentDirection_factory<ORDER,  mydim,  ndim>::createDirectionSolver(dp, fp, d);
 
-};
+}
 
 
 template<UInt ORDER, UInt mydim, UInt ndim>
@@ -315,7 +315,7 @@ MinimizationAlgorithm_time<ORDER, mydim, ndim>::MinimizationAlgorithm_time(const
 
     direction_ = DescentDirection_factory_time<ORDER,  mydim,  ndim>::createDirectionSolver(dp, fp, d);
 
-};
+}
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 MinimizationAlgorithm_time<ORDER, mydim, ndim>::MinimizationAlgorithm_time(const MinimizationAlgorithm_time<ORDER, mydim, ndim>& rhs):
