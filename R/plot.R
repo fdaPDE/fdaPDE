@@ -35,7 +35,11 @@
 #' ## Plot the FEM function
 #' plot(FEMfunction)
 
+<<<<<<< HEAD
 plot.FEM = function(x, colormap, num_refinements = NULL, ...)
+=======
+plot.FEM = function(x, colormap = "heat.colors", num_refinements = NULL, ...)
+>>>>>>> acc05d0b9610550ca23058113783924250f5bdce
 {
 if(class(x$FEMbasis$mesh)=="mesh.2D"){
   if(x$FEMbasis$order == 1)
@@ -311,14 +315,10 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
 #'
 #' ## Plot the mesh
 #' plot(mesh)
-plot.mesh.2D<-function(x,show.nodes=FALSE, ...)
+plot.mesh.2D<-function(x, ...)
 {
-  if(show.nodes)
-     type="p"
-  else
-     type="n"
   
-  plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n",type=type, ...)
+  plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", ...)
   segments(x$nodes[x$edges[,1],1], x$nodes[x$edges[,1],2],
            x$nodes[x$edges[,2],1], x$nodes[x$edges[,2],2], ...)
   segments(x$nodes[x$segments[,1],1], x$nodes[x$segments[,1],2],
@@ -347,13 +347,8 @@ plot.mesh.2D<-function(x,show.nodes=FALSE, ...)
 #' plot(mesh)
 
 
-plot.mesh.2.5D<-function(x,show.nodes=FALSE,...){
+plot.mesh.2.5D<-function(x, ...){
 
-  if(show.nodes)
-     alpha=1.
-  else 
-     alpha=0.
-  
   nodes <- x$nodes
   edges <- as.vector(t(x$edges))
 
@@ -362,7 +357,7 @@ plot.mesh.2.5D<-function(x,show.nodes=FALSE,...){
   rgl.pop("lights")
   light3d(specular="black")
 
-  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black",alpha=alpha, ...)
+  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black", ...)
   rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
 
   aspect3d("iso")
@@ -394,12 +389,7 @@ plot.mesh.2.5D<-function(x,show.nodes=FALSE,...){
 #'
 #' ##Plot the triangulation of the object
 #' plot(mesh)
-plot.mesh.3D<-function(x, show.nodes=FALSE,...){
-   
-   if(show.nodes)
-      alpha=1.
-   else
-      alpha=0.
+plot.mesh.3D<-function(x, ...){
    
   nodes <- x$nodes
   faces <- as.vector(t(x$faces[x$facesmarkers,]))
@@ -413,7 +403,7 @@ plot.mesh.3D<-function(x, show.nodes=FALSE,...){
   light3d(specular="black")
 
   rgl.triangles(nodes[faces,1],nodes[faces,2],nodes[faces,3],col="white",...)
-  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black",alpha=alpha, ...)
+  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black", ...)
   rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
 
   aspect3d("iso")
@@ -431,25 +421,21 @@ plot.mesh.3D<-function(x, show.nodes=FALSE,...){
 
 #' @usage \method{plot}{mesh.1.5D}(x, ...)
 #' @export
-plot.mesh.1.5D<-function(x, show.nodes=FALSE, ...)
+plot.mesh.1.5D<-function(x, ...)
 {
-   if(show.nodes)
-      type="p"
-   else
-      type="n"
    
    if( x$order == 1 ){
       
-      plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", type=type, ...)
+      plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", ...)
       segments(x$nodes[x$edges[,1],1], x$nodes[x$edges[,1],2],
                x$nodes[x$edges[,2],1], x$nodes[x$edges[,2],2], ...)
    }
    else{
       
-      plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", type=type, ...)
+      plot(x$nodes, xlab="", ylab="", xaxt="n", yaxt="n", bty="n", ...)
       segments(x$nodes[x$edges[,1],1], x$nodes[x$edges[,1],2],
                x$nodes[x$edges[,2],1], x$nodes[x$edges[,2],2], ...)
-      points(x$nodes[x$edges[,3],1], x$nodes[x$edges[,3],2],col="red", type=type, ...)
+      points(x$nodes[x$edges[,3],1], x$nodes[x$edges[,3],2],col="red", ...)
    }
 }
 
@@ -461,7 +447,11 @@ plot.mesh.1.5D<-function(x, show.nodes=FALSE, ...)
 
    nodes <- FEM$FEMbasis$mesh$nodes
    triangles <- as.vector(t(FEM$FEMbasis$mesh$triangles))
+<<<<<<< HEAD
 
+=======
+   
+>>>>>>> acc05d0b9610550ca23058113783924250f5bdce
    colormap <- match.fun(colormap)
    heat <- colormap(100)
    # How many plots are needed?
@@ -492,7 +482,11 @@ plot.mesh.1.5D<-function(x, show.nodes=FALSE, ...)
    FEMbasis = FEM$FEMbasis
 
    mesh = FEMbasis$mesh
+<<<<<<< HEAD
 
+=======
+   
+>>>>>>> acc05d0b9610550ca23058113783924250f5bdce
    colormap <- match.fun(colormap)
    heat <- colormap(100)
 
