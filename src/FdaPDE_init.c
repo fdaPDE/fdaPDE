@@ -36,20 +36,10 @@ extern SEXP CPP_TriangleMeshSplit(SEXP, SEXP);
 extern SEXP CPP_TriangleMeshSplitOrder2(SEXP, SEXP);
 extern SEXP CPP_TetraMeshSplit(SEXP, SEXP);
 extern SEXP CPP_TetraMeshSplitOrder2(SEXP, SEXP);
-
-extern SEXP reading_RObject(SEXP,SEXP);
-extern SEXP reading_RIntMatrixMatrix(SEXP);
-extern SEXP eval_FEM_fd_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP eval_FEM_time_Auxiliary_new(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP ,SEXP);
-extern SEXP refine1D(SEXP, SEXP,SEXP);
-extern SEXP TimingSearch(SEXP,SEXP,SEXP,SEXP,SEXP);
-extern SEXP isInside(SEXP,SEXP,SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP CPP_integrate_f(SEXP,SEXP,SEXP);
+extern SEXP refine1D(SEXP, SEXP, SEXP);
 extern SEXP CPP_EdgeMeshHelper(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshOrder2(SEXP, SEXP);
 extern SEXP CPP_EdgeMeshSplit(SEXP, SEXP);
-
-
 extern SEXP gam_Laplace(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP gam_PDE(SEXP, SEXP, SEXP, SEXP, SEXP,SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP gam_PDE_space_varying( SEXP, SEXP, SEXP, SEXP, SEXP,SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -90,14 +80,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"gam_Laplace",                       (DL_FUNC) &gam_Laplace,                       25},
     {"gam_PDE",                           (DL_FUNC) &gam_PDE,                           28},
     {"gam_PDE_space_varying",             (DL_FUNC) &gam_PDE_space_varying,             29},
-    {"reading_RObject",                   (DL_FUNC) &reading_RObject,                    2},
-    {"eval_FEM_fd_Auxiliary_new",         (DL_FUNC) &eval_FEM_fd_Auxiliary_new,         10},
-    {"reading_RIntMatrixMatrix",          (DL_FUNC) &reading_RIntMatrixMatrix,          1},
-    {"TimingSearch",                      (DL_FUNC) &TimingSearch,                      5},
-    {"eval_FEM_time_Auxiliary_new",       (DL_FUNC) &eval_FEM_time_Auxiliary_new,      13},
     {"refine1D",                          (DL_FUNC) &refine1D,                          3},
-    {"isInside",                          (DL_FUNC) &isInside,                          7},
-    {"CPP_integrate_f",                  (DL_FUNC) & CPP_integrate_f,                  3},
     {NULL, NULL, 0}
 };
 
