@@ -67,8 +67,9 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   }
   
   # Create a null inference object for preliminary computations 
-  R_Inference_Data_Object_Null=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), 
-                                   coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+  R_Inference_Data_Object_Null=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
+                                   locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
+                                   f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   
   ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reading
   test_Type<-as.vector(R_Inference_Data_Object@test)
@@ -89,10 +90,15 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   test_Type_Null<-as.vector(R_Inference_Data_Object_Null@test)
   interval_Type_Null<-as.vector(R_Inference_Data_Object_Null@interval)
   implementation_Type_Null<-as.vector(R_Inference_Data_Object_Null@type)
+  component_Type_Null<-as.vector(R_Inference_Data_Object_Null@component)
   exact_Inference_Null<-R_Inference_Data_Object_Null@exact
   enhanced_Inference_Null<-R_Inference_Data_Object_Null@enhanced
+  locs_Inference_Null<-as.matrix(R_Inference_Data_Object_Null@locations)
+  locs_index_Inference_Null<-as.vector(R_Inference_Data_Object_Null@locations_indices - 1) #converting the indices from R to c++ ones 
+  locs_are_nodes_Inference_Null<-R_Inference_Data_Object_Null@locations_are_nodes
   coeff_Inference_Null=as.matrix(R_Inference_Data_Object_Null@coeff)
   beta_0_Null=as.vector(R_Inference_Data_Object_Null@beta0)
+  f_0_eval_Null<-as.vector(R_Inference_Data_Object_Null@f0_eval)
   f_var_Inference_Null<-R_Inference_Data_Object_Null@f_var
   inference_Quantile_Null=as.vector(R_Inference_Data_Object_Null@quantile)
   inference_Alpha_Null=R_Inference_Data_Object_Null@alpha
@@ -161,10 +167,15 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   storage.mode(test_Type_Null) <- "integer"
   storage.mode(interval_Type_Null) <- "integer"
   storage.mode(implementation_Type_Null) <- "integer"
+  storage.mode(component_Type_Null) <- "integer"
   storage.mode(exact_Inference_Null) <- "integer"
   storage.mode(enhanced_Inference_Null) <- "integer"
+  storage.mode(locs_Inference_Null) <- "double"
+  storage.mode(locs_index_Inference_Null) <- "integer"
+  storage.mode(locs_are_nodes_Inference_Null) <- "integer"
   storage.mode(coeff_Inference_Null) <- "double"
   storage.mode(beta_0_Null) <- "double"
+  storage.mode(f_0_eval_Null) <- "double"
   storage.mode(f_var_Inference_Null) <- "integer"
   storage.mode(inference_Quantile_Null) <- "double"
   storage.mode(inference_Alpha_Null) <- "double"
@@ -198,7 +209,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
      FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
      BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
      search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-     test_Type_Null,interval_Type_Null,implementation_Type_Null,exact_Inference_Null,enhanced_Inference_Null,coeff_Inference_Null,beta_0_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null,inference_Tol_Fspai_Null,inference_Defined_Null,
+     test_Type_Null,interval_Type_Null,implementation_Type_Null,component_Type_Null,exact_Inference_Null,enhanced_Inference_Null,locs_Inference_Null,locs_index_Inference_Null,locs_are_nodes_Inference_Null,coeff_Inference_Null,
+     beta_0_Null,f_0_eval_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Defined_Null,
      PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
@@ -211,7 +223,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
        search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-       test_Type_Null,interval_Type_Null,implementation_Type_Null,exact_Inference_Null,enhanced_Inference_Null,coeff_Inference_Null,beta_0_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null,inference_Tol_Fspai_Null,inference_Defined_Null,
+       test_Type_Null,interval_Type_Null,implementation_Type_Null,component_Type_Null,exact_Inference_Null,enhanced_Inference_Null,locs_Inference_Null,locs_index_Inference_Null,locs_are_nodes_Inference_Null,coeff_Inference_Null,
+       beta_0_Null,f_0_eval_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Defined_Null,
        PACKAGE = "fdaPDE")
     }
     else
@@ -226,7 +239,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
          search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
-         test_Type_Null,interval_Type_Null,implementation_Type_Null,exact_Inference_Null,enhanced_Inference_Null,coeff_Inference_Null,beta_0_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null,inference_Tol_Fspai_Null,inference_Defined_Null,
+         test_Type_Null,interval_Type_Null,implementation_Type_Null,component_Type_Null,exact_Inference_Null,enhanced_Inference_Null,locs_Inference_Null,locs_index_Inference_Null,locs_are_nodes_Inference_Null,coeff_Inference_Null,
+         beta_0_Null,f_0_eval_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Defined_Null,
          PACKAGE = "fdaPDE")
       }
     }
