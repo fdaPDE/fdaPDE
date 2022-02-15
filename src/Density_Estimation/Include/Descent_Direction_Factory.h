@@ -4,14 +4,14 @@
 #include <memory>
 #include "../../Global_Utilities/Include/Make_Unique.h"
 
-//! brief@ A Factory class: a class for the choice of the step method for the optimization algorithm.
+//! @brief A Factory class: a class for the choice of the step method for the optimization algorithm.
 template<UInt ORDER, UInt mydim, UInt ndim>
 class DescentDirection_factory
 {
 	public:
 	//! A method that builds a pointer to the right object for the direction choice, taking as parameters a string and others objects needed for constructor.
 	static std::unique_ptr<DirectionBase<ORDER,  mydim,  ndim>>
-  createDirectionSolver(const DataProblem<ORDER, mydim, ndim>& dp,
+    createDirectionSolver(const DataProblem<ORDER, mydim, ndim>& dp,
     const FunctionalProblem<ORDER, mydim, ndim>& fp, const std::string& d)
 	{
 		if (d=="Gradient")
@@ -28,7 +28,7 @@ class DescentDirection_factory
 
 };
 
-//! brief@ A Factory class: a class for the choice of the step method for the optimization algorithm.
+//! @brief A Factory class: a class for the choice of the step method for the optimization algorithm (spatio-temporal setting).
 template<UInt ORDER, UInt mydim, UInt ndim>
 class DescentDirection_factory_time{
 public:
