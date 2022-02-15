@@ -21,15 +21,16 @@ extern "C" {
 	This function is then called from R code.
 	Calls the walking algoritm for efficient point location inside the mesh in 2D.
 
-	\param Rmesh an R-object containg the output mesh from Trilibrary
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
 	\param Rlocations an R-matrix (seen as an array) containing the xyz coordinates of the points where the solution has to be evaluated
 	\param RincidenceMatrix an R-matrix for the incidence matrix defining the regions in the case of areal data
 	\param Rcoef an R-vector the coefficients of the solution
 	\param Rorder an R integer containg the order of the solution
-	\param Rfast an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes)
+	\param Rfast an R integer to enforce verbose search for Walking Algorithm (can miss location for non convex meshes)
     \param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
-    \param Rmydim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
-*/
+    \param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
+    \param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
+ */
 SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
 
     UInt order = INTEGER(Rorder)[0];
@@ -59,19 +60,19 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
 //! This function evaluates the solution on a set of given points by evaluating the tensorial basis expansion.
 /*!
 	This function is then called from R code.
-	Calls the walking algoritm for efficient point location inside the mesh in 2D.
 
-	\param Rmesh an R-object containg the output mesh from Trilibrary
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
   \param Rmesh_time an R-vector containg the time mesh
-  \param Rlocations an R-matrix (seen as an array) containing the xyz coordinates of the points where the solution has to be evaluated
-  \param Rtime_locations an R-vector (seen as an array) containing the xyz coordinates of the points where the solution has to be evaluated
+  \param Rlocations an R-matrix containing the xyz coordinates of the points where the solution has to be evaluated
+  \param Rtime_locations an R-vector containing the coordinates of the points where the solution has to be evaluated
 	\param RincidenceMatrix an R-matrix for the incidence matrix defining the regions in the case of areal data
 	\param Rcoef an R-vector the coefficients of the solution
 	\param Rorder an R integer containg the order of the solution
-	\param Rfast an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes)
+	\param Rfast an R integer to enforce verbose search for Walking Algorithm (can miss location for non convex meshes)
+	\param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
   \param Rflag_parabolic an R logical (seen as an integer) 1 if parabolic smoothing, 0 otherwise
-  \param Rmydim an R integer containing the mesh space size, 2 for 2D and 2.5D, 3 for 3D
-  \param Rmydim an R integer containing the space size, 2 for 2D , 3 for 2.5D and 3D
+  \param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
+  \param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
 */
  SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rflag_parabolic, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations)
     {
@@ -192,6 +193,15 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
   	return(result);
   }
 
+//! This function build the binary-tree object in the tree search algorithm.
+/*!
+	This function is then called from R code.
+
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
+	\param Rorder an R integer representing the order of the element of the mesh
+  	\param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
+    \param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
+*/
 SEXP tree_mesh_construction(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim) {
 	UInt ORDER=INTEGER(Rorder)[0];
 	UInt mydim=INTEGER(Rmydim)[0];
@@ -217,19 +227,28 @@ SEXP tree_mesh_construction(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim) {
 	return(NILSXP);
 }
 
+//! This function projects the points on the given mesh.
+/*!
+	This function is then called from R code.
+
+  \param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
+  \param Rlocation an R matrix containing the coordinates of the points where the solution has to be evaluated
+  \param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
+  \param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
+*/
 SEXP points_projection(SEXP Rmesh, SEXP Rlocations,SEXP Rmydim, SEXP Rndim){
     UInt order = INTEGER(VECTOR_ELT(Rmesh,10))[0];
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];
 
     if(order==1 && mydim==1 && ndim==2)
-        return point_projection_skeleton<1,1,2>(Rmesh,Rlocations);
+        return points_projection_skeleton<1,1,2>(Rmesh,Rlocations);
     else if(order==2 && mydim==1 && ndim==2)
-        return point_projection_skeleton<2,1,2>(Rmesh,Rlocations);
+        return points_projection_skeleton<2,1,2>(Rmesh,Rlocations);
     else if(order==1 && mydim==2 && ndim==3)
-        return point_projection_skeleton<1,2,3>(Rmesh,Rlocations);
+        return points_projection_skeleton<1,2,3>(Rmesh,Rlocations);
     else if(order==2 && mydim==2 && ndim==3)
-        return point_projection_skeleton<2,2,3>(Rmesh,Rlocations);
+        return points_projection_skeleton<2,2,3>(Rmesh,Rlocations);
 
     return(NILSXP);
 }

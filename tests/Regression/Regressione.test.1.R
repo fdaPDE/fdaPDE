@@ -162,7 +162,7 @@ for( i in 1:N){
 }
 
 today_ = Sys.Date()
-ntest_ = "-test-1" # "-test.1.3" 
+ntest_ = "-test-1-WITH-COV" # "-test.1.3" 
 #today_ = "2021-11-15"
 file.name = paste("Regression-",today_,ntest_,sep="")
 save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/Regression/",file.name,".RData",sep="")
@@ -366,13 +366,12 @@ dev.off()
 ############### NO COVARIATES ############################################
 ##########################################################################
 
-source("~/Scrivania/fdaPDE/tests/Regressione/Regressione_Mattina.R")
-
-source("~/Scrivania/fdaPDE/tests/integrate_f.R")
-source("~/Scrivania/fdaPDE/tests/Mesh_Evaluator/isInside.R")
-source("tests/R_plot_graph.ggplot2.R")
-source("~/Scrivania/fdaPDE/tests/Eval_split_discontinous.R")
-source("~/Scrivania/fdaPDE/tests/Dijkstra.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/Regressione_Mattina.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/integrate_f.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/isInside.R")
+source("tests/Auxiliary/R_plot_graph.ggplot2.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/Eval_split_discontinous.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/Dijkstra.R")
 
 vertices_x = as.matrix(simplenet$vertices$x)
 vertices_y = as.matrix(simplenet$vertices$y)
@@ -506,7 +505,7 @@ save(nobs,M,N,
      sols,sols.fdaPDE,
      times,times.fdaPDE, file =save.file)
 
-###### delta varying #####
+################### delta varying #########################
 ### nobs = 500, delta = c(0.03, 0.015, 0.0075, 0.00375) ###
 ###########################################################
 
@@ -565,16 +564,16 @@ for( i in 1:N){
   idx.leaf = which( mesh.fdaPDE$nodesmarkers==TRUE)
   ### CAMPO f ### 
   dijkstra.8 = Dijkstra(mesh.fdaPDE,8)
-  dijkstra.37 = Dijkstra(mesh.fdaPDE,37)
+  dijkstra.4 = Dijkstra(mesh.fdaPDE,4)
   aux = function(x, y, seg, tp) { 
     
     sigma.8 = 0.1
-    sigma.37 = 0.085
+    sigma.4 = 0.085
     
     res.8 = equal_split_discontinous(mesh.fdaPDE, sigma.8, dijkstra.8, x, y)
-    res.37 = equal_split_discontinous(mesh.fdaPDE, sigma.37, dijkstra.37, x, y) 
+    res.4 = equal_split_discontinous(mesh.fdaPDE, sigma.4, dijkstra.4, x, y) 
     
-    res = 0.5 * res.8$coef + 0.5 * res.37$coef
+    res = 0.5 * res.8$coef + 0.5 * res.4$coef
     return(res)
   }
   
@@ -641,3 +640,4 @@ img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/",file.name,".pdf",
 save(nobs,M,N, delta, nnodes,
      mise, mise.fdaPDE, err.L2,
      times,times.fdaPDE, file =save.file)
+

@@ -98,7 +98,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
         if( !regression_.isMatrixNoCov_factorized() ){
 
-            _GCV[i] = std::numeric_limits<double>::max();
+            _GCV[i] = std::numeric_limits<double>::quiet_NaN();
 
         }else{
 
@@ -123,7 +123,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(UInt& lambda_
   regression_.apply();
 
   // if the system matrix is correctly factorized OR the algortihm performed only the first iteration
-  if( regression_.isMatrixNoCov_factorized() || n_iterations[lambda_index]==0) {
+  if( regression_.isMatrixNoCov_factorized() ) { //|| n_iterations[lambda_index]==0
       const SpMat *Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
       // get the solutions from the regression object.

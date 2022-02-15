@@ -24,72 +24,39 @@ mesh.fdaPDE = create.mesh.1.5D(mesh$nodes,mesh$segments)
 FEMbasis.fdaPDE = fdaPDE::create.FEM.basis(mesh.fdaPDE)
 
 ### CAMPO f ### 
-source("~/Scrivania/fdaPDE/tests/integrate_f.R")
-
 plot(mesh.fdaPDE)
-
-# a-sym
-points(mesh$nodes[46,1],mesh$nodes[46,2],pch=16)
-# sym
-points(mesh$nodes[283,1],mesh$nodes[283,2],pch=16,col="red")
-points(mesh$nodes[118,1], mesh$nodes[118,2],pch=16,col="blue")
-points(mesh$nodes[250,1], mesh$nodes[250,2],pch=16,col="green")
-
-
-dijkstra.283 = Dijkstra(mesh.fdaPDE,283)
-dijkstra.118 = Dijkstra(mesh.fdaPDE,118)
-dijkstra.250 = Dijkstra(mesh.fdaPDE, 250)
-
-res.283 = equal_split_discontinous(mesh.fdaPDE, 115, dijkstra.283, mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-res.283.cycle = equal_split_discontinous.cycle(mesh.fdaPDE, 115, dijkstra.283, mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-integrate_f(FEM(res.283$coef, FEMbasis.fdaPDE))
-integrate_f(FEM(res.283.cycle, FEMbasis.fdaPDE))
-idx.leaf = which(mesh.fdaPDE$nodesmarkers==TRUE)
-R_plot_graph.ggplot2(FEM(res.283$coef, FEMbasis.fdaPDE))
-
-dijkstra.283$distance[idx.leaf] < 5*115
-
-R_plot_graph.ggplot2(FEM(res.283$coef, FEMbasis.fdaPDE))
+dijkstra.55 = Dijkstra(mesh.fdaPDE,55)
+dijkstra.66 = Dijkstra(mesh.fdaPDE,66)
+dijkstra.98 = Dijkstra(mesh.fdaPDE, 98)
 
 # sym gaussian 
-aux.283 = function(x, y, seg, tp) { 
+aux.66 = function(x, y, seg, tp) { 
   
-  sigma.283 = 500
+  sigma.66 = 500
   
-  res.283 = equal_split_discontinous(mesh.fdaPDE, sigma.283, dijkstra.283, x, y)
+  res.66 = equal_split_discontinous(mesh.fdaPDE, sigma.66, dijkstra.66, x, y)
   
-  res =  res.283$coef 
+  res =  res.66$coef 
   return(res)
 }
-coef.283 = aux.283(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-
-R_plot_graph.ggplot2(FEM(coef.283,FEMbasis.fdaPDE))
-
-aux.250 = function(x, y, seg, tp) { 
+aux.55 = function(x, y, seg, tp) { 
   
-  sigma.250 = 500
+  sigma.55 = 500
   
-  res.250= equal_split_discontinous(mesh.fdaPDE, sigma.250, dijkstra.250, x, y)
+  res.55= equal_split_discontinous(mesh.fdaPDE, sigma.55, dijkstra.55, x, y)
   
-  res =  res.250$coef 
+  res =  res.55$coef 
   return(res)
 }
-coef.250 = aux.250(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-
-R_plot_graph.ggplot2(FEM(coef.250, FEMbasis.fdaPDE))
-
-aux.118 = function(x, y, seg, tp) { 
+aux.98 = function(x, y, seg, tp) { 
   
-  sigma.118 = 500
+  sigma.98 = 500
   
-  res.118= equal_split_discontinous(mesh.fdaPDE, sigma.118, dijkstra.118, x, y)
+  res.98= equal_split_discontinous(mesh.fdaPDE, sigma.98, dijkstra.98, x, y)
   
-  res =  res.118$coef 
+  res =  res.98$coef 
   return(res)
 }
-coef.118 = aux.118(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-
-R_plot_graph.ggplot2(FEM(coef.118, FEMbasis.fdaPDE))
 
 ########## a-sym gaussian ################
 aux.a.sym = function(x,y,tp,seg){
@@ -150,9 +117,9 @@ plot(a.sym.dens)
 
 # mixture of two gaussian distribution
 AUX = function(x,y,seg,tp){
-  sym = aux.118(x,y,seg,tp)
-  sym.2 = aux.250(x,y,seg,tp)
-  sym.3 = aux.283(x,y,seg,tp)
+  sym = aux.55(x,y,seg,tp)
+  sym.2 = aux.66(x,y,seg,tp)
+  sym.3 = aux.98(x,y,seg,tp)
   res = sym + sym.2 + sym.3
   return(res)                    
 }
@@ -161,20 +128,10 @@ coef.ex = AUX(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
 
 R_plot_graph.ggplot2(FEM(coef.ex,FEMbasis.fdaPDE))
 density = linfun(AUX,L)
-plot(density)
 
 plot(mesh.fdaPDE)
 points(mesh.fdaPDE$nodes[46,1], mesh.fdaPDE$nodes[46,2],pch=16, col="red")
 points(mesh.fdaPDE$nodes[283,1], mesh.fdaPDE$nodes[283,2],pch=16,col="red")
-
-coef.ex = AUX(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-
-R_plot_graph.ggplot2(FEM(coef.ex, FEMbasis.fdaPDE))
-integrate_f(FEM(coef.ex, FEMbasis.fdaPDE))
-
-PP = rlpp(150, density)
-plot(mesh.fdaPDE)
-points(PP$data$x, PP$data$y, pch=16, col="red")
 
 nobs = c(300,500,700,1000)
 N=length(nobs)
@@ -200,6 +157,7 @@ times.fdaPDE.2 = matrix(0,nrow=M,ncol=N)
 
 options(digits.sec=6)
 lambda_vector = seq(from=1e-1, to=1000, length.out=10)
+lambda = 1000
 epsilon=0.0001
 for( i in 1:N){
   for( j in 1:M){
@@ -215,14 +173,14 @@ for( i in 1:N){
     EPS = rnorm(nobs[i], 0, sd=0.05*my_range)
     Z = beta_ex*W + exact_sol + EPS
     
-    output.fdaPDE = smooth.FEM( observations=Z, FEMbasis=FEMbasis.fdaPDE, covariates=W,
-                                locations=points,
-                                lambda=lambda_vector, 
-                                lambda.selection.criterion='grid', 
-                                DOF.evaluation='exact', 
-                                lambda.selection.lossfunction='GCV' )
-    
-    lambda = output.fdaPDE$optimization$lambda_solution
+    # output.fdaPDE = smooth.FEM( observations=Z, FEMbasis=FEMbasis.fdaPDE, covariates=W,
+    #                             locations=points,
+    #                             lambda=lambda_vector, 
+    #                             lambda.selection.criterion='grid', 
+    #                             DOF.evaluation='exact', 
+    #                             lambda.selection.lossfunction='GCV' )
+    # 
+    # lambda = output.fdaPDE$optimization$lambda_solution
     
     start.fdaPDE = Sys.time()
     output.fdaPDE = smooth.FEM(observations=Z, FEMbasis=FEMbasis.fdaPDE, covariates=W,
@@ -265,7 +223,7 @@ file.name = paste("Regression-",today_,ntest_,sep="")
 save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/Regression/",file.name,".RData",sep="")
 img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/",file.name,".pdf",sep="")
 
-save(nobs,M,N,
+save(nobs,M,N,FEMbasis.fdaPDE,L,
      rmse.beta,
      rmse.fdaPDE.beta,
      mise, mise.fdaPDE, err.L2,
@@ -276,13 +234,13 @@ save(nobs,M,N,
 #####################################################################################
 #####################################################################################
 
-source("~/Scrivania/fdaPDE/tests/Regressione/Regressione_Mattina.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/Regressione_Mattina.R")
 
-source("~/Scrivania/fdaPDE/tests/integrate_f.R")
-source("~/Scrivania/fdaPDE/tests/Mesh_Evaluator/isInside.R")
-source("tests/R_plot_graph.ggplot2.R")
-source("~/Scrivania/fdaPDE/tests/Eval_split_discontinous.R")
-source("~/Scrivania/fdaPDE/tests/Dijkstra.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/integrate_f.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/isInside.R")
+source("tests/Auxiliary/R_plot_graph.ggplot2.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/Eval_split_discontinous.R")
+source("~/Scrivania/fdaPDE/tests/Auxiliary/Dijkstra.R")
 data("spiders")
 vertices = cbind(spiders$domain$vertices$x, spiders$domain$vertices$y)
 edges = cbind(spiders$domain$from, spiders$domain$to)
@@ -301,135 +259,51 @@ FEMbasis = create.FEM.basis.1D(mesh)
 mesh.fdaPDE = create.mesh.1.5D(mesh$nodes,mesh$segments)
 FEMbasis.fdaPDE = fdaPDE::create.FEM.basis(mesh.fdaPDE)
 
-plot(mesh.fdaPDE,show.nodes = TRUE)
-### CAMPO f ### 
-source("~/Scrivania/fdaPDE/tests/integrate_f.R")
-
-plot(mesh.fdaPDE)
-
-# a-sym
-points(mesh$nodes[46,1],mesh$nodes[46,2],pch=16)
-# sym
-points(mesh$nodes[283,1],mesh$nodes[283,2],pch=16,col="red")
-points(mesh$nodes[118,1], mesh$nodes[118,2],pch=16,col="blue")
-points(mesh$nodes[250,1], mesh$nodes[250,2],pch=16,col="green")
-
-
-dijkstra.283 = Dijkstra(mesh.fdaPDE,283)
-dijkstra.118 = Dijkstra(mesh.fdaPDE,118)
-dijkstra.250 = Dijkstra(mesh.fdaPDE, 250)
+dijkstra.55 = Dijkstra(mesh.fdaPDE,55)
+dijkstra.66= Dijkstra(mesh.fdaPDE,66)
+dijkstra.98 = Dijkstra(mesh.fdaPDE, 98)
 
 # sym gaussian 
-aux.283 = function(x, y, seg, tp) { 
+aux.55 = function(x, y, seg, tp) { 
   
-  sigma.283 = 500
+  sigma.55 = 500
   
-  res.283 = equal_split_discontinous(mesh.fdaPDE, sigma.283, dijkstra.283, x, y)
+  res.55 = equal_split_discontinous(mesh.fdaPDE, sigma.55, dijkstra.55, x, y)
   
-  res =  res.283$coef 
+  res =  res.55$coef 
   return(res)
 }
-coef.283 = aux.283(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
 
-R_plot_graph.ggplot2(FEM(coef.283,FEMbasis.fdaPDE))
-
-aux.250 = function(x, y, seg, tp) { 
+aux.66 = function(x, y, seg, tp) { 
   
-  sigma.250 = 500
+  sigma.66 = 500
   
-  res.250= equal_split_discontinous(mesh.fdaPDE, sigma.250, dijkstra.250, x, y)
+  res.66= equal_split_discontinous(mesh.fdaPDE, sigma.66, dijkstra.66, x, y)
   
-  res =  res.250$coef 
+  res =  res.66$coef 
   return(res)
 }
-coef.250 = aux.250(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
 
-R_plot_graph.ggplot2(FEM(coef.250, FEMbasis.fdaPDE))
-
-aux.118 = function(x, y, seg, tp) { 
+aux.98 = function(x, y, seg, tp) { 
   
-  sigma.118 = 500
+  sigma.98 = 500
   
-  res.118= equal_split_discontinous(mesh.fdaPDE, sigma.118, dijkstra.118, x, y)
+  res.98= equal_split_discontinous(mesh.fdaPDE, sigma.98, dijkstra.98, x, y)
   
-  res =  res.118$coef 
+  res =  res.98$coef 
   return(res)
 }
-coef.118 = aux.118(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-
-R_plot_graph.ggplot2(FEM(coef.118, FEMbasis.fdaPDE))
-
-########## a-sym gaussian ################
-aux.a.sym = function(x,y,tp,seg){
-  sigma = 50
-  h = 5*sigma
-  Graph = mesh.fdaPDE
-  dijkstra = dijkstra.46
-  source = dijkstra$source
-  points_ = cbind(x,y)
-  
-  coef = vector(mode="numeric", length=nrow(points_))
-  is_vertex = is.vertex(Graph, points_)
-  idx.vertex = which(is_vertex!=0)
-  idx.same.y = which(points_[idx.vertex,2] == Graph$nodes[source,2])
-  
-  if(!is.empty(idx.same.y)){
-    for( i in idx.same.y ){  
-      if( dijkstra$distance[idx.vertex[i]] < h ){
-        coef[i] = 1./((2*pi)^0.5*sigma) * exp(-dijkstra$distance[idx.vertex[i]]^2/(2*sigma^2))
-      }
-    }
-  }
-  
-  idx.not.vertex = which(is_vertex==0)
-  if(!is.empty(idx.not.vertex)){
-    idx.edge = isInside(Graph, points_)
-    idx.edge = idx.edge[idx.not.vertex]
-    Dist1 = dijkstra$distance[ Graph$edges[idx.edge, 1]]
-    Dist2 = dijkstra$distance[ Graph$edges[idx.edge, 2]]
-    Dist = vector(mode="numeric", length=length(idx.not.vertex))
-    Previous = vector(mode="integer", length(idx.not.vertex))
-    
-    for( i in 1:length(idx.not.vertex)){
-      if( abs( points_[idx.not.vertex[i],2] - Graph$nodes[source,2]) < 10 * .Machine$double.eps){
-        
-        if( Dist1[i] < Dist2[i] ){
-          Dist[i] = Dist1[i]
-          Previous[i] = Graph$edges[idx.edge[i], 1]
-        }else{
-          Dist[i] = Dist2[i]
-          Previous[i] = Graph$edges[idx.edge[i], 2]
-        }
-        
-        delta = Dist[i] + sqrt( (Graph$nodes[Previous[i] ,1] - points_[idx.not.vertex[i],1])^2 +
-                                  (Graph$nodes[Previous[i], 2] - points_[idx.not.vertex[i],2])^2) 
-        
-        if( delta < h)
-          coef[idx.not.vertex[i]] = 1/((2*pi)^0.5 * sigma) * exp(-delta/(2*sigma^2))  
-        
-      }
-    }
-  }
-  return (coef)
-}
-a.sym.dens = linfun(aux.a.sym, L)
-plot(a.sym.dens)
-##########################################
 
 # mixture of three gaussian distributions
 AUX = function(x,y,seg,tp){
-  sym = aux.118(x,y,seg,tp)
-  sym.2 = aux.250(x,y,seg,tp)
-  sym.3 = aux.283(x,y,seg,tp)
+  sym = aux.98(x,y,seg,tp)
+  sym.2 = aux.55(x,y,seg,tp)
+  sym.3 = aux.66(x,y,seg,tp)
   res = (sym + sym.2 + sym.3)
   return(res)                    
 }
 
 coef.ex = AUX(mesh.fdaPDE$nodes[,1], mesh.fdaPDE$nodes[,2])
-
-R_plot_graph.ggplot2(FEM(coef.ex,FEMbasis.fdaPDE))
-density = linfun(AUX,L)
-plot(density)
 
 nobs = c(300,500,700,1000)
 N=length(nobs)
@@ -449,30 +323,30 @@ times.fdaPDE.2 = matrix(0,nrow=M,ncol=N)
 
 options(digits.sec=6)
 lambda_vector = seq(from=1e-1, to=1000, length.out=10)
+lambda =1000
 epsilon=0.0001
 for( i in 1:N){
   for( j in 1:M){
     PPP = runiflpp(nobs[i], L)
     points_x = PPP$data$x
     points_y = PPP$data$y
-    points = NULL 
     points = cbind(points_x, points_y)
     
-    exact_sol = density(points_x, points_y)
+    exact_sol = AUX(points_x, points_y)
     temp = range(exact_sol)
     my_range = temp[2]-temp[1]
     EPS = rnorm(nobs[i], 0, sd=0.05*my_range )
     Z =  exact_sol + EPS
-    
-    output.fdaPDE = smooth.FEM( observations=Z, FEMbasis=FEMbasis.fdaPDE, 
-                                covariates=NULL,
-                                locations=points,
-                                lambda=lambda_vector, 
-                                lambda.selection.criterion='grid', 
-                                DOF.evaluation='exact', 
-                                lambda.selection.lossfunction='GCV' )
-    
-    lambda = output.fdaPDE$optimization$lambda_solution
+    # 
+    # output.fdaPDE = smooth.FEM( observations=Z, FEMbasis=FEMbasis.fdaPDE, 
+    #                             covariates=NULL,
+    #                             locations=points,
+    #                             lambda=lambda_vector, 
+    #                             lambda.selection.criterion='grid', 
+    #                             DOF.evaluation='exact', 
+    #                             lambda.selection.lossfunction='GCV' )
+    # 
+    #lambda = output.fdaPDE$optimization$lambda_solution
     
     start.fdaPDE = Sys.time()
     output.fdaPDE = smooth.FEM(observations=Z, FEMbasis=FEMbasis.fdaPDE, covariates=NULL,
@@ -510,11 +384,8 @@ save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/Regression/",file.name,".RDa
 img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/",file.name,".pdf",sep="")
 
 save(nobs,M,N,
-     rmse.beta,
-     rmse.fdaPDE.beta,
      mise, mise.fdaPDE, err.L2,
      sols,sols.fdaPDE,
-     norms.beta.inf,norms.beta.2,
      times,times.fdaPDE,times.fdaPDE.2, file =save.file)
 
 
@@ -531,7 +402,6 @@ source("~/Scrivania/fdaPDE/tests/Auxiliary/isInside.R")
 source("tests/Auxiliary/R_plot_graph.ggplot2.R")
 source("~/Scrivania/fdaPDE/tests/Auxiliary/Eval_split_discontinous.R")
 source("~/Scrivania/fdaPDE/tests/Auxiliary/Dijkstra.R")
-
 
 delta = c(40, 30, 25, 17.5)
 
@@ -558,7 +428,7 @@ times.fdaPDE.2 = matrix(0,nrow=M,ncol=N)
 options(digits.sec=6)
 lambda_vector = seq(from=1e-1, to=1000, length.out=10)
 epsilon=0.0001
-nnodes = vector(mode="integer",length=N)
+
 lambda = 1000
 for( i in 1:N){
   

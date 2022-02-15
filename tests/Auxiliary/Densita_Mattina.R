@@ -494,6 +494,8 @@ my_density.aldo <- function(data, mesh, PHI, FEMbasis, K0, K1, lambda, epsil, in
   error = tolerance + 1
   j = 1
   
+  loss_old = 1000
+  
   pb <- txtProgressBar(min = 0, max = nsim, style = 1, char="=")
   while (j<=nsim && (!is.na(error) && error>tolerance) ) {
     # Compute the first term of the log-likelihood
@@ -559,16 +561,52 @@ my_density.aldo <- function(data, mesh, PHI, FEMbasis, K0, K1, lambda, epsil, in
     cvec_update <- -epsil*GGG[,j]
     cvec[,j+1] <- cvec[,j] + cvec_update
     
+    int = matrix(0, nrow=nelem, ncol=1)
+    
     if( sum( is.na(cvec[,j+1]) ) != 0 )
       stop("Warning: there is at least one node containing NaN")
         
-      error = norm(cvec[,j+1]-cvec[,j], type="2") / norm(cvec[,j],type="2")
+    ### computing loss function ###
     
+    int = matrix(0, nrow=nelem, ncol=1)
+    
+    for (i in 1:nelem) {
+    
+      sx = elements[i,1]
+      dx = elements[i,2]
+      
+      current_length = len[i]
+      
+      edge_current = subel_edge[i]
+      n_local_elem = which(local_to_global[[edge_current]]==sx)
+      
+      a = rep ( (n_local_elem - 1)*len[i] , 3)
+      b = rep ( n_local_elem*len[i] , 3)
+      
+      w_tilde = (len[i]/2)*w
+      xq_tilde = ((b-a)/2 ) * xq + (b+a)/2
+      
+      PHI_q = matrix(0, nrow=nq, ncol=nnodes)
+      
+      PHI_q[1:nq, sx] = as.matrix( ( b - xq_tilde )/current_length )
+      PHI_q[1:nq, dx] = as.matrix( ( xq_tilde - a )/current_length )
+      
+      for ( qqq in 1:nq ){
+        int[i] = int[i] + as.vector( exp( PHI_q[qqq,] %*%cvec[,j+1] ) )*  as.vector(w_tilde[qqq])
+      }
+    }
+    int_tot = sum(int)
+    
+      TMP = solve(K0, K1%*%cvec[,j+1])
+      loss = -sum(PHI%*%cvec[,j+1]) + int_tot + lambda * t(cvec[,j+1])%*%K1%*%TMP  
+      error = abs( loss - loss_old  ) / abs(loss_old)
+    ###
     if(!is.na(error) && error < tolerance)
       print(paste("Method converged in ", j," iterations",sep=""))
     
     setTxtProgressBar(pb, j)
     j = j + 1
+    loss_old = loss
   }
   
   if( j - 1 == nsim)

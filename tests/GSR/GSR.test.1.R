@@ -372,49 +372,121 @@ for(i in 1:N){
   points(vertices)
   points(mesh$nodes[4,1], mesh$nodes[4,2], pch=16, col="green4")
   points(mesh$nodes[5,1], mesh$nodes[5,2], pch=16, col="green4")
-  #points(vertices[6,1], vertices[6,2], pch=16,col="green4")
+  points(vertices[6,1], vertices[6,2], pch=16,col="green4")
   points(vertices[8,1], vertices[8,2], pch=16, col="green4")
   points(vertices[10,1], vertices[10,2], pch=16, col="green4")
   
+  idx.4.5 = which( (mesh$nodes[,1] < vertices[5,1])) 
+  plot(mesh)
+  points(mesh$nodes[idx.4.5,1], mesh$nodes[idx.4.5,2], pch=16)
+  idx.tmp = which( (mesh$nodes[idx.4.5,2] < vertices[5,2]))
+  idx.4.5 = idx.4.5[idx.tmp]
   
+  idx.tmp = which( (mesh$nodes[idx.4.5,1] > vertices[4,1]))
+  idx.4.5 = idx.4.5[idx.tmp]
   
-  ### CAMPO f ### 
-  dijkstra.4 = Dijkstra(mesh,4)
-  dijkstra.5 = Dijkstra(mesh,5)
-  #dijkstra.6 = Dijkstra(mesh,6)
-  dijkstra.8 = Dijkstra(mesh,8)
-  dijkstra.10= Dijkstra(mesh,10)
+  idx.tmp = which( (mesh$nodes[idx.4.5,2] > vertices[4,2]))
+  idx.4.5 = idx.4.5[idx.tmp]                
   
-  aux = function(x, y, seg, tp) { 
+  plot(mesh)
+  points(mesh$nodes[idx.4.5,1], mesh$nodes[idx.4.5,2], pch=16)
+  points(mesh$nodes[idx.4.5[13],1], mesh$nodes[idx.4.5[15],2], pch=16, col="red")
+  points(mesh$nodes[71,1], mesh$nodes[71,2], pch=16, col="green")
+  IDX.sx = idx.4.5[ length(idx.4.5)/2 ]
+  
+  idx.8.10 = which( (mesh$nodes[,1] < vertices[8,1])) 
+  plot(mesh)
+  points(mesh$nodes[idx.8.10,1], mesh$nodes[idx.8.10,2], pch=16)
+  idx.tmp = which( (mesh$nodes[idx.8.10,2] < vertices[8,2]))
+  idx.8.10 = idx.8.10[idx.tmp]
+  
+  idx.tmp = which( (mesh$nodes[idx.8.10,1] > vertices[10,1]))
+  idx.8.10 = idx.8.10[idx.tmp]
+  
+  idx.tmp = which( (mesh$nodes[idx.8.10,2] > vertices[10,2]))
+  idx.8.10 = idx.8.10[idx.tmp]                
+  
+  plot(mesh)
+  points(mesh$nodes[idx.8.10,],pch=16)
+  points(mesh$nodes[idx.8.10[16],1], mesh$nodes[idx.8.10[16],2],pch=16, col="green")
+  
+  IDX.dx = idx.8.10[length(idx.8.10)/2]
+  
+  aux = function(x,y,seg,tp){
+    h = 0.15
+    source.sx = IDX.sx
+    source.dx = IDX.dx
+    vertex.1.sx = 4
+    vertex.2.sx = 5
     
-    sigma = 0.03
-     
-    res.4 = equal_split_discontinous.mollifier(mesh, sigma, dijkstra.4, x, y)
-    #res.5 = equal_split_discontinous.mollifier(mesh, 0.025, dijkstra.5, x, y) 
-   # res.6 = equal_split_discontinous.mollifier(mesh, sigma, dijkstra.6, x, y)
-    #res.8 = equal_split_discontinous.mollifier(mesh, 0.025, dijkstra.8, x, y)
-    res.10 = equal_split_discontinous.mollifier(mesh, sigma, dijkstra.10, x, y)
+    vertex.1.dx = 8
+    vertex.2.dx = 10
     
-    #res= (res.4$coef + res.5$coef  + res.8$coef + res.10 $coef) # + res.6$coef 
-    res = res.4$coef + res.10$coef
+    points_ = cbind(x,y)
+    coef = vector(mode="numeric", length=length(x))
     
-    idx.4 = which(res.4$bandwidth==0.0)
-    #idx.5 = which(res.5$bandwidth==0.0)
-    #idx.6 = which(res.6$bandwidth==0.0)
-    #idx.8 = which(res.8$bandwidth==0.0)
-    idx.10 = which(res.10$bandwidth==0.0)
+    m_.sx = (mesh$nodes[5,2] - mesh$nodes[4,2]) / ( mesh$nodes[5,1]- mesh$nodes[4,1])
+    idx.ok.sx = which( abs(points_[,2] - m_.sx * (points_[,1]-mesh$nodes[vertex.1.sx,1]) - mesh$nodes[vertex.1.sx,2] )    < 10 * .Machine$double.eps )
+    for(i in idx.ok.sx){
+      delta = sqrt( (points_[i,1] - mesh$nodes[source.sx,1])^2 +
+                    (points_[i,2] - mesh$nodes[source.sx,2])^2 )  
+      if(delta < h ){
+        coef[i] = -6/h^2 *  (delta^2-h^2) - 3
+      }
+      else 
+        coef[i] = -3.
+    }
     
-    #intersect.4.5 = intersect(idx.4, idx.5)
-    #intersect.8.10 = intersect(idx.10, idx.8)
-    #intersect.tot = intersect( intersect.4.5, intersect.8.10)
-    #intersect.tot = intersect(intersect.tot, idx.6)
-    intersect.tot = intersect(idx.4, idx.10)
+    m_.dx = (mesh$nodes[10,2] - mesh$nodes[8,2]) / ( mesh$nodes[10,1]- mesh$nodes[8,1])
+    idx.ok.dx = which( abs(points_[,2] - m_.dx * (points_[,1]-mesh$nodes[vertex.1.dx,1]) - mesh$nodes[vertex.1.dx,2] )    < 10 * .Machine$double.eps )
+    for(i in idx.ok.dx){
+      delta = sqrt( (points_[i,1] - mesh$nodes[source.dx,1])^2 +
+                      (points_[i,2] - mesh$nodes[source.dx,2])^2 )  
+      if(delta < h ){
+        coef[i] = -6/h^2 *  (delta^2-h^2) - 3
+      }
+      else
+        coef[i] = -3.
+    }
     
-    res[intersect.tot] = -1.0
-    return(res)
+  
+    idx.other = 1:length(x)
+    idx.other = idx.other[-c(idx.ok.sx, idx.ok.dx)]
+    
+    coef[idx.other] = -3.0
+    return(coef)
   }
   
-  #coef.ex = aux(mesh$nodes[,1],mesh$nodes[,2])
+  # aux = function(x, y, seg, tp) { 
+  #   
+  #   sigma = 0.03
+  #    
+  #   res.4 = equal_split_discontinous.mollifier(mesh, sigma, dijkstra.4, x, y)
+  #   res.5 = equal_split_discontinous.mollifier(mesh, 0.025, dijkstra.5, x, y) 
+  #   res.6 = equal_split_discontinous.mollifier(mesh, sigma, dijkstra.6, x, y)
+  #   res.8 = equal_split_discontinous.mollifier(mesh, 0.025, dijkstra.8, x, y)
+  #   res.10 = equal_split_discontinous.mollifier(mesh, sigma, dijkstra.10, x, y)
+  #   
+  #   res= (res.4$coef + res.5$coef  + res.8$coef + res.10 $coef) # + res.6$coef 
+  #   #res = res.4$coef + res.10$coef
+  #   
+  #   idx.4 = which(res.4$bandwidth==0.0)
+  #   idx.5 = which(res.5$bandwidth==0.0)
+  #   idx.6 = which(res.6$bandwidth==0.0)
+  #   idx.8 = which(res.8$bandwidth==0.0)
+  #   idx.10 = which(res.10$bandwidth==0.0)
+  #   
+  #   intersect.4.5 = intersect(idx.4, idx.5)
+  #   intersect.8.10 = intersect(idx.10, idx.8)
+  #   intersect.tot = intersect( intersect.4.5, intersect.8.10)
+  #   intersect.tot = intersect(intersect.tot, idx.6)
+  #   #intersect.tot = intersect(idx.4, idx.10)
+  #   
+  #   res[intersect.tot] = -1.0
+  #   return(res)
+  # }
+  # 
+  coef.ex = aux(mesh$nodes[,1],mesh$nodes[,2])
   R_plot_graph.ggplot2.2(FEM(coef.ex,FEMbasis), 
                          color.min  =min(coef.ex),
                          color.max  =max(coef.ex))
@@ -446,14 +518,14 @@ for(i in 1:N){
   points(mesh$nodes, pch=16, col=p)
 }
 
-nobs=c(200, 400, 600, 800)
+nobs=c(400, 600, 800)
 N = length(nobs)
-M = 20
+M = 5
 times = matrix(0, nrow=M, ncol=N)
 mise = matrix(0,nrow=M, ncol=N)
 sols = array(0, dim=c(M,N, nnodes))
 norm.l2 = matrix(0, nrow=M, ncol=N)
-lambda = 10^seq(-7,-6,length.out = 20) # test-1 con e senza covariate
+lambda = 10^seq(-7,6,length.out = 20) # test-1 con e senza covariate
 lambda.opt = matrix(0, nrow=M, ncol=N)
 start.tot = Sys.time()
 for(i in 1:N){
@@ -474,7 +546,7 @@ for(i in 1:N){
                                      observations = as.numeric(response), 
                                      FEMbasis =FEMbasis, 
                                      covariates = NULL, #W
-                                     max.steps=500, 
+                                     max.steps=150, 
                                      fam=FAMILY,
                                      mu0=NULL, 
                                      scale.param=NULL,

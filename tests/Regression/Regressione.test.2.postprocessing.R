@@ -1,11 +1,12 @@
 # loading data
-date_ = "2021-12-10"
+date_ = "2022-01-20"
 ntest_ = "-test-2" 
 
 file.name = paste("Regression-",date_,ntest_,sep="")
 save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/Regression/",file.name,".RData",sep="")
 img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/",file.name,".pdf",sep="")
 
+img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/","Regression-test-2-parte-1",".pdf",sep="")
 load(save.file)
 
 # postprocessing #
@@ -13,12 +14,31 @@ library(ggplot2)
 library(latex2exp)
 
 MyTheme <- theme(
-  axis.text = element_text(size=16),
-  axis.title = element_text(size=16),
-  title = element_text(size=20),
-  legend.text = element_text(size=14),
-  legend.key.size = unit(1,"cm") 
+  axis.text = element_text(size=26),
+  axis.title = element_text(size=26),
+  title = element_text(size=26),
+  plot.title = element_text(hjust = 0.5),
+  legend.text = element_text(size=24),
+  legend.key.size = unit(1,"cm"),
+  legend.key.height = unit(1,"cm"),
+  legend.title = element_blank(),
+  legend.background = element_rect(fill="white", color="black",
+                                   size=c(1,0.5))
 )
+# legend.position= c(0.825,0.15) # basso dx
+# legend.position= c(0.825,0.85) # alto  dx
+
+
+err.Inf = matrix(0, nrow=M, ncol=N)
+err.2 = matrix(0, nrow=M, ncol=N)
+for(i in 1:N){
+  for( j in 1:M){
+    
+    err.Inf[j,i] = max( abs( sols[j,i,] - sols.fdaPDE[j,i,]))
+    err.2[j,i] = norm( sols[j,i,] - sols.fdaPDE[j,i,], type="2" )
+    
+  }
+}
 
 rmse.beta_ = cbind( as.vector(rmse.beta), as.vector(rmse.fdaPDE.beta)) 
 rmse.beta_ = as.vector(rmse.beta_)
@@ -39,23 +59,23 @@ pdf(img.file)
 
 ggplot(data_frame.1) +
   geom_boxplot(aes(x=nobs_,y=rmse.beta_,group=interaction(nobs_,type_),fill=type_))+
-  labs(x="",y="",fill="",title=TeX( "$RMSE(\\beta)^{2}$") )+
+  labs(x="observations",y="",fill="",title=TeX( "$RMSE(\\beta)^{2}$") )+
   scale_x_discrete(limits=c("300","500","700","1000"))+
-  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position= c(0.825,0.85))+
   MyTheme
 
 ggplot(data_frame.1) +
   geom_boxplot(aes(x=nobs_,y=mise_,group=interaction(nobs_,type_),fill=type_))+
   labs(x="observations",y="",fill="",title=TeX( "MISE"))+
   scale_x_discrete(limits=c("300","500","700","1000"))+
-  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position= c(0.825,0.85))+
   MyTheme
 
 ggplot(data_frame.1) + 
   geom_boxplot(aes(x=nobs_,y=times_,group=interaction(nobs_,type_),fill=type_))+
   labs(x="observations",y="",fill="",title="TIME [s]") +
   scale_x_discrete(limits=c("300","500","700","1000"))+
-  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position= c(0.825,0.85))+
   MyTheme
 
 rmse.beta_ = as.vector(rmse.beta)
@@ -65,12 +85,15 @@ mise.fdaPDE_ = as.vector(mise.fdaPDE)
 times_ = as.vector(times)
 times.fdaPDE_ = as.vector(times.fdaPDE)
 err.L2_ = as.vector(err.L2)
+err.Inf_ = as.vector(err.Inf)
+err.2_ = as.vector(err.2)
 nobs_ = rep(as.character(nobs),each=M)
 
 data_frame.2 = data.frame(nobs_,
                           rmse.beta_,
                           rmse.fdaPDE.beta_,
-                          mise_,mise.fdaPDE_,err.L2_,
+                          mise_,mise.fdaPDE_,
+                          err.L2_, err.2_, err.Inf_,
                           times_,times.fdaPDE_)
 
 ggplot(data_frame.2)+
@@ -80,6 +103,23 @@ ggplot(data_frame.2)+
   scale_x_discrete(limits=c("300","500","700","1000"))+
   theme(plot.title = element_text(hjust = 0.5))+
   MyTheme
+
+ggplot(data_frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.2_,group=nobs_))+
+  labs(x="observations",y="",fill="",
+       title= "l 2 norm" ) +
+  scale_x_discrete(limits=c("300","500","700","1000"))+
+  theme(plot.title = element_text(hjust = 0.5))+
+  MyTheme
+
+ggplot(data_frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.Inf_,group=nobs_))+
+  labs(x="observations",y="",fill="",
+       title= "l inf norm" ) +
+  scale_x_discrete(limits=c("300","500","700","1000"))+
+  theme(plot.title = element_text(hjust = 0.5))+
+  MyTheme
+
 
 for(i in 1:N){
   data_frame.tmp = subset(data_frame.2, nobs_ %in% c(nobs[i]))
@@ -112,17 +152,7 @@ for(i in 1:N){
       MyTheme)
   
 }
-
-FEM.ex = FEM(coef.ex, FEMbasis.fdaPDE)
-FEM.fdaPDE = FEM( sols.fdaPDE[ which( mise.fdaPDE[,4] <= min(mise.fdaPDE[,4])), 4,], FEMbasis.fdaPDE)
-FEM.R = FEM( sols[ which( mise[,4] <= min(mise[,4])), 4,], FEMbasis.fdaPDE )
-R_plot_graph.ggplot2(FEM.ex)
-R_plot_graph.ggplot2(FEM.fdaPDE)
-R_plot_graph.ggplot2(FEM.R)
-
 dev.off()
-
-
 
 ########################################################################
 ##### Regression PostProcessing Test-2 delta-var #######################
@@ -133,11 +163,11 @@ date_ = "2022-01-12-"
 ntest_ = "test-2-delta-var" # "test-2"
 
 MyTheme <- theme(
-  axis.text = element_text(size=16),
-  axis.title = element_text(size=16),
-  title = element_text(size=20),
-  legend.text = element_text(size=14),
-  legend.key.size = unit(1,"cm") 
+  axis.text = element_text(size=26),
+  axis.title = element_text(size=26),
+  title = element_text(size=26),
+  legend.text = element_text(size=26),
+  legend.key.size = unit(1.5,"cm") 
 )
 
 

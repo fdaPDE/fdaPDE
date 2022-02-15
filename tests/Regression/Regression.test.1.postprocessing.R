@@ -5,16 +5,23 @@ library(latex2exp)
 
 
 ## loading data ##
-date_ = "2022-01-11-"
-ntest_ = "test-1" # "test-2"
+date_ = "2022-01-12"
+ntest_ = "-test-1-no-cov"
 
 MyTheme <- theme(
-  axis.text = element_text(size=16),
-  axis.title = element_text(size=16),
-  title = element_text(size=20),
-  legend.text = element_text(size=14),
-  legend.key.size = unit(1,"cm") 
+  axis.text = element_text(size=26),
+  axis.title = element_text(size=26),
+  title = element_text(size=26),
+  plot.title = element_text(hjust = 0.5),
+  legend.text = element_text(size=24),
+  legend.key.size = unit(1,"cm"),
+  legend.key.height = unit(1,"cm"),
+  legend.title = element_blank(),
+  legend.background = element_rect(fill="white", color="black",
+                                   size=c(1,0.5))
 )
+# legend.position= c(0.825,0.15) # basso dx
+# legend.position= c(0.825,0.85) # alto  dx
 
 file.name = paste("Regression-",date_,ntest_,sep="")
 save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/Regression/",file.name,".RData",sep="")
@@ -24,6 +31,18 @@ load(save.file)
 ###
 
 ## post - processing ## 
+err.Inf = matrix(0, nrow=M, ncol=N)
+err.2 = matrix(0, nrow=M, ncol=N)
+for(i in 1:N){
+  for( j in 1:M){
+    
+    err.Inf[j,i] = max( abs( sols[j,i,] - sols.fdaPDE[j,i,]))
+    err.2[j,i] = norm( sols[j,i,] - sols.fdaPDE[j,i,], type="2" )
+    
+  }
+}
+
+
 rmse.beta.1_ = cbind( as.vector(rmse.beta.1), as.vector(rmse.fdaPDE.beta.1)) 
 rmse.beta.1_ = as.vector(rmse.beta.1_)
 rmse.beta.2_ = cbind( as.vector(rmse.beta.2), as.vector(rmse.fdaPDE.beta.2)) 
@@ -78,18 +97,35 @@ mise.fdaPDE_ = as.vector(mise.fdaPDE)
 times_ = as.vector(times)
 times.fdaPDE_ = as.vector(times.fdaPDE)
 err.L2_ = as.vector(err.L2)
+err.Inf_ = as.vector(err.Inf)
+err.2_ = as.vector(err.2)
 nobs_ = rep(nobs,each=M)
 # data frame per scatterplots #
 data_frame.2 = data.frame(nobs_,
                           rmse.beta.1_, rmse.beta.2_,
                           rmse.fdaPDE.beta.1_, rmse.fdaPDE.beta.2_,
-                          mise_,mise.fdaPDE_,err.L2_,
+                          mise_,mise.fdaPDE_,
+                          err.L2_, err.Inf_, err.2_,
                           times_,times.fdaPDE_)
 
 ggplot(data_frame.2)+
   geom_boxplot(aes(x=nobs_,y=err.L2_,group=nobs_))+
   labs(x="observations",y="",fill="",
-       title= TeX("Scatter \ $||f_{R} - f_{fdaPDE}||_{L_{2}}^2$") ) +
+       title= TeX("$||f_{R} - f_{fdaPDE}||_{L_{2}}^2$") ) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  MyTheme
+
+ggplot(data_frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.2_,group=nobs_))+
+  labs(x="observations",y="",fill="",
+       title= "l 2 norm" ) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  MyTheme
+
+ggplot(data_frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.Inf_,group=nobs_))+
+  labs(x="observations",y="",fill="",
+       title= "l inf norm" ) +
   theme(plot.title = element_text(hjust = 0.5))+
   MyTheme
 
@@ -248,14 +284,14 @@ dev.off()
 ########################################################################
 ##### Regression PostProcessing Test-1 delta-var #######################
 ########################################################################
-date_ = "2022-01-11-"
-ntest_ = "test-1-delta-var" # "test-2"
+date_ = "2022-01-12-"
+ntest_ = "test-1-no-cov" # "test-2"
 
 MyTheme <- theme(
-  axis.text = element_text(size=16),
-  axis.title = element_text(size=16),
-  title = element_text(size=20),
-  legend.text = element_text(size=14),
+  axis.text = element_text(size=26),
+  axis.title = element_text(size=26),
+  title = element_text(size=28),
+  legend.text = element_text(size=26),
   legend.key.size = unit(1,"cm") 
 )
 
@@ -390,21 +426,41 @@ date_ = "2022-01-12-"
 ntest_ = "test-1-no-cov" 
 
 MyTheme <- theme(
-  axis.text = element_text(size=16),
-  axis.title = element_text(size=16),
-  title = element_text(size=20),
-  legend.text = element_text(size=14),
-  legend.key.size = unit(1,"cm") 
+  axis.text = element_text(size=26),
+  axis.title = element_text(size=26),
+  title = element_text(size=26),
+  plot.title = element_text(hjust = 0.5),
+  legend.text = element_text(size=24),
+  legend.key.size = unit(1,"cm"),
+  legend.key.height = unit(1,"cm"),
+  legend.title = element_blank(),
+  legend.background = element_rect(fill="white", color="black",
+                                   size=c(1,0.5))
 )
+# legend.position= c(0.825,0.15) # basso dx
+# legend.position= c(0.825,0.85) # alto  dx
 
 file.name = paste("Regression-",date_,ntest_,sep="")
 save.file = paste("/home/aldo/Scrivania/fdaPDE-DATA/Regression/",file.name,".RData",sep="")
 img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/",file.name,".pdf",sep="")
 
+img.file = paste("/home/aldo/Scrivania/fdaPDE-IMG/Regression/","-test-1-no-cov-parte-1",".pdf",sep="")
 load(save.file)
 ###
 
 ## post - processing ## 
+err.Inf = matrix(0, nrow=M, ncol=N)
+err.2 = matrix(0, nrow=M, ncol=N)
+for(i in 1:N){
+  for( j in 1:M){
+    
+    err.Inf[j,i] = max( abs( sols[j,i,] - sols.fdaPDE[j,i,]))
+    err.2[j,i] = norm( sols[j,i,] - sols.fdaPDE[j,i,], type="2" )
+    
+  }
+}
+
+
 mise_ = cbind( as.vector(mise), as.vector(mise.fdaPDE))
 mise_ = as.vector(mise_)
 times_ = cbind( as.vector(times), as.vector(times.fdaPDE)) 
@@ -422,14 +478,16 @@ pdf(img.file)
 
 ggplot(data_frame.1) +
   geom_boxplot(aes(x=nobs_,y=mise_,group=interaction(nobs_,type_),fill=type_))+
+  scale_x_discrete(limits= as.character(nobs))+
   labs(x="observations",y="",fill="",title=TeX( "MISE"))+
-  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position= c(0.825,0.85))+
   MyTheme
 
 ggplot(data_frame.1) + 
   geom_boxplot(aes(x=nobs_,y=times_,group=interaction(nobs_,type_),fill=type_))+
   labs(x="observations",y="",fill="",title="TIME [s]") +
-  theme(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(limits= as.character(nobs))+
+  theme(legend.position= c(0.825,0.85))+
   MyTheme
 
 mise_ = as.vector(mise)
@@ -437,16 +495,33 @@ mise.fdaPDE_ = as.vector(mise.fdaPDE)
 times_ = as.vector(times)
 times.fdaPDE_ = as.vector(times.fdaPDE)
 err.L2_ = as.vector(err.L2)
+err.Inf_ = as.vector(err.Inf)
+err.2_ = as.vector(err.2)
 nobs_ = rep(nobs,each=M)
 # data frame per scatterplots #
 data_frame.2 = data.frame(nobs_,
-                          mise_,mise.fdaPDE_,err.L2_,
+                          mise_,mise.fdaPDE_,
+                          err.L2_, err.Inf_, err.2_,
                           times_,times.fdaPDE_)
 
 ggplot(data_frame.2)+
   geom_boxplot(aes(x=nobs_,y=err.L2_,group=nobs_))+
   labs(x="observations",y="",fill="",
        title= TeX("Scatter \ $||f_{R} - f_{fdaPDE}||_{L_{2}}^2$") ) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  MyTheme
+
+ggplot(data_frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.2_,group=nobs_))+
+  labs(x="observations",y="",fill="",
+       title= "l 2 norm" ) +
+  theme(plot.title = element_text(hjust = 0.5))+
+  MyTheme
+
+ggplot(data_frame.2)+
+  geom_boxplot(aes(x=nobs_,y=err.Inf_,group=nobs_))+
+  labs(x="observations",y="",fill="",
+       title= "l inf norm" ) +
   theme(plot.title = element_text(hjust = 0.5))+
   MyTheme
 
@@ -469,6 +544,5 @@ for(i in 1:N){
       MyTheme)
   
 }
-
 
 dev.off()

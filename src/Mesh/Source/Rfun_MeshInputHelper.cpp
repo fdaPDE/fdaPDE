@@ -246,10 +246,13 @@ SEXP CPP_EdgeMeshSplit(SEXP Redges, SEXP Rnodes){
   return result;
   }
 
-//! A function to refine a 1D mesh passing the maximum allowed length.
-//! \param Rnodes a #nodes x 2
-//! \param Redges a #edges x 2
-//! \param Rdelta max allowed length
+//! A function to refine a 1.5D mesh.
+/*!
+Each edge is splitted into subedges whose lengths are less or equal to the maximum allowed length \p Rdelta
+\param Rnodes an R-matrix storing the mesh nodes
+ \param Redges an R-matrix storing the mesh edges
+ \param Rdelta an R integer representing the maximum allowed length
+*/
 SEXP refine1D(SEXP Rnodes, SEXP Redges, SEXP Rdelta){
 
     const RIntegerMatrix edges_old(Redges);

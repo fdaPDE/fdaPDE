@@ -5,6 +5,12 @@
 #include "Projection.h"
 #include "../../Mesh/Include/Mesh.h"
 
+//! This function build the binary-tree object used in the tree search algorithm according to template the parameter.
+/*!
+	This function is then called from <tree_mesh_construction>"()" function.
+
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
+*/
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP tree_mesh_skeleton(SEXP Rmesh) {
     MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, 2);
@@ -55,8 +61,15 @@ SEXP tree_mesh_skeleton(SEXP Rmesh) {
     return(result);
 }
 
+//! This function projects the points on the mesh according to the template the parameter.
+/*!
+	This function is then called from  code.
+
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 2.5D and 3D R functions can produce a compatible object if the triangulation is already available)
+  	\param Rlocations R matrix containing the coordinates of the points to project
+*/
 template<UInt ORDER,UInt mydim,UInt ndim>
-SEXP point_projection_skeleton(SEXP Rmesh, SEXP Rlocations){
+SEXP points_projection_skeleton(SEXP Rmesh, SEXP Rlocations){
     //RECIEVE PROJECTION INFORMATION FROM R
     RNumericMatrix locations(Rlocations);
     UInt n_X = locations.nrows();
@@ -94,11 +107,21 @@ SEXP point_projection_skeleton(SEXP Rmesh, SEXP Rlocations){
     return(NILSXP);
 }
 
+//! This function manages the solution evaluation on given locations according to template parameters.
+/*!
+	This function is called from <eval_FEM_fd>"()" function.
+
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
+	\param Rlocations an R-matrix containing the coordinates of the points where the solution has to be evaluated
+	\param RincidenceMatrix an R-matrix for the incidence matrix defining the regions in the case of areal data
+	\param Rcoef an R-vector the coefficients of the solution
+	\param Rorder an R integer containg the order of the solution
+	\param Rfast an R integer to enforce verbose search for Walking Algorithm (can miss location for non convex meshes)
+	\param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
+ */
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP Eval_FEM_fd_skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations){
 
-    // RbaryLocations is a list of list, it has to be passed from R in order to use RObjects.
-    // RbaryLocations could be dummy.
     RNumericMatrix barycenters( VECTOR_ELT(RbaryLocations,2));
     RIntegerMatrix id_element( VECTOR_ELT(RbaryLocations,1));
     RIntegerMatrix incidenceMatrix( RincidenceMatrix );
@@ -123,9 +146,9 @@ SEXP Eval_FEM_fd_skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SE
         RNumericMatrix result_(result);
 
         std::vector<bool> isinside(n_X);
-        if (barycenters.nrows() == 0) { //doesn't have location information
+        if (barycenters.nrows() == 0) {
             evaluator.eval(locations, coef, fast, result_, isinside);
-        } else { //have location information
+        } else {
             evaluator.evalWithInfo(locations, coef, fast, result_, isinside, id_element, barycenters);
         }
 
@@ -147,6 +170,21 @@ SEXP Eval_FEM_fd_skeleton(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SE
 
 }
 
+//! This function evaluates the solution on a set of given points by evaluating the tensorial basis expansion.
+/*!
+	This function is then called from <eval_FEM_time>"()" function.
+
+	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
+  \param Rmesh_time an R-vector containg the time mesh
+  \param Rlocations an R-matrix containing the xyz coordinates of the points where the solution has to be evaluated
+  \param Rtime_locations an R-vector containing the coordinates of the points where the solution has to be evaluated
+	\param RincidenceMatrix an R-matrix for the incidence matrix defining the regions in the case of areal data
+	\param Rcoef an R-vector the coefficients of the solution
+	\param Rorder an R integer containg the order of the solution
+	\param Rfast an R integer to enforce verbose search for Walking Algorithm (can miss location for non convex meshes)
+	\param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
+  \param Rflag_parabolic an R logical (seen as an integer) 1 if parabolic smoothing, 0 otherwise
+*/
 template<UInt ORDER, UInt mydim, UInt ndim, UInt DEGREE>
 SEXP Eval_FEM_time_skeleton (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rfast, SEXP Rsearch, SEXP RbaryLocations)
 {
@@ -183,10 +221,10 @@ SEXP Eval_FEM_time_skeleton (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP 
     phi.makeCompressed();
 
     SEXP result;
-    PROTECT(result=Rf_allocVector(REALSXP, N));  // 0
+    PROTECT(result=Rf_allocVector(REALSXP, N));  // 1
 
     SEXP Rcoef_0;
-    PROTECT(Rcoef_0=Rf_allocMatrix(REALSXP, n_nodes,1)); // 1
+    PROTECT(Rcoef_0=Rf_allocMatrix(REALSXP, n_nodes,1)); // 2
     RNumericMatrix coef_0(Rcoef_0);
 
     //!evaluates the solution on the given points location at the first
@@ -195,9 +233,9 @@ SEXP Eval_FEM_time_skeleton (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP 
     {
         coef_0[j] = coef[j];
     }
-    //does not temp need protection ?!
+
     SEXP temp = Eval_FEM_fd_skeleton<ORDER,mydim,ndim>(Rmesh,Rlocations, RincidenceMatrix,Rcoef_0, Rfast,Rsearch, RbaryLocations);
-    UNPROTECT(1); //UNPROTECT Rcoef_0 ?!
+    UNPROTECT(1);
 
     for(UInt k=0; k < N; k++) {
         REAL(result)[k] = REAL(temp)[k];
@@ -212,7 +250,7 @@ SEXP Eval_FEM_time_skeleton (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP 
     {
 
         SEXP Rcoef_i;
-        PROTECT(Rcoef_i=Rf_allocMatrix(REALSXP, n_nodes,1)); // 1
+        PROTECT(Rcoef_i=Rf_allocMatrix(REALSXP, n_nodes,1)); //1
         RNumericMatrix coef_i(Rcoef_i);
         for(UInt j=0; j<n_nodes; ++j)
         {

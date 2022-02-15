@@ -1364,7 +1364,10 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				{
 					computeDegreesOfFreedom(s,t,lambdaS,lambdaT);
 				}
-				computeGeneralizedCrossValidation(s,t,lambdaS,lambdaT);
+                if ( isMatrixNoCov_factorized() )
+				    computeGeneralizedCrossValidation(s,t,lambdaS,lambdaT);
+                else
+                    _GCV(s,t) = std::numeric_limits<double>::quiet_NaN();
 			}
 			else
 			{

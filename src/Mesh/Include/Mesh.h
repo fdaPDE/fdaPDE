@@ -24,7 +24,7 @@ public:
     /*!
       * This constructor permits the initialization of the mesh from an R object
       * constructed with the TriLibrary (our R wrapper for the Triangle library)
-      * in 2D (in 2.5D and 3D R functions can produce a compatible object if the
+      * in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object if the
       * triangulation is already available)
     */
 
@@ -115,12 +115,14 @@ private:
 
 };
 
-//Graph partial specialization
-
+//! Partial specialization template class handling the Linear Network mesh
+/*!
+/tparam ORDER representing the order of the elements of the mesh
+*/
 template <UInt ORDER>
 class MeshHandler<ORDER,1,2>{
     static_assert((ORDER==1 || ORDER==2),
-    "ERROR! TRYING TO INSTANTIATE GRAPH MESH_HANDLER WITH WRONG NUMBER OF NODES! See mesh.h");
+    "ERROR! TRYING TO INSTANTIATE LINEAR NETWORK MESH_HANDLER WITH WRONG NUMBER OF NODES! See mesh.h");
 public:
     using meshElement = Element<how_many_nodes(ORDER,1),1,2>;
 
@@ -128,7 +130,7 @@ public:
     /*!
       * This constructor permits the initialization of the mesh from an R object
       * constructed with the TriLibrary (our R wrapper for the Triangle library)
-      * in 2D (in 2.5D and 3D R functions can produce a compatible object if the
+      * in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object if the
       * triangulation is already available)
     */
 
@@ -186,8 +188,8 @@ public:
 
 private:
 
-    const RNumericMatrix points_;
-    const RIntegerMatrix elements_;
+    const RNumericMatrix points_; //! stores the mesh nodes
+    const RIntegerMatrix elements_; //! stores the edges
     const RIntMatrixMatrix neighbors_;
     const UInt search_;
 
