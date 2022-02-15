@@ -34,12 +34,7 @@
 #'
 #' ## Plot the FEM function
 #' plot(FEMfunction)
-
-<<<<<<< HEAD
-plot.FEM = function(x, colormap, num_refinements = NULL, ...)
-=======
 plot.FEM = function(x, colormap = "heat.colors", num_refinements = NULL, ...)
->>>>>>> acc05d0b9610550ca23058113783924250f5bdce
 {
 if(class(x$FEMbasis$mesh)=="mesh.2D"){
   if(x$FEMbasis$order == 1)
@@ -447,11 +442,7 @@ plot.mesh.1.5D<-function(x, ...)
 
    nodes <- FEM$FEMbasis$mesh$nodes
    triangles <- as.vector(t(FEM$FEMbasis$mesh$triangles))
-<<<<<<< HEAD
-
-=======
    
->>>>>>> acc05d0b9610550ca23058113783924250f5bdce
    colormap <- match.fun(colormap)
    heat <- colormap(100)
    # How many plots are needed?
@@ -482,11 +473,7 @@ plot.mesh.1.5D<-function(x, ...)
    FEMbasis = FEM$FEMbasis
 
    mesh = FEMbasis$mesh
-<<<<<<< HEAD
-
-=======
    
->>>>>>> acc05d0b9610550ca23058113783924250f5bdce
    colormap <- match.fun(colormap)
    heat <- colormap(100)
 
