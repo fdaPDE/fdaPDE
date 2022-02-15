@@ -69,7 +69,7 @@ protected:
     //! A method that provides a set of starting densities.
     void computeStartingDensities();
 
-    std::vector<UInt>  data_index_;
+    std::vector<UInt> data_index_;
 
 public:
     //! A Constructor.
@@ -168,6 +168,8 @@ protected:
     VectorXr computeDensityOnlyData(UInt);
     //! A method that provides a set of starting densities.
     void computeStartingDensities();
+
+    std::vector<UInt> data_index_;
 
 public:
     //! A Constructor.

@@ -145,8 +145,8 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec, SEXP RheatStep,
                                                        SEXP RheatIter, SEXP Rlambda, SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim,
                                                        SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch,
-                                                       SEXP Rmesh, const std::vector<Real>& mesh_time, bool isTime, SEXP RisTimeDiscrete,
-                                                       SEXP RflagMass, SEXP RflagLumped):
+                                                       SEXP Rmesh, const std::vector<Real>& mesh_time, SEXP RisTimeDiscrete,
+                                                       SEXP RflagMass, SEXP RflagLumped, bool isTime):
   DataProblem<ORDER, mydim, ndim>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals,
                                     Rtol1, Rtol2, Rprint, Rsearch, Rmesh, isTime),
   deData_time_(Rdata_time, Rlambda_time), mesh_time_(mesh_time), spline_(mesh_time) {
@@ -171,8 +171,7 @@ DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_ti
         }
     }
 
-    Rprintf("WARNING: %d observations removed.\n", data.size() - data_.size());
-    //Rprintf("WARNING: %d observations used in the algorithm.\n", data_.size());
+    Rprintf("WARNING: %d observations used in the algorithm.\n", data_.size());
 
     // FILL SPACE MATRIX
     std::vector <UInt> v(this->deData_.dataSize());
@@ -322,7 +321,7 @@ MatrixXr DataProblem_time<ORDER, mydim, ndim>::fillPhiQuad(UInt time_node) const
 
 
 template<UInt ORDER, UInt mydim, UInt ndim>
-SpMat DataProblem_time<ORDER, mydim, ndim>::computeUpsilon(const SpMat& phi, const SpMat& psi) const
+SpMat DataProblem_time<ORDER, mydim, ndim>::computeUpsilon(const SpMat& phi, const SpMat& psi)
 {
     static constexpr Real eps = std::numeric_limits<Real>::epsilon(), tolerance = 100 * eps;
 
