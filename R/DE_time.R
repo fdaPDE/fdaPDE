@@ -77,10 +77,10 @@
 #' @description This function implements a nonparametric spatio-temporal density estimation method with differential regularization
 #' (given by the sum of the square of the L2 norm of the laplacian of the density function and the square of the L2 norm of the second-
 #' order time-derivative), when points are located over a planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
-#'               stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-#'               direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
-#'               flagLumped=0)
+#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
+#'                    stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
+#'                    direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
+#'                    flagLumped=0)
 #' @export
 #' @examples
 #' library(fdaPDE)
@@ -114,7 +114,7 @@
 #' ## Density Estimation
 #' lambda <- 0.1
 #' lambda_time <- 0.001
-#' sol <- DE.FEM_time(data = data, data_time = data_time, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
+#' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
 #'                    fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
 #'                    nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
 #'                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
@@ -133,14 +133,16 @@
 #' FEMfunction = FEM.time(sol, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 #' evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
 #' image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
-#'         xlab = "x", ylab = "y", contour=list(drawlabels = FALSE),
+#'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
 #'         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
+#'
+#' plot(FEMfunction, 0.5)
 
 
-DE.FEM_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
+DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
                         stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
                         step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
-                        search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+                        search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2

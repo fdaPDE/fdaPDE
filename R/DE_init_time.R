@@ -28,17 +28,63 @@
 #' for each possible pair (\code{lambda}, \code{lambda_time}). If \code{init = 'CV'} it returns the initial vector associated
 #' to the unique pair (\code{lambda}, \code{lambda_time}) given.
 #' @description This function implements two methods for the density initialization procedure.
-#' @usage DE.heat.FEM(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=500,
-#'                    init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=500,
+#'                         init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 #' @export
 #' @examples
+#' library(fdaPDE)
+#' library(mvtnorm) # library to generate the data
 #'
-#' ...................................
+#' ## Create a 2D mesh over a squared domain
+#' Xbound <- seq(-3, 3, length.out = 10)
+#' Ybound <- seq(-3, 3, length.out = 10)
+#' grid_XY <- expand.grid(Xbound, Ybound)
+#' Bounds <- grid_XY[(grid_XY$Var1 %in% c(-3, 3)) | (grid_XY$Var2 %in% c(-3, 3)), ]
+#' mesh <- create.mesh.2D(nodes = Bounds, order = 1)
+#' mesh <- refine.mesh.2D(mesh, maximum_area = 0.1, minimum_angle = 20)
+#' FEMbasis <- create.FEM.basis(mesh)
 #'
+#' ## Create a 1D time mesh over a (non-negative) interval
+#' mesh_time <- seq(0, 1, length.out=11)
 #'
+#' ## Generate data
+#' n <- 1000
+#' set.seed(10)
+#' locations <- mvtnorm::rmvnorm(1, mean=c(0,0), sigma=diag(2))
+#' times <- runif(n,0,1)
+#' data <- cbind(locations, times)
+#'
+#' t <- 0.5 # time instant in which to evaluate the solution
+#'
+#' plot(mesh)
+#' sample <- data[abs(data[,3]-t)<0.05,1:2]
+#' points(sample, col="red", pch=19, cex=1, main=paste('Sample | ', t-0.05,' < t < ', t+0.05))
+#'
+#' ## Density initialization
+#' lambda = 0.1
+#' lambda_time <- 0.001
+#' sol = DE.heat.FEM_time(data = locations, data_time = times, FEMbasis = FEMbasis, lambda = lambda, lambda_time = lambda_time,
+#'                        heatStep=0.1, heatIter=500, init="Heat")
+#'
+#' ## Visualization
+#'
+#' plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis))
+#'
+#' n = 100
+#' X <- seq(-3, 3, length.out = n)
+#' Y <- seq(-3, 3, length.out = n)
+#' grid <- expand.grid(X, Y)
+#'
+#' FEMfunction = FEM.time(sol, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+#' evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
+#' image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
+#'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
+#'         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
+#'
+#' plot(FEMfunction, 0.5)
 
-DE.heat.FEM_time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1,
-                             heatIter=500, init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1,
+                             heatIter=500, init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
