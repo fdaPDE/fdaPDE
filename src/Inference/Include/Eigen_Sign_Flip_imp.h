@@ -112,7 +112,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
   Real SS_res = eps_hat.squaredNorm();
   Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
 
-  Real threshold = 5*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
+  Real threshold = 10*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
   UInt N_Eig_Out=0;
     
 
@@ -355,7 +355,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     Real SS_res = eps_hat.squaredNorm();
     Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
 
-    Real threshold = 5*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
+    Real threshold = 10*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
     UInt N_Eig_Out=0;
     
     // Observed statistic
@@ -426,7 +426,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     Real SS_res = eps_hat.squaredNorm();
     Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
 
-    Real threshold = 5*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
+    Real threshold = 10*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
     UInt N_Eig_Out=0;
 
     // Observed statistic
