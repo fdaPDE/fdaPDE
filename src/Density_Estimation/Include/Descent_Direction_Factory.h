@@ -38,11 +38,11 @@ public:
                           const FunctionalProblem_time<ORDER, mydim, ndim>& fp, const std::string& d)
     {
         if (d=="Gradient") {
-            std::cout << "Gradient direction" << std::endl;
+            Rprintf("Gradient direction");
             return make_unique<DirectionGradient<ORDER, mydim, ndim, FunctionalProblem_time<ORDER, mydim, ndim>>>(fp);
         }
         else if (d=="BFGS") {
-            std::cout << "BFGS direction" << std::endl;
+            Rprintf("BFGS direction");
             return make_unique<DirectionBFGS<ORDER, mydim, ndim, FunctionalProblem_time<ORDER, mydim, ndim>>>(fp, dp.getNumNodes()*dp.getSplineNumber());
         }
         else{
