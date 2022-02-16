@@ -134,6 +134,7 @@ extern "C"
     \param RtestType an R-vector defining if hypotesis testing is required, and which type (one at the time, simultaneous)
     \param RintervalType an R-vector defining if confidence intervals are required, and which type (one at the time, simultaneous, bonferroni)
     \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, eigen-sign-flip)
+    \param RcomponentType an R-vector specifying on which component of the model the inferential analysis should be peformed (parametric, nonparametric, both)
     \param RexactInference an R-integer that defines if an exact inferential analysis is required or not
     \param RenhancedInference an R-integer that defines if an enhanced ESF test is required or not
     \param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
@@ -150,14 +151,14 @@ extern "C"
 					 SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,  SEXP RincidenceMatrix, SEXP RarealDataAvg,
 					 SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch,
 					 SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
-					 SEXP RtestType, SEXP RintervalType, SEXP RimplementationType, SEXP RexactInference,  SEXP RenhancedInference, SEXP RcoeffInference,
+					 SEXP RtestType, SEXP RintervalType, SEXP RimplementationType,  SEXP RcomponentType, SEXP RexactInference,  SEXP RenhancedInference, SEXP RcoeffInference,
 				         SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile,SEXP RinferenceAlpha, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set data
     RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK, Rbeta, Rc, Ru,
 						      Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Ric, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RexactInference, RenhancedInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RenhancedInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];

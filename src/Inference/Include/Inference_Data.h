@@ -42,7 +42,7 @@ class InferenceData
 				SEXP exact_Inference_, SEXP enhanced_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP f_Var_,
 			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
                 //! Space-time constructor (without inference for f --> not implemented yet)
-                InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
+                InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
 			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
                 
                 

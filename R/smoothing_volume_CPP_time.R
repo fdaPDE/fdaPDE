@@ -75,6 +75,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   test_Type<-as.vector(R_Inference_Data_Object@test)
   interval_Type<-as.vector(R_Inference_Data_Object@interval)
   implementation_Type<-as.vector(R_Inference_Data_Object@type)
+  component_Type<-as.vector(R_Inference_Data_Object@component)
   exact_Inference<-R_Inference_Data_Object@exact
   enhanced_Inference<-R_Inference_Data_Object@enhanced
   coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
@@ -152,6 +153,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   storage.mode(test_Type) <- "integer"
   storage.mode(interval_Type) <- "integer"
   storage.mode(implementation_Type) <- "integer"
+  storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
   storage.mode(enhanced_Inference) <- "integer"
   storage.mode(coeff_Inference) <- "double"
@@ -277,7 +279,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
     mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
     IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, 
-    test_Type,interval_Type,implementation_Type,exact_Inference,enhanced_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
+    test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,enhanced_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
     PACKAGE = "fdaPDE")
 
   return(c(bigsol,ICsol))

@@ -19,7 +19,7 @@
   \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
   \param definition_ parameter used to set definition of the InferenceData object
 */
-InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP exact_Inference_,  SEXP enhanced_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
+InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,  SEXP enhanced_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -59,6 +59,18 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
       implementation_Type[i] = "eigen-sign-flip";
     else if(INTEGER(implementation_Type_)[i]==4)
       implementation_Type[i] = "sign-flip";
+  }
+
+  //component_Type
+  UInt size_component_Type=Rf_length(component_Type_);
+  component_Type.resize(size_component_Type);
+  for(UInt i=0; i<size_component_Type; i++){
+    if(INTEGER(component_Type_)[i]==1)
+      component_Type[i] = "parametric";
+    else if(INTEGER(component_Type_)[i]==2)
+      component_Type[i] = "nonparametric";
+    else if(INTEGER(component_Type_)[i]==3)
+      component_Type[i] = "both";
   }
  
   //exact_Inference
@@ -126,20 +138,8 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 //! Space-only main constructor of the class, with inference for f
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
 			     SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
-			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, exact_Inference_, enhanced_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
- 
-  //component_Type
-  UInt size_component_Type=Rf_length(component_Type_);
-  component_Type.resize(size_component_Type);
-  for(UInt i=0; i<size_component_Type; i++){
-    if(INTEGER(component_Type_)[i]==1)
-      component_Type[i] = "parametric";
-    else if(INTEGER(component_Type_)[i]==2)
-      component_Type[i] = "nonparametric";
-    else if(INTEGER(component_Type_)[i]==3)
-      component_Type[i] = "both";
-  }
-  
+			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, enhanced_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
+   
   //locs_Inference
   UInt m_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[0]; // #Rows
   UInt d_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[1]; // #Columns
