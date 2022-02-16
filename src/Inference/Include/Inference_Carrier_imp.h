@@ -81,4 +81,10 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   setBeta_hatp(beta_hatp_);
   setZ_hat(z_hat_);
 
+  //Since only inference on beta is allowed in ST, for safety
+  setN_loc(0);
+  setPsi_loc(*(model_->getpsi_()));
+  setW_loc(*(Regression_Data_->getCovariates()));
+  setZ_loc(*(Regression_Data_->getObservations()));
+
 };

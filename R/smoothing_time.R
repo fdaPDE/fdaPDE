@@ -511,72 +511,78 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Save statistics and intervals
   if(R_Inference_Data_Object@definition==1){
     inference = {}
-    confidence_intervals = matrix(data = bigsol[[14]], nrow = 3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1])
-    p_val = matrix(data = bigsol[[13]], nrow = dim(R_Inference_Data_Object@coeff)[1], ncol = length(R_Inference_Data_Object@type))
+    confidence_intervals = matrix(data = bigsol[[14]], nrow = 2*3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1]) #since inference for f is not implemented for ST
+    p_val = matrix(data = bigsol[[13]], nrow = dim(R_Inference_Data_Object@coeff)[1]+1, ncol = length(R_Inference_Data_Object@type))
     
     for(i in 1:length(R_Inference_Data_Object@type)){ # each element is a different inferential setting
       if(R_Inference_Data_Object@interval[i]!=0){ # Intervals requested by this setting, adding them to the right implementation position
-        ci=t(confidence_intervals[(3*(i-1)+1):(3*(i-1)+3),])
         
-        if(R_Inference_Data_Object@type[i]==1){
-          inference$CI$wald[[length(inference$CI$wald)+1]] = ci
-          inference$CI$wald=as.list(inference$CI$wald)
-        }
-        else if(R_Inference_Data_Object@type[i]==2){
-          inference$CI$speckman[[length(inference$CI$speckman)+1]] = ci
-          inference$CI$speckman=as.list(inference$CI$speckman)
-        }
-        else if(R_Inference_Data_Object@type[i]==3){
-          if(ci[2]> 10^20){
-            warning("ESF CI bisection algorithm did not converge, returning NA")
-            for(h in 1:nrow(ci))
-              for(k in 1:ncol(ci))
-                ci[h,k]=NA
+        if(R_Inference_Data_Object@component[i]!=2){ # intervals for beta were requested, just for safety, actually it cannot be equal to 2
+          p = dim(R_Inference_Data_Object@coeff)[1]
+          ci_beta=t(confidence_intervals[(3*(2*i-2)+1):(3*(2*i-2)+3),1:p])
+          if(R_Inference_Data_Object@type[i]==1){
+            inference$beta$CI$wald[[length(inference$beta$CI$wald)+1]] = ci_beta
+            inference$beta$CI$wald=as.list(inference$beta$CI$wald)
           }
-          inference$CI$eigen_sign_flip[[length(inference$CI$eigen_sign_flip)+1]] = ci
-          inference$CI$eigen_sign_flip=as.list(inference$CI$eigen_sign_flip)
+          else if(R_Inference_Data_Object@type[i]==2){
+            inference$beta$CI$speckman[[length(inference$beta$CI$speckman)+1]] = ci_beta
+            inference$beta$CI$speckman=as.list(inference$beta$CI$speckman)
+          }
+          else if(R_Inference_Data_Object@type[i]==3){
+            if(ci_beta[2]> 10^20){
+              warning("ESF CI bisection algorithm did not converge, returning NA")
+              for(h in 1:nrow(ci_beta))
+                for(k in 1:ncol(ci_beta))
+                  ci_beta[h,k]=NA
+            }
+            inference$beta$CI$eigen_sign_flip[[length(inference$beta$CI$eigen_sign_flip)+1]] = ci_beta
+            inference$beta$CI$eigen_sign_flip=as.list(inference$beta$CI$eigen_sign_flip)
+          }
         }
       }
       
       if(R_Inference_Data_Object@test[i]!=0){ # Test requested by this setting, adding them to the right implementation position
         statistics=p_val[,i]
-        p_values = numeric()
-        if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip p-value is already computed in cpp code
-          if(R_Inference_Data_Object@test[i]==1){ 
-            # one-at-the-time tests
-            p_values = statistics
-          }
-          else if(R_Inference_Data_Object@test[i]==2){
-            # simultaneous test
-            p_values = statistics[1]
-          }
-        }else{
-          # Compute p-values
-          if(R_Inference_Data_Object@test[i]==1){ # Wald and Speckman return statistics and needs computation of p-values (no internal use of distributions quantiles)
-            # one-at-the-time-tests
-            p_values = numeric(length(statistics))
-            for(l in 1:length(statistics)){
-              p_values[l] = 2*pnorm(-abs(statistics[l]))
+        if(R_Inference_Data_Object@component[i]!=2){ # test on beta was requested, just for safety, it cannot be otherwise
+          beta_statistics = statistics[1:dim(R_Inference_Data_Object@coeff)[1]]
+          p_values = numeric()
+          if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip p-value is already computed in cpp code
+            if(R_Inference_Data_Object@test[i]==1){ 
+              # one-at-the-time tests
+              p_values = beta_statistics
+            }
+            else if(R_Inference_Data_Object@test[i]==2){
+              # simultaneous test
+              p_values = beta_statistics[1]
+            }
+          }else{
+            # Compute p-values
+            if(R_Inference_Data_Object@test[i]==1){ # Wald and Speckman return statistics and needs computation of p-values (no internal use of distributions quantiles)
+              # one-at-the-time-tests
+              p_values = numeric(length(beta_statistics))
+              for(l in 1:length(beta_statistics)){
+                p_values[l] = 2*pnorm(-abs(beta_statistics[l]))
+              }
+            }
+            else if(R_Inference_Data_Object@test[i]==2){
+              # simultaneous tests
+              p = dim(R_Inference_Data_Object@coeff)[1]
+              p_values = 1-pchisq(beta_statistics[1], p)
             }
           }
-          else if(R_Inference_Data_Object@test[i]==2){
-            # simultaneous tests
-            p = dim(R_Inference_Data_Object@coeff)[1]
-            p_values = 1-pchisq(statistics[1], p)
+          # add p-values in the right position
+          if(R_Inference_Data_Object@type[i]==1){
+            inference$beta$p_values$wald[[length(inference$beta$p_values$wald)+1]] = p_values
+            inference$beta$p_values$wald=as.list(inference$beta$p_values$wald)
           }
-        }
-        # add p-values in the right position
-        if(R_Inference_Data_Object@type[i]==1){
-          inference$p_values$wald[[length(inference$p_values$wald)+1]] = p_values
-          inference$p_values$wald=as.list(inference$p_values$wald)
-        }
-        else if(R_Inference_Data_Object@type[i]==2){
-          inference$p_values$speckman[[length(inference$p_values$speckman)+1]] = p_values
-          inference$p_values$speckman=as.list(inference$p_values$speckman)
-        }
-        else if(R_Inference_Data_Object@type[i]==3){
-          inference$p_values$eigen_sign_flip[[length(inference$p_values$eigen_sign_flip)+1]] = p_values
-          inference$p_values$eigen_sign_flip=as.list(inference$p_values$eigen_sign_flip)
+          else if(R_Inference_Data_Object@type[i]==2){
+            inference$beta$p_values$speckman[[length(inference$beta$p_values$speckman)+1]] = p_values
+            inference$beta$p_values$speckman=as.list(inference$beta$p_values$speckman)
+          }
+          else if(R_Inference_Data_Object@type[i]==3){
+            inference$beta$p_values$eigen_sign_flip[[length(inference$beta$p_values$eigen_sign_flip)+1]] = p_values
+            inference$beta$p_values$eigen_sign_flip=as.list(inference$beta$p_values$eigen_sign_flip)
+          }
         }
       }
     }

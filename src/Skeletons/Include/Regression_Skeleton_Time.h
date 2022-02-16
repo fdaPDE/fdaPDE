@@ -71,7 +71,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 		if((bestLambdaS != optimizationData.get_size_S()-1) || (bestLambdaT != optimizationData.get_size_T()-1)){
 			regression.build_regression_inference(Optimal_lambda_S, Optimal_lambda_T);
 			// for debug only 
-			Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
+			//Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 			}
 		}
 
@@ -84,7 +84,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	//!Prepare the inference output space
         UInt n_inf_implementations = inferenceData.get_test_type().size();
 	UInt p_inf = inferenceData.get_coeff_inference().rows();
-        MatrixXv inference_beta_Output = inference_Output.topRows(n_inf_implementations);
+        MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
 	MatrixXv p_values;
 	MatrixXv intervals;
 	
@@ -95,15 +95,23 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
           intervals(0,0)(1) = 10e20; 
           intervals(0,0)(2) = 10e20;
 	  
-	  p_values.resize(1,1);
+	  p_values.resize(2,1);
 	  p_values(0,0).resize(1);
 	  p_values(0,0)(0)= 10e20;
+          p_values(1,0).resize(1);
+	  p_values(1,0)(0)= 10e20;
 	}else{
 	  
-	  p_values.resize(1, n_inf_implementations);
-	  intervals.resize(n_inf_implementations, p_inf);
-	  p_values=(inference_beta_Output.col(0)).transpose();
-          intervals=inference_beta_Output.rightCols(p_inf);
+	  p_values.resize(2, n_inf_implementations);
+	  intervals.resize(2*n_inf_implementations, p_inf);
+          
+          for(UInt i=0; i < n_inf_implementations; ++i){
+	    p_values.row(0)(i) = inf_Output.col(0)(2*i);
+            p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
+          }
+
+          intervals=inf_Output.rightCols(p_inf);
+	
 	}
 
         //!Prepare the local f variance output space
@@ -113,7 +121,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
         f_var(0,0).resize(f_size);
 
         if(inferenceData.get_f_var()){
-           f_var(0,0) = inference_Output(n_inf_implementations,0);
+           f_var(0,0) = inference_Output(2*n_inf_implementations,0);
         }
 	else{
            for(long int i=0; i<f_size; ++i){
@@ -225,12 +233,13 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	}
 
 	// We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
-	SET_VECTOR_ELT(result,12,Rf_allocMatrix(REALSXP,p_values(0).size(),p_values.cols())); // P_values info (inference on betas)
+	SET_VECTOR_ELT(result,12,Rf_allocMatrix(REALSXP,p_values(0).size()+1,p_values.cols())); // P_values info (inference on betas)
 	Real *rans12=REAL(VECTOR_ELT(result,12));
 	for(UInt j = 0; j<p_values.cols(); j++){
 	  for(UInt i = 0; i<p_values(0).size(); i++){
-	    rans12[i+p_values(0).size()*j]=p_values(j)(i);
+	    rans12[i+(p_values(0).size()+1)*j]=p_values(0,j)(i);
 	  }
+         rans12[p_values(0).size()+(p_values(0).size()+1)*j] = p_values(1,j)(0);
 	}
 	
 	SET_VECTOR_ELT(result, 13, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (Inference on betas)
@@ -242,6 +251,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	    } 
 	  }
 	}
+
 
         // local f variance
 	// Add the vector of lambdas
@@ -273,7 +283,8 @@ void inference_wrapper_time(const OptimizationData & opt_data, const Inference_C
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
 
-  inference_output.resize(n_implementations+1, p+1);
+  // since only inference on beta is implemented for ST 
+  inference_output.resize(2*n_implementations+1, p+1);
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
     // Select the right policy for inversion of MatrixNoCov
@@ -283,14 +294,14 @@ void inference_wrapper_time(const OptimizationData & opt_data, const Inference_C
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
       std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-      inference_output.row(i) = inference_Solver->compute_inference_output();
+      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
 
     }
     
     // Check if local f variance has to be computed
     if(inf_car.getInfData()->get_f_var()){
       std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(n_implementations,0) = inference_Solver->compute_f_var();
+      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
     }
   }
   else{
@@ -301,7 +312,7 @@ void inference_wrapper_time(const OptimizationData & opt_data, const Inference_C
       // Factory instantiation for solver: using factory provided in Inference_Factory.h
       std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
 		
-      inference_output.row(i) = inference_Solver->compute_inference_output();
+      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
 
 
     }
@@ -309,7 +320,7 @@ void inference_wrapper_time(const OptimizationData & opt_data, const Inference_C
     // Check if local f variance has to be computed
     if(inf_car.getInfData()->get_f_var()){
       std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(n_implementations,0) = inference_Solver->compute_f_var();
+      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
     }
   }
 
