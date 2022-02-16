@@ -278,7 +278,6 @@ VectorXr HeatProcess_time<ORDER, mydim, ndim>::computeDensityOnlyData(UInt num_b
                 x[node.id()] += 1;
         }
     }
-    else std::cout << "Null size" << std::endl;
 
     x.array() /= patch_areas_.array();
 
