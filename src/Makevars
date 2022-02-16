@@ -4,8 +4,9 @@
 CXX_STD = CXX11
 
 #This flag hides those ugly EIGEN warnings
-#It has been commented out because it is not admissible on CRAN  
-#PKG_CXXFLAGS = -Wno-ignored-attributes
+#It has been commented out because it is not admissible on CRAN
+PKG_CXX11FLAGS = -g -O3 -Wall -Wextra -pedantic
+PKG_CXX11FLAGS = -Wno-ignored-attributes
 
 # Group the source files
 SOURCES =  $(wildcard */*.cpp) #subfolders cpp files
