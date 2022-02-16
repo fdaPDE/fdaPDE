@@ -24,14 +24,14 @@ If this is \code{NULL} the initial density is estimated thanks to a discretized 
 process that starts from the empirical density of the data. Default is \code{NULL}.
 N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).}
 
-\item{heatStep}{Real specifying the time step for the discretized heat diffusionn process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
 
-\item{heatIter}{Integer specifying the number of iteriations to perform the discretized heat diffusion process.}
+\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
 
-\item{stepProposals}{A scalar or a vector containing the step parameters useful for the descent algotihm. If there is a 
+\item{stepProposals}{A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
 vector of parameters, the biggest one such that the functional decreases at each iteration is choosen. If it is \code{NULL}
 the following vector \code{c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)} is proposed. Default is \code{NULL}.
-N.B. If the program does not receive a right parameter, it abort the R session. Try a smaller parameter.}
+N.B. If the program does not receive a right parameter, it aborts the R session. Try a smaller parameter.}
 
 \item{tol1}{A scalar specifying the tolerance to use for the termination criterion based on the percentage difference
 between two consecutive iterations of the minimization algorithm of the loss function, the log-likelihood and the
