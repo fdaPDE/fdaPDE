@@ -181,7 +181,7 @@ CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, 
 }
 
 CPP_FEM.graph.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+                                stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
 

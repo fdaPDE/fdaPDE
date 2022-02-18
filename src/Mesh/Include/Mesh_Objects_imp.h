@@ -32,7 +32,7 @@ template <class ArgType>
 Eigen::CwiseNullaryOp<BaryCoord_functor<ArgType>, typename BaryCoord_helper<ArgType>::VectorType>
 makeBaryCoord(const Eigen::MatrixBase<ArgType>& arg)
 {
-	static_assert(ArgType::SizeAtCompileTime==2 || ArgType::SizeAtCompileTime==3,
+	static_assert(ArgType::SizeAtCompileTime==1 || ArgType::SizeAtCompileTime==2 || ArgType::SizeAtCompileTime==3,
 		"ERROR! WRONG SIZE OF THE INPUT! See mesh_objects_imp.h!");
 
   	using VectorType = typename BaryCoord_helper<ArgType>::VectorType;

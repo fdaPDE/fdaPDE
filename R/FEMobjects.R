@@ -47,7 +47,7 @@ create.FEM.basis = function(mesh=NULL, saveTree = FALSE)
   if (is.null(mesh))
     stop("mesh required;  is NULL.")
 
-  if(class(mesh)!='mesh.2D' & class(mesh)!='mesh.2.5D' & class(mesh)!='mesh.3D')
+  if(class(mesh)!='mesh.1.5D' & class(mesh)!='mesh.2D' & class(mesh)!='mesh.2.5D' & class(mesh)!='mesh.3D')
     stop("Unknown mesh class")
 
   if (saveTree == TRUE) {
@@ -75,7 +75,7 @@ create.FEM.basis = function(mesh=NULL, saveTree = FALSE)
       if(myDim == 1 && nDim == 2){
         mesh$edges = mesh$edges - 1
         storage.mode(mesh$edges) <- "integer"
-      else if(nDim==2 || (myDim==2 && nDim==3)){
+      }else if(nDim==2 || (myDim==2 && nDim==3)){
         mesh$triangles = mesh$triangles - 1
         mesh$edges = mesh$edges - 1
         storage.mode(mesh$triangles) <- "integer"
