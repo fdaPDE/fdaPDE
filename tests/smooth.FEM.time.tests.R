@@ -674,7 +674,7 @@ solParCovIter = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], cova
 # Example of RMSE computation
 TimeNodesEval=seq(0,4,length.out = 9)
 eval_locations = cbind(rep(TimeNodesEval,each=nnodes),rep(nodesLocations[,1],length(TimeNodesEval)),rep(nodesLocations[,2],length(TimeNodesEval)),rep(nodesLocations[,3],length(TimeNodesEval)))
-sol_eval=eval.FEM.time(solSep$fit.FEM.time,locations = nodesLocations,time.instants = TimeNodesEval, lambdaS = solSep$bestlambda[1],lambdaT = solSep$bestlambda[2])
+sol_eval=eval.FEM.time(solSep$fit.FEM.time,locations = nodesLocations,time.instants = TimeNodesEval, lambdaS = solSep$optimization$lambda_position[1], lambdaT = solSep$optimization$lambda_position[2])
 sol_exact = func(eval_locations)
 RMSE<-function(f,g) sqrt(mean((f-g)^2))
 RMSE(sol_eval,sol_exact)
@@ -898,7 +898,7 @@ solParCovIter = smooth.FEM.time(observations = datacov[,2:length(TimeLocations)]
                             IC=func_evaluation[1:nnodes])
 #### Example of RMSE computation
 
-sol_eval=eval.FEM.time(solParNoNodes$fit.FEM.time,locations = loc[1:nloc,2:4], time.instants = timeloc, lambdaS = solParNoNodes$bestlambda[1],lambdaT = solParNoNodes$bestlambda[2])
+sol_eval=eval.FEM.time(solParNoNodes$fit.FEM.time,locations = loc[1:nloc,2:4], time.instants = timeloc, lambdaS = solSep$optimization$lambda_position[1], lambdaT = solSep$optimization$lambda_position[1])
 sol_exact = func_evaluation2
 RMSE<-function(f,g) sqrt(mean((f-g)^2))
 RMSE(sol_eval,sol_exact)
