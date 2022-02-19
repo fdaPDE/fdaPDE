@@ -347,7 +347,7 @@ const VectorXr* HeatProcess_time<ORDER, mydim, ndim>::chooseInitialization(Real 
     UInt index_min;
     sum.minCoeff(&index_min);
 
-    Rprintf("The initialization selected for lambda_S %f and lambda_T %f is the number %d\n", lambda_S, lambda_T, index_min);
+    //Rprintf("The initialization selected for lambda_S %f and lambda_T %f is the number %d\n", lambda_S, lambda_T, index_min);
 
     VectorXr g_heat = init_proposals_[index_min].array().log();
 
@@ -411,7 +411,7 @@ void Heat_CV_time<ORDER, mydim, ndim>::perform_init_cv()
 
     init_best_ = std::distance(cv_errors_.cbegin(), std::min_element(cv_errors_.cbegin(), cv_errors_.cend()));
 
-    Rprintf("The initialization selected is the number %d\n", init_best_);
+    //Rprintf("The initialization selected is the number %d\n", init_best_);
 
     // Total
     this->data_index_.resize(this->dataProblem_.dataSize());
