@@ -125,7 +125,7 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, 
 
 
   ###################################### Checking parameters, sizes and conversion #####################################
-  checkParametersDE_init(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, heatStep, heatIter, init, search)
+  checkParametersDE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, heatStep, heatIter, init, search)
 
   ## Converting to format for internal usage
   data = as.matrix(data)
@@ -134,7 +134,7 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, 
   lambda_time = as.vector(lambda_time)
   mesh_time = as.vector(mesh_time)
 
-  checkParametersSizeDE_init(data, data_time, ndim)
+  checkParametersSizeDE_init_time(data, data_time, ndim)
   #################################### End checking parameters, sizes and conversion ###################################
 
 
