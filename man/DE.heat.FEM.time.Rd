@@ -4,8 +4,8 @@
 \alias{DE.heat.FEM.time}
 \title{Spatio-temporal density initialization}
 \usage{
-DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=10,
-                 init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=500,
+                        init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -24,13 +24,13 @@ and, if ndim=3, the third column corresponds to the \code{z}-coordinates.}
 
 \item{lambda_time}{A scalar or vector of smoothing parameters in time. Default is NULL. It is useful only if \code{init='Heat'}.}
 
-\item{heatStep}{A real specifying the time step for the discretized heat diffusion process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
 
-\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
+\item{heatIter}{An integer specifying the number of iteriations to perform the discretized heat diffusion process.}
 
 \item{init}{A string specifying the initialization procedure. It can be either 'Heat' or 'CV'.}
 
-\item{nFolds}{An integer specifying the number of folds used in the cross validation technique. It is useful only
+\item{nFolds}{An integer specifying the number of folds used in the cross validation techinque. It is useful only
 for the case \code{init = 'CV'}.}
 
 \item{search}{A flag to decide the search algorithm type (tree or naive or walking search algorithm).}
@@ -73,7 +73,7 @@ mesh_time <- seq(0, 1, length.out=11)
 ## Generate data
 n <- 1000
 set.seed(10)
-locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
+locations <- mvtnorm::rmvnorm(1, mean=c(0,0), sigma=diag(2))
 times <- runif(n,0,1)
 data <- cbind(locations, times)
 
@@ -86,20 +86,23 @@ points(sample, col="red", pch=19, cex=1, main=paste('Sample | ', t-0.05,' < t < 
 ## Density initialization
 lambda = 0.1
 lambda_time <- 0.001
-sol = DE.heat.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-                       heatStep=0.1, heatIter=10, init="Heat")
+sol = DE.heat.FEM_time(data = locations, data_time = times, FEMbasis = FEMbasis, lambda = lambda, lambda_time = lambda_time,
+                       heatStep=0.1, heatIter=500, init="Heat")
 
 ## Visualization
+
+plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis))
 
 n = 100
 X <- seq(-3, 3, length.out = n)
 Y <- seq(-3, 3, length.out = n)
 grid <- expand.grid(X, Y)
 
-FEMfunction = FEM.time(sol$f_init[,1,1], mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+FEMfunction = FEM.time(sol, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
-image2D(x = X, y = Y, z = matrix(evaluation, n, n), col = heat.colors(100),
-        xlab = "", ylab = "", contour = list(drawlabels = FALSE),
-        main = paste("Initial guess at t = ", t), zlim=c(0,0.2), asp = 1)
+image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
+        xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
+        main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
 
+plot(FEMfunction, 0.5)
 }

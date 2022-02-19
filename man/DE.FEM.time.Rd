@@ -4,10 +4,10 @@
 \alias{DE.FEM.time}
 \title{Nonparametric spatio-temporal density estimation with differential regularization}
 \usage{
-DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
-            stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-            direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
-            flagLumped=0)
+DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
+                   stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
+                   direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
+                   flagLumped=0)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -31,9 +31,9 @@ is chosen, together with the optimal smoothing parameter in space, with a \code{
 \item{fvec}{A vector of length #\code{nodes} of the spatial mesh times #\code{B-spline} temporal functional basis. It corresponds to the
 node values of the initial density function. If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion
 process that starts from the empirical density of the data. Default is \code{NULL}.
-N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).}
+N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).}
 
-\item{heatStep}{A real specifying the time step for the discretized heat diffusion process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
 
 \item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
 
@@ -54,7 +54,7 @@ criterion. Default is 0.}
 penalization terms printed on console at each iteration of the descent algorithm (plus some other information/warnings). Default is \code{FALSE}.
 N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.}
 
-\item{nfolds}{An integer specifying the number of folds used in cross validation technique to find the best pair of
+\item{nfolds}{An integer specifying the number of folds used in cross validation techinque to find the best pair of
 (\code{lambda}, \code{lambda_time}) smoothing parameters.
 If there is only one pair of (\code{lambda}, \code{lambda_time}) it can be \code{NULL}. Default is \code{NULL}.}
 
@@ -68,13 +68,7 @@ if it is \code{Wolfe_Method}, the step is computed at each iteration according t
 \item{direction_method}{A string specifying which descent direction to use in the descent algorithm.
 If it is \code{Gradient}, the direction is the one given by the gradient descent method (the opposite to the gradient of
 the functional); if instead it is \code{BFGS} the direction is the one given by the BFGS method
-(Broyden-Fletcher-Goldfarb-Shanno, a Quasi-Newton method). Default is \code{BFGS}. Other possible choices:
-Conjugate Gradient direction with Fletcher-Reeves formula (\code{ConjugateGradientFR}), Conjugate Gradient direction with
-Polak-Ribiére-Polyak formula (\code{ConjugateGradientPRP}), Conjugate Gradient direction with Hestenes-Stiefel formula
-(\code{ConjugateGradientHS}), Conjugate Gradient direction with Dai-Yuan formula (\code{ConjugateGradientDY}), Conjugate
-Gradient direction with Conjugate-Descent formula (\code{ConjugateGradientCD}), Conjugate Gradient direction with Liu-Storey
-formula (\code{ConjugateGradientLS}), L-BFGS direction with 5 correction vectors (\code{L-BFGS5}), L-BFGS direction with 10
-correction vectors (\code{L-BFGS10}).}
+(Broyden-Fletcher-Goldfarb-Shanno, a Quasi-Newton method). Default is \code{BFGS}.}
 
 \item{preprocess_method}{A string specifying the k fold cross validation technique to use, if there is more than one pair of
 smoothing parameters in space and in time (\code{lambda}, \code{lambda_time}); otherwise it should be \code{NULL}.
@@ -138,7 +132,7 @@ mesh_time <- seq(0, 1, length.out=11)
 ## Generate data
 n <- 1000
 set.seed(10)
-locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
+locations <- mvtnorm::rmvnorm(1, mean=c(0,0), sigma=diag(2))
 times <- runif(n,0,1)
 data <- cbind(locations, times)
 
@@ -152,7 +146,7 @@ points(sample, col="red", pch=19, cex=1, main=paste('Sample | ', t-0.05,' < t < 
 lambda <- 0.1
 lambda_time <- 0.001
 sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-                   fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
+                   fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
                    nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 
@@ -167,10 +161,11 @@ image2D(x = X, y = Y, z = matrix(as.matrix(data_grid), n, n), col=heat.colors(10
         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
         main = paste("True density at t = ", t), zlim=c(0,0.2), asp = 1)
 
-FEMfunction = FEM.time(sol$g, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+FEMfunction = FEM.time(sol, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
 image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
 
+plot(FEMfunction, 0.5)
 }
