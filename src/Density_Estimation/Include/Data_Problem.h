@@ -144,10 +144,6 @@ private:
     std::vector<std::vector<UInt>> data_Heat_;
     // Flags related to penalty matrices.
     bool flagMass_, flagLumped_;
-    // Indices to keep track of how Upsilon_ is filled with respect to the order in which data appear in the dataset.
-    // This data structure is useful in discrete time settings only, in order to efficiently compute Upsilon_ during the
-    // CV preprocessing stage.
-    std::vector<UInt> Upsilon_indices_;
 
     //! A method to compute the matrix which evaluates the temporal basis functions at the time instants.
     void fillGlobalPhi();
@@ -181,7 +177,7 @@ public:
     //! A method to compute the Upsilon_ matrix as the Kronecker product between GlobalPhi_ and GlobalPsi_.
     //! In discrete time settings, this method builds Upsilon_indices_ for the efficient extraction of Upsilon_ rows
     //! (for CV preprocessing).
-    SpMat computeUpsilon(const SpMat& phi, const SpMat& psi);
+    SpMat computeUpsilon(const SpMat& phi, const SpMat& psi) const;
     //! A method to compute the Upsilon_ matrix by considering only locations and times in the positions stored in
     //! indices. This method is needed for CV preprocessing (only points that are in the considered fold are used).
     SpMat computeUpsilon(const std::vector<UInt>& indices) const;
