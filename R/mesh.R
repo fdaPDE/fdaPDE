@@ -543,14 +543,13 @@ create.mesh.2.5D<- function(nodes, triangles = NULL, order = 1, nodesattributes 
 projection.points.2.5D<-function(mesh, locations) {
   if(class(mesh) !="mesh.2.5D")
   stop("Data projection is only available for 2.5D mesh ")
-
-  if (mesh$order == 2)
-    stop("Data projection is only available for order 1 ")
-
+  
   mesh$triangles = mesh$triangles - 1
   mesh$edges = mesh$edges - 1
   mesh$neighbors[mesh$neighbors != -1] = mesh$neighbors[mesh$neighbors != -1] - 1
 
+  mydim=2
+  ndim=3
   # Imposing types, this is necessary for correct reading from C++
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
@@ -560,9 +559,10 @@ projection.points.2.5D<-function(mesh, locations) {
   storage.mode(mesh$edges) <- "integer"
   storage.mode(mesh$neighbors) <- "integer"
   storage.mode(mesh$order) <- "integer"
-
+  storage.mode(mydim) <- "integer"
+  storage.mode(ndim) <-"integer"
   ## Call C++ function
-  evalmat <- .Call("points_projection", mesh, locations, PACKAGE = "fdaPDE")
+  evalmat <- .Call("points_projection", mesh, locations, mydim, ndim, PACKAGE = "fdaPDE")
 
   #Returning the evaluation matrix
   return(evalmat)
