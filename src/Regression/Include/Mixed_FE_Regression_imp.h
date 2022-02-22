@@ -1331,7 +1331,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 		{
                         Real lambdaS;
                         Real lambdaT;
-			if(!regressionData_.isSpaceTime() && !isGAMData) //at the moment only space is implemented
+			if(!isGAMData) //at the moment only space and space-time are implemented
 				{
 					lambdaS = optimizationData_.get_current_lambdaS();
 					lambdaT = optimizationData_.get_current_lambdaT();
