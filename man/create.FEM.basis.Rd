@@ -14,15 +14,9 @@ create.FEM.basis(mesh, saveTree = FALSE)
 \value{
 A \code{FEMbasis} object. This contains the \code{mesh}, along with some additional quantities:
 \itemize{
-<<<<<<< HEAD
  \item{\code{order}}{Either "1" or "2" for the 2D and 2.5D case, and "1" for the 3D case.
  Order of the Finite Element basis.}
  \item{\code{nbasis}}{Scalar. The number of basis.}
-=======
-	\item{\code{order}}{Either "1" or "2" for the 2D and 2.5D case, and "1" for the 3D case.
-	Order of the Finite Element basis.}
-	\item{\code{nbasis}}{Scalar. The number of basis.}
->>>>>>> master
 }
 }
 \description{

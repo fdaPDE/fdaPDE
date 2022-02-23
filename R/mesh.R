@@ -811,7 +811,7 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 
 }
 
-#' Create a 1D graph mesh
+#' Create a 1.5D linear network mesh
 #'
 #' @param nodes A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.
 #' @param nodesattributes A matrix with #nodes rows containing nodes' attributes.
@@ -833,7 +833,7 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 #' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.
 #' These are passed unchanged from the input.}
 #' \item{\code{edges}}{A #edges-by-2 matrix containing all the edges of the triangles in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the edge starts from and ends to.}
-#' \item{\code{neighbors}}{A #nodes(#nodes - 1)/2 vector. Contains the upper triangular part of the adjecny matrix.}
+#' \item{\code{neighbors}}{A #edges-by-2 matrix of list. Each row contains the indices of the neighbouring edges. An empty entry indicates that one node of the edge is a boundary node.}
 #' \item{\code{order}}{Either '1' or '2'. It specifies wether each mesh triangle should be represented by 3 nodes (the triangle' vertices) or by 6 nodes (the triangle's vertices and midpoints).
 #' These are respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements.}
 #' }
@@ -915,12 +915,12 @@ create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = N
   return(out)
 }  
 
-#' Project 2D points onto 1D graph mesh
+#' Project 2D points onto 1.5D linear network mesh
 #'
 #' @param mesh A mesh.1.5D object representing the graph mesh, created by \link{create.mesh.1.5D}.
-#' @param locations 2D points to be projected onto 1D triangular mesh.
-#' @description This function projects any 2D points onto 1D graph mesh.
-#' @return 2D points projected onto 1D graph mesh.
+#' @param locations 2D points to be projected onto 1.5D mesh.
+#' @description This function projects any 2D points onto 1.5D linear network mesh.
+#' @return 2D points projected onto 1.5D linear network mesh.
 #' @export
 #' @examples
 #' library(fdaPDE)
@@ -936,7 +936,7 @@ create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = N
 #'locations[,2] = runif(5,min=0.25,max=0.5)
 #'
 #' ## Project the points on the mesh
-#' loc = projection.points.1D(mesh, locations)
+#' loc = projection.points.1.5D(mesh_, locations)
 
 projection.points.1.5D<-function(mesh, locations) {
   if(class(mesh) !="mesh.1.5D")

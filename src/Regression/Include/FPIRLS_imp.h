@@ -84,9 +84,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
       if( !regression_.isMatrixNoCov_factorized() ) {
 
-          std::cout <<
-                    "WARNING: System matrix cannot be factorized for optimization parameter in position " << i+1
-                    <<". Try increasing optimization parameter." << std::endl;
+         Rprintf("WARNING: System matrix cannot be factorized for optimization parameter in position %d. Try increasing optimization parameter.\n", i+1) ;
           break;
       }
       n_iterations[i]++;

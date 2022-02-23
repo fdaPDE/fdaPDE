@@ -1,6 +1,7 @@
 #' Plot a \code{FEM} object
 #'
 #' @param x A \code{FEM} object.
+#' @param colormap A colormap exploited in the plot. The default value is the heat colormap. 
 #' @param num_refinements A natural number specifying how many bisections should be applied to each triangular element for
 #' plotting purposes. This functionality is useful where a discretization with 2nd order Finite Element is applied.
 #' This parameter can be specified only when a FEM object defined over a 2D mesh is plotted.
@@ -11,7 +12,7 @@
 #' the value of the coefficients for the Finite Element basis expansion (\code{coeff} component of the \code{FEM} object).
 #' If the \code{mesh} is of class \code{mesh.3D}, the color of each triangle or tetrahedron represent the mean value of
 #' the coefficients for the Finite Element basis expansion (\code{coeff}).
-#' @usage \method{plot}{FEM}(x, num_refinements, ...)
+#' @usage \method{plot}{FEM}(x, colormap = "heat.colors", num_refinements = NULL, ...)
 #' @export
 #' @seealso \code{\link{FEM}}, \code{\link{image.FEM}}
 #' @examples
@@ -145,7 +146,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
 
       solution <- .Call("eval_FEM_time_nodes",N,x$mesh_time,time_locations,x$coeff[,lambdaS,lambdaT],x$FLAG_PARABOLIC, PACKAGE = "fdaPDE")
       plot = FEM(solution[1:N],x$FEMbasis)
-      plot.FEM(plot,num_refinements,main = paste0("Spatial function in t = ",time_locations),...)
+      plot.FEM(x = plot, num_refinements = num_refinements,main = paste0("Spatial function in t = ",time_locations),...)
 
       # time evolution:
       locations = x$FEMbasis$mesh$nodes[1,]
@@ -207,7 +208,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
       for(i in 1:length(t))
       {
          plot = FEM(solution[(1+(i-1)*N):(N+(i-1)*N)],x$FEMbasis)
-         plot.FEM(plot,num_refinements,...)
+         plot.FEM(x = plot, num_refinements = num_refinements,...)
       }
    }
 
