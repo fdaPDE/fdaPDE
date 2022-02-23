@@ -811,7 +811,7 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 
 }
 
-#' Create a 1D graph mesh
+#' Create a 1.5D linear network mesh
 #'
 #' @param nodes A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.
 #' @param nodesattributes A matrix with #nodes rows containing nodes' attributes.
@@ -915,12 +915,12 @@ create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = N
   return(out)
 }  
 
-#' Project 2D points onto 1D graph mesh
+#' Project 2D points onto 1.5D linear network mesh
 #'
-#' @param mesh A mesh.1.5D object representing the graph mesh, created by \link{create.mesh.1.5D}.
-#' @param locations 2D points to be projected onto 1D triangular mesh.
-#' @description This function projects any 2D points onto 1D graph mesh.
-#' @return 2D points projected onto 1D graph mesh.
+#' @param mesh A mesh.1.5D object representing the linear network mesh, created by \link{create.mesh.1.5D}.
+#' @param locations 2D points to be projected onto 1.5D mesh.
+#' @description This function projects any 2D points onto 1.5D mesh.
+#' @return 2D points projected onto 1.5D linear network mesh.
 #' @export
 #' @examples
 #' library(fdaPDE)
