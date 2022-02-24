@@ -160,7 +160,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   storage.mode(beta_0) <- "double"
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
-  storage.mode(inference_ALpha) <- "double"
+  storage.mode(inference_Alpha) <- "double"
   storage.mode(inference_N_Flip) <- "integer"
   storage.mode(inference_Tol_Fspai) <- "double"
   storage.mode(inference_Defined) <- "integer"
