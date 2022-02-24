@@ -66,10 +66,20 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
     if(!is_B_computed){
       compute_B();
     }
+    if(!is_B_computed){
+     // something went wrong with FSPAI inversion 
+     this->is_V_f_computed = false;
+     return; 
+    }
   }
   else{ // case with covariates
     if(!is_S_computed){
       compute_S();
+    }
+    if(!is_S_computed){
+     // something went wrong with FSPAI inversion 
+     this->is_V_f_computed = false;
+     return; 
     }
   }
   // make sure sigma_hat_sq has been computed
@@ -179,6 +189,13 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   if(!is_V_f_computed){
     this->compute_V_f();
   }
+
+  // check that FSPAI inversion went well (if non-exact inference was required)
+  if(!is_V_f_computed){
+   Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
+   result = 10e20;
+   return result; 
+  }
   
   // get the estimator f_hat 
   UInt nnodes = this->inf_car.getN_nodes();
@@ -210,6 +227,13 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     if(k >= max_it || eig_values(k,k) > threshold)
       stop = true;
     ++k;
+  }
+
+  // check that at least one eigenvalue > threshold is found (this may happen with FSPAI implementation) 
+  if(max_it - k + 1 == 0){
+   Rprintf("error: cannot invert variance-covariance matrix in Wald-type inference for f, returning NA");
+   result = 10e20;
+   return result;  
   }
 
   MatrixXr eig_values_red = eig_values.bottomRightCorner(max_it - k + 1, max_it - k + 1);
@@ -305,6 +329,18 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   if(!is_V_f_computed){
     this->compute_V_f();
   }
+
+  // check that FSPAI inversion went well (if non-exact inference was required)
+  if(!is_V_f_computed){
+   Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
+   for(UInt i=0; i < n_loc; ++i){
+     result(i).resize(3); 
+     result(i)(1) = 10e20; 
+     result(i)(2) = 10e20;
+     result(i)(3) = 10e20;
+   }
+   return result; 
+  }
   
   // get the estimator f_hat 
   UInt nnodes = this->inf_car.getN_nodes();
@@ -323,21 +359,6 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
   Real alpha = this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
   Real quant;
   
-  /* SIMULTANEOUS and BONFERRONI are going to be suppressed 
-  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="simultaneous"){
-    // generate the distribution
-    boost::math::chi_squared dist(n_loc);
-    quant = std::sqrt(boost::math::quantile(dist, alpha));
-  }
-
-  if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="bonferroni"){
-    // generate the distribution
-    boost::math::normal dist; // default is a standard normal
-    quant = boost::math::quantile(complement(dist, alpha/(2*n_loc)));
-  }
-  */
-
-
   //ONE-AT-THE-TIME is the only possible implementation
   //if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
     // generate the distribution

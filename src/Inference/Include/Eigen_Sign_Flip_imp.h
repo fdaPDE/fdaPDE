@@ -719,19 +719,19 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
     
     // compute the partial residuals and p value
     Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UU); 
-    local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+    local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UL);
-    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LU);
-    local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+    local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
     // compute the partial residuals and p value
     Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LL);
-    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
 
   }
@@ -764,7 +764,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
 	  }
           // compute the partial residuals
 	  Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UU); 
-	  local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+	  local_p_values(0,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
   
 	}else{
  
@@ -778,7 +778,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_UL); 
-	    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+	    local_p_values(1,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -799,7 +799,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
  
 	      // compute the partial residuals
 	      Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_proposal);
-	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
 
 	      if(prop_p_val<=alpha){UU(i)=proposal; local_p_values(0,i)=prop_p_val;}else{UL(i)=proposal;local_p_values(1,i)=prop_p_val;}
@@ -821,7 +821,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   
 	  // compute the partial residuals
 	  Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LU);
-	  local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+	  local_p_values(2,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
   
 	}else{
  
@@ -835,7 +835,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   
 	    // compute the partial residuals
 	    Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_LL);
-	    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+	    local_p_values(3,i)=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
 	  }else{//both the Upper bounds are well defined
 
@@ -857,7 +857,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
    
 	      // compute the partial residuals
 	      Partial_res_H0_CI = Q_loc*(Z_loc - f_hat_loc_proposal);
-	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, i);
+	      Real prop_p_val=compute_CI_aux_f_pvalue(Partial_res_H0_CI, sub_locations_index[i]);
 
 	      if(prop_p_val<=alpha){LL(i)=proposal; local_p_values(3,i)=prop_p_val;}else{LU(i)=proposal;local_p_values(2,i)=prop_p_val;}
 	    }
@@ -876,6 +876,10 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
     Count_Iter++;
 
   }
+
+  // give a warning in R if at least one interval did not converge
+  if(!all_f_converged)
+    Rprintf("warning: some sign-flip confidence intervals for the nonparametric component did not converge");
    
   // for each point
   for(UInt i=0; i<n_loc; ++i){
