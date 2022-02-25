@@ -21,12 +21,14 @@ class FPIRLS_Base {
    InputHandler & inputData_; //!< It contains the data of the problem (RegressionDataGAM)
    OptimizationData & optimizationData_; //!< It contains the data of the optimization problem
    MixedFERegression<InputHandler>  regression_;
-
+   
+   const UInt lenS_; //! It contains the length of the space-optimization parameters vector
+   const UInt lenT_; //! It contains the length of the time-optimization parameters vector
 
    std::vector<std::vector<VectorXr>> mu_; //!< Mean vector
    std::vector<std::vector<VectorXr>> pseudoObservations_; //! Pseudodata observations
    std::vector<std::vector<VectorXr>> G_; //!< diag(link_deriv(mu)) it is a vector since it would be more memory consuming to declere it as a matrix
-   std::vector<VectorXr> WeightsMatrix_; //!< (G^-2 * Var_function(mu)^-1) it is a vector because it is a diagonal matrix
+   std::vector<std::vector<VectorXr>> WeightsMatrix_; //!< (G^-2 * Var_function(mu)^-1) it is a vector because it is a diagonal matrix
 
    // the value of the functional is saved deparated (parametric and non-parametric part)
    std::vector<std::vector<std::array<Real,2>>> current_J_values;
@@ -117,6 +119,8 @@ class FPIRLS_Base {
    inline MatrixXr const & getBarycenters() const{return regression_.getBarycenters();}
    //! A method returning the element ids of the locations
    inline VectorXi const & getElementIds() const{return regression_.getElementIds();}
+   inline UInt get_size_S()const{return this->lenS_;}
+   inline UInt get_size_T()const{return this->lenT_;}
 
 
 };
