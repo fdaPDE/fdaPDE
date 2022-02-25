@@ -28,7 +28,7 @@
 #' for each possible pair (\code{lambda}, \code{lambda_time}). If \code{init = 'CV'} it returns the initial vector associated
 #' to the unique pair (\code{lambda}, \code{lambda_time}) given.
 #' @description This function implements two methods for the density initialization procedure.
-#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=500,
+#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=50,
 #'                         init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 #' @export
 #' @examples
@@ -64,7 +64,7 @@
 #' lambda = 0.1
 #' lambda_time <- 0.001
 #' sol = DE.heat.FEM_time(data = locations, data_time = times, FEMbasis = FEMbasis, lambda = lambda, lambda_time = lambda_time,
-#'                        heatStep=0.1, heatIter=500, init="Heat")
+#'                        heatStep=0.1, heatIter=50, init="Heat")
 #'
 #' ## Visualization
 #'
@@ -84,7 +84,7 @@
 #' plot(FEMfunction, 0.5)
 
 DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1,
-                             heatIter=500, init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+                             heatIter=50, init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
@@ -160,7 +160,20 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, 
 
   ################################################### Collect Results ##################################################
 
-  f_init = bigsol[[1]]
+  N = nrow(FEMbasis$mesh$nodes)
+  SPLINE_DEGREE = 3
+  M = length(mesh_time) + SPLINE_DEGREE - 1
+
+  dim_1 = length(lambda)
+  dim_2 = length(lambda_time)
+
+  order <- c()
+  for(i in 1:dim_2) {
+    o <- seq(i,dim_1*dim_2,by=dim_2)
+    order <- c(order, o)
+  }
+
+  f_init = array(data = bigsol[[1]][1:(N*M),order], dim = c(N*M,dim_1,dim_2))
 
   reslist = list(f_init = f_init)
   return(reslist)

@@ -77,7 +77,7 @@
 #' @description This function implements a nonparametric spatio-temporal density estimation method with differential regularization
 #' (given by the sum of the square of the L2 norm of the laplacian of the density function and the square of the L2 norm of the second-
 #' order time-derivative), when points are located over a planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
+#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=50,
 #'                    stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
 #'                    direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
 #'                    flagLumped=0)
@@ -115,7 +115,7 @@
 #' lambda <- 0.1
 #' lambda_time <- 0.001
 #' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-#'                    fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
+#'                    fvec=NULL, heatStep=0.1, heatIter=50, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
 #'                    nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
 #'                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 #'
@@ -139,7 +139,7 @@
 #' plot(FEMfunction, 0.5)
 
 
-DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
+DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=50,
                         stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
                         step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
                         search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
