@@ -27,7 +27,7 @@ extern "C" {
         	\param Rmesh an R-object containing the output mesh from Trilibrary
         	\param Rorder an R-integer containing the order of the approximating basis.
         	\param Rmydim an R-integer containing the dimension of the problem we are considering.
-        	\param Rndim an R-integer containing the dimension of the space in which the location are.
+        	\param Rndim an R-integer containing the dimension of the space in which the locations are.
         	\param Rfvec an R-vector containing the initial solution coefficients given by the user.
         	\param RheatStep an R-double containing the step for the heat equation initialization.
         	\param RheatIter an R-integer containing the number of iterations to perform the heat equation initialization.

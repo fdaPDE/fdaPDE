@@ -62,8 +62,6 @@ protected:
     // Penalization term for each possible initial density
     VectorXr penTerm_;
 
-    //! A method to compute the patch_areas_.
-    void computePatchAreas();
     //! A method to compute the density exploting only the data.
     VectorXr computeDensityOnlyData();
     //! A method that provides a set of starting densities.
@@ -78,6 +76,8 @@ public:
     //! An overridden method to compute density initialization when it needs to be chosen among the proposals given by a
     //! discretized heat diffusion process.
     const VectorXr* chooseInitialization(Real lambda) const override;
+    //! A method to compute the patch_areas_.
+    static VectorXr computePatchAreas(const MeshHandler<ORDER, mydim, ndim>& mesh);
 };
 
 
@@ -161,8 +161,6 @@ protected:
     // Penalization term for each possible initial density
     VectorXr penSterm_, penTterm_;
 
-    //! A method to compute the patch_areas_.
-    void computePatchAreas();
     //! A method to compute the density exploiting only the data.
     //VectorXr computeDensityOnlyData();
     VectorXr computeDensityOnlyData(UInt);
