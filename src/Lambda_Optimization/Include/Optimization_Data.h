@@ -48,6 +48,7 @@ class  OptimizationData
 
                 // For GAM
                 std::vector<Real> lambdaS_backup;               //!< Backup vector of lambda_S (as passed by the user), used in GAM methods
+                std::vector<Real> lambdaT_backup;               //!< Backup vector of lambda_T (as passed by the user), used in GAM methods
 
                 // For optimized methods
                 Real stopping_criterion_tol = 0.05;             //!< Contains the user defined tolerance for optimized methods

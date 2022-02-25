@@ -161,8 +161,8 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(UInt& lambdaS
   regression_.preapply(this->mesh_);
   regression_.apply();
 
-  // if the system matrix is correctly factorized OR the algortihm performed only the first iteration
-  if( regression_.isMatrixNoCov_factorized() ) { //|| n_iterations[lambda_index]==0
+  // if the system matrix is correctly factorized 
+  if( regression_.isMatrixNoCov_factorized() ) { 
       const SpMat *Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
       // get the solutions from the regression object.
@@ -188,7 +188,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_pseudoObs(UInt& lambd
   const VectorXr * z = inputData_.getInitialObservations();
 
   first_addendum.resize(mu_[lambdaS_index][lambdaT_index].size());
-  g_mu.resize(mu_[lambda_index][lambdaT_index].size());
+  g_mu.resize(mu_[lambdaS_index][lambdaT_index].size());
 
   //compute the vecotr first_addendum and g_mu
   for(auto i=0; i < mu_[lambdaS_index][lambdaT_index].size(); i++){
@@ -319,7 +319,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_GCV(UInt & lambdaS_in
 
         GCV_value *= y->size();
 
-        GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index,lambdaT_index))*(y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0));
+        GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index,lambdaT_index))*(y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index,lambdaT_index));
 
         _GCV[lambdaS_index][lambdaT_index] = GCV_value;
 
