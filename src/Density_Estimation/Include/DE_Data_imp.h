@@ -135,8 +135,6 @@ void DEData_time::setLambdaTime(SEXP Rlambda_time)
 
 void DEData_time::setTimes2Locations()
 {
-    static constexpr Real eps = std::numeric_limits<Real>::epsilon(), tolerance = 100 * eps;
-
     // Extraction of non-duplicated times
     std::set<Real> set_times(data_time_.cbegin(), data_time_.cend());
     times_.resize(set_times.size());
