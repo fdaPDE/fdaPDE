@@ -12,8 +12,6 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
   mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
 {
   //Pre-allocate memory for all quatities
-  //UInt lenS = optimizationData.get_size_S();
-  //UInt lenT = optimizationData.get_size_T();
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
   pseudoObservations_.resize(lenS_, std::vector<VectorXr>(lenT_));
   G_.resize(lenS_, std::vector<VectorXr>(lenT_));
@@ -22,7 +20,7 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
   past_J_values.resize(lenS_, std::vector<std::array<Real, 2>>(lenT_));
   n_iterations.resize(lenS_, std::vector<UInt>(lenT_));
   _J_minima.resize(lenS_, std::vector<Real>(lenT_));
-  _GCV.resize(lenS_, std::vector<Real>(lenT_));
+  _GCV.resize(lenS_, std::vector<Real>(lenT_, -1));
   
   //initialization of mu, current_J_values and past_J_values.
   for(UInt i=0; i<optimizationData_.get_size_S() ; i++){
@@ -34,14 +32,12 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
   }
 };
 
-// Delegating Constructor no?
+// Delegating Constructor?
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, const std::vector<Real>& mesh_time, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
   mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
 {
   //Pre-allocate memory for all quatities
-  //UInt lenS = optimizationData.get_size_S();
-  //UInt lenT = optimizationData.get_size_T();
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
   pseudoObservations_.resize(lenS_, std::vector<VectorXr>(lenT_));
   G_.resize(lenS_, std::vector<VectorXr>(lenT_));
@@ -50,7 +46,7 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
   past_J_values.resize(lenS_, std::vector<std::array<Real, 2>>(lenT_));
   n_iterations.resize(lenS_, std::vector<UInt>(lenT_));
   _J_minima.resize(lenS_, std::vector<Real>(lenT_));
-  _GCV.resize(lenS_, std::vector<Real>(lenT_));
+  _GCV.resize(lenS_, std::vector<Real>(lenT_, -1));
   
   //initialization of mu, current_J_values and past_J_values.
   for(UInt i=0; i<optimizationData_.get_size_S() ; i++){
@@ -67,23 +63,11 @@ template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
   // f-PRILS implementation
 
-  //Initialize the containers size, as LambdaS_len
-  //const UInt LambdaS_len = mu_.size();
-  //const UInt LambdaT_len = mu_[0].size();
-
-  // initialize the algorithm variables (Constructor sets the correct dimensions)
-  //G_.resize(LambdaS_len);
-  //WeightsMatrix_.resize(LambdaS_len);
-  //pseudoObservations_.resize(LambdaS_len);
-  //n_iterations = std::vector<UInt>(LambdaS_len,0);
-
   // Initialize the outputs. The temporal dimension is not implemented, for this reason the 2nd dimension is set to 1.
   if( this->inputData_.getCovariates()->rows() > 0 )_beta_hat.resize(lenS_, lenT_);
   _fn_hat.resize(lenS_, lenT_);
   _dof.resize(lenS_, lenT_);
   _solution.resize(lenS_,lenT_);
-
-  //_GCV.resize(LambdaS_len,-1);//If GCV is not computed the vector stores -1 (In the following functions)
 
   if(isSpaceVarying)
   {
@@ -104,16 +88,14 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
     while(stopping_criterion(i, j)){
 
       // STEP (1)
-      
       compute_G(i, j);
       compute_Weights(i, j);
       compute_pseudoObs(i, j);
 
       // STEP (2)
-	
       this->inputData_.updatePseudodata(pseudoObservations_[i][j], WeightsMatrix_[i][j]);
       update_solution(i, j);
-	
+      
       // STEP (3)
       compute_mu(i, j);
 
@@ -340,27 +322,23 @@ template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_variance_est(){
   Real phi;
   if(this->scale_parameter_flag_ && this->optimizationData_.get_loss_function()!="GCV"){// if scale param should be
-    //UInt lenS = optimizationData_.get_size_S();
-    //UInt lenT = optimizationData_.get_size_T();
-    //_variance_estimates.resize(this->mu_.size(),0);
-    _variance_estimates.resize(lenS_, std::vector<Real>(lenT_));
+    
+    _variance_estimates.resize(lenS_, std::vector<Real>(lenT_, 0.0));
     const UInt n_obs = this->inputData_.getObservations()->size();
-
+    
     //scale parameter computed as: mean((var.link(mu)*phi)/mu), and phi is computed as in Wood IGAM
     for(UInt i=0; i < lenS_; i++){
-     	for(UInt j=0; j< lenT_; j++){ // NB Cunial sbagliava questa?! Ora dovrebbe essere corretto
+     	for(UInt j=0; j< lenT_; j++){ 
       		phi = (this->scale_parameter_flag_ )? this->current_J_values[i][j][0]/(n_obs - this->_dof(i,j) ) : _scale_param;
-       		for(UInt k=0; j < this->mu_[i][j].size(); k++){
+       		for(UInt k=0; k < this->mu_[i][j].size(); k++){
          	_variance_estimates[i][j] += phi* this->var_function(this->mu_[i][j](k))/this->mu_[i][j](k);
        		}
       	_variance_estimates[i][j] /= this->mu_[i][j].size();
     	}
-   }
+    }
   }else{
-    //UInt lenS = optimizationData_.get_size_S();
-    //UInt lenT = optimizationData_.get_size_T();
     _variance_estimates.resize(lenS_, std::vector<Real>(lenT_,-1));
-}
+  }
 
 }
 
