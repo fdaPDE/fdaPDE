@@ -132,7 +132,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
     N_Eig_Out=0;
     for(unsigned long int j=0;j<TildeX.cols();j++){
       UInt flip;
-      if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
+      if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
 	flip=1;
 	++N_Eig_Out;
       }else{
@@ -375,7 +375,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
       N_Eig_Out=0;
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
-        if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
+        if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
 	  flip=1;
           ++N_Eig_Out;
         }else{
@@ -446,7 +446,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
       N_Eig_Out=0;
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
-	if((this->inf_car.getInfData()->get_enhanced_inference()=="enhanced") & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
+	if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
 	  flip=1;
           ++N_Eig_Out;
 	}else{

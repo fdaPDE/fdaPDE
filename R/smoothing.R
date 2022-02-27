@@ -532,7 +532,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   # Check that GCV is set for inference
   if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
     warning("Inference is not defined when lambda grid is provided without GCV")
-    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
                                 f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
@@ -581,7 +581,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   if(R_Inference_Data_Object@definition==1 & (family!= "gaussian"))
   {
     warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
-    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), 
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
                                 f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
@@ -951,6 +951,16 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
               inference$beta$CI$eigen_sign_flip[[length(inference$beta$CI$eigen_sign_flip)+1]] = ci_beta
               inference$beta$CI$eigen_sign_flip=as.list(inference$beta$CI$eigen_sign_flip)
             }
+            else if(R_Inference_Data_Object@type[i]==4){
+              if(ci_beta[2]> 10^20){
+                warning("Enhanced ESF CI bisection algorithm did not converge, returning NA")
+                for(h in 1:nrow(ci_beta))
+                  for(k in 1:ncol(ci_beta))
+                    ci_beta[h,k]=NA
+              }
+              inference$beta$CI$enh_eigen_sign_flip[[length(inference$beta$CI$enh_eigen_sign_flip)+1]] = ci_beta
+              inference$beta$CI$enh_eigen_sign_flip=as.list(inference$beta$CI$enh_eigen_sign_flip)
+            }
           }
           if(R_Inference_Data_Object@component[i]!=1){ # intervals for f were requested
             n_loc = dim(R_Inference_Data_Object@locations)[1]
@@ -963,7 +973,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
               inference$f$CI$eigen_sign_flip[[length(inference$f$CI$eigen_sign_flip)+1]] = ci_f
               inference$f$CI$eigen_sign_flip=as.list(inference$f$CI$eigen_sign_flip)
             }
-            else if(R_Inference_Data_Object@type[i]==4){ # sign-flip confidence intervals for f
+            else if(R_Inference_Data_Object@type[i]==5){ # sign-flip confidence intervals for f
               inference$f$CI$sign_flip[[length(inference$f$CI$sign_flip)+1]] = ci_f
               inference$f$CI$sign_flip=as.list(inference$f$CI$sign_flip)
             }
@@ -975,7 +985,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         if(R_Inference_Data_Object@component[i]!=2){ # test on beta was requested
         beta_statistics = statistics[1:dim(R_Inference_Data_Object@coeff)[1]]
         p_values = numeric()
-        if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip p-value is already computed in cpp code
+        if(R_Inference_Data_Object@type[i]==3 || R_Inference_Data_Object@type[i]==4){ # eigen-sign-flip p-value is already computed in cpp code
           if(R_Inference_Data_Object@test[i]==1){ 
             # one-at-the-time tests
             p_values = beta_statistics
@@ -1012,6 +1022,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           inference$beta$p_values$eigen_sign_flip[[length(inference$beta$p_values$eigen_sign_flip)+1]] = p_values
           inference$beta$p_values$eigen_sign_flip=as.list(inference$beta$p_values$eigen_sign_flip)
         }
+        else if(R_Inference_Data_Object@type[i]==4){
+          inference$beta$p_values$enh_eigen_sign_flip[[length(inference$beta$p_values$enh_eigen_sign_flip)+1]] = p_values
+          inference$beta$p_values$enh_eigen_sign_flip=as.list(inference$beta$p_values$enh_eigen_sign_flip)
+        }
         }
         if(R_Inference_Data_Object@component[i]!=1){ # test on f was requested
           p_value = statistics[length(statistics)]
@@ -1025,7 +1039,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
             inference$f$p_values$eigen_sign_flip[[length(inference$f$p_values$eigen_sign_flip)+1]] = p_value
             inference$f$p_values$eigen_sign_flip=as.list(inference$f$p_values$eigen_sign_flip)
           }
-          else if(R_Inference_Data_Object@type[i]==4){
+          else if(R_Inference_Data_Object@type[i]==5){
             inference$f$p_values$sign_flip[[length(inference$f$p_values$sign_flip)+1]] = p_value
             inference$f$p_values$sign_flip=as.list(inference$f$p_values$sign_flip)
           }

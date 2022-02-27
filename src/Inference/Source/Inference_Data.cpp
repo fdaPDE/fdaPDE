@@ -6,7 +6,6 @@
   \param implementation_Type_ vector parameter used to define which type of implementations (Wald, Speckman, ESF) are used for the tests and intervals computation
   \param component_Type_ vector parameter used to on which component of the model (parametric, nonparametric, both) inference has to be performed
   \param exact_Inference_ parameter for the method used to invert E matrix in Woodbury decomposition for inference
-  \param enhanced_Inference_ parameter for the type of ESF test performed
   \param locs_Inference_ matrix that specifies the spatial locations to be considered when performing inference on the nonparametric component
   \param locs_index_Inference_ vector containing the spatial locations indices to be considered among the observed ones for inference on the nonparametric component 
   \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
@@ -19,7 +18,7 @@
   \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
   \param definition_ parameter used to set definition of the InferenceData object
 */
-InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,  SEXP enhanced_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
+InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,  SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -55,9 +54,9 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
       implementation_Type[i] = "wald";
     else if(INTEGER(implementation_Type_)[i]==2)
       implementation_Type[i] = "speckman";
-    else if(INTEGER(implementation_Type_)[i]==3)
+    else if(INTEGER(implementation_Type_)[i]==3 || INTEGER(implementation_Type_)[i]==4 )
       implementation_Type[i] = "eigen-sign-flip";
-    else if(INTEGER(implementation_Type_)[i]==4)
+    else if(INTEGER(implementation_Type_)[i]==5)
       implementation_Type[i] = "sign-flip";
   }
 
@@ -80,10 +79,13 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
     this->set_exact_inference("non-exact");
 
   //enhanced_Inference
-  if(INTEGER(enhanced_Inference_)[0]==1)
-    this->set_enhanced_inference("enhanced");
-  else
-    this->set_enhanced_inference("classical");
+  enhanced_Inference.resize(size_implementation_Type);
+  for(UInt i=0; i<size_implementation_Type; i++){
+    if(INTEGER(implementation_Type_)[i]==4)
+      enhanced_Inference[i] = true;
+    else
+      enhanced_Inference[i] = false;
+  }
 
   //coeff_Inference
   UInt n_ = INTEGER(Rf_getAttrib(coeff_Inference_, R_DimSymbol))[0]; // #Rows
@@ -137,8 +139,8 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 
 //! Space-only main constructor of the class, with inference for f
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
-			     SEXP exact_Inference_, SEXP enhanced_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
-			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, enhanced_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
+			     SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
+			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
    
   //locs_Inference
   UInt m_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[0]; // #Rows
@@ -198,7 +200,11 @@ void InferenceData::print_inference_data() const{
   
   Rprintf("exact_Inference: %s\n",exact_Inference.c_str());
 
-  Rprintf("enhanced_Inference: %s\n",enhanced_Inference.c_str());
+  Rprintf("enhanced_Inference:");
+  for(UInt i=0; i < enhanced_Inference.size(); ++i){
+    Rprintf(" %d",enhanced_Inference[i]);
+  }
+  Rprintf("\n");
 							     
   Rprintf("locs_inference:");
   for(UInt i=0; i < locs_Inference.rows(); ++i){

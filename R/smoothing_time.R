@@ -334,7 +334,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Check that GCV is set for inference
   if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction) && (dim(lambdaS)!=1 || dim(lambdaT)!=1)){
     warning("Inference is not defined when lambda grid is provided without GCV")
-    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), enhanced = as.integer(0), dim = as.integer(0), 
+    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                 coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha=0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
   
@@ -538,6 +538,16 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
             inference$beta$CI$eigen_sign_flip[[length(inference$beta$CI$eigen_sign_flip)+1]] = ci_beta
             inference$beta$CI$eigen_sign_flip=as.list(inference$beta$CI$eigen_sign_flip)
           }
+          else if(R_Inference_Data_Object@type[i]==4){
+            if(ci_beta[2]> 10^20){
+              warning("Enhanced ESF CI bisection algorithm did not converge, returning NA")
+              for(h in 1:nrow(ci_beta))
+                for(k in 1:ncol(ci_beta))
+                  ci_beta[h,k]=NA
+            }
+            inference$beta$CI$enh_eigen_sign_flip[[length(inference$beta$CI$enh_eigen_sign_flip)+1]] = ci_beta
+            inference$beta$CI$enh_eigen_sign_flip=as.list(inference$beta$CI$enh_eigen_sign_flip)
+          }
         }
       }
       
@@ -546,7 +556,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
         if(R_Inference_Data_Object@component[i]!=2){ # test on beta was requested, just for safety, it cannot be otherwise
           beta_statistics = statistics[1:dim(R_Inference_Data_Object@coeff)[1]]
           p_values = numeric()
-          if(R_Inference_Data_Object@type[i]==3){ # eigen-sign-flip p-value is already computed in cpp code
+          if(R_Inference_Data_Object@type[i]==3 || R_Inference_Data_Object@type[i]==4){ # eigen-sign-flip p-value is already computed in cpp code
             if(R_Inference_Data_Object@test[i]==1){ 
               # one-at-the-time tests
               p_values = beta_statistics
@@ -582,6 +592,10 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
           else if(R_Inference_Data_Object@type[i]==3){
             inference$beta$p_values$eigen_sign_flip[[length(inference$beta$p_values$eigen_sign_flip)+1]] = p_values
             inference$beta$p_values$eigen_sign_flip=as.list(inference$beta$p_values$eigen_sign_flip)
+          }
+          else if(R_Inference_Data_Object@type[i]==4){
+            inference$beta$p_values$enh_eigen_sign_flip[[length(inference$beta$p_values$enh_eigen_sign_flip)+1]] = p_values
+            inference$beta$p_values$enh_eigen_sign_flip=as.list(inference$beta$p_values$enh_eigen_sign_flip)
           }
         }
       }

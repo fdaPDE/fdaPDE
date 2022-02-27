@@ -4,12 +4,10 @@
 #'in the third a simultaneous test is performed.
 #'@slot interval A vector of integers taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
 #'in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.
-#'@slot type A vector of integers taking value 1, 2 or 3, corresponding to Wald, Speckman or Eigen-Sign-Flip implementation 
+#'@slot type A vector of integers taking value 1, 2, 3, 4 or 5 corresponding to Wald, Speckman, Eigen-Sign-Flip, Enhanced-Eigen-Sign-Flip or Sign-Flip implementation 
 #'of the inference analysis.
 #'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 #'whereas if 2 an approximated computation will be carried out.
-#'@slot enhanced An integer taking value 1 or 2. If 1 an enhanced computation of the beta ESF test statistics will be performed,
-#'whereas if 2 the classical beta ESF test will be perfoermed.
 #'@slot component A vector of integers taking value 1,2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.  
 #'@slot dim Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases. 
 #'@slot n_cov Number of covariates taken into account in the linear part of the regression problem.
@@ -46,7 +44,6 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   type = "integer", 
                                                                   component = "integer",
                                                                   exact = "integer",
-                                                                  enhanced = "integer",
                                                                   dim = "integer",
                                                                   n_cov = "integer",
                                                                   locations = "matrix",
@@ -74,14 +71,11 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' and can take values 'one-at-the-time', 'simultaneous' (available only for Wald and Speckman cases) and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
 #'  Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account.
 #'@param type A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
-#''wald'(default), 'speckman' 'sign-flip' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.
+#''wald'(default), 'speckman', 'sign-flip', 'eigen-sign-flip' or 'enhanced-eigen-sign-flip'.
 #'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric', 'nonparametric' or 'both'. The default is 'parametric'.
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
 #'The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
 #'In the second case the evaluation is exact but computationally expensive.
-#'@param enhanced A logical used to decide wether to perform enhaned on classical ESF tests.
-#'The possible values are: FALSE (default) and TRUE. In the first case classical ESF test will be performed.
-#'In the second case enhanced ESF procedures will be employed leading to a better Type-I error but slight lower power.
 #'@param dim Dimension of the problem, defaulted to NULL. (Must be set by the user)
 #'@param n_cov Number of the covariates, defaulted to NULL. (Must be set by the user)
 #'@param locations A matrix of the locations of interest when testing the nonparametric component f
@@ -105,7 +99,6 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'type = 'wald', 
 #'component = 'parametric',
 #'exact = FALSE, 
-#'enhanced = FALSE,
 #'dim = NULL, 
 #'n_cov = NULL,
 #'locations = NULL,
@@ -133,7 +126,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 type = "wald", 
                                 component = "parametric",
                                 exact = F,
-                                enhanced = F,
                                 dim = NULL,
                                 n_cov = NULL,
                                 locations = NULL,
@@ -189,18 +181,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
     exact_numeric=as.integer(1)
   }else{
     exact_numeric=as.integer(2)
-  }
-  
-  if(enhanced != F){
-    if(class(enhanced)!="logical")
-      stop("'enhanced' should be either TRUE or FALSE ")
-    if(length(enhanced)==0)
-      stop("'enhanced' is zero dimensional, should be either TRUE or FALSE")
-    if(enhanced!=T)
-      stop("'enhanced' should be either TRUE or FALSE")
-    enhanced_numeric=as.integer(1)
-  }else{
-    enhanced_numeric=as.integer(2)
   }
   
   if(!is.null(dim)){
@@ -448,12 +428,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   for (index in 1:n_of_implementations){
     
-      if(type[index]!="wald" && type[index]!="speckman" && type[index]!="eigen-sign-flip" && type[index]!="sign-flip"){
-        stop("type should be chosen between 'wald', 'speckman' 'sign-flip' and 'eigen-sign-flip'")}else{
+      if(type[index]!="wald" && type[index]!="speckman" && type[index]!="eigen-sign-flip" && type[index]!="enhanced-eigen-sign-flip" && type[index]!="sign-flip"){
+        stop("type should be chosen between 'wald', 'speckman' 'sign-flip', 'eigen-sign-flip' or 'enhanced-eigen-sign-flip'")}else{
           if(type[index]=="wald") type_numeric[index]=as.integer(1)
           if(type[index]=="speckman") type_numeric[index]=as.integer(2)
           if(type[index]=="eigen-sign-flip") type_numeric[index]=as.integer(3)
-          if(type[index]=="sign-flip") type_numeric[index]=as.integer(4)
+          if(type[index]=="enhanced-eigen-sign-flip") type_numeric[index]=as.integer(4)
+          if(type[index]=="sign-flip") type_numeric[index]=as.integer(5)
         }
     
     if(component[index]!="parametric" && component[index]!="nonparametric" && component[index]!="both"){
@@ -493,23 +474,23 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("level should be a positive value smaller or equal to 1")
       }
     
-      if(interval[index]=="simultaneous" && type[index]=="eigen-sign-flip"){
-        stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip case")
+      if(interval[index]=="simultaneous" && (type[index]=="eigen-sign-flip" || type[index] == "enhanced-eigen-sign-flip")){
+        stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip cases")
       }
       
       if((interval[index]=="simultaneous" || interval[index]=="bonferroni") && component[index]!="parametric")
         stop("only one-at-the-time confidence intervals are allowed for the nonparametric component")
       
-      if(type[index] == "eigen-sign-flip" && component[index]!="nonparametric"){
+      if((type[index] == "eigen-sign-flip" || type[index] == "enhanced-eigen-sign-flip") && component[index]!="nonparametric"){
         for(i in 1:dim(coeff)[1]){
           count=0
           for(j in 1:dim(coeff)[2]){
             if(coeff[i,j]!= 0 && coeff[i,j]!=1)
-              stop("linear combinations are not allowed in the eigen-sign-flip case")
+              stop("linear combinations are not allowed in the eigen-sign-flip cases")
             count = count + coeff[i,j]
           }
           if(count != 1)
-            stop("linear combinations are not allowed in the eigen-sign-flip case")
+            stop("linear combinations are not allowed in the eigen-sign-flip cases")
         }
       }
       
@@ -611,10 +592,10 @@ if(sum(component == "nonparametric")!=length(component)){
   
   # Building the output object, returning it
   if(!is.null(locations_indices))
-    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
+    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
               locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   else
-    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, enhanced = enhanced_numeric, dim = dim, n_cov = n_cov,
+    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
                 locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
     
   
