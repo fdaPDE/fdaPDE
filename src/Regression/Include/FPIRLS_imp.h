@@ -35,7 +35,7 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
 // Delegating Constructor?
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, const std::vector<Real>& mesh_time, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
+  mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(mesh_time, inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
 {
   //Pre-allocate memory for all quatities
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
@@ -74,7 +74,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
     FiniteElement<ORDER, mydim, ndim> fe;
   	Assembler::forcingTerm(mesh_, fe, u, forcingTerm);
   }
-
+Rprintf("FPIRLS: lambdaS = %d, lambdaT = %d\n", lenS_, lenT_);
   for(UInt i=0 ; i < lenS_ ; i++){//for-cycle for each spatial penalization (lambdaS).
    for(UInt j=0 ; j < lenT_ ; j++){
     current_J_values[i][j][0] = past_J_values[i][j][0] + 2*inputData_.get_treshold();
@@ -86,16 +86,16 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
     // start the iterative method for the lambda index i
     while(stopping_criterion(i, j)){
-
+	Rprintf("FPIRLS-> STEP 1\n");
       // STEP (1)
       compute_G(i, j);
       compute_Weights(i, j);
       compute_pseudoObs(i, j);
-
+	Rprintf("FPIRLS-> STEP 2\n");
       // STEP (2)
       this->inputData_.updatePseudodata(pseudoObservations_[i][j], WeightsMatrix_[i][j]);
       update_solution(i, j);
-      
+      	Rprintf("FPIRLS-> STEP 3\n");
       // STEP (3)
       compute_mu(i, j);
 
@@ -132,7 +132,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
     
    } 	// end time for
   }	// end space for
-
+	Rprintf("FPIRLS-> COMPUTE VARIANCE_EST\n");
   // Variance Estimate
   compute_variance_est();
 }
@@ -143,7 +143,9 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(UInt& lambdaS
 
   // Here we have to solve a weighted regression problem.
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
+  Rprintf("regr -> Pre-apply...\n");
   regression_.preapply(this->mesh_);
+  Rprintf("regr-> apply... \n");
   regression_.apply();
 
   // if the system matrix is correctly factorized 

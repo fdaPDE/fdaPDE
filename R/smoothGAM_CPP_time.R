@@ -286,7 +286,9 @@ CPP_smooth.GAM.FEM.PDE.time <- function(locations, time_locations, observations,
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
+  time_locations <- as.matrix(time_locations)
   storage.mode(time_locations) <- "double"
+  time_mesh <- as.matrix(time_mesh)
   storage.mode(time_mesh) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$triangles) <- "integer"
@@ -315,6 +317,10 @@ CPP_smooth.GAM.FEM.PDE.time <- function(locations, time_locations, observations,
   storage.mode(FLAG_MASS) <- "integer"
   FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
   storage.mode(FLAG_PARABOLIC) <- "integer"
+  FLAG_ITERATIVE<-as.integer(FLAG_ITERATIVE)
+  storage.mode(FLAG_ITERATIVE)<-"integer"
+  storage.mode(max.steps) <- "integer"
+  storage.mode(threshold) <- "double"
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
   storage.mode(search) <- "integer"

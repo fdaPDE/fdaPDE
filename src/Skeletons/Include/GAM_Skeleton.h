@@ -25,10 +25,10 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 	Real scale_parameter = REAL(RscaleParam)[0];
 	// Factory:
 	std::unique_ptr<FPIRLS<InputHandler, ORDER, mydim, ndim>> fpirls = FPIRLSfactory<InputHandler, ORDER, mydim, ndim>::createFPIRLSsolver(family, mesh, GAMData, optimizationData, mu0, scale_parameter);
-
+	Rprintf("GAM Skeleton: FPIRLS > apply() \n");
   	fpirls->apply();
 
-
+	Rprintf("GAM Skeleton: Collecting Result \n");
   	const MatrixXv& solution = fpirls->getSolution();
   	const MatrixXr& dof = fpirls->getDOF();
   	const std::vector<std::vector<Real>>& J_value = fpirls->get_J();
@@ -39,7 +39,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
   	const UInt bestLambda = optimizationData.get_best_lambda_S();
   	const UInt lambdaS_len = fpirls->get_size_S();
   	const UInt lambdaT_len = 1;
-	
+	Rprintf("lambdaS_len = %d, lambdaT_len = %d \n", lambdaS_len, lambdaT_len);
   	MatrixXv beta;
   	if(GAMData.getCovariates()->rows()==0)
    	{
@@ -53,7 +53,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 	const MatrixXr & barycenters = fpirls->getBarycenters();
 	const VectorXi & elementIds = fpirls->getElementIds();
 
-  	// COMPOSIZIONE SEXP result FOR RETURN
+  	// COMPOSIZIONE SEXP result FOR RETURNs
 	
 	//Copy result in R memory
 	SEXP result = R_NilValue;
@@ -63,7 +63,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
   	SET_VECTOR_ELT(result, 2, Rf_allocMatrix(REALSXP, lambdaS_len, lambdaT_len));
   	SET_VECTOR_ELT(result, 3, Rf_allocVector(INTSXP, 1));
   	SET_VECTOR_ELT(result, 4, Rf_allocMatrix(REALSXP, beta(0).size(), beta.size()));
-	
+	Rprintf("GAM Skeleton: Solution \n");
 	//return solution
 	Real *rans = REAL(VECTOR_ELT(result, 0));
 	for(UInt j = 0; j < solution.size(); j++)
@@ -78,7 +78,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 	{
 		rans1[i] = dof(i);
 	}
-	
+	Rprintf("GAM Skeleton: GCV \n");
 	//return GCV values
   	Real *rans2 = REAL(VECTOR_ELT(result, 2));
 	for(UInt i = 0; i < lambdaS_len; i++)
@@ -89,7 +89,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 	// Copy best lambda
 	UInt *rans3 = INTEGER(VECTOR_ELT(result, 3));
 	rans3[0] = bestLambda;
-	
+	Rprintf("GAM Skeleton: Beta Hat \n");
 	//return beta hat
 	Real *rans4 = REAL(VECTOR_ELT(result, 4));
 	for(UInt j = 0; j < beta.size(); j++)
@@ -150,11 +150,11 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 		for(UInt i = 0; i < barycenters.rows(); i++)
 			rans11[i + barycenters.rows()*j] = barycenters(i,j);
 	}
-
+	Rprintf("GAM Skeleton: GAM Parameter estimations \n");
 	// GAM PARAMETER ESTIMATIONS
 	SET_VECTOR_ELT(result, 12, Rf_allocMatrix(REALSXP, fn_hat(0,0).size(), fn_hat.rows()*fn_hat.cols()));
-	SET_VECTOR_ELT(result, 13, Rf_allocVector(REALSXP, J_value.size()));
-	SET_VECTOR_ELT(result, 14, Rf_allocVector(REALSXP, variance_est.size()));
+	SET_VECTOR_ELT(result, 13, Rf_allocMatrix(REALSXP, lambdaS_len, lambdaT_len));
+	SET_VECTOR_ELT(result, 14, Rf_allocMatrix(REALSXP, lambdaS_len, lambdaT_len));
 	
 	//return fn hat
 	Real *rans12 = REAL(VECTOR_ELT(result, 12));
@@ -167,19 +167,24 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
         	for (UInt i = 0; i < fn_hat(0, 0).size(); i++)
             		rans12[i + fn_hat(0 , 0).size() * j] = fn_hat(j)(i);
     	}
-	
+	Rprintf("GAM Skeleton: J value \n");
 	//return J_value
   	Real *rans13 = REAL(VECTOR_ELT(result, 13));
   	for(UInt i = 0; i < lambdaS_len; i++){
   		for(UInt j = 0; j < lambdaT_len; j++)
 			rans13[i + lambdaS_len*j] = J_value[i][j];
 	}
-	
+	Rprintf("GAM Skeleton: Scale Parameter \n");
+	Rprintf("variance.rows() = %d, variance.cols() = %d", variance_est.size(), variance_est.front().size());
 	//return scale parameter
 	Real *rans14 = REAL(VECTOR_ELT(result, 14));
 	for(UInt i = 0; i < lambdaS_len; i++){
-		for(UInt j = 0; j < lambdaT_len; j++)
+		Rprintf("i =  %d\n", i);
+		for(UInt j = 0; j < lambdaT_len; j++){
+			Rprintf("j = %d\n",j);
+			Rprintf("pos = %d\n", i + lambdaS_len*j);
 			rans14[i + lambdaS_len*j] = variance_est[i][j];
+		}
 	}
 
 	UNPROTECT(1);
