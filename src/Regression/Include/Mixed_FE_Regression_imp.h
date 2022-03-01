@@ -412,15 +412,12 @@ void MixedFERegressionBase<InputHandler>::buildSpaceTimeMatrices()
 {
     SpMat IM(M_, M_); // Matrix temporal_nodes x temporal_nodes
     SpMat phi;     // Dummy for update, old Psi will be overwritten by Psi_tilde
-    Rprintf("M_ = %d, N_ = %d\n",M_,N_); 
 	// Distinguish between two problem classes
 	if(regressionData_.getFlagParabolic())
 	{ // Parabolic case
-	    Rprintf("PARABOLIC\n");
             MixedFDRegression <InputHandler> FiniteDifference(mesh_time_, regressionData_);
             FiniteDifference.setDerOperator();
             SpMat L = FiniteDifference.getDerOpL(); // Matrix of finite differences
-            Rprintf("L.rows() = %d, L.cols() = %d\n", L.rows(), L.cols());
             IM.setIdentity(); // Set as identity matrix
             LR0k_ = kroneckerProduct(L, R0_); // REMARK --> HAS TO BE ADDED TO R1 (that is R1 tilde) in the system
             phi = IM;
@@ -436,13 +433,11 @@ void MixedFERegressionBase<InputHandler>::buildSpaceTimeMatrices()
 		Spline.smoothSecondDerivative();
 		if(regressionData_.getFlagMass())
 		{ // Mass penalization
-			Rprintf("Mass Penalization\n");
 			IM = Spline.getTimeMass();
 			IN = R0_;
 		}
 		else
 		{ // Identity penalization
-			Rprintf("Identity Penalization\n");
 			IM.setIdentity();
 			IN.setIdentity();
 		}
@@ -474,7 +469,6 @@ void MixedFERegressionBase<InputHandler>::buildSpaceTimeMatrices()
 	// right hand side correction for the forcing term:
 	if(this->isSpaceVarying)
 	{ // otherwise no forcing term needed
-		Rprintf("RightHandSide correctrion\n");
 		VectorXr forcingTerm = rhs_ft_correction_; // Store old data
 		rhs_ft_correction_.resize(M_*N_); // New size
 		for(UInt i=0; i<N_; i++) // Update forcing term (i.e. repeat identically M_ times)
@@ -1155,7 +1149,6 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 		this->template setA<ORDER, mydim, ndim>(mesh_);
 		isAComputed = true;
 	}
-	Rprintf("Computing Psi\n");
 	// Set psi matrix if not already done
 	if(!isPsiComputed){
 		this->template setPsi<ORDER, mydim, ndim>(mesh_);
@@ -1163,20 +1156,19 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	}
     psi_mini = psi_;
 	// If there are covariates in the model set H and Q
-	Rprintf("Computing H and Q\n");
 	if(Wp->rows() != 0)
 	{
 		setH();
 		setQ();
 	}
-	Rprintf("Computing R1\n");
+	
 	typedef EOExpr<Mass> ETMass; Mass EMass; ETMass mass(EMass);
 	if(!isR1Computed)
 	{
 		Assembler::operKernel(oper, mesh_, fe, R1_);
 		isR1Computed = true;
 	}
-	Rprintf("Computing R0\n");
+	
 	if(!isR0Computed)
 	{
 		Assembler::operKernel(mass, mesh_, fe, R0_);
@@ -1189,21 +1181,18 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	}
 	
 	if(regressionData_.isSpaceTime() && !isTimeComputed && !this->isIterative)
-	{	Rprintf("BuildSpaceTimeMatrices \n");
+	{
 		this->buildSpaceTimeMatrices();
 		isTimeComputed = true;
 	}
-	Rprintf("setpsi_t_()\n");
 	// Set final transpose of Psi matrix
 	setpsi_t_();
-	Rprintf("setDMat()\n");
 	// Set matrix DMat for all cases
 	setDMat();
 
 	// Set the matrix needed for the iterative method
 	if(regressionData_.isSpaceTime() && this->isIterative)
         buildSpaceTimeMatrices_iterative();
-	Rprintf("Define RightHandData\n");
 	// Define right hand data [rhs]
 	VectorXr rightHandData;
 	getRightHandData(rightHandData); //updated

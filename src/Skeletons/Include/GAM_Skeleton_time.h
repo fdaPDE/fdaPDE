@@ -37,9 +37,9 @@ SEXP GAM_skeleton_time(InputHandler &GAMData,
         FPIRLSfactory<InputHandler, ORDER, mydim, ndim>::createFPIRLSsolver(
             family, mesh, mesh_time, GAMData, optimizationData, mu0,
             scale_parameter);
-    Rprintf("GAM Skeleton_time: FPIRLS > apply() \n");
+            
     fpirls->apply();
-    Rprintf("GAM Skeleton: Collecting Result \n");
+    
     const MatrixXv &solution = fpirls->getSolution();
     const MatrixXr &dof = fpirls->getDOF();
     const std::vector<std::vector<Real>> &J_value = fpirls->get_J();
@@ -52,7 +52,7 @@ SEXP GAM_skeleton_time(InputHandler &GAMData,
     
     const UInt lambdaS_len = fpirls->get_size_S();
     const UInt lambdaT_len = fpirls->get_size_T();
-    Rprintf("lambdaS_len = %d, lambdaT_len = %d \n", lambdaS_len, lambdaT_len);
+    
     MatrixXv beta;
     if (GAMData.getCovariates()->rows() == 0) {
         beta.resize(1, 1);

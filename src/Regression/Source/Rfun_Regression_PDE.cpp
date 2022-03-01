@@ -203,39 +203,6 @@ extern "C"
                 return(R_NilValue);
         }
         
-        SEXP gam_PDE_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, 
-        	SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, 
-        	SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic,SEXP Rflag_iterative, SEXP Rmax_num_iteration, 
-        	SEXP Rthreshold, SEXP Ric, SEXP Rfamily, SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rmu0, SEXP RscaleParam, 
-        	SEXP Rsearch, SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, 
-        	SEXP Rsct) 
-        {
-        GAMDataElliptic regressionData(
-            Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK,
-            Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix,
-            RarealDataAvg, Rflag_mass, Rflag_parabolic, Rflag_iterative, Rmax_num_iteration, Rthreshold, Ric, Rsearch,
-            Rmax_num_iteration_pirls, Rthreshold_pirls);
-        OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T,
-                                          Rflag_parabolic, Rnrealizations, Rseed,
-                                          RDOF_matrix, Rtune, Rsct);
-
-        UInt mydim = INTEGER(Rmydim)[0];
-        UInt ndim = INTEGER(Rndim)[0];
-
-        std::string family = CHAR(STRING_ELT(Rfamily, 0));
-
-        if (regressionData.getOrder() == 1 && ndim == 2)
-            return (GAM_skeleton_time<GAMDataElliptic, 1, 2, 2>(
-                regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family,
-                RscaleParam));
-        else if (regressionData.getOrder() == 2 && ndim == 2)
-            return (GAM_skeleton_time<GAMDataElliptic, 2, 2, 2>(
-                regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family,
-                RscaleParam));
-
-        return (NILSXP);
-    }
-
         //! A utility, not used for system solution, may be used for debugging
         /*!
                 This function is then called from R code.

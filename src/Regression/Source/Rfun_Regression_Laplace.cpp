@@ -223,7 +223,7 @@ extern "C"
 		GAMDataLaplace regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
             RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic,
             Rflag_iterative, Rmax_num_iteration, Rthreshold, Ric, Rsearch,
-            Rmax_num_iteration_pirls, Rthreshold_pirls); //, NILSXP);
+            Rmax_num_iteration_pirls, Rthreshold_pirls);
 		OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
 	  	std::string family = CHAR(STRING_ELT(Rfamily,0));
 
