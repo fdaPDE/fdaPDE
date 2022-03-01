@@ -223,7 +223,7 @@ extern "C"
 		GAMDataLaplace regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
             RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic,
             Rflag_iterative, Rmax_num_iteration, Rthreshold, Ric, Rsearch,
-            Rmax_num_iteration_pirls, Rthreshold_pirls, NILSXP);
+            Rmax_num_iteration_pirls, Rthreshold_pirls); //, NILSXP);
 		OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
 	  	std::string family = CHAR(STRING_ELT(Rfamily,0));
 
@@ -234,6 +234,18 @@ extern "C"
 			return(GAM_skeleton_time<GAMDataLaplace, 1, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
 		else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
 			return(GAM_skeleton_time<GAMDataLaplace, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
+			return(GAM_skeleton_time<GAMDataLaplace, 1, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
+			return(GAM_skeleton_time<GAMDataLaplace, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==1 && mydim==3 && ndim==3)
+			return(GAM_skeleton_time<GAMDataLaplace, 1, 3, 3>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==2 && mydim==3 && ndim==3)
+			return(GAM_skeleton_time<GAMDataLaplace, 2, 3, 3>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==1 && mydim==1 && ndim==2)
+			return(GAM_skeleton_time<GAMDataLaplace, 1, 1, 2>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==2 && mydim==1 && ndim==2)
+			return(GAM_skeleton_time<GAMDataLaplace, 2, 1, 2>(regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family, RscaleParam));	
 
 	    	return(NILSXP);
 	}

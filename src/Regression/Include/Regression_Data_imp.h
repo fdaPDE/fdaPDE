@@ -50,7 +50,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(
     SEXP Robservations, SEXP Rorder, SEXP Rcovariates, SEXP RBCIndices,
     SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass,
     SEXP Rflag_parabolic,SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rmax_num_iteration_pirls,
-    SEXP Rthreshold_pirls, SEXP nochoice)
+    SEXP Rthreshold_pirls) //, SEXP nochoice)
     : RegressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations,
                      Rorder, Rcovariates, RBCIndices, RBCValues,
                      RincidenceMatrix, RarealDataAvg, Rflag_mass,

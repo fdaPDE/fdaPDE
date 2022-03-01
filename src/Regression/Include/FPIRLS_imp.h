@@ -219,10 +219,13 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_mu(UInt& lambdaS_inde
   //compute mu as mu_i = g-1( w_ii*beta + fn_hat)
 
   VectorXr W_beta = VectorXr::Zero(mu_[lambdaS_index][lambdaT_index].size()); // initialize the vector w_ii*beta
-
-  if(inputData_.getCovariates()->rows()>0)
+	Rprintf("W_beta.size() = %d", W_beta.size());
+	Rprintf("getCovariates())).rows() = %d, ncols() = %d", (*inputData_.getCovariates()).rows(), (*inputData_.getCovariates()).cols()); 
+  if(inputData_.getCovariates()->rows()>0){
+    Rprintf("_beta_hat(i,j).size() = %d", _beta_hat(lambdaS_index,lambdaT_index).size());
     W_beta = (*(inputData_.getCovariates()))*_beta_hat(lambdaS_index,lambdaT_index);
 
+}
 
   for(UInt j=0; j < W_beta.size(); j++){
       mu_[lambdaS_index][lambdaT_index](j) = inv_link(W_beta[j] + _fn_hat(lambdaS_index,lambdaT_index)(j));
