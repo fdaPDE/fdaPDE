@@ -130,7 +130,7 @@
 #'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
 #'         main = paste("True density at t = ", t), zlim=c(0,0.2), asp = 1)
 #'
-#' FEMfunction = FEM.time(sol, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+#' FEMfunction = FEM.time(sol$g, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 #' evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
 #' image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
 #'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
