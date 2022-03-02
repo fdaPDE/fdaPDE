@@ -465,7 +465,7 @@ void MixedFERegressionBase<InputHandler>::buildSpaceTimeMatrices()
         R0_.resize(N_ * M_, N_ * M_);
         R0_ = kroneckerProduct(IM, R0_temp);
         R0_.makeCompressed();
-	
+
 	// right hand side correction for the forcing term:
 	if(this->isSpaceVarying)
 	{ // otherwise no forcing term needed
@@ -1161,25 +1161,25 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 		setH();
 		setQ();
 	}
-	
+
 	typedef EOExpr<Mass> ETMass; Mass EMass; ETMass mass(EMass);
 	if(!isR1Computed)
 	{
 		Assembler::operKernel(oper, mesh_, fe, R1_);
 		isR1Computed = true;
 	}
-	
+
 	if(!isR0Computed)
 	{
 		Assembler::operKernel(mass, mesh_, fe, R0_);
 		isR0Computed = true;
 	}
-	
+
 	if(this->isSpaceVarying)
 	{
 		Assembler::forcingTerm(mesh_, fe, u, rhs_ft_correction_);
 	}
-	
+
 	if(regressionData_.isSpaceTime() && !isTimeComputed && !this->isIterative)
 	{
 		this->buildSpaceTimeMatrices();
@@ -1914,11 +1914,7 @@ class MixedFERegression<GAMDataElliptic>: public MixedFERegressionBase<Regressio
 	public:
 		MixedFERegression(const RegressionDataElliptic & regressionData, OptimizationData & optimizationData, UInt nnodes_):
 			MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
-		
-		MixedFERegression(const std::vector<Real>& mesh_time,
-                      const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_): 
-                		MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_){};
-              
+
 		template< UInt ORDER, UInt mydim, UInt ndim>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
 		{
@@ -1941,11 +1937,7 @@ class MixedFERegression<GAMDataEllipticSpaceVarying>: public MixedFERegressionBa
 	public:
 		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData, OptimizationData & optimizationData, UInt nnodes_):
 			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>( regressionData, optimizationData, nnodes_) {};
-		
-		MixedFERegression(const std::vector<Real>& mesh_time, 
-			const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_): 		
-				MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_){};
-              
+
 		template<UInt ORDER, UInt mydim, UInt ndim>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
 		{

@@ -10,8 +10,8 @@
 template<typename InputHandler,UInt ORDER, UInt mydim, UInt ndim>
 SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, SEXP Rmesh, SEXP Rmu0, std::string family, SEXP RscaleParam)
 {
-  	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, GAMData.getSearch());
-  
+	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, GAMData.getSearch());
+
 	// read Rmu0
 	VectorXr mu0;
 	UInt n_obs_ = Rf_length(Rmu0);
@@ -25,7 +25,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 	Real scale_parameter = REAL(RscaleParam)[0];
 	// Factory:
 	std::unique_ptr<FPIRLS<InputHandler, ORDER, mydim, ndim>> fpirls = FPIRLSfactory<InputHandler, ORDER, mydim, ndim>::createFPIRLSsolver(family, mesh, GAMData, optimizationData, mu0, scale_parameter);
-	
+
   	fpirls->apply();
 
 	const MatrixXv& solution = fpirls->getSolution();
@@ -38,7 +38,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
   	const UInt bestLambda = optimizationData.get_best_lambda_S();
   	const UInt lambdaS_len = fpirls->get_size_S();
   	const UInt lambdaT_len = 1;
-	
+
 	MatrixXv beta;
   	if(GAMData.getCovariates()->rows()==0)
    	{
@@ -62,7 +62,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
   	SET_VECTOR_ELT(result, 2, Rf_allocMatrix(REALSXP, lambdaS_len, lambdaT_len));
   	SET_VECTOR_ELT(result, 3, Rf_allocVector(INTSXP, 1));
   	SET_VECTOR_ELT(result, 4, Rf_allocMatrix(REALSXP, beta(0).size(), beta.size()));
-	
+
 	//return solution
 	Real *rans = REAL(VECTOR_ELT(result, 0));
 	for(UInt j = 0; j < solution.size(); j++)
@@ -70,25 +70,25 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 		for(UInt i = 0; i < solution(0).size(); i++)
 			rans[i + solution(0).size()*j] = solution(j)(i);
 	}
-	
+
 	//return DoF
 	Real *rans1 = REAL(VECTOR_ELT(result, 1));
 	for(UInt i = 0; i < dof.size(); i++)
 	{
 		rans1[i] = dof(i);
 	}
-	
+
 	//return GCV values
   	Real *rans2 = REAL(VECTOR_ELT(result, 2));
 	for(UInt i = 0; i < lambdaS_len; i++)
 		for(UInt j = 0; j < lambdaT_len; j++)
 			rans2[i + lambdaS_len * j] = GCV[i][j];
-		
-	
+
+
 	// Copy best lambda
 	UInt *rans3 = INTEGER(VECTOR_ELT(result, 3));
 	rans3[0] = bestLambda;
-	
+
 	//return beta hat
 	Real *rans4 = REAL(VECTOR_ELT(result, 4));
 	for(UInt j = 0; j < beta.size(); j++)
@@ -96,7 +96,7 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 		for(UInt i = 0; i < beta(0).size(); i++)
 			rans4[i + beta(0).size()*j] = beta(j)(i);
 	}
-	
+
 	if(GAMData.getSearch()==2){
 
 		//SEND TREE INFORMATION TO R
@@ -149,12 +149,12 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 		for(UInt i = 0; i < barycenters.rows(); i++)
 			rans11[i + barycenters.rows()*j] = barycenters(i,j);
 	}
-	
+
 	// GAM PARAMETER ESTIMATIONS
 	SET_VECTOR_ELT(result, 12, Rf_allocMatrix(REALSXP, fn_hat(0,0).size(), fn_hat.rows()*fn_hat.cols()));
 	SET_VECTOR_ELT(result, 13, Rf_allocMatrix(REALSXP, lambdaS_len, lambdaT_len));
 	SET_VECTOR_ELT(result, 14, Rf_allocMatrix(REALSXP, lambdaS_len, lambdaT_len));
-	
+
 	//return fn hat
 	Real *rans12 = REAL(VECTOR_ELT(result, 12));
 	for(UInt i = 0; i < fn_hat.rows(); i++){
@@ -166,14 +166,14 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
         	for (UInt i = 0; i < fn_hat(0, 0).size(); i++)
             		rans12[i + fn_hat(0 , 0).size() * j] = fn_hat(j)(i);
     	}
-	
+
 	//return J_value
   	Real *rans13 = REAL(VECTOR_ELT(result, 13));
   	for(UInt i = 0; i < lambdaS_len; i++){
   		for(UInt j = 0; j < lambdaT_len; j++)
 			rans13[i + lambdaS_len*j] = J_value[i][j];
 	}
-	
+
 	//return scale parameter
 	Real *rans14 = REAL(VECTOR_ELT(result, 14));
 	for(UInt i = 0; i < lambdaS_len; i++){
