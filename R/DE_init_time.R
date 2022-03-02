@@ -63,23 +63,21 @@
 #' ## Density initialization
 #' lambda = 0.1
 #' lambda_time <- 0.001
-#' sol = DE.heat.FEM_time(data = locations, data_time = times, FEMbasis = FEMbasis, lambda = lambda, lambda_time = lambda_time,
-#'                        heatStep=0.1, heatIter=50, init="Heat")
+#' sol = DE.heat.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
+#'                        heatStep=0.1, heatIter=10, init="Heat")
 #'
 #' ## Visualization
-#'
-#' plot(FEM(coeff=sol$f_init, FEMbasis=FEMbasis))
 #'
 #' n = 100
 #' X <- seq(-3, 3, length.out = n)
 #' Y <- seq(-3, 3, length.out = n)
 #' grid <- expand.grid(X, Y)
 #'
-#' FEMfunction = FEM.time(sol, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+#' FEMfunction = FEM.time(sol$f_init[,1,1], mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 #' evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
-#' image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
-#'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
-#'         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
+#' image2D(x = X, y = Y, z = matrix(evaluation, n, n), col = heat.colors(100),
+#'         xlab = "", ylab = "", contour = list(drawlabels = FALSE),
+#'         main = paste("Initial guess at t = ", t), zlim=c(0,0.2), asp = 1)
 #'
 
 DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1,
