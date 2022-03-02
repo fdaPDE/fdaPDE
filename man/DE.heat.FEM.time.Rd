@@ -73,7 +73,7 @@ mesh_time <- seq(0, 1, length.out=11)
 ## Generate data
 n <- 1000
 set.seed(10)
-locations <- mvtnorm::rmvnorm(1, mean=c(0,0), sigma=diag(2))
+locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
 times <- runif(n,0,1)
 data <- cbind(locations, times)
 
@@ -104,5 +104,4 @@ image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
 
-plot(FEMfunction, 0.5)
 }
