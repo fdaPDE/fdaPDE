@@ -101,7 +101,7 @@
 #' ## Generate data
 #' n <- 1000
 #' set.seed(10)
-#' locations <- mvtnorm::rmvnorm(1, mean=c(0,0), sigma=diag(2))
+#' locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
 #' times <- runif(n,0,1)
 #' data <- cbind(locations, times)
 #'
@@ -136,7 +136,6 @@
 #'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
 #'         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
 #'
-#' plot(FEMfunction, 0.5)
 
 
 DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=50,
