@@ -3,6 +3,7 @@
 #include "../../Skeletons/Include/Regression_Skeleton.h"
 #include "../../Skeletons/Include/Regression_Skeleton_Time.h"
 #include "../../Skeletons/Include/GAM_Skeleton.h"
+#include "../../Skeletons/Include/GAM_Skeleton_time.h"
 #include "../Include/Regression_Data.h"
 #include "../../FE_Assemblers_Solvers/Include/Integration.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
@@ -201,7 +202,7 @@ extern "C"
 
                 return(R_NilValue);
         }
-
+        
         //! A utility, not used for system solution, may be used for debugging
         /*!
                 This function is then called from R code.
