@@ -110,7 +110,7 @@ class FPIRLS_Base {
    //! An inline member that returns a VectorXr, returns the final function estimates.
    inline MatrixXv const & getFunctionEst() const{return _fn_hat;}
    //! An inline member that returns the variance estimates.
-   inline std::vector<std::vector<Real>> const getVarianceEst() const{return  _variance_estimates;}
+   inline std::vector<std::vector<Real>> const & getVarianceEst() const{return  _variance_estimates;}
    //! An inline member that returns a the computed (or not) GCV estimates. If GCV is not computed, -1 is returned
    inline std::vector<std::vector<Real>> const & getGCV() const{return _GCV;}
 
