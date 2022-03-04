@@ -4,7 +4,7 @@
 \alias{DE.heat.FEM.time}
 \title{Spatio-temporal density initialization}
 \usage{
-DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=500,
+DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=10,
                         init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 }
 \arguments{
@@ -24,13 +24,13 @@ and, if ndim=3, the third column corresponds to the \code{z}-coordinates.}
 
 \item{lambda_time}{A scalar or vector of smoothing parameters in time. Default is NULL. It is useful only if \code{init='Heat'}.}
 
-\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusion process.}
 
-\item{heatIter}{An integer specifying the number of iteriations to perform the discretized heat diffusion process.}
+\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
 
 \item{init}{A string specifying the initialization procedure. It can be either 'Heat' or 'CV'.}
 
-\item{nFolds}{An integer specifying the number of folds used in the cross validation techinque. It is useful only
+\item{nFolds}{An integer specifying the number of folds used in the cross validation technique. It is useful only
 for the case \code{init = 'CV'}.}
 
 \item{search}{A flag to decide the search algorithm type (tree or naive or walking search algorithm).}

@@ -4,7 +4,7 @@
 \alias{DE.FEM.time}
 \title{Nonparametric spatio-temporal density estimation with differential regularization}
 \usage{
-DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=500,
+DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
                    stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
                    direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
                    flagLumped=0)
@@ -31,9 +31,9 @@ is chosen, together with the optimal smoothing parameter in space, with a \code{
 \item{fvec}{A vector of length #\code{nodes} of the spatial mesh times #\code{B-spline} temporal functional basis. It corresponds to the
 node values of the initial density function. If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion
 process that starts from the empirical density of the data. Default is \code{NULL}.
-N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).}
+N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).}
 
-\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusion process.}
 
 \item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
 
@@ -54,7 +54,7 @@ criterion. Default is 0.}
 penalization terms printed on console at each iteration of the descent algorithm (plus some other information/warnings). Default is \code{FALSE}.
 N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.}
 
-\item{nfolds}{An integer specifying the number of folds used in cross validation techinque to find the best pair of
+\item{nfolds}{An integer specifying the number of folds used in cross validation technique to find the best pair of
 (\code{lambda}, \code{lambda_time}) smoothing parameters.
 If there is only one pair of (\code{lambda}, \code{lambda_time}) it can be \code{NULL}. Default is \code{NULL}.}
 
@@ -146,7 +146,7 @@ points(sample, col="red", pch=19, cex=1, main=paste('Sample | ', t-0.05,' < t < 
 lambda <- 0.1
 lambda_time <- 0.001
 sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-                   fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
+                   fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
                    nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 
