@@ -10,10 +10,10 @@
 #' (interval). Its nodes are in increasing order.
 #' @param lambda A scalar or vector of smoothing parameters in space. Default is NULL. It is useful only if \code{init='Heat'}.
 #' @param lambda_time A scalar or vector of smoothing parameters in time. Default is NULL. It is useful only if \code{init='Heat'}.
-#' @param heatStep A real specifying the time step for the discretized heat diffusionn process.
-#' @param heatIter An integer specifying the number of iteriations to perform the discretized heat diffusion process.
+#' @param heatStep A real specifying the time step for the discretized heat diffusion process.
+#' @param heatIter An integer specifying the number of iterations to perform the discretized heat diffusion process.
 #' @param init A string specifying the initialization procedure. It can be either 'Heat' or 'CV'.
-#' @param nFolds An integer specifying the number of folds used in the cross validation techinque. It is useful only
+#' @param nFolds An integer specifying the number of folds used in the cross validation technique. It is useful only
 #' for the case \code{init = 'CV'}.
 #' @param search A flag to decide the search algorithm type (tree or naive or walking search algorithm).
 #' @param isTimeDiscrete A boolean specifying the time data type: \code{TRUE} for discrete (with many duplicates) time data;
@@ -28,7 +28,7 @@
 #' for each possible pair (\code{lambda}, \code{lambda_time}). If \code{init = 'CV'} it returns the initial vector associated
 #' to the unique pair (\code{lambda}, \code{lambda_time}) given.
 #' @description This function implements two methods for the density initialization procedure.
-#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=50,
+#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=10,
 #'                         init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 #' @export
 #' @examples
@@ -81,7 +81,7 @@
 #'
 
 DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1,
-                             heatIter=50, init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+                             heatIter=10, init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
