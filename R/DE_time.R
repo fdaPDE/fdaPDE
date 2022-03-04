@@ -15,8 +15,8 @@
 #' @param fvec A vector of length #\code{nodes} of the spatial mesh times #\code{B-spline} temporal functional basis. It corresponds to the
 #' node values of the initial density function. If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion
 #' process that starts from the empirical density of the data. Default is \code{NULL}.
-#' N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).
-#' @param heatStep A real specifying the time step for the discretized heat diffusionn process.
+#' N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).
+#' @param heatStep A real specifying the time step for the discretized heat diffusion process.
 #' @param heatIter An integer specifying the number of iterations to perform the discretized heat diffusion process.
 #' @param stepProposals A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
 #' vector of parameters, the biggest one such that the functional decreases at each iteration is chosen. If it is \code{NULL}
@@ -31,7 +31,7 @@
 #' @param print A boolean that is \code{TRUE} if the user wants the value of the functional, of the loglikelihood and of the
 #' penalization terms printed on console at each iteration of the descent algorithm (plus some other information/warnings). Default is \code{FALSE}.
 #' N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.
-#' @param nfolds An integer specifying the number of folds used in cross validation techinque to find the best pair of
+#' @param nfolds An integer specifying the number of folds used in cross validation technique to find the best pair of
 #' (\code{lambda}, \code{lambda_time}) smoothing parameters.
 #' If there is only one pair of (\code{lambda}, \code{lambda_time}) it can be \code{NULL}. Default is \code{NULL}.
 #' @param nsimulations An integer specifying the number of iterations used in the optimization algorithms. Default value is 500.
@@ -77,7 +77,7 @@
 #' @description This function implements a nonparametric spatio-temporal density estimation method with differential regularization
 #' (given by the sum of the square of the L2 norm of the laplacian of the density function and the square of the L2 norm of the second-
 #' order time-derivative), when points are located over a planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=50,
+#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
 #'                    stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
 #'                    direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
 #'                    flagLumped=0)
@@ -115,7 +115,7 @@
 #' lambda <- 0.1
 #' lambda_time <- 0.001
 #' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-#'                    fvec=NULL, heatStep=0.1, heatIter=50, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
+#'                    fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
 #'                    nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
 #'                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 #'
@@ -138,7 +138,7 @@
 #'
 
 
-DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=50,
+DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
                         stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
                         step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
                         search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
