@@ -406,8 +406,8 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
     stop('Unknown mesh class')
   }
 
-  if## Set propr type for correct C++ reading
-   ( (ndim==2 && mydim==2) || (ndim==3 && mydim==2) ){
+   ## Set propr type for correct C++ reading
+   if( (ndim==2 && mydim==2) || (ndim==3 && mydim==2) ){
    # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
 
    FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1

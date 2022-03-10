@@ -27,10 +27,10 @@ extern "C" {
 	\param Rcoef an R-vector the coefficients of the solution
 	\param Rorder an R integer containg the order of the solution
 	\param Rfast an R integer to enforce verbose search for Walking Algorithm (can miss location for non convex meshes)
-    \param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
-    \param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
-    \param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
- */
+	\param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
+    	\param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
+    	\param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
+*/
 SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations){
 
     UInt order = INTEGER(Rorder)[0];
@@ -64,7 +64,7 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
 	\param Rmesh an R-object containg the output mesh from Trilibrary in 2D (in 1.5D, 2.5D and 3D R functions can produce a compatible object)
   \param Rmesh_time an R-vector containg the time mesh
   \param Rlocations an R-matrix containing the xyz coordinates of the points where the solution has to be evaluated
-  \param Rtime_locations an R-vector containing the coordinates of the points where the solution has to be evaluated
+  \param Rtime_locations an R-vector containing the time coordinates of the points where the solution has to be evaluated
 	\param RincidenceMatrix an R-matrix for the incidence matrix defining the regions in the case of areal data
 	\param Rcoef an R-vector the coefficients of the solution
 	\param Rorder an R integer containg the order of the solution
@@ -72,9 +72,9 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
 	\param Rsearch an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes), 3 for Tree search
   \param Rflag_parabolic an R logical (seen as an integer) 1 if parabolic smoothing, 0 otherwise
   \param Rmydim an R integer containing the mesh space size, 1 for 1.5D, 2 for 2D and 2.5D, 3 for 3D
-  \param Rndim an R integer containing the space size, 2 for 1.5D and 2D , 3 for 2.5D and 3D
+  \param Rndim an R integer containing the space size, 2 for 1.5D and 2D, 3 for 2.5D and 3D
 */
- SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rflag_parabolic, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations)
+SEXP eval_FEM_time(SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP Rtime_locations, SEXP RincidenceMatrix, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rflag_parabolic, SEXP Rmydim, SEXP Rndim, SEXP Rsearch, SEXP RbaryLocations)
     {
         UInt order = INTEGER(Rorder)[0];
         UInt mydim = INTEGER(Rmydim)[0];
@@ -127,7 +127,7 @@ SEXP eval_FEM_fd(SEXP Rmesh, SEXP Rlocations, SEXP RincidenceMatrix, SEXP Rcoef,
 	\param Rcoef an R-vector the coefficients of the solution
   \param Rflag_parabolic an R logical TRUE for parabolic smoothing, FALSE otherwise
 */
-  SEXP eval_FEM_time_nodes(SEXP Rns, SEXP Rmesh_time, SEXP Rtime, SEXP Rcoef, SEXP Rflag_parabolic)
+SEXP eval_FEM_time_nodes(SEXP Rns, SEXP Rmesh_time, SEXP Rtime, SEXP Rcoef, SEXP Rflag_parabolic)
   {
   	UInt ns = INTEGER(Rns)[0];
   	UInt nt = Rf_length(Rmesh_time);
@@ -227,7 +227,7 @@ SEXP tree_mesh_construction(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim) {
 	return(NILSXP);
 }
 
- //! This function projects the points on the given mesh.
+//! This function projects the points on the given mesh.
 /*!
 	This function is then called from R code.
 

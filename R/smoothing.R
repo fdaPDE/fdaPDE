@@ -458,6 +458,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   	stop("walking search is not available for mesh class mesh.2.5D.")
   }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.1.5D"){
     stop("walking search is not available for mesh class mesh.1.5D.")
+  }else if(search=="walking" & class(FEMbasis$mesh) != "mesh.2.5D" & class(FEMbasis$mesh) != "mesh.1.5D"){
+    search=3
   }else{
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
   }
