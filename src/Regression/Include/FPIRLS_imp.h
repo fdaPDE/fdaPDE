@@ -115,7 +115,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
     Rprintf("\t n. iterations: %d\n \n", n_iterations[i][j]);
 
-    _J_minima.push_back(current_J_values[i][j][0]+current_J_values[i][j][1]); // compute the minimum value of the J fuctional
+    _J_minima[i][j] = current_J_values[i][j][0]+current_J_values[i][j][1]; // compute the minimum value of the J fuctional
     
     if(this->optimizationData_.get_loss_function()=="GCV"){ // compute GCV if it is required
 
