@@ -8,7 +8,7 @@
 /*! @brief An abstract class for computing the descent direction. The father is pure virtual; the right direction
 is computed inside the children according to a proper method chosen.
 */
-template<UInt ORDER, UInt mydim, UInt ndim, typename T = FunctionalProblem<ORDER, mydim, ndim>>
+template<UInt ORDER, UInt mydim, UInt ndim, class T = FunctionalProblem<ORDER, mydim, ndim>>
 class DirectionBase{
   protected:
     // to give generality if you want to add other children
@@ -30,7 +30,7 @@ class DirectionBase{
 
 
 //! @brief A class for computing the gradient descent direction.
-template<UInt ORDER, UInt mydim, UInt ndim, typename T = FunctionalProblem<ORDER, mydim, ndim>>
+template<UInt ORDER, UInt mydim, UInt ndim, class T = FunctionalProblem<ORDER, mydim, ndim>>
 class DirectionGradient : public DirectionBase<ORDER, mydim, ndim, T>{
   public:
     //! A delegating constructor.
@@ -46,8 +46,36 @@ class DirectionGradient : public DirectionBase<ORDER, mydim, ndim, T>{
 };
 
 
+//! @brief A class for computing the conjugate gradient descent direction.
+template<UInt ORDER, UInt mydim, UInt ndim, class T = FunctionalProblem<ORDER, mydim, ndim>>
+class DirectionConjugateGradient : public DirectionBase<ORDER, mydim, ndim, T>{
+private:
+    // Old gradient and old direction
+    VectorXr gradOld_, directionOld_;
+    // Flag for the first iteration
+    bool first_iteration_;
+    // Flag to choose the update formula for beta
+    UInt betaFormula_;
+    // Counter for restart
+    UInt restart;
+public:
+    //! A delegating constructor.
+    DirectionConjugateGradient(const T& fp, const UInt beta):
+            DirectionBase<ORDER, mydim, ndim, T>(fp), betaFormula_(beta), first_iteration_(true), restart(0) {};
+    //! A copy constructor: it just creates a DirectionConjugateGradient object with the same features of rhs but it initializes the flag.
+    DirectionConjugateGradient(const DirectionConjugateGradient<ORDER, mydim, ndim, T>& rhs);
+    //! Clone method overridden.
+    std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>> clone() const override;
+    //! A method to compute the conjugate gradient descent direction.
+    VectorXr computeDirection(const VectorXr& g, const VectorXr& grad) override;
+    //! A method to reset all the old parameters. In the conjugate gradient method they aren't.
+    void resetParameters() override;
+
+};
+
+
 //! @brief A class for computing the BFGS descent direction.
-template<UInt ORDER, UInt mydim, UInt ndim, typename T = FunctionalProblem<ORDER, mydim, ndim>>
+template<UInt ORDER, UInt mydim, UInt ndim, class T = FunctionalProblem<ORDER, mydim, ndim>>
 class DirectionBFGS : public DirectionBase<ORDER, mydim, ndim, T>{
   private:
     MatrixXr HInit_, HOld_;
@@ -66,6 +94,52 @@ class DirectionBFGS : public DirectionBase<ORDER, mydim, ndim, T>{
     VectorXr computeDirection(const VectorXr& g, const VectorXr& grad) override;
     //! A method to reset all the old parameters.
     void resetParameters() override;
+
+};
+
+
+//! @brief A class for computing the L-BFGS descent direction.
+template<UInt ORDER, UInt mydim, UInt ndim, class T = FunctionalProblem<ORDER, mydim, ndim>>
+class DirectionLBFGS : public DirectionBase<ORDER, mydim, ndim, T>{
+private:
+    // Maximum number of correction vectors
+    UInt m_;
+    // Old g and old gradient
+    VectorXr gOld_, gradOld_;
+    // gamma_ * I is the initial approximation to the Hessian matrix
+    Real gamma_;
+    // History of s and y vectors
+    std::vector<VectorXr> s_, y_;
+    // History of the y's values
+    std::vector<Real> ys_;
+    // Temporary values used in computing H * v
+    std::vector<Real> alpha_;
+    // Number of correction vectors in the history, ncorr_ <= m_
+    UInt ncorr_;
+    // A Pointer to locate the most recent history, 1 <= ptr_ <= m_
+    // Details: s and y vectors are stored in cyclic order.
+    //          For example, if the current s-vector is stored in s_[m-1],
+    //          then in the next iteration s_[0] will be overwritten.
+    //          s_[ptr_-1] points to the most recent history,
+    //          and s_[ptr_ % m_] points to the most distant one.
+    UInt ptr_;
+    // Flag for the first iteration
+    bool first_iteration_;
+
+public:
+    //! A constructor.
+    DirectionLBFGS(const T& fp, const UInt m);
+
+    //! A copy constructor: it just creates a DirectionLBFGS object with the same features of rhs but it initializes the members.
+    DirectionLBFGS(const DirectionLBFGS<ORDER, mydim, ndim, T>& rhs);
+    //! Clone method overridden.
+    std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>> clone() const override;
+    //! A method to compute the L-BFGS descent direction.
+    VectorXr computeDirection(const VectorXr& g, const VectorXr& grad) override;
+    //! A method to reset all the old parameters.
+    void resetParameters() override;
+    //! Add correction vectors
+    void add_correction(const VectorXr& s, const VectorXr& y);
 
 };
 

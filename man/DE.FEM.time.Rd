@@ -5,9 +5,9 @@
 \title{Nonparametric spatio-temporal density estimation with differential regularization}
 \usage{
 DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
-                   stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-                   direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
-                   flagLumped=0)
+            stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
+            direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
+            flagLumped=0)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -68,7 +68,13 @@ if it is \code{Wolfe_Method}, the step is computed at each iteration according t
 \item{direction_method}{A string specifying which descent direction to use in the descent algorithm.
 If it is \code{Gradient}, the direction is the one given by the gradient descent method (the opposite to the gradient of
 the functional); if instead it is \code{BFGS} the direction is the one given by the BFGS method
-(Broyden-Fletcher-Goldfarb-Shanno, a Quasi-Newton method). Default is \code{BFGS}.}
+(Broyden-Fletcher-Goldfarb-Shanno, a Quasi-Newton method). Default is \code{BFGS}. Other possible choices:
+Conjugate Gradient direction with Fletcher-Reeves formula (\code{ConjugateGradientFR}), Conjugate Gradient direction with
+Polak-Ribiére-Polyak formula (\code{ConjugateGradientPRP}), Conjugate Gradient direction with Hestenes-Stiefel formula
+(\code{ConjugateGradientHS}), Conjugate Gradient direction with Dai-Yuan formula (\code{ConjugateGradientDY}), Conjugate
+Gradient direction with Conjugate-Descent formula (\code{ConjugateGradientCD}), Conjugate Gradient direction with Liu-Storey
+formula (\code{ConjugateGradientLS}), L-BFGS direction with 5 correction vectors (\code{L-BFGS5}), L-BFGS direction with 10
+correction vectors (\code{L-BFGS10}).}
 
 \item{preprocess_method}{A string specifying the k fold cross validation technique to use, if there is more than one pair of
 smoothing parameters in space and in time (\code{lambda}, \code{lambda_time}); otherwise it should be \code{NULL}.
