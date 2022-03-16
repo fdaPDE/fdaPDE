@@ -15,7 +15,7 @@
 #' for each \code{lambda}. If \code{init = 'CV'} it returns the initial vector associated to the \code{lambda} given.
 #' @description This function implements two methods for the density initialization procedure.
 #' @usage DE.heat.FEM(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500, 
-#'                    init="Heat", nFolds=5, search = "tree") 
+#'             init="Heat", nFolds=5, search = "tree")
 #' @export
 #' @examples
 #' library(fdaPDE)

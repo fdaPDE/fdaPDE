@@ -58,8 +58,8 @@ checkParametersDE_time <- function(data, data_time, FEMbasis, mesh_time, lambda,
   if (is.null(direction_method))
     stop("'direction_method' is required; is NULL.")
   else{
-    if(direction_method!="Gradient" && direction_method!="BFGS")
-      stop("'direction_method' needs to be either 'Gradient' or 'BFGS'.")
+    if(direction_method!="Gradient" && direction_method!="ConjugateGradientFR" && direction_method!="ConjugateGradientPRP" && direction_method!="ConjugateGradientHS" && direction_method!="ConjugateGradientDY" && direction_method!="ConjugateGradientCD" && direction_method!="ConjugateGradientLS" && direction_method!="BFGS" && direction_method!="L-BFGS5" && direction_method!="L-BFGS10")
+      stop("'direction_method' needs to be 'Gradient', 'ConjugateGradientFR', 'ConjugateGradientPRP', 'ConjugateGradientHS', 'ConjugateGradientDY', 'ConjugateGradientCD', 'ConjugateGradientLS', 'BFGS', 'L-BFGS5' or 'L-BFGS10'.")
   }
 
   if((length(lambda)>1 || length(lambda_time)>1) && preprocess_method!="RightCV" && preprocess_method!="SimplifiedCV")
@@ -108,7 +108,7 @@ checkParametersSizeDE_time <- function(data, data_time, FEMbasis, mesh_time, ndi
     stop("'data' and 'data_time' must have the same number of rows (equal to the number of observations).")
 
   if(!is.null(fvec)){
-    SPLINE_DEGREE = 3
+    SPLINE_DEGREE <- 3
     if(length(fvec) != nrow(FEMbasis$mesh$nodes) * (length(mesh_time)+SPLINE_DEGREE-1))
       stop("The length of fvec has to be equal to the product of the number of mesh nodes and the number of B-spline basis functions.")
   }

@@ -35,7 +35,13 @@
 #' @param direction_method String. This parameter specifies which descent direction use in the descent algorithm. 
 #' If it is \code{Gradient}, the direction is the one given by the gradient descent method (the opposite to the gradient of
 #' the functional); if instead it is \code{BFGS} the direction is the one given by the BFGS method
-#' (Broyden Fletcher Goldfarb and Shanno, a Quasi-Newton method). Default is \code{BFGS}.
+#' (Broyden Fletcher Goldfarb and Shanno, a Quasi-Newton method). Default is \code{BFGS}. Other possible choices:
+#' Conjugate Gradient direction with Fletcher-Reeves formula (\code{ConjugateGradientFR}), Conjugate Gradient direction with
+#' Polak-Ribiére-Polyak formula (\code{ConjugateGradientPRP}), Conjugate Gradient direction with Hestenes-Stiefel formula
+#' (\code{ConjugateGradientHS}), Conjugate Gradient direction with Dai-Yuan formula (\code{ConjugateGradientDY}), Conjugate
+#' Gradient direction with Conjugate-Descent formula (\code{ConjugateGradientCD}), Conjugate Gradient direction with Liu-Storey
+#' formula (\code{ConjugateGradientLS}), L-BFGS direction with 5 correction vectors (\code{L-BFGS5}), L-BFGS direction with 10
+#' correction vectors (\code{L-BFGS10}).
 #' @param preprocess_method String. This parameter specifies the k fold cross validation technique to use, if there is more
 #' than one smoothing parameter \code{lambda} (otherwise it should be \code{NULL}). If it is \code{RightCV} the usual k fold 
 #' cross validation method is performed. If it is \code{SimplifiedCV} a simplified version is performed. 
@@ -58,9 +64,9 @@
 #' (given by the square root of the L2 norm of the laplacian of the density function), when points are located over a 
 #' planar mesh. The computation relies only on the C++ implementation of the algorithm.
 #' @usage DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, 
-#'               stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, 
-#'               nsimulations=500, step_method="Fixed_Step", direction_method="BFGS", 
-#'               preprocess_method="NoCrossValidation", search = "tree")
+#'        stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL,
+#'        nsimulations=500, step_method="Fixed_Step", direction_method="BFGS",
+#'        preprocess_method="NoCrossValidation", search = "tree")
 #' @export
 #'
 #' @references
