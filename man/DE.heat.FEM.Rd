@@ -5,7 +5,7 @@
 \title{Density initialization}
 \usage{
 DE.heat.FEM(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500, 
-                   init="Heat", nFolds=5, search = "tree")
+            init="Heat", nFolds=5, search = "tree")
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point, 
