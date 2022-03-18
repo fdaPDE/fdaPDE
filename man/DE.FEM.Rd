@@ -4,16 +4,9 @@
 \alias{DE.FEM}
 \title{Nonparametric density estimation with differential regularization}
 \usage{
-<<<<<<< HEAD
 DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
 tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2, nThreads_l=1, nThreads_fold=1, nfolds=NULL,
 nsimulations=500, step_method = "Fixed_Step", direction_method = "BFGS", preprocess_method="NoCrossValidation", search = "tree")
-=======
-DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, 
-              stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, 
-              nsimulations=500, step_method="Fixed_Step", direction_method="BFGS", 
-              preprocess_method="NoCrossValidation", search = "tree")
->>>>>>> master
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point, 
@@ -73,7 +66,6 @@ In the latter case the number of smoothing parameters \code{lambda} must be equa
 Default is \code{NULL}.}
 
 \item{search}{a flag to decide the search algorithm type (tree or naive or walking search algorithm).}
-<<<<<<< HEAD
 
 \item{nThread_int}{Integer specifying the number of threads to paralllize the computation of integrals. Default is 2. 
 N.B. Only one between \code{nThread_int}, \code{nThread_l}, \code{nThread_fold} can be 2, the others need to be 1.}
@@ -83,8 +75,6 @@ N.B. Only one between \code{nThread_int}, \code{nThread_l}, \code{nThread_fold} 
 
 \item{nThread_fold}{Integer specifying the number of threads to paralllize the loop over folds during cross-validation. Default is 1.
 #' N.B. Only one between \code{nThread_int}, \code{nThread_l}, \code{nThread_fold} can be 2, the others need to be 1.}
-=======
->>>>>>> master
 }
 \value{
 A list with the following variables:
@@ -130,16 +120,10 @@ points(data, col="red", pch=19, cex=0.5)
 ## Density Estimation
 lambda = 0.1
 sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, fvec=NULL, heatStep=0.1,
-<<<<<<< HEAD
                   heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2,
                   nThreads_l=1, nThreads_fold=1, nfolds=NULL, nsimulations=500, 
                   step_method = "Fixed_Step", direction_method = "BFGS",
                   preprocess_method="NoCrossValidation", search = "tree")
-=======
-                  heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, 
-                  nfolds=NULL, nsimulations=300,step_method = "Fixed_Step", 
-                  direction_method = "BFGS",preprocess_method="NoCrossValidation")
->>>>>>> master
 
 ## Visualization 
 n = 100
