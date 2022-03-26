@@ -94,7 +94,6 @@
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
-<<<<<<< HEAD
 #' @param solver.options A string specifying which solving technique is applied to the resolution of the finite element
 #' system: \code{'no_preconditioner'} solves the original system, \code{'mass_lumping'} solves the system with lumped mass matrix,
 #' \code{'lambda_preconditioner'} performs a scaling both by rows and columns by a factor sqrt(lambda_s), \code{'block_preconditioner'}
@@ -102,10 +101,7 @@
 #' south-west block accordingly. Block preconditioner is the slowest, lambda preconditioner is the safest,
 #' mass lumping works particularly well for covariate model.
 #' Default is \code{solver.options='no_preconditioner'}. Avoid mass lumping when the mesh is very irregular.
-#' @return A list with the following variables in \code{family="gaussian"} case:
-=======
 #' @return A list with the following variables:
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}

@@ -279,9 +279,11 @@ class MixedFERegressionBase
 		
 		template<typename Solver>
 		MatrixXv apply(void);
+		template<typename Solver>
         MatrixXv apply_iterative(void);
 		template<typename Solver>
 		MatrixXr apply_to_b(const MatrixXr& b);
+		template<typename Solver>
 		MatrixXr apply_to_b_iter(const MatrixXr & b, UInt time_index);
 };
 

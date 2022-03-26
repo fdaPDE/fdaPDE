@@ -448,11 +448,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
-<<<<<<< HEAD
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
       solver)
-=======
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.1.5D')
   {
     bigsol = NULL

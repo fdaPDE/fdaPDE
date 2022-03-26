@@ -1,14 +1,9 @@
 CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
                                      covariates = NULL, ndim, mydim, BC = NULL,
                                      incidence_matrix = NULL, areal.data.avg = TRUE,
-<<<<<<< HEAD
-                                     FLAG_MASS, FLAG_PARABOLIC, IC,
+                                     FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, threshold = 10^(-4), max.steps = 50, IC,
                                      search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
                                      solver)
-=======
-                                     FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, threshold = 10^(-4), max.steps = 50, IC,
-                                     search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
 {
 
   FEMbasis$mesh$tetrahedrons = FEMbasis$mesh$tetrahedrons - 1
@@ -145,12 +140,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
     ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
      FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
      BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-<<<<<<< HEAD
-     search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
+     search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
      solver, PACKAGE = "fdaPDE")
-=======
-     search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if(ICsol[[6]]==1)
@@ -161,12 +152,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
       ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-<<<<<<< HEAD
-       search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
+       search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
        solver, PACKAGE = "fdaPDE")
-=======
-       search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
     }
     else
     {
@@ -179,12 +166,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
         ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-<<<<<<< HEAD
-         search, as.integer(c(0,1,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
+         search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
          solver, PACKAGE = "fdaPDE")
-=======
-         search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
       }
     }
 
@@ -218,14 +201,9 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
 
   ## Call C++ function
   bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
-<<<<<<< HEAD
-    mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
+    mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
     IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
     solver, PACKAGE = "fdaPDE")
-=======
-    mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
-    IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
 
   return(c(bigsol,ICsol))
 }

@@ -1266,6 +1266,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 	Solver solverobj;
 	if (isMatrixNoCov_Computed)
 		solverobj.compute(matrixNoCov_);
+
 	const Real last_lambdaS = optimizationData_.get_last_lS_used();
 	const Real last_lambdaT = optimizationData_.get_last_lT_used();
 	const Real lambdaS = optimizationData_.get_current_lambdaS();
@@ -1290,20 +1291,25 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 }
 
 template<typename InputHandler>
+template<typename Solver
 MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b_iter(const MatrixXr & b, UInt time_index)
 {
+	Solver solverobj;
+	if (isMatrixNoCov_Computed)
+		solverobj.compute(matrixNoCov_);
+
 	const Real lambdaS = optimizationData_.get_current_lambdaS();
 	const Real lambdaT = optimizationData_.get_current_lambdaT();
 
 	if(!regressionData_.isSpaceTime())
-		buildSystemMatrix(lambdaS);
+		this->template buildSystemMatrix(lambdaS, &solverobj);
     else
-		buildSystemMatrix(lambdaS, lambdaT);
+		this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
 
 	if(regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
 		this->addDirichletBC_matrix();
 
-    this->system_factorize();
+	this->template system_factorize(&solverobj);
         
 	optimizationData_.set_last_lS_used(lambdaS);
 	optimizationData_.set_last_lT_used(lambdaT);
@@ -1318,6 +1324,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	Solver solverobj;
 	if (isMatrixNoCov_Computed)
 		solverobj.compute(matrixNoCov_);
+
 	UInt nnodes = N_*M_; // Define nuber of nodes
 	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
 
@@ -1450,7 +1457,13 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 
 //Iterative method for Space-Time problems
 template<typename InputHandler>
+template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
+
+	Solver solverobj;
+	if (isMatrixNoCov_Computed)
+		solverobj.compute(matrixNoCov_);
+
     UInt nnodes = N_ * M_; // Define number of space-times nodes
     Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
     const VectorXr *obsp = regressionData_.getObservations(); // Get observations
@@ -1522,11 +1535,11 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
             _solution_f_old_ = _solution(s, t).topRows(nnodes);
 
             if (regressionData_.getObservationsNA()->size() == 0) {
-                buildSystemMatrix(lambdaS, lambdaT);
+                this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
                 // Applying boundary conditions if necessary
                 if (regressionData_.getDirichletIndices()->size() != 0)
                     addDirichletBC();
-                system_factorize();
+				this->template system_factorize(&solverobj);
             }
 
             initialize_g(lambdaS,lambdaT, s, t);
@@ -1553,10 +1566,10 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
                     {
                         psi_mini = psi_.block(k * nlocations, k* N_, nlocations, N_);
                         DMat_ = psi_mini.transpose()* psi_mini;
-                        buildSystemMatrix(lambdaS, lambdaT);
+						this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
                         if (regressionData_.getDirichletIndices()->size() != 0)
                             addDirichletBC();
-                        system_factorize();
+						this->template system_factorize(&solverobj);
                     }
 
 
@@ -1564,7 +1577,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
                     update_rhs(k, lambdaS, lambdaT, s, t);
 
                     if (regressionData_.getCovariates()->rows() == 0)
-                        _solution_k_ = this->template system_solve(_rightHandSide_k_);
+                        _solution_k_ = this->template system_solve(_rightHandSide_k_, &solverobj);
                     else
                         _solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_,k);
 
