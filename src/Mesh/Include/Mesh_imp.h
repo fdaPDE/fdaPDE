@@ -1,16 +1,13 @@
 #ifndef MESH_IMP_H_
 #define MESH_IMP_H_
 
-
 template <UInt ORDER, UInt mydim, UInt ndim>
 MeshHandler<ORDER,mydim,ndim>::MeshHandler(SEXP Rmesh, UInt search) :
 	points_(VECTOR_ELT(Rmesh, 0)), sides_(VECTOR_ELT(Rmesh, 6)),
 		elements_(VECTOR_ELT(Rmesh, 3)), neighbors_(VECTOR_ELT(Rmesh, 8)),
 		 	search_(search) {
-				if((XLENGTH(Rmesh)==11 || TYPEOF(VECTOR_ELT(Rmesh, 11))==0) && search==2)
-					tree_ptr_.reset(new ADTree<meshElement>(points_, elements_));
-				else if (search==2)
-					tree_ptr_.reset(new ADTree<meshElement>(Rmesh));
+		 		if(search==2)
+		 			tree_ptr_=make_unique<const ADTree<meshElement> > (Rmesh);
 				}
 
 template <UInt ORDER, UInt mydim, UInt ndim>
@@ -34,6 +31,28 @@ typename MeshHandler<ORDER,mydim,ndim>::meshElement MeshHandler<ORDER,mydim,ndim
 	int id_neighbor{neighbors_(id_element, number)};
 	//return empty element if "neighbor" not present (out of boundary!)
 	return (id_neighbor==-1) ? meshElement() : getElement(id_neighbor);
+}
+
+template <UInt ORDER, UInt mydim, UInt ndim>
+template <bool isManifold>
+typename std::enable_if<!isManifold, typename MeshHandler<ORDER,mydim,ndim>::meshElement>::type  
+MeshHandler<ORDER,mydim,ndim>::findLocation(const Point<ndim>& point) const {
+	if(search_==2)
+		return findLocationTree(point);
+	else if(search_==3)
+		return findLocationWalking(point, getElement(0));
+	else
+		return findLocationNaive(point);
+}
+
+template <UInt ORDER, UInt mydim, UInt ndim>
+template <bool isManifold>
+typename std::enable_if<isManifold, typename MeshHandler<ORDER,mydim,ndim>::meshElement>::type  
+MeshHandler<ORDER,mydim,ndim>::findLocation(const Point<ndim>& point) const {
+	if(search_==2)
+		return findLocationTree(point);
+	else
+		return findLocationNaive(point);
 }
 
 template <UInt ORDER, UInt mydim, UInt ndim>
@@ -126,5 +145,137 @@ void MeshHandler<ORDER,mydim,ndim>::printTree(std::ostream & os) const
 	else
 		os << "No tree!" <<std::endl;
 }
+
+//Linear Networks partial specialization
+template<UInt ORDER>
+MeshHandler<ORDER,1,2>::MeshHandler(SEXP Rmesh, UInt search) :
+        points_(VECTOR_ELT(Rmesh, 0)),
+        elements_(VECTOR_ELT(Rmesh, 3)), neighbors_(VECTOR_ELT(Rmesh, 8)),
+        search_(search) {
+
+    if(search==2)
+        tree_ptr_=make_unique<const ADTree<meshElement> > (Rmesh);
+
+}
+
+template <UInt ORDER>
+Point<2> MeshHandler<ORDER,1,2>::getPoint(const UInt id) const
+{
+    return Point<2>(id, points_);
+}
+
+template <UInt ORDER>
+typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::getElement(const UInt id) const
+{
+    typename meshElement::elementPoints elPoints;
+    for (int j=0; j<how_many_nodes(ORDER,1); ++j)
+        elPoints[j] = getPoint(elements_(id,j));
+    return meshElement(id, elPoints);
+}
+
+template <UInt ORDER>
+std::vector<typename MeshHandler<ORDER,1,2>::meshElement > MeshHandler<ORDER,1,2>::getNeighbors(const UInt id_element, const UInt number) const
+{
+    const RIntegerMatrix &id_neighbors = neighbors_(id_element, number);
+    std::vector< meshElement > elem_neighbors;
+    elem_neighbors.reserve(id_neighbors.nrows()*id_neighbors.ncols());
+
+    for(UInt i=0; i<id_neighbors.nrows()*id_neighbors.ncols(); ++i){
+        elem_neighbors.push_back(getElement(id_neighbors[i]));
+    }
+    //return empty vector if "neighbors" not present (out of boundary!)
+    return elem_neighbors;
+}
+
+template <UInt ORDER>
+typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::findLocation(const Point<2>& point) const {
+    if(search_==2) {
+        return findLocationTree(point);
+    }
+    else
+        return findLocationNaive(point);
+}
+
+template <UInt ORDER>
+typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::findLocationNaive(const Point<2>& point) const
+{
+    for(UInt id=0; id < elements_.nrows(); ++id){
+        meshElement current_element{getElement(id)};
+        if(current_element.isPointInside(point))
+            return current_element;
+    }
+    return meshElement(); //default element with NVAL ID
+}
+
+template <UInt ORDER>
+typename MeshHandler<ORDER,1,2>::meshElement MeshHandler<ORDER,1,2>::findLocationTree(const Point<2>& point) const {
+    std::set<int> found;
+    std::vector<Real> region;
+    region.reserve(2*2);
+
+    for (UInt i=0; i<2; ++i){
+        region.push_back(point[i]);
+    }
+    for (UInt i=0; i<2; ++i){
+        region.push_back(point[i]);
+    }
+
+    if(!tree_ptr_->search(region, found)) {
+        return meshElement();
+    }
+
+    for (const auto &i : found) {
+        const UInt index = tree_ptr_->pointId(i);
+        meshElement tmp = getElement(index);
+        if(tmp.isPointInside(point)) {
+            return tmp;
+        }
+    }
+    return meshElement();
+}
+
+
+template <UInt ORDER>
+void MeshHandler<ORDER,1,2>::printPoints(std::ostream& os) const
+{
+    os<<"# Nodes: "<<points_.nrows()<<std::endl;
+    for(UInt i=0; i<points_.nrows(); ++i)
+        os<<getPoint(i);
+}
+
+
+template <UInt ORDER>
+void MeshHandler<ORDER,1,2>::printElements(std::ostream& os) const
+{
+    os << "# Edges: "<< elements_.nrows() <<std::endl;
+    for (UInt i = 0; i < elements_.nrows(); ++i )
+        os<<getElement(i);
+}
+
+template <UInt ORDER>
+void MeshHandler<ORDER,1,2>::printNeighbors(std::ostream& os) const
+{
+    os << "# Neighbors list: "<< elements_.nrows() <<std::endl;
+    for (UInt i = 0; i < elements_.nrows(); ++i){
+        for( UInt j = 0; j < 2; ++j){
+            for(UInt k=0; k<neighbors_(i,j).nrows()*neighbors_(i,j).ncols(); ++k) {
+                os << neighbors_(i, j)[k] << " ";
+            }
+            os<<"\t";
+        }
+        os << std::endl;
+    }
+}
+
+template <UInt ORDER>
+void MeshHandler<ORDER,1,2>::printTree(std::ostream & os) const
+{
+    os << "# Tree characteristic: " <<std::endl;
+    if (tree_ptr_)
+        os << *tree_ptr_ << std::endl;
+    else
+        os << "No tree!" <<std::endl;
+}
+
 
 #endif

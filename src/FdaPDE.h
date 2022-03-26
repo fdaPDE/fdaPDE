@@ -30,12 +30,10 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
-#include <Eigen/SVD>
 #define  EIGEN_MPL2_ONLY
 
 typedef double Real;
 typedef int UInt;
-
 
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixXr;
 typedef Eigen::Matrix<UInt,Eigen::Dynamic,Eigen::Dynamic> MatrixXi;

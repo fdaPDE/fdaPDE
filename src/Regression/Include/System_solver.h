@@ -18,6 +18,7 @@ protected:
 	Real lambdaT = 1.0;					// time smoothing parameter
 	bool parabolic = false;
 	bool timeDependent = false;
+	bool iterative = false;
 
 	// Factorization of the system matrix
 	Eigen::SparseLU<SpMat> Mdec;
