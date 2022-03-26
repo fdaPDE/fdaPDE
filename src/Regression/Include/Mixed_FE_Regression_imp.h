@@ -961,10 +961,8 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
 	Solver solverobj;
 	if (isMatrixNoCov_Computed)
-	{
 		solverobj.compute(matrixNoCov_);
-		Rprintf("solverobj init w/ mNC");
-	}
+	
 	UInt nnodes = N_*M_; // Define nuber of nodes
 	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
 
