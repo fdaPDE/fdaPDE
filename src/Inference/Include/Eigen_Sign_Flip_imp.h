@@ -1012,6 +1012,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   // fill the p_values matrix
   for (UInt i=0; i<p; i++){
     MatrixXr TildeX_loc= TildeX.row(beta_in_test[i]);
+    beta_hat_mod = beta_hat;
 
     // compute the partial residuals and p value
     beta_hat_mod(beta_in_test[i])=UU(i); // beta_hat_mod(i) = beta_hat(i) if i not in test; beta_HP otherwise
@@ -1052,6 +1053,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
     for (UInt i=0; i<p; i++){
 
       MatrixXr TildeX_loc= TildeX.row(beta_in_test[i]);
+      beta_hat_mod = beta_hat;
   
       if(!converged_up[i]){
 	if(local_p_values(0,i)>alpha){ // Upper-Upper bound excessively tight
