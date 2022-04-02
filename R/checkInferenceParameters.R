@@ -94,7 +94,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
     if(R_Inference_Object_Data@locations_are_nodes!=1){
       # intervals with sign-flip or eigen-sign-flip implementation are not allowed
       for(k in 1:length(R_Inference_Object_Data@type)){
-        if((R_Inference_Object_Data@type[k]==3 || R_Inference_Object_Data@type[k]==4) && R_Inference_Object_Data@interval[k]!=0 && R_Inference_Object_Data@component[k]!=1)
+        if((R_Inference_Object_Data@type[k]==3 || R_Inference_Object_Data@type[k]==5) && R_Inference_Object_Data@interval[k]!=0 && R_Inference_Object_Data@component[k]!=1)
           stop("Sign-Flip and Eigen-Sign-Flip confidence intervals on f are implemented only if the selected locations are a subset of the mesh nodes")
       }
     }
