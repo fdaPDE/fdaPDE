@@ -1176,15 +1176,16 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 		isR0Computed = true;
 	}
 
-	if(this->isSpaceVarying)
+	if(this->isSpaceVarying && !isFTComputed)
 	{
 		Assembler::forcingTerm(mesh_, fe, u, rhs_ft_correction_);
+		isFTComputed = true;
 	}
 
-	if(regressionData_.isSpaceTime() && !isTimeComputed && !this->isIterative)
+	if(regressionData_.isSpaceTime() && !isSVComputed && !this->isIterative)
 	{
 		this->buildSpaceTimeMatrices();
-		isTimeComputed = true;
+		isSVComputed = true;
 	}
 
 	// Set final transpose of Psi matrix
