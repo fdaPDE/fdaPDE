@@ -156,6 +156,9 @@ class FPIRLS< GAMDataEllipticSpaceVarying, ORDER,  mydim,  ndim>: public FPIRLS_
     FPIRLS(const MeshHandler<ORDER,mydim,ndim>& mesh, GAMDataEllipticSpaceVarying& inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
       FPIRLS_Base<GAMDataEllipticSpaceVarying, ORDER, mydim, ndim>(mesh, inputData, optimizationData, mu0, scale_parameter_flag, scale_param){};
     
+    FPIRLS(const MeshHandler<ORDER,mydim,ndim>& mesh, const std::vector<Real> & mesh_time, GAMDataEllipticSpaceVarying& inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
+      FPIRLS_Base<GAMDataEllipticSpaceVarying, ORDER, mydim, ndim>(mesh, mesh_time, inputData, optimizationData, mu0, scale_parameter_flag, scale_param){};     
+    
     virtual ~FPIRLS(){};
 
     virtual void apply();
