@@ -231,6 +231,14 @@ extern "C"
             return (GAM_skeleton_time<GAMDataElliptic, 2, 2, 2>(
                 regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family,
                 RscaleParam));
+        else if (regressionData.getOrder() == 1 && mydim == 3 && ndim == 3)
+            return (GAM_skeleton_time<GAMDataElliptic, 1, 3, 3>(
+                regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family,
+                RscaleParam));
+        else if (regressionData.getOrder() == 2 && mydim == 3 && ndim == 3)
+            return (GAM_skeleton_time<GAMDataElliptic, 2, 3, 3>(
+                regressionData, optimizationData, Rmesh, Rmesh_time, Rmu0, family,
+                RscaleParam));
 
         return (NILSXP);
     }
