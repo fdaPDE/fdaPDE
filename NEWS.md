@@ -1,4 +1,11 @@
 
+# fdaPDE 1.1-4
+
+## New features
+
+1) fdaPDE over Linear Networks domains
+2) smooth regression for non-gaussian space-time data (GLM model)
+
 # fdaPDE 1.1-3
 
 ## New features
