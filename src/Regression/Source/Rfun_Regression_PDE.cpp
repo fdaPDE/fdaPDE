@@ -285,10 +285,15 @@ extern "C"
                 const Diffusion<PDEParameterOptions::Constant>& K = regressionData.getK();
                 const Advection<PDEParameterOptions::Constant>& beta = regressionData.getBeta();
 
-                if(regressionData.getOrder()==1 && ndim==2)
+                if(regressionData.getOrder()==1 && ndim==2 && mydim==2)
                         return(get_FEM_Matrix_skeleton<1,2,2>(Rmesh, c*mass+stiff[K]+beta.dot(grad)));
-                if(regressionData.getOrder()==2 && ndim==2)
+                else if(regressionData.getOrder()==2 && ndim==2 && mydim==2)
                         return(get_FEM_Matrix_skeleton<2,2,2>(Rmesh, c*mass+stiff[K]+beta.dot(grad)));
+                else if(regressionData.getOrder()==1 && ndim==3 && mydim==3)
+                        return(get_FEM_Matrix_skeleton<1,3,3>(Rmesh, c*mass+stiff[K]+beta.dot(grad)));
+                else if(regressionData.getOrder()==2 && ndim==3 && mydim==3)
+                        return(get_FEM_Matrix_skeleton<2,3,3>(Rmesh, c*mass+stiff[K]+beta.dot(grad)));
+                
                 return(NILSXP);
         }
 }
