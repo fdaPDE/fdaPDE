@@ -271,12 +271,51 @@ std::array<Real,2> FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_J(const
 
   if(isSpaceVarying)
   {
-      Lf = Lf - forcingTerm;
+      if( inputData_.isSpaceTime() ){
+     
+       UInt M_ =  regression_.getM_();
+       UInt N_ = regression_.getN_();
+      
+       VectorXr forcingTerm_correction_;
+       forcingTerm_correction_.resize(M_*N_); // New size
+      
+       for(UInt i=0; i<N_; i++) // Update forcing term (i.e. repeat identically M_ times)
+       {
+       	for(UInt j=0; j<M_; j++)
+        {
+         forcingTerm_correction_(i+j*N_) = forcingTerm(i);
+        }
+       }
+      
+      	Lf = Lf - forcingTerm_correction_;
+      }
+      else{
+      	Lf = Lf - forcingTerm;
+      }
   }
-
-  non_parametric_value = Lf.transpose() * (*(regression_.getR0_())) * Lf;
-  non_parametric_value = (*optimizationData_.get_LambdaS_vector())[lambdaS_index]*non_parametric_value;
-
+  
+  SpMat Int;
+  std::array<Real, 2> lambdaST = {
+  	(*optimizationData_.get_LambdaS_vector())[lambdaS_index],
+        (*optimizationData_.get_LambdaT_vector())[lambdaT_index]};
+  if (inputData_.isSpaceTime()) {
+  	UInt correction_size = inputData_.getFlagParabolic() ? -1 : +2;
+        VectorXr intcoef(mesh_time_.size() + correction_size);
+        intcoef.setConstant(mesh_time_[1] - mesh_time_[0]);
+        intcoef(0) *= 0.5;
+        SpMat IN(mesh_.num_nodes(), mesh_.num_nodes());
+        IN.setIdentity();
+        SpMat tmp = intcoef.asDiagonal().toDenseMatrix().sparseView();
+        tmp = kroneckerProduct(tmp, IN);
+        Int.resize(tmp.rows(), tmp.cols());
+        Int = lambdaST[0] * (*regression_.getR0_()) * tmp;
+    } else {
+        Int.resize(mesh_.num_nodes(), mesh_.num_nodes());
+        Int = lambdaST[0] * (*regression_.getR0_());
+    }
+    
+  non_parametric_value = Lf.transpose() * Int * Lf;
+  
   std::array<Real,2> returnObject{parametric_value, non_parametric_value};
 
   return returnObject;
