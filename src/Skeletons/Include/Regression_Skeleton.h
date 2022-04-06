@@ -501,6 +501,29 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
       // if the selected locations coincide with the nodes compute the matrix that groups closer locations, according to the distance induced by the mesh elements
       if(inferenceData_.get_locs_are_nodes_inference()){
 	MatrixXr Group_locs = MatrixXr::Zero(mesh_.num_nodes(), inferenceData_.get_locs_inference().rows());
+
+        // check if the locations coincide with the nodes, or if they are a subset of the nodes
+        if(mesh_.num_nodes()!=inf_car_.getPsip()->rows()){
+          // compute the correct locations indices on test with respect to the mesh nodes
+          std::vector<UInt> nodes_indices(inf_car_.getPsip()->rows(), -1);
+          // loop over the nonzero elements of Psi matrix
+	  for (UInt k = 0; k < inf_car_.getPsip()->outerSize(); ++k){
+	    for (SpMat::InnerIterator it(*(inf_car_.getPsip()),k); it; ++it)
+	      {
+		if(it.value() > 0.9){
+		  nodes_indices[it.row()] = k;
+		}
+	      }
+	  }
+	  // set the correct location indices in the inference carrier 
+	  std::vector<UInt> sub_nodes_indices = inferenceData_.get_locs_index_inference();
+	  for(auto i=0; i < sub_nodes_indices.size(); ++i){
+	    sub_nodes_indices[i] = nodes_indices[inferenceData_.get_locs_index_inference()[i]];
+	  }
+	  inferenceData_.set_locs_index_inference(sub_nodes_indices);
+        }
+
+
 	// get the selected location indices
 	std::vector<UInt> locations_index = inferenceData_.get_locs_index_inference(); 
 	// declare the vector that contains, for each location-node, the corresponding neighbors' indices
@@ -530,7 +553,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	for(UInt i=0; i < locations_index.size(); ++i){
 	  for(UInt j : NearestIndices[locations_index[i]]){
             if(rel_rows(j)>=0) // only if it belongs to the selected locations
-	    	Group_locs(locations_index[i], rel_rows(j)) = 1;
+	      Group_locs(locations_index[i], rel_rows(j)) = 1;
           }
 	}
     
