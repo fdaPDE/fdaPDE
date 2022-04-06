@@ -17,7 +17,7 @@ checkInferenceParameters <- function(R_Inference_Object_Data,checknumber,locatio
   }
   
   #check consistency with covariates dimension (if inference on the linear component is required)
-  if(sum(R_Inference_Object_Data@component!=2)!=0 && checknumber!=R_Inference_Object_Data@n_cov){
+  if(checknumber!=R_Inference_Object_Data@n_cov){
     stop("Inference data dimension and covariates dimension are not consistent")
   }
   
