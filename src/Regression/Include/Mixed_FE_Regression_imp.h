@@ -1727,6 +1727,11 @@ class MixedFERegression<GAMDataElliptic>: public MixedFERegressionBase<Regressio
 	public:
 		MixedFERegression(const RegressionDataElliptic & regressionData, OptimizationData & optimizationData, UInt nnodes_):
 			MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
+		
+		MixedFERegression(const std::vector<Real>& mesh_time,
+                      const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_): 
+                		MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_){};
+
 
 		template< UInt ORDER, UInt mydim, UInt ndim>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
@@ -1750,7 +1755,11 @@ class MixedFERegression<GAMDataEllipticSpaceVarying>: public MixedFERegressionBa
 	public:
 		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData, OptimizationData & optimizationData, UInt nnodes_):
 			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>( regressionData, optimizationData, nnodes_) {};
-
+		
+		MixedFERegression(const std::vector<Real>& mesh_time, 
+			const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_): 		
+				MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_){};
+		
 		template<UInt ORDER, UInt mydim, UInt ndim>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
 		{
