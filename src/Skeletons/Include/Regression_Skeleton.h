@@ -32,7 +32,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
 template<typename InputHandler>
 void lambda_inference_selection(const OptimizationData & optimizationData, const output_Data & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference);
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, const InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car);
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh, const InputHandler & regressionData, InferenceData & inferenceData, Inference_Carrier<InputHandler> & inf_car);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh)
@@ -367,7 +367,7 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
   \return void
 */
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, const InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
+void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
   // if a matrix of locations has been provided, compute Psi_loc by directly evaluating the spatial basis functions in the provided points
   // only wald implementation can enter here, no other additional matrices are needed
   if((inferenceData_.get_locs_index_inference())[0] == -1){
