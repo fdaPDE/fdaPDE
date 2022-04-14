@@ -37,7 +37,7 @@ class  RegressionData
 		// Other parameters
 		UInt order_;
 		// Solver technique
-		UInt solver_;
+		UInt solver_ = 0;
 
 		// Boundary + Initial
 		std::vector<Real> bc_values_;
@@ -102,7 +102,7 @@ class  RegressionData
 			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative,SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rsolver);
 
 		explicit RegressionData(Real* locations, UInt n_locations, UInt ndim, VectorXr & observations, UInt order, MatrixXr & covariates,
-			 VectorXr & WeightsMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,  MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, SEXP Rsolver);
+			 VectorXr & WeightsMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,  MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, UInt Rsolver);
 
 		// -- PRINTERS --
 		void printObservations(std::ostream & out) const;

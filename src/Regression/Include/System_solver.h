@@ -18,7 +18,6 @@ protected:
 	Real lambdaT = 1.0;					// time smoothing parameter
 	bool parabolic = false;
 	bool timeDependent = false;
-	bool iterative = false;
 
 	// Factorization of the system matrix
 	Eigen::SparseLU<SpMat> Mdec;
@@ -32,6 +31,8 @@ protected:
 	// A method assembling the system matrix starting from the four blocks
 	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE);
 public:
+	bool iterative = false;
+
 	BaseSolver() = default;
 	BaseSolver(const SpMat & M) { compute(M); };
 
@@ -55,6 +56,9 @@ public:
 
 	// Solve the system
 	virtual MatrixXr system_solve(const MatrixXr & b) const;
+
+	// Set iterative method flag
+	void setIterative(bool flag) { iterative = flag; }
 };
 
 

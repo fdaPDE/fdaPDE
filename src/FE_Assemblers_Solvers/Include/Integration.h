@@ -1,3 +1,4 @@
+#ifndef __INTEGRATION_H__
 #define __INTEGRATION_H__
 
 #include <type_traits>

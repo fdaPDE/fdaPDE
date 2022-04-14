@@ -52,3 +52,5 @@ constexpr std::array<Real,IntegratorTetrahedronP4::NNODES> IntegratorTetrahedron
 constexpr std::array<Real,IntegratorGaussP3::NNODES> IntegratorGaussP3::WEIGHTS;
 
 constexpr std::array<Real,IntegratorGaussP5::NNODES> IntegratorGaussP5::WEIGHTS;
+
+

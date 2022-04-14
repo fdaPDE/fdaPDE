@@ -459,7 +459,6 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                           FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
                                           search = search, bary.locations = bary.locations,
                                           optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
   }
   # ---------- Solution -----------
   N = nrow(FEMbasis$mesh$nodes)

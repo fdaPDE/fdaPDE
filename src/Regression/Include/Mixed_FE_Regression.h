@@ -102,7 +102,7 @@ class MixedFERegressionBase
 		bool isIterative;
 
 		//preconditioner choice
-		UInt solver_options;
+		UInt solver_options = 0;
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
@@ -151,6 +151,8 @@ class MixedFERegressionBase
 		//! Space-time version
 		template<typename Solver>
 		void buildSystemMatrix(Real lambdaS, Real lambdaT, Solver* solverobj);
+		//! Flag that indicates if the system matrix has been computed
+		bool isMatrixNoCov_Computed = false;
 
 		// -- FACTORIZER --
 		//! A function to factorize the system, using Woodbury decomposition when there are covariates
@@ -169,7 +171,8 @@ class MixedFERegressionBase
 
         // -- methods for the iterative method --
         //! A method to initialize f
-        void initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index);
+		template<typename Solver>
+        void initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index, Solver* solverobj);
          //! A method to initialize g
         void initialize_g(Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
         //! A method that stops the iterative algorithm based on difference between functionals J_k J_k+1 or n_iterations > max_num_iterations .
@@ -304,6 +307,7 @@ class MixedFERegression : public MixedFERegressionBase<InputHandler>
 			Rprintf("Option not implemented!\n");
 		}
 
+		template<typename Solver>
          void apply_iterative(void)
         {
             Rprintf("Option not implemented!\n");

@@ -143,7 +143,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(const UInt& l
   // Here we have to solve a weighted regression problem.
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
   regression_.preapply(this->mesh_);
-<<<<<<< HEAD
 
   if (regression_.getSolver() == 0)
       regression_.template apply<BaseSolver>();
@@ -155,9 +154,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(const UInt& l
       regression_.template apply<BlockPreconditioner>();
 
   const SpMat * Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
-=======
-  regression_.apply();
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
 
   // if the system matrix is correctly factorized
   if( regression_.isMatrixNoCov_factorized() ) {
@@ -302,21 +298,19 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_GCV(const UInt& lambd
 
         if (optimizationData_.get_DOF_evaluation() != "not_required") //in this case surely we have already the dofs
         { // is DOF_matrix to be computed?
-<<<<<<< HEAD
             if(regression_.getSolver() == 0)
-                regression_.template computeDegreesOfFreedom<BaseSolver>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+                regression_.template computeDegreesOfFreedom<BaseSolver>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambdaS_index],
+                    (*optimizationData_.get_LambdaT_vector())[lambdaT_index]);
             else if (regression_.getSolver() == 1)
-                regression_.template computeDegreesOfFreedom<MassLumping>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+                regression_.template computeDegreesOfFreedom<MassLumping>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambdaS_index],
+                    (*optimizationData_.get_LambdaT_vector())[lambdaT_index]);
             else if (regression_.getSolver() == 2)
-                regression_.template computeDegreesOfFreedom<LambdaPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+                regression_.template computeDegreesOfFreedom<LambdaPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambdaS_index],
+                    (*optimizationData_.get_LambdaT_vector())[lambdaT_index]);
             else if (regression_.getSolver() == 3)
-                regression_.template computeDegreesOfFreedom<BlockPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
-        _dof(lambda_index,0) = regression_.getDOF()(0,0);
-=======
-        regression_.computeDegreesOfFreedom(0, 0, (*optimizationData_.get_LambdaS_vector())[lambdaS_index],
-        					  (*optimizationData_.get_LambdaT_vector())[lambdaT_index]);
-        _dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(0,0);
->>>>>>> 9fe0adcb72d31d7267a8a8e0223c3a7a4e4330b7
+                regression_.template computeDegreesOfFreedom<BlockPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambdaS_index],
+                    (*optimizationData_.get_LambdaT_vector())[lambdaT_index]);
+            _dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(0, 0);
         }
         else _dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(lambdaS_index, lambdaT_index);
  

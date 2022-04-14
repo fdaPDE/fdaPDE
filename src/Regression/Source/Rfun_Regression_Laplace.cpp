@@ -219,13 +219,13 @@ extern "C"
 		SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,  SEXP RincidenceMatrix, 
 		SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic,SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, 
 		SEXP Ric, SEXP Rfamily, SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rmu0, SEXP RscaleParam, SEXP Rsearch,
-		SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
+		SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct, SEXP Rsolver)
 	{
 	    	//Set input data
 		GAMDataLaplace regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
             RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic,
             Rflag_iterative, Rmax_num_iteration, Rthreshold, Ric, Rsearch,
-            Rmax_num_iteration_pirls, Rthreshold_pirls);
+            Rmax_num_iteration_pirls, Rthreshold_pirls, Rsolver);
 		OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
 	  	std::string family = CHAR(STRING_ELT(Rfamily,0));
 
