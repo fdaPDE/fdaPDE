@@ -38,15 +38,6 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	
 	regression.preapply(mesh); // preliminary apply (preapply) to store all problem matrices
 
-	if (regression.getSolver() == 0)
-		regression.template apply<BaseSolver>();
-	else if (regression.getSolver() == 1)
-		regression.template apply<MassLumping>();
-	else if (regression.getSolver() == 2)
-		regression.template apply<LambdaPreconditioner>();
-	else if (regression.getSolver() == 3)
-		regression.template apply<BlockPreconditioner>();
-
 	std::pair<MatrixXr, output_Data<2>> solution_bricks;	// Prepare solution to be filled
 	
 	// Build the Carrier according to problem type

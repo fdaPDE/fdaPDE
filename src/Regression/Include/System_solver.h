@@ -30,6 +30,7 @@ protected:
 
 	// A method assembling the system matrix starting from the four blocks
 	SpMat buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMat& SW, const SpMat& NE);
+
 public:
 	bool iterative = false;
 

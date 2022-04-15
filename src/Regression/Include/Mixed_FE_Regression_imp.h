@@ -687,6 +687,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::solve_covariates_iter(const Eigen:
         U_k.topRows(N_) = U_.block(time_index*N_ ,0, N_, U_.cols());
 
         MatrixXr D = V_k*matrixNoCovdec_.solve(U_k);
+		Rprintf("matrixnocovdec is ok");
 
         // G = C + D
         MatrixXr G;
