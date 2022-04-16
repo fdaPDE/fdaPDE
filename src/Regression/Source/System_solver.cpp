@@ -16,7 +16,7 @@ SpMat BaseSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat
 	else if (parabolic && !iterative)
 		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
 	else if (parabolic && iterative)
-		R1_lambda = lambdaS * R1 - lambdaS * (lambdaT * R0_lambda);
+		R1_lambda = lambdaS * R1 - (lambdaT * R0_lambda);
 
 	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
@@ -26,6 +26,8 @@ SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMa
 {
 
 	UInt nnodes = NW.outerSize();
+	if (timeDependent && iterative)
+		nnodes *= M_;
 	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
 	std::vector<coeff> tripletAll;
 	tripletAll.reserve(NW.nonZeros() + NE.nonZeros() + SW.nonZeros() + SE.nonZeros());

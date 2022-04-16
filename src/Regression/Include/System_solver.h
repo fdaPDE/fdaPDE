@@ -18,6 +18,7 @@ protected:
 	Real lambdaT = 1.0;					// time smoothing parameter
 	bool parabolic = false;
 	bool timeDependent = false;
+	UInt M_;
 
 	// Factorization of the system matrix
 	Eigen::SparseLU<SpMat> Mdec;
@@ -60,6 +61,9 @@ public:
 
 	// Set iterative method flag
 	void setIterative(bool flag) { iterative = flag; }
+
+	// Set M_
+	void setM(UInt M) { M_ = M; }
 };
 
 

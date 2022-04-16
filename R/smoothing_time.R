@@ -458,7 +458,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                           incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
                                           FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
                                           search = search, bary.locations = bary.locations,
-                                          optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
+                                          optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+                                          solver)
   }
   # ---------- Solution -----------
   N = nrow(FEMbasis$mesh$nodes)
@@ -621,7 +622,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                       DOF.stochastic.seed = DOF.stochastic.seed,
                                       DOF.matrix = DOF.matrix,
                                       GCV.inflation.factor = GCV.inflation.factor,
-                                      lambda.optimization.tolerance = lambda.optimization.tolerance)
+                                      lambda.optimization.tolerance = lambda.optimization.tolerance, solver)
   } else if( class(FEMbasis$mesh) == 'mesh.2.5D' &  is.null(PDE_parameters)){
     bigsol = NULL
     bigsol = CPP_smooth.manifold.GAM.FEM.time(locations = locations, time_locations = time_locations,
@@ -639,7 +640,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                      DOF.stochastic.seed = DOF.stochastic.seed,
                                      DOF.matrix = DOF.matrix,
                                      GCV.inflation.factor = GCV.inflation.factor,
-                                     lambda.optimization.tolerance = lambda.optimization.tolerance)
+                                     lambda.optimization.tolerance = lambda.optimization.tolerance, solver)
   }else if(class(FEMbasis$mesh) == 'mesh.3D' &  is.null(PDE_parameters)){
     bigsol = NULL
     bigsol = CPP_smooth.volume.GAM.FEM.time(locations = locations, time_locations = time_locations,
@@ -657,7 +658,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                      DOF.stochastic.seed = DOF.stochastic.seed,
                                      DOF.matrix = DOF.matrix,
                                      GCV.inflation.factor = GCV.inflation.factor,
-                                     lambda.optimization.tolerance = lambda.optimization.tolerance)  
+                                     lambda.optimization.tolerance = lambda.optimization.tolerance, solver)  
   }else if(class(FEMbasis$mesh) == 'mesh.1.5D' &  is.null(PDE_parameters)){
     bigsol = NULL
     bigsol = CPP_smooth.graph.GAM.FEM.time(locations = locations, time_locations = time_locations,
@@ -675,7 +676,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                      DOF.stochastic.seed = DOF.stochastic.seed,
                                      DOF.matrix = DOF.matrix,
                                      GCV.inflation.factor = GCV.inflation.factor,
-                                     lambda.optimization.tolerance = lambda.optimization.tolerance)
+                                     lambda.optimization.tolerance = lambda.optimization.tolerance, solver)
   }else{
     stop("Not implemented for !is.null(PDE_parameters). Try Laplacian regularization.")
   }

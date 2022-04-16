@@ -687,7 +687,6 @@ MatrixXr MixedFERegressionBase<InputHandler>::solve_covariates_iter(const Eigen:
         U_k.topRows(N_) = U_.block(time_index*N_ ,0, N_, U_.cols());
 
         MatrixXr D = V_k*matrixNoCovdec_.solve(U_k);
-		Rprintf("matrixnocovdec is ok");
 
         // G = C + D
         MatrixXr G;
@@ -1186,15 +1185,16 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 		isR0Computed = true;
 	}
 
-	if(this->isSpaceVarying)
+	if(this->isSpaceVarying && !isFTComputed)
 	{
 		Assembler::forcingTerm(mesh_, fe, u, rhs_ft_correction_);
+		isFTComputed = true;
 	}
 
-	if(regressionData_.isSpaceTime() && !isTimeComputed && !this->isIterative)
+	if(regressionData_.isSpaceTime() && !isSVComputed && !this->isIterative)
 	{
 		this->buildSpaceTimeMatrices();
-		isTimeComputed = true;
+		isSVComputed = true;
 	}
 
 	// Set final transpose of Psi matrix
@@ -1243,6 +1243,7 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
     {
         //Recall: with the iterative method the  matrix of the systems have dimension 2N_*2N_ i
         Real delta = mesh_time_[1] - mesh_time_[0];
+		solverobj->setM(M_);
         //this->R1_lambda = (lambdaS) * R1_ - (lambdaT / delta) * R0_lambda;
 		solverobj->addTimeCorrection(std::make_shared<SpMat>(LR0k_), lambdaT/delta, true);
     }
