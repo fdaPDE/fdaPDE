@@ -9,7 +9,7 @@
 // Constructor
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
+  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
 {
   //Pre-allocate memory for all quatities
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
@@ -34,7 +34,7 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
 
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, const std::vector<Real>& mesh_time, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(mesh_time, inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
+  mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(mesh_time, inputData, optimizationData, mesh.num_nodes()), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
 {
   //Pre-allocate memory for all quatities
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
