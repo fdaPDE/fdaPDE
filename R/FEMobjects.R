@@ -47,25 +47,25 @@ create.FEM.basis = function(mesh=NULL, saveTree = FALSE)
   if (is.null(mesh))
     stop("mesh required;  is NULL.")
 
-  if(class(mesh)!='mesh.1.5D' & class(mesh)!='mesh.2D' & class(mesh)!='mesh.2.5D' & class(mesh)!='mesh.3D')
+  if(!is(mesh, "mesh.1.5D") & !is(mesh, "mesh.2D") & !is(mesh, "mesh.2.5D") & !is(mesh, "mesh.3D"))
     stop("Unknown mesh class")
 
   if (saveTree == TRUE) {
       ## Call C++ function
       # Note: myDim and nDim are available outside the scope (different from C++)
-      if (class(mesh)=='mesh.2D'){
+      if (is(mesh, "mesh.2D")){
         myDim = 2
         nDim = 2
       }
-      if (class(mesh)=='mesh.2.5D'){
+      if (is(mesh, "mesh.2.5D")){
         myDim = 2
         nDim = 3
       }
-      if (class(mesh)=='mesh.3D'){
+      if (is(mesh, "mesh.3D")){
         myDim = 3
         nDim = 3
       }
-      if(class(mesh)=='mesh.1.5D'){
+      if(is(mesh, "mesh.1.5D")){
         myDim = 1
         nDim = 2
       }
@@ -154,7 +154,7 @@ FEM<-function(coeff,FEMbasis)
     stop("coeff required;  is NULL.")
   if (is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis) != "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("FEMbasis not of class 'FEMbasis'")
   coeff = as.matrix(coeff)
   if(nrow(coeff) != FEMbasis$nbasis)
@@ -212,7 +212,7 @@ FEM.time<-function(coeff,time_mesh,FEMbasis,FLAG_PARABOLIC=FALSE)
     stop("FLAG_PARABOLIC required;  is NULL.")
   if (is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis) != "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("FEMbasis not of class 'FEMbasis'")
   if(dim(coeff)[1] != (FEMbasis$nbasis*M))
     stop("Number of row of 'coeff' different from number of basis")
