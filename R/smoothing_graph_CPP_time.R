@@ -148,7 +148,7 @@ CPP_smooth.graph.FEM.time<-function(locations, time_locations, observations, FEM
                    FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
                    BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
                    search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance,
-                   solver, PACKAGE = "fdaPDE")
+                   sovler, PACKAGE = "fdaPDE")
     
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if(ICsol[[6]]==1)

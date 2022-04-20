@@ -680,7 +680,7 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
   triplets <- .Call("get_FEM_PDE_space_varying_matrix", locations, bary.locations, observations, FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates,
                     BC_indices, BC_values, incidence_matrix, areal.data.avg, search, PACKAGE = "fdaPDE")
-
+  
   A = sparseMatrix(i = triplets[[1]][,1], j=triplets[[1]][,2], x = triplets[[2]], dims = c(nrow(FEMbasis$mesh$nodes),nrow(FEMbasis$mesh$nodes)))
   return(A)
 }

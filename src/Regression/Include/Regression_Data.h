@@ -37,7 +37,7 @@ class  RegressionData
 		// Other parameters
 		UInt order_;
 		// Solver technique
-		UInt solver_ = 0;
+		UInt solver_;
 
 		// Boundary + Initial
 		std::vector<Real> bc_values_;
@@ -96,13 +96,13 @@ class  RegressionData
 
 		*/
 		explicit RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates,
-			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rsolver);
+			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP RSolver);
 
 		explicit RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates,
-			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rsolver);
+			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative,SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP RSolver);
 
-		explicit RegressionData(Real* locations, UInt n_locations, UInt ndim, VectorXr& observations, UInt order, MatrixXr& covariates,
-			VectorXr& WeightsMatrix, std::vector<UInt>& bc_indices, std::vector<Real>& bc_values, MatrixXi& incidenceMatrix, bool arealDataAvg, UInt search, UInt Rsolver);
+		explicit RegressionData(Real* locations, UInt n_locations, UInt ndim, VectorXr & observations, UInt order, MatrixXr & covariates,
+			 VectorXr & WeightsMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,  MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, UInt solver);
 
 		// -- PRINTERS --
 		void printObservations(std::ostream & out) const;
@@ -177,9 +177,10 @@ class  RegressionData
 		//! A method returning the input search
 		UInt getSearch(void) const {return search_;}
 
-
-		//! A method returning the solver choice
+		//! A method returning the preconditioner choice
 		inline UInt getSolver(void) const { return solver_; }
+		//! A method allowing to set the preconditioner
+		inline void setSolver(UInt solver) { solver_ = solver; }
 };
 
 
@@ -212,12 +213,12 @@ class  RegressionDataElliptic:public RegressionData
 		        \param Rsearch an R-integer to decide the search algorithm type (tree or naive or walking search algorithm).
 		*/
 		explicit RegressionDataElliptic(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
-			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rsolver);
+			 SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
+			 SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP RSolver);
 
 		explicit RegressionDataElliptic(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rsolver);
+			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP RSolver);
 
 		Diffusion<PDEParameterOptions::Constant> const & getK() const {return K_;}
 		Advection<PDEParameterOptions::Constant> const & getBeta() const {return beta_;}
@@ -257,11 +258,11 @@ class RegressionDataEllipticSpaceVarying:public RegressionData
 		*/
 		explicit RegressionDataEllipticSpaceVarying(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rsolver);
+			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP RSolver);
 
 		explicit RegressionDataEllipticSpaceVarying(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
-			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rsolver);
+			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP RSolver);
 
 		Diffusion<PDEParameterOptions::SpaceVarying> const & getK() const {return K_;}
 		Advection<PDEParameterOptions::SpaceVarying> const & getBeta() const {return beta_;}
@@ -314,35 +315,35 @@ class  RegressionDataGAM : public RegressionHandler
 		//Laplace
 		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 			SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
-			SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Rsolver);
+			SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP RSolver);
 
 		// PDE
 		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Rsolver);
+			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP RSolver);
 
 		// PDE SpaceVarying
 		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Rsolver);
+			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP RSolver);
 
 		//Laplace time
 		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
 			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, 
-			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rsolver);
+			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP RSolver);
 		
 		// PDE time
 		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
 			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, 
-			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rsolver);
+			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP RSolver);
 		
 		// PDE SpaceVarying time
 		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
 			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, 
-			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rsolver);
+			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP RSolver);
 
 		//! A method returning the maximum iteration for the iterative method
 		UInt get_maxiter() const {return max_num_iterations_;}

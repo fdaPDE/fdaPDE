@@ -58,7 +58,6 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP Rb
     this->isGAM = true;
 }
 
-
 // PDE time
 template <typename RegressionHandler>
 RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, 
@@ -79,7 +78,7 @@ template <typename RegressionHandler>
 RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, 
 	SEXP Rorder, SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix,
 	SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic,SEXP Rflag_iterative, SEXP Rmax_num_iteration, 
-	SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rsolver): 
+	SEXP Rthreshold, SEXP Ric, SEXP Rsearch, SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls, SEXP Rsolver):
 		RegressionDataEllipticSpaceVarying(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK, Rbeta, Rc, Ru, 
 						   Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, 
 						   Rflag_mass, Rflag_parabolic, Rflag_iterative, Rmax_num_iteration_pirls, Rthreshold_pirls, Ric,Rsearch, Rsolver) {

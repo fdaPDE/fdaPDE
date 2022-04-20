@@ -219,13 +219,13 @@ class Carrier: public Extensions...
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         if (this->model->getSolver() == 0)
-                            return (this->model->template apply_to_b<BaseSolver>(b));
+                            return this->model->template apply_to_b<BaseSolver>(b);
                         else if (this->model->getSolver() == 1)
-                            return (this->model->template apply_to_b<MassLumping>(b));
+                            return this->model->template apply_to_b<MassLumping>(b);
                         else if (this->model->getSolver() == 2)
-                            return (this->model->template apply_to_b<LambdaPreconditioner>(b));
+                            return this->model->template apply_to_b<LambdaPreconditioner>(b);
                         else if (this->model->getSolver() == 3)
-                            return (this->model->template apply_to_b<BlockPreconditioner>(b));
+                            return this->model->template apply_to_b<BlockPreconditioner>(b);
                 }
                 
                 //! Method to solve the system given a lambdaS and a lambdaT and a right hand side of the system
@@ -239,26 +239,26 @@ class Carrier: public Extensions...
                         this->opt_data->set_current_lambdaS(lambda(0)); // set the lambdaS value
                         this->opt_data->set_current_lambdaT(lambda(1)); // set the lambdaT value
                         if (this->model->getSolver() == 0)
-                            return (this->model->template apply_to_b<BaseSolver>(b));
+                            return this->model->template apply_to_b<BaseSolver>(b);
                         else if (this->model->getSolver() == 1)
-                            return (this->model->template apply_to_b<MassLumping>(b));
+                            return this->model->template apply_to_b<MassLumping>(b);
                         else if (this->model->getSolver() == 2)
-                            return (this->model->template apply_to_b<LambdaPreconditioner>(b));
+                            return this->model->template apply_to_b<LambdaPreconditioner>(b);
                         else if (this->model->getSolver() == 3)
-                            return (this->model->template apply_to_b<BlockPreconditioner>(b));
+                            return this->model->template apply_to_b<BlockPreconditioner>(b);
                 }
                 
                 inline MatrixXr apply_to_b_iter(const MatrixXr & b, lambda::type<1> lambda, UInt time_index)
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         if (this->model->getSolver() == 0)
-                            return (this->model->template apply_to_b_iter<BaseSolver>(b, time_index));
+                            return this->model->template apply_to_b_iter<BaseSolver>(b, time_index);
                         else if (this->model->getSolver() == 1)
-                            return (this->model->template apply_to_b_iter<MassLumping>(b, time_index));
+                            return this->model->template apply_to_b_iter<MassLumping>(b, time_index);
                         else if (this->model->getSolver() == 2)
-                            return (this->model->template apply_to_b_iter<LambdaPreconditioner>(b, time_index));
+                            return this->model->template apply_to_b_iter<LambdaPreconditioner>(b, time_index);
                         else if (this->model->getSolver() == 3)
-                            return (this->model->template apply_to_b_iter<BlockPreconditioner>(b, time_index));
+                            return this->model->template apply_to_b_iter<BlockPreconditioner>(b, time_index);
                 }
                 
                 inline MatrixXr apply_to_b_iter(const MatrixXr & b, lambda::type<2> lambda, UInt time_index)
@@ -266,13 +266,13 @@ class Carrier: public Extensions...
                         this->opt_data->set_current_lambdaS(lambda(0)); // set the lambdaS value
                         this->opt_data->set_current_lambdaT(lambda(1)); // set the lambdaT value
                         if (this->model->getSolver() == 0)
-                            return (this->model->template apply_to_b_iter<BaseSolver>(b, time_index));
+                            return this->model->template apply_to_b_iter<BaseSolver>(b, time_index);
                         else if (this->model->getSolver() == 1)
-                            return (this->model->template apply_to_b_iter<MassLumping>(b, time_index));
+                            return this->model->template apply_to_b_iter<MassLumping>(b, time_index);
                         else if (this->model->getSolver() == 2)
-                            return (this->model->template apply_to_b_iter<LambdaPreconditioner>(b, time_index));
+                            return this->model->template apply_to_b_iter<LambdaPreconditioner>(b, time_index);
                         else if (this->model->getSolver() == 3)
-                            return (this->model->template apply_to_b_iter<BlockPreconditioner>(b, time_index));
+                            return this->model->template apply_to_b_iter<BlockPreconditioner>(b, time_index);
                 }
 
                 //! Method to solve the system given a lambda [right hand side is the usual of the problem]

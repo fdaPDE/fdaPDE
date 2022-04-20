@@ -5,7 +5,7 @@ CPP_smooth.GAM.FEM.time <- function(locations, time_locations, observations, FEM
                                     search, bary.locations, optim, lambdaS = NULL, lambdaT = NULL,
                                     DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
                                     DOF.matrix = NULL, GCV.inflation.factor = 1,
-                                    lambda.optimization.tolerance = 0.05, solver) 
+                                    lambda.optimization.tolerance = 0.05, solver = 0) 
 {
   # Indexes in C++ starts from 0, in R from 1
   FEMbasis$mesh$triangles <- FEMbasis$mesh$triangles - 1
@@ -195,7 +195,7 @@ CPP_smooth.GAM.FEM.time <- function(locations, time_locations, observations, FEM
     FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold, IC, FAMILY, max.steps.FPIRLS, threshold.FPIRLS,
     mu0, scale.param, search, optim, lambdaS, lambdaT,
     DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
-    GCV.inflation.factor, lambda.optimization.tolerance, solver, 
+    GCV.inflation.factor, lambda.optimization.tolerance, solver,
     PACKAGE = "fdaPDE"
   )
   return(c(bigsol, ICsol))
@@ -207,8 +207,8 @@ CPP_smooth.GAM.FEM.PDE.time <- function(locations, time_locations, observations,
                                         max.steps, threshold, IC, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL,
                                         threshold.FPIRLS = 0.0002020, search, bary.locations, optim, lambdaS = NULL,
                                         lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
-                                        DOF.matrix = NULL, GCV.inflation.factor = 1, solver,
-                                        lambda.optimization.tolerance = 0.05) 
+                                        DOF.matrix = NULL, GCV.inflation.factor = 1,
+                                        lambda.optimization.tolerance = 0.05, solver = 0) 
 {
 
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
@@ -436,7 +436,7 @@ CPP_smooth.GAM.FEM.PDE.sv.time <- function(locations, time_locations, observatio
                                            threshold.FPIRLS = 0.0002020, search, bary.locations, optim, lambdaS = NULL,
                                            lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
                                            DOF.matrix = NULL, GCV.inflation.factor = 1,
-                                           lambda.optimization.tolerance = 0.05, solver) 
+                                           lambda.optimization.tolerance = 0.05, solver = 0) 
 {
 
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
@@ -676,7 +676,7 @@ CPP_smooth.manifold.GAM.FEM.time <- function(locations, time_locations, observat
                                     search, bary.locations, optim, lambdaS = NULL, lambdaT = NULL,
                                     DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
                                     DOF.matrix = NULL, GCV.inflation.factor = 1,
-                                    lambda.optimization.tolerance = 0.05, solver) 
+                                    lambda.optimization.tolerance = 0.05, solver = 0) 
 {
   # Indexes in C++ starts from 0, in R from 1
   FEMbasis$mesh$triangles <- FEMbasis$mesh$triangles - 1
@@ -879,7 +879,7 @@ CPP_smooth.volume.GAM.FEM.time <- function(locations, time_locations, observatio
                                              search, bary.locations, optim, lambdaS = NULL, lambdaT = NULL,
                                              DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
                                              DOF.matrix = NULL, GCV.inflation.factor = 1,
-                                             lambda.optimization.tolerance = 0.05, solver) 
+                                             lambda.optimization.tolerance = 0.05, solver = 0) 
 {
   # Indexes in C++ starts from 0, in R from 1
   FEMbasis$mesh$tetrahedrons = FEMbasis$mesh$tetrahedrons - 1
@@ -1081,8 +1081,8 @@ CPP_smooth.volume.GAM.FEM.PDE.time <- function(locations, time_locations, observ
                                         max.steps, threshold, IC, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL,
                                         threshold.FPIRLS = 0.0002020, search, bary.locations, optim, lambdaS = NULL,
                                         lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
-                                        DOF.matrix = NULL, GCV.inflation.factor = 1, solver,
-                                        lambda.optimization.tolerance = 0.05) 
+                                        DOF.matrix = NULL, GCV.inflation.factor = 1,
+                                        lambda.optimization.tolerance = 0.05, solver = 0) 
 {
 
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
@@ -1251,7 +1251,7 @@ CPP_smooth.volume.GAM.FEM.PDE.time <- function(locations, time_locations, observ
     #  max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
     #  as.integer(c(0, 1, 1)), lambdaSIC, DOF.stochastic.realizations,
     #  DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor,
-    #  lambda.optimization.tolerance,
+    #  lambda.optimization.tolerance, solver,
     #  PACKAGE = "fdaPDE"
     #)
 
@@ -1307,8 +1307,8 @@ CPP_smooth.volume.GAM.FEM.PDE.sv.time <- function(locations, time_locations, obs
                                            max.steps, threshold, IC, FAMILY, mu0 = NULL, max.steps.FPIRLS = 15, scale.param = NULL,
                                            threshold.FPIRLS = 0.0002020, search, bary.locations, optim, lambdaS = NULL,
                                            lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
-                                           DOF.matrix = NULL, GCV.inflation.factor = 1, solver,
-                                           lambda.optimization.tolerance = 0.05) 
+                                           DOF.matrix = NULL, GCV.inflation.factor = 1,
+                                           lambda.optimization.tolerance = 0.05, solver = 0) 
 {
 
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
@@ -1477,7 +1477,7 @@ CPP_smooth.volume.GAM.FEM.PDE.sv.time <- function(locations, time_locations, obs
       max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
       as.integer(c(0, 1, 1)), lambdaSIC, DOF.stochastic.realizations,
       DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor,
-      lambda.optimization.tolerance, solver,
+      lambda.optimization.tolerance,
       PACKAGE = "fdaPDE"
     )
     #ICsol <- .Call(
@@ -1547,7 +1547,7 @@ CPP_smooth.graph.GAM.FEM.time <- function(locations, time_locations, observation
                                              search, bary.locations, optim, lambdaS = NULL, lambdaT = NULL,
                                              DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0,
                                              DOF.matrix = NULL, GCV.inflation.factor = 1,
-                                             lambda.optimization.tolerance = 0.05, solver) 
+                                             lambda.optimization.tolerance = 0.05, solver = 0) 
 {
   # Indexes in C++ starts from 0, in R from 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1

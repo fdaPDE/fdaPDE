@@ -103,7 +103,7 @@ class MixedFERegressionBase
 		bool isIterative;
 
 		//preconditioner choice
-		UInt solver_options = 0;
+		UInt solver_options;
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
@@ -138,6 +138,7 @@ class MixedFERegressionBase
 		void computeDegreesOfFreedomExact(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
         //! Exact GCV: iterative method
 		//void computeDOFExact_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+		//! A method computing dofs in case of stochastic GCV, it is called by computeDegreesOfFreedom
 		template<typename Solver>
 		void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT, Solver* solverobj);
 		//! Stochastic GCV: iterative method
@@ -152,8 +153,7 @@ class MixedFERegressionBase
 		//! Space-time version
 		template<typename Solver>
 		void buildSystemMatrix(Real lambdaS, Real lambdaT, Solver* solverobj);
-		//! Flag that indicates if the system matrix has been computed
-		bool isMatrixNoCov_Computed = false;
+		bool isMatrixNoCov_computed = false;
 
 		// -- FACTORIZER --
 		//! A function to factorize the system, using Woodbury decomposition when there are covariates
@@ -165,10 +165,9 @@ class MixedFERegressionBase
 		template<typename Solver>
 		MatrixXr system_solve(const MatrixXr& b, Solver* solverobj);
 
-
         //! A function which solves the factorized system in presence of covariates (iterative method)
-        template<typename Derived>
-        MatrixXr solve_covariates_iter(const Eigen::MatrixBase<Derived>&, UInt time_index);
+        template<typename Derived, typename Solver>
+        MatrixXr solve_covariates_iter(const Eigen::MatrixBase<Derived>&, UInt time_index, Solver* solverobj);
 
         // -- methods for the iterative method --
         //! A method to initialize f
@@ -280,15 +279,15 @@ class MixedFERegressionBase
 		//! A method which builds all the space matrices
 		template<UInt ORDER, UInt mydim, UInt ndim, typename A>
 		void preapply(EOExpr<A> oper, const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
-		
+
 		template<typename Solver>
 		MatrixXv apply(void);
 		template<typename Solver>
-        MatrixXv apply_iterative(void);
+		MatrixXv apply_iterative(void);
 		template<typename Solver>
 		MatrixXr apply_to_b(const MatrixXr& b);
 		template<typename Solver>
-		MatrixXr apply_to_b_iter(const MatrixXr & b, UInt time_index);
+		MatrixXr apply_to_b_iter(const MatrixXr& b, UInt time_index);
 };
 
 //----------------------------------------------------------------------------//
@@ -308,11 +307,10 @@ class MixedFERegression : public MixedFERegressionBase<InputHandler>
 			Rprintf("Option not implemented!\n");
 		}
 
-		template<typename Solver>
-         void apply_iterative(void)
-        {
-            Rprintf("Option not implemented!\n");
-         }
+		void apply_iterative(void)
+		{
+			Rprintf("Option not implemented!\n");
+		}
 };
 
 //! A class for the construction of the temporal matrices needed for the parabolic case

@@ -10,14 +10,14 @@ SpMat BaseSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat
 
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
-	// Add time-dependent blocks
-	if (timeDependent && !parabolic)
-		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
-	else if (parabolic && !iterative)
-		R1_lambda -= lambdaS * (lambdaT * (*LR0k));
-	else if (parabolic && iterative)
-		R1_lambda = lambdaS * R1 - (lambdaT * R0_lambda);
+	//// Add time-dependent blocks
+	//if(timeDependent && parabolic && !iterative)
+	//	R1_lambda -= lambdaS * (lambdaT * (*LR0k));
+	//if(timeDependent && parabolic && iterative)
+	//	R1_lambda = lambdaS * R1 - lambdaT * R0_lambda;
 
+	//if (timeDependent && !parabolic)
+	//	return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
 	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
@@ -26,8 +26,8 @@ SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMa
 {
 
 	UInt nnodes = NW.outerSize();
-	if (timeDependent && iterative)
 		nnodes *= M_;
+
 	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
 	std::vector<coeff> tripletAll;
 	tripletAll.reserve(NW.nonZeros() + NE.nonZeros() + SW.nonZeros() + SE.nonZeros());
@@ -106,10 +106,10 @@ SpMat MassLumping::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMa
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
 	// Add time-dependent blocks
-	if (timeDependent && !parabolic)
+	/*if (timeDependent && !parabolic)
 		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
 	else if (parabolic)
-		R1_lambda -= lambdaS * (lambdaT * lumpMassMatrix(*LR0k));
+		R1_lambda -= lambdaS * (lambdaT * lumpMassMatrix(*LR0k));*/
 
 	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
@@ -144,11 +144,11 @@ SpMat LambdaPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, c
 
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
-	// Add time-dependent blocks
-	if (timeDependent && !parabolic)
-		return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
-	else if (parabolic)
-		R1_lambda -= sqrt(lambdaS) * (lambdaT * (*LR0k));
+	//// Add time-dependent blocks
+	//if (timeDependent && !parabolic)
+	//	return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
+	//else if (parabolic)
+	//	R1_lambda -= sqrt(lambdaS) * (lambdaT * (*LR0k));
 
 	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
@@ -184,9 +184,9 @@ SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, co
 	SpMat R0_lambda = (-lambdaS) * R0;
 	SpMat R1_lambda = -R1;
 
-	// Add time-dependent blocks in the parabolic case
-	if (timeDependent && parabolic)
-		R1_lambda -= (lambdaT * (*LR0k));
+	//// Add time-dependent blocks in the parabolic case
+	//if (timeDependent && parabolic)
+	//	R1_lambda -= (lambdaT * (*LR0k));
 
 	UInt nnodes = R0_lambda.outerSize();
 
@@ -206,10 +206,10 @@ SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, co
 
 	SpMat R1_lambdaT(R1_lambda.transpose());
 
-	// Add time-dependent blocks in the separable case
-	// And build the system matrix from the four blocks
-	if (timeDependent && !parabolic)
-		return buildSystemMatrix(DMat + lambdaT * (*Ptk), Id, SWblock, R1_lambdaT);
+	//// Add time-dependent blocks in the separable case
+	//// And build the system matrix from the four blocks
+	//if (timeDependent && !parabolic)
+	//	return buildSystemMatrix(DMat + lambdaT * (*Ptk), Id, SWblock, R1_lambdaT);
 
 	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, Id, SWblock, R1_lambdaT);

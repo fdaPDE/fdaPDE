@@ -76,6 +76,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
   for(UInt i=0 ; i < lenS_ ; i++){//for-cycle for each spatial penalization (lambdaS).
    for(UInt j=0 ; j < lenT_ ; j++){
+
     current_J_values[i][j][0] = past_J_values[i][j][0] + 2*inputData_.get_treshold();
     current_J_values[i][j][1] = past_J_values[i][j][1] + 2*inputData_.get_treshold();
 
@@ -85,7 +86,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
     // start the iterative method for the lambda index i
     while(stopping_criterion(i, j)){
-
       // STEP (1)
       compute_G(i, j);
       compute_Weights(i, j);
@@ -152,8 +152,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(const UInt& l
       regression_.template apply<LambdaPreconditioner>();
   else if (regression_.getSolver() == 3)
       regression_.template apply<BlockPreconditioner>();
-
-  const SpMat * Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
   // if the system matrix is correctly factorized
   if( regression_.isMatrixNoCov_factorized() ) {
@@ -349,7 +347,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_GCV(const UInt& lambd
             else if (regression_.getSolver() == 3)
                 regression_.template computeDegreesOfFreedom<BlockPreconditioner>(0, 0, (*optimizationData_.get_LambdaS_vector())[lambdaS_index],
                     (*optimizationData_.get_LambdaT_vector())[lambdaT_index]);
-            _dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(0, 0);
+        _dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(0,0);
         }
         else _dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(lambdaS_index, lambdaT_index);
  

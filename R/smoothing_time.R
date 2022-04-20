@@ -90,13 +90,13 @@ NULL
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
-#' @param solver.options A string specifying which solving technique is applied to the resolution of the finite element
+#' @param preconditioner A string specifying which solving technique is applied to the resolution of the finite element
 #' system: \code{'no_preconditioner'} solves the original system, \code{'mass_lumping'} solves the system with lumped mass matrix,
 #' \code{'lambda_preconditioner'} performs a scaling both by rows and columns by a factor sqrt(lambda_s), \code{'block_preconditioner'}
 #' applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
 #' south-west block accordingly. Block preconditioner is the slowest, lambda preconditioner is the safest,
 #' mass lumping works particularly well for covariate model.
-#' Default is \code{solver.options='no_preconditioner'}. Avoid mass lumping when the mesh is very irregular.
+#' Default is \code{preconditioner='no_preconditioner'}. Avoid mass lumping when the mesh is very irregular.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 #' \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
@@ -120,7 +120,7 @@ NULL
 #' lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 #' DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, solver.options='no_preconditioner')
+#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, preconditioner='no_preconditioner')
 #' @export
 #' @references #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
 #' spatially dependent functional data via regression with differential regularization. 
@@ -164,7 +164,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
                           lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
-                          solver.options="no_preconditioner")
+                          preconditioner="no_preconditioner")
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
@@ -189,16 +189,16 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   ##################### Checking parameters, sizes and conversion ################################
 
   # Preliminary consistency of solver parameter
-  if(solver.options=="no_preconditioner")
+  if(preconditioner=="no_preconditioner")
     solver=0
-  else if(solver.options=="mass_lumping")
+  else if(preconditioner=="mass_lumping")
     solver=1
-  else if(solver.options=="lambda_preconditioner")
+  else if(preconditioner=="lambda_preconditioner")
     solver=2
-  else if(solver.options=="block_preconditioner")
+  else if(preconditioner=="block_preconditioner")
     solver=3
   else
-    stop("'solver.options' must be 'no_preconditioner','mass_lumping',
+    stop("'preconditioner' must be 'no_preconditioner','mass_lumping',
          'lambda_preconditioner' or 'block_preconditioner'")
   
   
@@ -437,16 +437,36 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
-      search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+      search = search, bary.locations = bary.locations,optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
       solver)
-  }else if(class(FEMbasis$mesh) == 'mesh.3D')
+  }else if(class(FEMbasis$mesh) == 'mesh.3D' & is.null(PDE_parameters))
   {
     bigsol = NULL
     bigsol = CPP_smooth.volume.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
       covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+      solver)
+  }else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==FALSE)
+  {
+    bigsol = NULL
+    bigsol = CPP_smooth.volume.FEM.PDE.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
+       covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
+       search = search, bary.locations = bary.locations,
+       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
+       solver)
+                                      
+  }else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==TRUE)
+  {
+    bigsol = NULL
+    bigsol = CPP_smooth.volume.FEM.PDE.sv.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
+      covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
       solver)
@@ -623,6 +643,44 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                       DOF.matrix = DOF.matrix,
                                       GCV.inflation.factor = GCV.inflation.factor,
                                       lambda.optimization.tolerance = lambda.optimization.tolerance, solver)
+  }else if (class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE) {
+    bigsol = NULL
+    bigsol = CPP_smooth.GAM.FEM.PDE.time(locations = locations, time_locations = time_locations,
+                                         observations = observations, FEMbasis = FEMbasis,
+                                         time_mesh = time_mesh, covariates = covariates,
+                                         PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim,
+                                         BC = BC, incidence_matrix = incidence_matrix,
+                                         areal.data.avg = areal.data.avg, FLAG_MASS = FLAG_MASS,
+                                         FLAG_PARABOLIC = FLAG_PARABOLIC, FLAG_ITERATIVE = FLAG_ITERATIVE,
+                                         threshold = threshold, max.steps = max.steps, IC = IC, FAMILY = family,
+                                         mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS,
+                                         scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+                                         search = search, bary.locations = bary.locations, optim = optim,
+                                         lambdaS = lambdaS, lambdaT = lambdaT,
+                                         DOF.stochastic.realizations = DOF.stochastic.realizations,
+                                         DOF.stochastic.seed = DOF.stochastic.seed,
+                                         DOF.matrix = DOF.matrix,
+                                         GCV.inflation.factor = GCV.inflation.factor,
+                                         lambda.optimization.tolerance = lambda.optimization.tolerance, solver)
+  }else if (class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE) {
+    bigsol = NULL
+    bigsol = CPP_smooth.GAM.FEM.PDE.sv.time(locations = locations, time_locations = time_locations,
+                                   	    observations = observations, FEMbasis = FEMbasis,
+                                            time_mesh = time_mesh, covariates = covariates,
+                                            PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim,
+                                            BC = BC, incidence_matrix = incidence_matrix,
+                                            areal.data.avg = areal.data.avg, FLAG_MASS = FLAG_MASS,
+                                            FLAG_PARABOLIC = FLAG_PARABOLIC, FLAG_ITERATIVE = FLAG_ITERATIVE,
+                                            threshold = threshold, max.steps = max.steps, IC = IC, FAMILY = family,
+                                            mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS,
+                                            scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+                                            search = search, bary.locations = bary.locations, optim = optim,
+                                            lambdaS = lambdaS, lambdaT = lambdaT,
+                                            DOF.stochastic.realizations = DOF.stochastic.realizations,
+                                            DOF.stochastic.seed = DOF.stochastic.seed,
+                                            DOF.matrix = DOF.matrix,
+                                            GCV.inflation.factor = GCV.inflation.factor,
+                                            lambda.optimization.tolerance = lambda.optimization.tolerance, solver)
   } else if( class(FEMbasis$mesh) == 'mesh.2.5D' &  is.null(PDE_parameters)){
     bigsol = NULL
     bigsol = CPP_smooth.manifold.GAM.FEM.time(locations = locations, time_locations = time_locations,
@@ -647,6 +705,44 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                      observations = observations, FEMbasis = FEMbasis,
                                      time_mesh = time_mesh, covariates = covariates, ndim = ndim,
                                      mydim = mydim, BC = BC, incidence_matrix = incidence_matrix,
+                                     areal.data.avg = areal.data.avg, FLAG_MASS = FLAG_MASS,
+                                     FLAG_PARABOLIC = FLAG_PARABOLIC, FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, 
+                                     max.steps = max.steps, IC = IC, FAMILY = family,
+                                     mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS,
+                                     scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+                                     search = search, bary.locations = bary.locations, optim = optim,
+                                     lambdaS = lambdaS, lambdaT = lambdaT,
+                                     DOF.stochastic.realizations = DOF.stochastic.realizations,
+                                     DOF.stochastic.seed = DOF.stochastic.seed,
+                                     DOF.matrix = DOF.matrix,
+                                     GCV.inflation.factor = GCV.inflation.factor,
+                                     lambda.optimization.tolerance = lambda.optimization.tolerance, solver)  
+  }else if(class(FEMbasis$mesh) == 'mesh.3D' &  !is.null(PDE_parameters) & space_varying == FALSE){
+    bigsol = NULL
+    bigsol = CPP_smooth.volume.GAM.FEM.PDE.time(locations = locations, time_locations = time_locations,
+                                     observations = observations, FEMbasis = FEMbasis,
+                                     time_mesh = time_mesh, covariates = covariates, 
+                                     PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, 
+                                     BC = BC, incidence_matrix = incidence_matrix,
+                                     areal.data.avg = areal.data.avg, FLAG_MASS = FLAG_MASS,
+                                     FLAG_PARABOLIC = FLAG_PARABOLIC, FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, 
+                                     max.steps = max.steps, IC = IC, FAMILY = family,
+                                     mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS,
+                                     scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+                                     search = search, bary.locations = bary.locations, optim = optim,
+                                     lambdaS = lambdaS, lambdaT = lambdaT,
+                                     DOF.stochastic.realizations = DOF.stochastic.realizations,
+                                     DOF.stochastic.seed = DOF.stochastic.seed,
+                                     DOF.matrix = DOF.matrix,
+                                     GCV.inflation.factor = GCV.inflation.factor,
+                                     lambda.optimization.tolerance = lambda.optimization.tolerance, solver)  
+  }else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying == TRUE){
+    bigsol = NULL
+    bigsol = CPP_smooth.volume.GAM.FEM.PDE.sv.time(locations = locations, time_locations = time_locations,
+                                     observations = observations, FEMbasis = FEMbasis,
+                                     time_mesh = time_mesh, covariates = covariates, 
+                                     PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, 
+                                     BC = BC, incidence_matrix = incidence_matrix,
                                      areal.data.avg = areal.data.avg, FLAG_MASS = FLAG_MASS,
                                      FLAG_PARABOLIC = FLAG_PARABOLIC, FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, 
                                      max.steps = max.steps, IC = IC, FAMILY = family,
