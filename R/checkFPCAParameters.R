@@ -18,7 +18,7 @@ checkSmoothingParametersFPCA<-function(locations = NULL, datamatrix, FEMbasis, i
     stop("observations required;  is NULL.")
   if (is.null(FEMbasis)) 
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis)!= "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("'FEMbasis' is not class 'FEMbasis'")
   
   if (!is.null(locations) && !is.null(incidence_matrix))
@@ -88,11 +88,11 @@ checkSmoothingParametersSizeFPCA<-function(locations = NULL, datamatrix, FEMbasi
   {
     if (nrow(incidence_matrix) != ncol(datamatrix))
       stop("'incidence_matrix' and 'datamatrix' have incompatible size;")
-    if (class(FEMbasis$mesh) == 'mesh.2D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
+    if (is(FEMbasis$mesh, "mesh.2D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
       stop("'incidence_matrix' must be a ntriangles-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.2.5D' && ncol(incidence_matrix) != FEMbasis$mesh$ntriangles)
+    else if (is(FEMbasis$mesh, "mesh.2.5D") && ncol(incidence_matrix) != FEMbasis$mesh$ntriangles)
       stop("'incidence_matrix' must be a ntriangles-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.3D' && ncol(incidence_matrix) != FEMbasis$mesh$ntetrahedrons)
+    else if (is(FEMbasis$mesh, "mesh.3D") && ncol(incidence_matrix) != FEMbasis$mesh$ntetrahedrons)
       stop("'incidence_matrix' must be a ntetrahedrons-columns matrix;") 
   }
   if(ncol(lambda) != 1)

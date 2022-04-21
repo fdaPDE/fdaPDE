@@ -36,7 +36,7 @@ Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
     stats, grDevices, graphics, geometry,
-    rgl, Matrix, plot3D, plot3Drgl, shiny
+    rgl, Matrix, plot3D, plot3Drgl, shiny, methods
 LinkingTo: 
 	RcppEigen
 Suggests: 
@@ -47,5 +47,5 @@ License: CC BY-NC-SA 4.0
 Copyright: See the individual source files for copyrights information
 NeedsCompilation: yes
 SystemRequirements: C++11, GNU make
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
