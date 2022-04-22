@@ -144,14 +144,14 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(const UInt& l
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
   regression_.preapply(this->mesh_);
 
-  if (regression_.getSolver() == 0)
-      regression_.template apply<BaseSolver>();
-  else if (regression_.getSolver() == 1)
+  if (regression_.getSolver() == 1)
       regression_.template apply<MassLumping>();
   else if (regression_.getSolver() == 2)
       regression_.template apply<LambdaPreconditioner>();
   else if (regression_.getSolver() == 3)
       regression_.template apply<BlockPreconditioner>();
+  else //(regression_.getSolver() == 0)
+      regression_.template apply<BaseSolver>();
 
   // if the system matrix is correctly factorized
   if( regression_.isMatrixNoCov_factorized() ) {

@@ -20,7 +20,11 @@ protected:
 	//bool timeDependent = false;
 	bool iterative = false;
 
+	//Only used for BlockPreconditioner
+	SpMat SEblock;
+
 	UInt M_;
+	Real lambda = 1.0;      // The space smoothing parameter
 
 	// Factorization of the system matrix
 	Eigen::SparseLU<SpMat> Mdec;
@@ -65,6 +69,12 @@ public:
 	void setIterative(bool flag) { iterative = flag; }
 
 	void setM(UInt M) { M_ = M; }
+
+	// Only used for BlockPreconditioner: A method storing the SE block of the original matrix
+	virtual void setSEblock(const SpMat & SE) { SEblock = SE; }
+
+	// A method setting the space smoothing parameter
+	void set_lambdaS(Real lambda_) { lambda = lambda_; }
 };
 
 
@@ -133,7 +143,7 @@ public:
 class LambdaPreconditioner : public BaseDiagPreconditioner
 {
 protected:
-	Real lambda; // The space smoothing parameter
+	Real lambda = 1.0;
 public:
 	LambdaPreconditioner() : lambda(1.0) {};
 	LambdaPreconditioner(const SpMat& M) { compute(M); };
@@ -154,14 +164,12 @@ public:
 class BlockPreconditioner : public BaseSolver
 {
 protected:
-	Real lambda;			// The space smoothing parameter
+	Real lambda = 1.0;			// The space smoothing parameter
 
 	SpMat SEblock;			// R0_lambda
 	SpMat SWblock;			// R0^-1 * R1
 	Eigen::SparseLU<SpMat> SEdec;	// LU decomposition of R0
 	bool initialized = false;
-
-	bool recompute = false;		// Indicates if the blocks and factorizations have to be recomputed
 
 public:
 	BlockPreconditioner();
@@ -180,6 +188,7 @@ public:
 	MatrixXr preconditionRHS(const MatrixXr& b) const;
 	MatrixXr system_solve(const MatrixXr& b) const override;
 	using BaseSolver::compute;
+	void setSEblock(const SpMat& SE) override { SEblock = SE; SEdec.compute(SE); initialized = true; }
 };
 
 #endif

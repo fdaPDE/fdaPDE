@@ -734,6 +734,15 @@ template<typename Solver>
 void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
 {
 	Solver solverobj(this->matrixNoCov_);
+	if (this->getSolver() == 3)
+	{
+		UInt nnodes = N_ * M_;
+		SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
+		solverobj.setSEblock(tempSE);
+	}
+	if (this->getSolver() == 2)
+		solverobj.set_lambdaS(lambdaS);
+
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
 	switch (GCVmethod == "exact") {
 	case 1:
@@ -1311,12 +1320,24 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr& b)
 {
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
+	{
+		if (this->getSolver() == 3)
+		{
+			UInt nnodes = N_*M_;
+			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
+			solverobj.setSEblock(tempSE);
+		}
 		solverobj.compute(matrixNoCov_);
+	}
 
 	const Real last_lambdaS = optimizationData_.get_last_lS_used();
 	const Real last_lambdaT = optimizationData_.get_last_lT_used();
 	const Real lambdaS = optimizationData_.get_current_lambdaS();
 	const Real lambdaT = optimizationData_.get_current_lambdaT();
+
+	if (this->getSolver() == 2)
+		solverobj.set_lambdaS(lambdaS);
+
     if(lambdaS!=last_lambdaS || lambdaT!=last_lambdaT)
 	{
 		if(!regressionData_.isSpaceTime())
@@ -1344,10 +1365,21 @@ template<typename Solver>
 {
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
+	{
+		if (this->getSolver() == 3)
+		{
+			UInt nnodes = N_*M_;
+			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
+			solverobj.setSEblock(tempSE);
+		}
 		solverobj.compute(matrixNoCov_);
+	}
 
 	const Real lambdaS = optimizationData_.get_current_lambdaS();
 	const Real lambdaT = optimizationData_.get_current_lambdaT();
+
+	if (this->getSolver() == 2)
+		solverobj.set_lambdaS(lambdaS);
 
 	if(!regressionData_.isSpaceTime())
 		this->template buildSystemMatrix(lambdaS, &solverobj);
@@ -1372,12 +1404,19 @@ template<typename InputHandler>
 template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
-	Solver solverobj;
-	if (isMatrixNoCov_computed)
-		solverobj.compute(matrixNoCov_);
-
 	UInt nnodes = N_*M_; // Define nuber of nodes
 	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
+
+	Solver solverobj;
+	if (isMatrixNoCov_computed)
+	{
+		if (this->getSolver() == 3)
+		{
+			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
+			solverobj.setSEblock(tempSE);
+		}
+		solverobj.compute(matrixNoCov_);
+	}
 
 	UInt sizeLambdaS;
 	UInt sizeLambdaT;
@@ -1418,6 +1457,9 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				 	lambdaS = (optimizationData_.get_lambda_S())[s];
 				 	lambdaT = (optimizationData_.get_lambda_T())[t];
 		 		}
+
+			if (this->getSolver() == 2)
+				solverobj.set_lambdaS(lambdaS);
 		 		
 			_rightHandSide = rhs;
 
@@ -1466,12 +1508,13 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 
 			// system solution
 			_solution(s,t) = this->template system_solve(this->_rightHandSide, &solverobj);
-
+			//Rprintf("system_solved");
 			
 			if(optimizationData_.get_loss_function()!="GCV" || isGAMData)
 			{
 				_dof(s,t) = -1;
 				_GCV(s,t) = -1;
+				//Rprintf("loss_got");
 			}
 			
 
@@ -1490,6 +1533,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 					beta_rhs = W.transpose()*(*obsp - psi_*_solution(s,t).topRows(psi_.cols()));
 				}
 				_beta(s,t) = WTW_.solve(beta_rhs);
+				//Rprintf("wtw_solved");
 			}
             if (regressionData_.getCovariates()->rows() != 0)
                 isUVComputed = false;
@@ -1501,6 +1545,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	{
 		optimizationData_.set_last_lS_used(optimizationData_.get_current_lambdaS());
 		optimizationData_.set_last_lT_used(optimizationData_.get_current_lambdaT());
+		//Rprintf("fine");
 	}
 	_rightHandSide = rhs; // Return rhs to original status for next apply call
 
@@ -1513,14 +1558,21 @@ template<typename InputHandler>
 template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
 
-	Solver solverobj;
-	if (isMatrixNoCov_computed)
-		solverobj.compute(matrixNoCov_);
-
     UInt nnodes = N_ * M_; // Define number of space-times nodes
     Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
     const VectorXr *obsp = regressionData_.getObservations(); // Get observations
     UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
+
+	Solver solverobj;
+	if (isMatrixNoCov_computed)
+	{
+		if (this->getSolver() == 3)
+		{
+			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
+			solverobj.setSEblock(tempSE);
+		}
+		solverobj.compute(matrixNoCov_);
+	}
 
     UInt sizeLambdaS;
     UInt sizeLambdaT;
@@ -1567,6 +1619,9 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
                 lambdaS = (optimizationData_.get_lambda_S())[s];
                 lambdaT = (optimizationData_.get_lambda_T())[t];
             }
+
+			if (this->getSolver() == 2)
+				solverobj.set_lambdaS(lambdaS);
 
             _rightHandSide = rhs;
             for (UInt i = 0; i < regressionData_.getInitialValues()->rows(); i++)  // p

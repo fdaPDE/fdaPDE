@@ -199,7 +199,7 @@ CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covari
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
-  storage.mode(sovler) <- "integer"
+  storage.mode(solver) <- "integer"
   
   ## Call C++ function
   bigsol <- .Call("gam_PDE", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,

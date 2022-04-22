@@ -34,10 +34,11 @@ class  RegressionData
 		MatrixXr barycenters_; 				//!< Barycenter information
 		bool locations_by_barycenter_;
 
-		// Other parameters
-		UInt order_;
+
 		// Solver technique
 		UInt solver_;
+		// Other parameters
+		UInt order_;
 
 		// Boundary + Initial
 		std::vector<Real> bc_values_;
