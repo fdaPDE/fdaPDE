@@ -706,6 +706,7 @@ template<typename InputHandler>
 template<typename Solver>
 MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr & b, Solver* solverobj)
 {
+	solverobj->compute(this->matrixNoCov_);
 	if(isMatrixNoCov_factorized()) {
 	 // Resolution of the system matrixNoCov * x1 = b
 	 MatrixXr x1 = solverobj->system_solve(b);
@@ -1508,13 +1509,11 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 
 			// system solution
 			_solution(s,t) = this->template system_solve(this->_rightHandSide, &solverobj);
-			//Rprintf("system_solved");
 			
 			if(optimizationData_.get_loss_function()!="GCV" || isGAMData)
 			{
 				_dof(s,t) = -1;
 				_GCV(s,t) = -1;
-				//Rprintf("loss_got");
 			}
 			
 
@@ -1533,7 +1532,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 					beta_rhs = W.transpose()*(*obsp - psi_*_solution(s,t).topRows(psi_.cols()));
 				}
 				_beta(s,t) = WTW_.solve(beta_rhs);
-				//Rprintf("wtw_solved");
 			}
             if (regressionData_.getCovariates()->rows() != 0)
                 isUVComputed = false;
@@ -1545,7 +1543,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	{
 		optimizationData_.set_last_lS_used(optimizationData_.get_current_lambdaS());
 		optimizationData_.set_last_lT_used(optimizationData_.get_current_lambdaT());
-		//Rprintf("fine");
 	}
 	_rightHandSide = rhs; // Return rhs to original status for next apply call
 
@@ -1557,7 +1554,6 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 template<typename InputHandler>
 template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
-
     UInt nnodes = N_ * M_; // Define number of space-times nodes
     Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
     const VectorXr *obsp = regressionData_.getObservations(); // Get observations
