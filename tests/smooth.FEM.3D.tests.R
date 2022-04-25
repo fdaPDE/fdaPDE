@@ -51,11 +51,53 @@ output_CPP<-smooth.FEM(locations = locations,
                        observations=data, FEMbasis=FEMbasis, lambda=lambda[1])
 plot(output_CPP$fit.FEM)
 
+# Test 1.1.1: Mass lumping regularization
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda[1],
+                       preconditioner='mass_lumping')
+plot(output_CPP$fit.FEM)
+
+# Test 1.1.2: lambda preconditioner
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda[1],
+                       preconditioner='lambda_preconditioner')
+plot(output_CPP$fit.FEM)
+
+# Test 1.1.3: block preconditioner
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda[1],
+                       preconditioner='block_preconditioner')
+plot(output_CPP$fit.FEM)
+
 #### Test 1.2: grid with exact GCV
 # it takes lot of time
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, lambda=lambda,
                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.2.1: Mass lumping regularization
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner='mass_lumping')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.2.2: lambda preconditioner
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner='lambda_preconditioner')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.2.3: block preconditioner
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner='block_preconditioner')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -67,12 +109,63 @@ output_CPP<-smooth.FEM(locations = locations,
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
+# Test 1.3.1: mass lumping regularization
+lambda= 10^seq(-9,-5,by=0.5)
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='mass_lumping')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.3.2: lambda preconditioner
+lambda= 10^seq(-9,-5,by=0.5)
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='lambda_preconditioner')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.3.3: block preconditioner
+lambda= 10^seq(-9,-5,by=0.5)
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='block_preconditioner')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
 #No exact GCV computation for Newton's method, it takes too much time
 #### Test 1.4: Newton_fd method with stochastic GCV, default initial lambda and tolerance
 #monotone increasing GCV function
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, 
                        lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.4.1: mass Lumping regularization
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='mass_lumping')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+#Test 1.4.2: lambda preconditioner
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'lambda_preconditioner')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+# Test 1.4.3: block preconditioner
+output_CPP<-smooth.FEM(locations = locations, 
+                       observations=data, FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'block_preconditioner')
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -115,6 +208,24 @@ lambda= 10^seq(-3,3,by=0.25)
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda[1])
+# Test 2.1.1: mass lumping regularization
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda[1],
+                       preconditioner='mass_lumping')
+
+# Test 2.1.2: lambda preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda[1],
+                       preconditioner='lambda_preconditioner')
+
+# Test 2.1.3: block preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda[1],
+                       preconditioner='block_preconditioner')
+
 # plot(output_CPP$fit.FEM)
 
 #### Test 2.2: grid with exact GCV
@@ -122,6 +233,39 @@ output_CPP<-smooth.FEM(observations=data,
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.2.1: mass lumping
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner='mass_lumping')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.2.2: digonal preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner='lambda_preconditioner')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.2.3: block preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner='block_preconditioner')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -137,11 +281,77 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
+# Test 2.3.1: mass lumping
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='mass_lumping')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.3.2: digonal preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='lambda_preconditioner')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.3.3: block preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='block_preconditioner')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
 #### Test 2.4: Newton method with exact GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis,
                        lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.4.1: mass lumping
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'mass_lumping')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.4.2: digonal preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'lambda_preconditioner')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.4.3: block preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'block_preconditioner')
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -157,6 +367,40 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
+# Test 2.5.1: mass lumping
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'mass_lumping')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+
+# Test 2.5.2: digonal preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'lambda_preconditioner')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.5.3: block preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       preconditioner = 'block_preconditioner')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
 #### Test 2.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
@@ -167,6 +411,38 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
+# Test 2.6.1: mass lumping
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='mass_lumping')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.6.2: digonal preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='lambda_preconditioner')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+# Test 2.6.3: block preconditioner
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       preconditioner='block_preconditioner')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
 
 ### Second order FEM in 3D ################################
 # Compare the accuracy and robustness of first 

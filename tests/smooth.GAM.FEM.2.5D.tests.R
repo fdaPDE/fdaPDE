@@ -75,6 +75,21 @@ output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FE
                         max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
                         lambda = lambda)
 
+# Test 1.1.1: mass lumping
+output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                        max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                        lambda = lambda, preconditioner='mass_lumping')
+
+# Test 1.1.2: diagonal preconditoner
+output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                        max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                        lambda = lambda, preconditioner='lambda_preconditioner')
+
+# Test 1.1.3: block preconditoner
+output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                        max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                        lambda = lambda, preconditioner='block_preconditioner')
+
 #### Test 1.2: grid with exact GCV
 output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
                          max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
@@ -85,10 +100,81 @@ beta = output_CPP$solution$beta
 func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
 plot(FEM(func_estimation,FEMbasis))
 
+# Test 1.2.1: mass lumping
+output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                        max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                        lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                        preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
+plot(FEM(func_estimation,FEMbasis))
+
+# Test 1.2.2: diagonal preconditoner
+output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                        max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                        lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                        preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
+plot(FEM(func_estimation,FEMbasis))
+
+
+# Test 1.2.3: block preconditoner
+output_CPP<- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                        max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                        lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                        preconditioner='block_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
+plot(FEM(func_estimation,FEMbasis))
+
+
 #### Test 1.3: grid with stochastic GCV
 output_CPP <- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
                          max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
                          lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
+plot(FEM(func_estimation,FEMbasis))
+
+
+# Test 1.3.1: mass lumping
+output_CPP <- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                         max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                         preconditioner = 'mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
+plot(FEM(func_estimation,FEMbasis))
+
+# Test 1.3.2: diagonal preconditoner
+output_CPP <- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                         max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                         preconditioner = 'lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+beta = output_CPP$solution$beta
+func_estimation = output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position]
+plot(FEM(func_estimation,FEMbasis))
+
+
+# Test 1.3.3: block preconditoner
+
+output_CPP <- smooth.FEM(location = NULL, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
+                         max.steps=15, family=FAMILY, mu0=NULL, scale.param=NULL,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                         preconditioner = 'block_preconditioner')
 plot(log10(lambda),output_CPP$optimization$GCV_vector)
 
 beta = output_CPP$solution$beta

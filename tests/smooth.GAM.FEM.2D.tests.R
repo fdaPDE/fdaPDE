@@ -81,6 +81,26 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
 image(FEM(sol_nodes, FEMbasis))
 image(output_CPP$fit.FEM)
 
+# Test 1.1.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis = FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, preconditioner ='mass_lumping')
+image(FEM(sol_nodes, FEMbasis))
+image(output_CPP$fit.FEM)
+
+# Test 1.1.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis = FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, preconditioner ='lambda_preconditioner')
+image(FEM(sol_nodes, FEMbasis))
+image(output_CPP$fit.FEM)
+
+# Test 1.1.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis = FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, preconditioner ='block_preconditioner')
+image(FEM(sol_nodes, FEMbasis))
+image(output_CPP$fit.FEM)
 
 #### Test 1.2: With exact GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
@@ -90,10 +110,67 @@ plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
+# Test 1.2.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 1.2.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 1.2.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='block_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
 #### Test 1.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
+# Test 1.3.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 1.3.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
+# Test 1.3.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='block_preconditioner')
 plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
@@ -175,6 +252,28 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
 image(output_CPP$fit.FEM)
 image(FEM(sol_nodes, FEMbasis))
 
+# Test 2.1.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda=lambda, preconditioner='mass_lumping')
+image(output_CPP$fit.FEM)
+image(FEM(sol_nodes, FEMbasis))
+
+
+# Test 2.1.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda=lambda, preconditioner='lambda_preconditioner')
+image(output_CPP$fit.FEM)
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 2.1.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda=lambda, preconditioner='block_preconditioner')
+image(output_CPP$fit.FEM)
+image(FEM(sol_nodes, FEMbasis))
+
 #### Test 2.2: With exact GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
@@ -183,10 +282,66 @@ plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
+# Test 2.2.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 2.2.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
+# Test 2.2.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='block_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
 #### Test 2.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 2.3.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner = 'mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 2.3.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner = 'lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 2.3.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='block_preconditioner')
 plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
@@ -268,6 +423,26 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
                                  lambda = lambda)
 image(output_CPP$fit.FEM)
 
+# Test 3.1.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, preconditioner ='mass_lumping')
+image(output_CPP$fit.FEM)
+
+# Test 3.1.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, preconditioner ='lambda_preconditioner')
+image(output_CPP$fit.FEM)
+
+
+# Test 3.1.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, preconditioner ='block_preconditioner')
+image(output_CPP$fit.FEM)
+
+
 #### Test 3.2: With exact GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
@@ -276,10 +451,66 @@ plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
+# Test 3.2.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV', 
+                                 preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 3.2.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV', 
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
+# Test 3.2.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV', 
+                                 preconditioner='block_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+
 #### Test 3.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 3.3.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner = 'mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 3.3.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 3.3.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='block_preconditioner')
 plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
@@ -362,6 +593,24 @@ output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(respo
                                  lambda=lambda)
 image(output_CPP$fit.FEM)
 
+# Test 4.1.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda=lambda, preconditioner='mass_lumping')
+image(output_CPP$fit.FEM)
+
+# Test 4.1.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda=lambda, preconditioner='lambda_preconditioner')
+image(output_CPP$fit.FEM)
+
+# Test 4.1.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda=lambda, preconditioner='block_preconditioner')
+image(output_CPP$fit.FEM)
+
 #### Test 4.2: With exact GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
@@ -370,10 +619,64 @@ plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
 
+# Test 4.2.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 4.2.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 4.2.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                                 preconditioner='block_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
 #### Test 4.3: With stochastic GCV
 output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
                                  max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                                  lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV' )
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 4.3.1: mass lumping
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV' ,
+                                 preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 4.3.2: diagonal preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV' ,
+                                 preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(sol_nodes, FEMbasis))
+
+# Test 4.3.3: block preconditioner
+output_CPP <- fdaPDE::smooth.FEM(location = loc, observations = as.numeric(response), FEMbasis =FEMbasis, covariates = NULL,
+                                 max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                                 lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV' ,
+                                 preconditioner='block_preconditioner')
 plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 image(FEM(sol_nodes, FEMbasis))
@@ -535,6 +838,24 @@ output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasi
                          incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
                          lambda = lambda)
 
+# Test 5.1.1: mass lumping
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, preconditioner='mass_lumping')
+
+# Test 5.1.2: diagonal preconditioner
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, preconditioner='lambda_preconditioner')
+
+# Test 5.1.3: block preconditioner
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, preconditioner = 'block_preconditioner')
+
 #### Test 5.2: grid with exact GCV
 output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
                          max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
@@ -544,10 +865,71 @@ plot(log10(lambda),output_CPP$optimization$GCV_vector)
 
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
 
+# Test 5.2.1: mass lumping
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                         preconditioner='mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
+
+# Test 5.2.2: diagonal preconditioner
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                         preconditioner='lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
+
+
+# Test 5.2.3: block preconditioner
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'exact', lambda.selection.lossfunction = 'GCV',
+                         preconditioner='block_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
+
+
 #### Test 5.3: grid with stochastic GCV
 output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
                          max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
                          incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
                          lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
+
+# Test 5.3.1: mass lumping
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                         preconditioner = 'mass_lumping')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
+
+
+# Test 5.3.2: diagonal preconditioner
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                         preconditioner = 'lambda_preconditioner')
+plot(log10(lambda),output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
+
+
+# Test 5.3.3: block preconditioner
+output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis = FEMbasis, covariates = desmat,
+                         max.steps=15, fam=FAMILY, mu0=NULL, scale.param=NULL,
+                         incidence_matrix = t(incidence_matrix), areal.data.avg = FALSE,
+                         lambda = lambda, lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic', lambda.selection.lossfunction = 'GCV',
+                         preconditioner = 'block_preconditioner')
 plot(log10(lambda),output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position], FEMbasis))
