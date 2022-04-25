@@ -56,7 +56,7 @@ loc <- rbind(nodesLocations, new_loc)
 dim(loc)
 
 # Exact test function - locations at nodes
-nnodes = sphere3D$nnodes
+nnodes = nrow(sphere3D$nodes)
 nloc = dim(loc)[1]
 a1 = rnorm(1,mean = -2, sd = 1/8)
 a2 = rnorm(1,mean = -2, sd = 1/8)

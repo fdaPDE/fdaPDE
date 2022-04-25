@@ -5,10 +5,12 @@
  *  \author Prada Daniele
  */
 
+
  #ifndef __TREE_NODE_H__
  #define __TREE_NODE_H__
 
  #include "../../FdaPDE.h"
+
 //#include "mesh_objects.h"
 //#include "bounding_box.h"
 
@@ -57,6 +59,15 @@ public:
     children_[1] = 0;
     id_ = id;
   }
+
+
+    TreeNode(Id const id, const Box<T::dp()>& shape): box_(shape) { //father_(0),
+
+    children_[0] = 0;
+    children_[1] = 0;
+    id_ = id;
+  }
+
 
   // constructor in case there is already tree information
   TreeNode(Box<T::dp()> const & box, Id const & id, int const & left_child, int const & right_child):

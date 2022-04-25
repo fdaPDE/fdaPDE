@@ -1,14 +1,12 @@
 CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
 
-  # C++ function for manifold works with vectors not with matrices
-
-  FEMbasis$mesh$triangles=c(t(FEMbasis$mesh$triangles))
-  FEMbasis$mesh$nodes=c(t(FEMbasis$mesh$nodes))
-
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
 
-  FEMbasis$mesh$triangles=FEMbasis$mesh$triangles-1
+  FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
+  FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
+
 
 
   if(is.null(covariates))
@@ -61,11 +59,11 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   storage.mode(locations) <- "double"
   data <- as.vector(observations)
   storage.mode(observations) <- "double"
-  storage.mode(FEMbasis$mesh$order) <- "integer"
-  storage.mode(FEMbasis$mesh$nnodes) <- "integer"
-  storage.mode(FEMbasis$mesh$ntriangles) <- "integer"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$triangles) <- "integer"
+  storage.mode(FEMbasis$mesh$edges) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
+  storage.mode(FEMbasis$mesh$order) <- "integer"
   covariates <- as.matrix(covariates)
   storage.mode(covariates) <- "double"
   storage.mode(ndim) <- "integer"
@@ -98,13 +96,9 @@ CPP_eval.manifold.FEM = function(FEM, locations, incidence_matrix, redundancy, n
 {
   FEMbasis = FEM$FEMbasis
 
-  # C++ function for manifold works with vectors not with matrices
-
-  FEMbasis$mesh$triangles=c(t(FEMbasis$mesh$triangles))
-  FEMbasis$mesh$nodes=c(t(FEMbasis$mesh$nodes))
-
-  #NEW: riporto shift indici in R
-  FEMbasis$mesh$triangles=FEMbasis$mesh$triangles-1
+  FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
+  FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
+  FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
 
   # Imposing types, this is necessary for correct reading from C++
   ## Set proper type for correct C++ reading
@@ -114,6 +108,8 @@ CPP_eval.manifold.FEM = function(FEM, locations, incidence_matrix, redundancy, n
   storage.mode(incidence_matrix) <- "integer"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$triangles) <- "integer"
+  storage.mode(FEMbasis$mesh$edges) <- "integer"
+  storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   storage.mode(FEMbasis$order) <- "integer"
   coeff <- as.matrix(FEM$coeff)
   storage.mode(coeff) <- "double"
@@ -129,18 +125,17 @@ CPP_eval.manifold.FEM = function(FEM, locations, incidence_matrix, redundancy, n
     element_ids <- as.matrix(bary.locations$element_ids)
     storage.mode(bary.locations$barycenters) <- "double"
     barycenters <- as.matrix(bary.locations$barycenters)
+  }else{
+    bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
+    storage.mode(bary.locations$locations) <- "double"
+    storage.mode(bary.locations$element_ids) <- "integer"
+    storage.mode(bary.locations$barycenters) <- "double"
   }
-
-  # if (search == 1) { #use Naive search
-  #   print('This is Naive Search')
-  # } else if (search == 2)  { #use Tree search (default)
-  #   print('This is Tree Search')
-  # }
 
   #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
   evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
   for (i in 1:ncol(coeff)){
-    evalmat[,i] <- .Call("eval_FEM_fd", FEMbasis$mesh, locations, incidence_matrix, coeff[,i],
+    evalmat[,i] <- .Call("eval_FEM_fd", FEMbasis$mesh, locations, incidence_matrix, as.matrix(coeff[,i]),
                          FEMbasis$order, redundancy, mydim, ndim, search, bary.locations, PACKAGE = "fdaPDE")
   }
 

@@ -31,6 +31,8 @@ FEMbasis = create.FEM.basis(mesh)
 # Test function
 f = function(x, y, z)
 {
+  x = x/2
+  y = y/2
   coe = function(x,y) 1/2*sin(5*pi*x)*exp(-x^2)+1
   sin(2*pi*(coe(y,1)*x*cos(z-2)-y*sin(z-2)))*cos(2*pi*(coe(y,1)*x*cos(z-2+pi/2)+coe(x,1)*y*sin((z-2)*pi/2)))
 }
@@ -48,7 +50,7 @@ sol_exact=f(SpaceTimePoints[,1],SpaceTimePoints[,2],SpaceTimePoints[,3])
 # Add error to simulate data
 set.seed(7893475)
 ran = range(sol_exact)
-data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
+data = sol_exact + rnorm(length(sol_exact), mean=0, sd=0.05*abs(ran[2]-ran[1]))
 observations=matrix(data,nrow(SpacePoints),NumTimePoints)
 
 # Set smoothing parameter
@@ -77,8 +79,9 @@ lambdaT = 1e-3
 output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations, 
                             FEMbasis=FEMbasis, lambdaS=lambdaS,lambdaT=lambdaT,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
 #### Test 1.3: grid with stochastic GCV
 lambdaS = 10^seq(-7, -5, length.out=3)
@@ -91,8 +94,22 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints,
                             lambda.selection.criterion='grid', 
                             DOF.evaluation='stochastic', 
                             lambda.selection.lossfunction='GCV')
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-image(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+image(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+
+#### Test 1.4: Newton_fd method with stochastic GCV
+lambdaS = exp(-4)
+lambdaT = exp(-7)
+output_CPP<-smooth.FEM.time(time_mesh = TimePoints, 
+                            time_locations = TimePoints,
+                            observations=observations, 
+                            FEMbasis=FEMbasis, 
+                            lambdaS=lambdaS,lambdaT=lambdaT,
+                            lambda.selection.criterion='newton_fd', 
+                            DOF.evaluation='stochastic', 
+                            lambda.selection.lossfunction='GCV',
+                            lambda.optimization.tolerance = 1e-4)
 
 #### Test 2: c-shaped domain ####
 #            locations != nodes
@@ -150,7 +167,7 @@ cov1 = rnorm(ndata, mean = 1, sd = 2)
 # Add error to simulate data
 set.seed(7893475)
 data = sol_exact + 2*cov1 
-data = data + rnorm(length(sol_exact), mean = 0, sd =  0.05*diff(range(sol_exact)))
+data = data + rnorm(ndata, mean = 0, sd =  0.05*diff(range(sol_exact)))
 observations = matrix(data,nrow(locations),NumTimeInstants)
 
 # Set smoothing parameter
@@ -172,13 +189,14 @@ lambdaT = 10^(-6:-4)
 output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                             observations=observations, 
                             covariates = cov1,
-                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-plot(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+plot(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
-output_CPP$beta[,bestlambdas[1],bestlambdas[2]]
+output_CPP$beta
 
 #### Test 2.3: stochastic GCV
 lambdaS = 10^(-2:0)
@@ -189,10 +207,11 @@ output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints,
                             FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
-bestlambdas = which(output_CPP$GCV == min(output_CPP$GCV), arr.ind = TRUE)
-plot(FEM.time(output_CPP$fit.FEM$coeff[,bestlambdas[1],bestlambdas[2]],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
+# bestlambdas = which(output_CPP$optimization$GCV_vector == min(output_CPP$optimization$GCV_vector), arr.ind = TRUE) #previous version of the package
+bestlambdas = output_CPP$optimization$lambda_position
+plot(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = TimePoints), t=1)
 
-output_CPP$beta[,bestlambdas[1],bestlambdas[2]]
+output_CPP$beta
 
 
 
@@ -238,7 +257,7 @@ sol_exact=f(SpaceTimePoints[,1],SpaceTimePoints[,2],SpaceTimePoints[,3])
 # Add error to simulate data
 set.seed(7893475)
 ran = range(sol_exact)
-data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
+data = sol_exact + rnorm(length(sol_exact), mean=0, sd=0.05*abs(ran[2]-ran[1]))
 observations=matrix(data,nrow(SpacePoints),NumTimePoints)
 
 # Set PDE parameters
@@ -346,7 +365,7 @@ u_func<-function(points)
 PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
 
 
-#### Test 4.1.2: Forcing term = 0, estimated IC, without GCV
+#### Test 4.1.2: Forcing term = 0, estimated IC, without GCV, monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -357,7 +376,19 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             DOF.evaluation = NULL)
 plot(output_CPP$fit.FEM.time, t = 1)
 
-#### Test 4.1.2: Forcing term = 0 exact  GCV
+#### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE,
+                            FLAG_ITERATIVE = TRUE,
+                            DOF.evaluation = NULL)
+plot(output_CPP_iter$fit.FEM.time, t = 1)
+
+#### Test 4.1.2: Forcing term = 0 exact  GCV,  monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -367,7 +398,16 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             FLAG_PARABOLIC = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
-#### Test 4.1.3: Forcing term = 0  stochastic  GCV
+#### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
+#### Test 4.1.3: Forcing term = 0  stochastic  GCV, monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -375,6 +415,16 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             BC = BC,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
+
+#### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE,  FLAG_ITERATIVE = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
 #### Test 4.2.1: Forcing term != 0 without GCV
@@ -398,7 +448,18 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             FLAG_PARABOLIC = TRUE)
 plot(output_CPP$fit.FEM.time, t = 1)
 
-#### Test 4.2.2: Forcing term != 0 exact GCV
+# forcing function != 0, iterative method
+
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)
+plot(output_CPP_iter$fit.FEM.time, t = 1)
+
+#### Test 4.2.2: Forcing term != 0 exact GCV, monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -406,6 +467,15 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             BC = BC,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
+### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE,  FLAG_ITERATIVE = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
 #### Test 4.2.3: Forcing term != 0 stochastic GCV
@@ -418,7 +488,15 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
-
+### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
 #### Test 4.3.1: BC != 0  without GCV
 u_func<-function(points)
@@ -434,6 +512,7 @@ observations = observations + 5
 # Set new value for the BC
 BC$BC_values = rep(5,length(BC$BC_indices))
 
+### monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -443,8 +522,19 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             FLAG_PARABOLIC = TRUE)
 plot(output_CPP$fit.FEM, t = 1)
 
+### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)
+plot(output_CPP_iter$fit.FEM, t = 1)
+
 
 #### Test 4.3.2: BC != 0 exact GCV
+### monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -453,8 +543,17 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
-
+### iterative method
+output_CPP_iter<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 #### Test 4.3.3: BC != 0 stochastic GCV
+### monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
                             incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
                             FEMbasis = FEMbasis, time_mesh = time_mesh,
@@ -463,7 +562,15 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             PDE_parameters = PDE_parameters,
                             FLAG_PARABOLIC = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
-
+### iterative method
+output_CPP<-smooth.FEM.time(observations=observations,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
 ####### 2.5D ########
 
@@ -479,7 +586,7 @@ FEMbasis <- create.FEM.basis(mesh)
 nodesLocations=mesh$nodes
 
 # Exact data - Locations at nodes
-nnodes = mesh$nnodes
+nnodes = nrow(mesh$nodes)
 a1 = rnorm(1,mean = 1, sd = 1)
 a2 = rnorm(1,mean = 1, sd = 1)
 a3 = rnorm(1,mean = 1, sd = 1)
@@ -520,13 +627,13 @@ ran=range(func_evaluation)
 plot(FEM.time(coeff=array(W%*%beta_exact + func_evaluation, dim = c(nnodes*length(TimeNodes),1,1)),FEMbasis=FEMbasis,time_mesh = TimeNodes,FLAG_PARABOLIC = T),TimeNodes)
 
 ran = range(func_evaluation)
-data = func_evaluation +rnorm(nnodes,mean=0,sd=0.05*(ran[2]-ran[1]))
+data = func_evaluation +rnorm(nnodes*length(TimeNodes),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 ran = range(func_evaluation+ W%*%beta_exact)
-datacov=func_evaluation+ W%*%beta_exact +rnorm(nnodes,mean=0,sd=0.05*(ran[2]-ran[1]))
+datacov=func_evaluation+ W%*%beta_exact +rnorm(nnodes*length(TimeNodes),mean=0,sd=0.05*(ran[2]-ran[1]))
 
-data = matrix(data,mesh$nnodes,length(TimeNodes))
-datacov = matrix(datacov,mesh$nnodes,length(TimeNodes))
+data = matrix(data,nrow(mesh$nodes),length(TimeNodes))
+datacov = matrix(datacov,nrow(mesh$nodes),length(TimeNodes))
 
 #########################################SEPARABLE####################################################
 solSep = smooth.FEM.time(observations=data,
@@ -541,21 +648,33 @@ solSepCov = smooth.FEM.time(observations=datacov, covariates = W,
 
 
 ##########################################PARABOLIC####################################################
+### MONOLITIC METHOD
 solPar = smooth.FEM.time(observations=data,
                          FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
                          lambdaS = lambdaS, lambdaT = lambdaT,
                          FLAG_PARABOLIC = TRUE)
 
-solParCov = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+mesh$nnodes):(length(TimeNodes)*mesh$nnodes),],
+solParCov = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
                             FEMbasis = FEMbasis, time_mesh = TimeNodes,
                             lambdaS = lambdaS, lambdaT = lambdaT,
-                            IC=func_evaluation[1:mesh$nnodes],
+                            IC=func_evaluation[1:nrow(mesh$nodes)],
                             FLAG_PARABOLIC = TRUE)
-  
+
+### ITERATIVE METHOD
+solParIter = smooth.FEM.time(observations=data,
+                         FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
+                         lambdaS = lambdaS_par, lambdaT = lambdaT_par,
+                         FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)
+
+solParCovIter = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
+                            FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            IC=func_evaluation[1:nrow(mesh$nodes)],
+                            FLAG_PARABOLIC = TRUE , FLAG_ITERATIVE = TRUE)
 # Example of RMSE computation
 TimeNodesEval=seq(0,4,length.out = 9)
 eval_locations = cbind(rep(TimeNodesEval,each=nnodes),rep(nodesLocations[,1],length(TimeNodesEval)),rep(nodesLocations[,2],length(TimeNodesEval)),rep(nodesLocations[,3],length(TimeNodesEval)))
-sol_eval=eval.FEM.time(solSep$fit.FEM.time,locations = nodesLocations,time.instants = TimeNodesEval, lambdaS = solSep$bestlambda[1],lambdaT = solSep$bestlambda[2])
+sol_eval=eval.FEM.time(solSep$fit.FEM.time,locations = nodesLocations,time.instants = TimeNodesEval, lambdaS = solSep$optimization$lambda_position[1], lambdaT = solSep$optimization$lambda_position[2])
 sol_exact = func(eval_locations)
 RMSE<-function(f,g) sqrt(mean((f-g)^2))
 RMSE(sol_eval,sol_exact)
@@ -569,7 +688,7 @@ data(hub2.5Dareal)
 
 nodesLocations=mesh$nodes
 
-nnodes = mesh$nnodes
+nnodes = nrow(mesh$nodes)
 a1 = rnorm(1,mean = 1, sd = 1)
 a2 = rnorm(1,mean = 1, sd = 1)
 a3 = rnorm(1,mean = 1, sd = 1)
@@ -620,14 +739,36 @@ solSep = smooth.FEM.time(observations = datacov,time_mesh = TimeNodes, covariate
                          FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 
 ##########################################PARABOLIC####################################################
+###MONOLITIC METHOD
 solPar = smooth.FEM.time(observations = data[,2:length(TimeNodes)],time_mesh = TimeNodes, incidence_matrix = incidence_matrix,
                          FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
-                         IC=func_evaluation[1:mesh$nnodes])
+                         IC=func_evaluation[1:nrow(mesh$nodes)])
 
 solPar = smooth.FEM.time(observations = datacov[,2:length(TimeNodes)],time_mesh = TimeNodes, incidence_matrix = incidence_matrix,covariates = W_areal[(1+RDD_groups):(length(TimeNodes)*RDD_groups),],
                          FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, 
-                         IC=func_evaluation[1:mesh$nnodes])
+                         IC=func_evaluation[1:nrow(mesh$nodes)])
+###ITERATIVE METHOD
+solParIter = smooth.FEM.time(observations = data[,2:length(TimeNodes)],time_mesh = TimeNodes, incidence_matrix = incidence_matrix,
+                         FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
+                         FLAG_ITERATIVE = TRUE, 
+                         IC=func_evaluation[1:nrow(mesh$nodes)])
 
+solParIter = smooth.FEM.time(observations = datacov[,2:length(TimeNodes)],time_mesh = TimeNodes, incidence_matrix = incidence_matrix,covariates = W_areal[(1+RDD_groups):(length(TimeNodes)*RDD_groups),],
+                         FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
+                         FLAG_ITERATIVE = TRUE, 
+                         IC=func_evaluation[1:nrow(mesh$nodes)])
+### GCV Exact
+solParIter = smooth.FEM.time(observations=data,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
+                             lambda.selection.criterion='grid',DOF.evaluation='exact',lambda.selection.lossfunction='GCV')
+
+### GCV Stochastic 
+solParIter = smooth.FEM.time(observations=data,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes,
+                             lambdaS = lambdaS_par, lambdaT = lambdaT_par,FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
+                             lambda.selection.criterion='grid',DOF.evaluation='stochastic',lambda.selection.lossfunction='GCV')
+
+solParIter$bestlambda 
 
 ######### 3D (These tests are slow!) #########
 
@@ -641,7 +782,7 @@ sphere3D<-create.mesh.3D(sphere3Ddata$nodes, sphere3Ddata$tetrahedrons)
 # plot(sphere3D)
 FEMbasis <- create.FEM.basis(sphere3D)
 nodesLocations=sphere3D$nodes
-nnodes = sphere3D$nnodes
+nnodes = nrow(sphere3D$nodes)
 TimeLocations = seq(0,1,length.out = 5)
 Locations = cbind(rep(TimeLocations,each=nnodes),rep(nodesLocations[,1],length(TimeLocations)),rep(nodesLocations[,2],length(TimeLocations)),rep(nodesLocations[,3],length(TimeLocations)))
 
@@ -708,13 +849,13 @@ lambdaT_par2=10^seq(1.4, 1.8, 0.1)
 
 beta_exact= c(0.7,2.0)
 ran = range(func_evaluation)
-data = func_evaluation +rnorm(nrow(Locations),mean=0,sd=0.05*(ran[2]-ran[1]))
+data = func_evaluation +rnorm(length(func_evaluation),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 ran = range(func_evaluation2)
-data_noloc = func_evaluation2 +rnorm(nrow(loc),mean=0,sd=0.05*(ran[2]-ran[1]))
+data_noloc = func_evaluation2 +rnorm(length(func_evaluation2),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 ran = range(func_evaluation+ W%*%beta_exact)
-datacov=func_evaluation+ W%*%beta_exact +rnorm(nrow(Locations),mean=0,sd=0.05*(ran[2]-ran[1]))
+datacov=func_evaluation+ W%*%beta_exact +rnorm(length(func_evaluation),mean=0,sd=0.05*(ran[2]-ran[1]))
 
 data = matrix(data,nnodes,length(TimeLocations))
 data_noloc = matrix(data_noloc,nloc,length(timeloc))
@@ -733,6 +874,7 @@ solSepCov = smooth.FEM.time(observations = datacov,time_mesh = TimeLocations, co
                             FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 
 ##########################################PARABOLIC####################################################
+### MONOLITIC METHOD
 solPar = smooth.FEM.time(observations = data,time_mesh = TimeLocations,
                          FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE)
 
@@ -742,10 +884,182 @@ solParNoNodes = smooth.FEM.time(locations=loc[1:nloc,2:4],observations = data_no
 solParCov = smooth.FEM.time(observations = datacov[,2:length(TimeLocations)],time_mesh = TimeLocations, covariates = W[(1+nnodes):(length(TimeLocations)*nnodes),],
                             FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
                             IC=func_evaluation[1:nnodes])
+###ITERATIVE METHOD
+solParIter = smooth.FEM.time(observations = data,time_mesh = TimeLocations,
+                         FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
+                         FLAG_ITERATIVE = TRUE)
 
+solParNoNodesIter = smooth.FEM.time(locations=loc[1:nloc,2:4],observations = data_noloc,time_mesh = timeloc,
+                                FEMbasis = FEMbasis, lambdaS = lambdaS_par2, lambdaT = lambdaT_par2, FLAG_PARABOLIC = TRUE,
+                                FLAG_ITERATIVE = TRUE)
+
+solParCovIter = smooth.FEM.time(observations = datacov[,2:length(TimeLocations)],time_mesh = TimeLocations, covariates = W[(1+nnodes):(length(TimeLocations)*nnodes),],
+                            FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE, 
+                            IC=func_evaluation[1:nnodes])
 #### Example of RMSE computation
 
-sol_eval=eval.FEM.time(solParNoNodes$fit.FEM.time,locations = loc[1:nloc,2:4], time.instants = timeloc, lambdaS = solParNoNodes$bestlambda[1],lambdaT = solParNoNodes$bestlambda[2])
+sol_eval=eval.FEM.time(solParNoNodes$fit.FEM.time,locations = loc[1:nloc,2:4], time.instants = timeloc, lambdaS = solSep$optimization$lambda_position[1], lambdaT = solSep$optimization$lambda_position[1])
 sol_exact = func_evaluation2
+RMSE<-function(f,g) sqrt(mean((f-g)^2))
+RMSE(sol_eval,sol_exact)
+
+#### C-shaped domain (1.5D) pointwise (examples with and without covariates) ####
+library(fdaPDE)
+rm(list=ls())
+
+eps = 1 / 2
+x = c(0., 1)
+y = c(0.,eps)
+vertices = expand.grid(x,y)
+vertices = cbind(vertices[,1], vertices[,2])
+edges = matrix(c(1,2,1,3,3,4), nrow=3,ncol=2, byrow=T)
+
+mesh = create.mesh.1.5D(vertices, edges)
+mesh = refine.mesh.1.5D(mesh,delta=0.0125)
+
+nnodes=dim(mesh$nodes)[1]
+FEMbasis=create.FEM.basis(mesh)
+# Locations at nodes
+nodesLocations=mesh$nodes
+
+# Exact data - Locations at nodes
+nnodes = nrow(mesh$nodes)
+TimeNodes = seq(0,pi,length.out = 6)
+locations = cbind(rep(TimeNodes,each=nnodes),rep(nodesLocations[,1],length(TimeNodes)),rep(nodesLocations[,2],length(TimeNodes)) )
+
+aux.4 = function(x,y){
+  h = 1
+  source = 4 
+  points_ = cbind(x,y)
+  idx.ok = which( abs(points_[,2]-mesh$nodes[source,2]) < 10 * .Machine$double.eps )
+  coef = vector(mode="numeric", length=length(x))
+  
+  for(i in idx.ok){
+    delta = abs(points_[i,1] - mesh$nodes[source,1])
+    if(delta < h ){
+      #coef[i] = 1- 8*delta
+      #coef[i] = -4/h^2 * (delta^2 - h^2) - 2
+      coef[i] = 3*exp(1/(delta^2 / h^2 -1)+1 ) - 1
+      
+    }
+  }
+  
+  return(coef)
+}
+aux.3 = function(x,y){
+  
+  h = eps
+  source = 3 
+  points_ = cbind(x,y)
+  idx.ok = which( abs(points_[,1]-mesh$nodes[source,1]) < 10 * .Machine$double.eps )
+  coef = vector(mode="numeric", length=length(x))
+  
+  for(i in idx.ok){
+    delta = abs(points_[i,2] - mesh$nodes[source,2])
+    if(delta < h ){
+      coef[i] = -1 - 1/h*delta
+    }
+    
+    
+  }
+  return(coef)
+}
+aux.1 = function(x,y){
+  
+  h = 1
+  source = 1 
+  points_ = cbind(x,y)
+  idx.ok = which( abs(points_[,2]-mesh$nodes[source,2]) < 10 * .Machine$double.eps )
+  coef = vector(mode="numeric", length=length(x))
+  
+  for(i in idx.ok){
+    delta = abs(points_[i,1] - mesh$nodes[source,1])
+    if(delta <= h ){
+      coef[i] = -2 - 1/h*delta
+    }
+  }
+  return(coef)
+  
+}  
+func = function(x,y,t){
+  
+  res = (aux.1(x,y) + aux.3(x,y) + aux.4(x,y)) * cos(t)
+  return(res)
+}
+
+func_evaluation = func(locations[,2], locations[,3], locations[,1])
+# Plot the exact solution
+plot(FEM.time(coeff=func_evaluation, FEMbasis = FEMbasis,time_mesh=TimeNodes, FLAG_PARABOLIC = T),TimeNodes)
+
+
+lambdaS = 10^seq(-4, -2, by=0.5)
+lambdaT = 10^seq(-4, -2, by=0.5)
+
+lambdaS_par=10^seq(-5, -4, 0.25)
+lambdaT_par=10^seq(-1, 0, 0.2)
+
+cov1=4*sin(2*pi*locations[,2])*cos(2*pi*locations[,3])
+cov2=rnorm(nnodes*length(TimeNodes), mean=3, sd=0.1)*rep(exp(-TimeNodes/length(TimeNodes)),each=nnodes)
+W=cbind(cov1,cov2)
+
+# Fix betas
+beta_exact=c(1,-0.5)
+
+ran=range(W%*%beta_exact + func_evaluation)
+ran=range(func_evaluation)
+
+# Plot exact solution
+plot(FEM.time(coeff=array(W%*%beta_exact + func_evaluation, dim = c(nnodes*length(TimeNodes),1,1)),FEMbasis=FEMbasis,time_mesh = TimeNodes,FLAG_PARABOLIC = T),TimeNodes)
+
+ran = range(func_evaluation)
+data = func_evaluation +rnorm(nnodes*length(TimeNodes),mean=0,sd=0.05*(ran[2]-ran[1]))
+
+ran = range(func_evaluation+ W%*%beta_exact)
+datacov=func_evaluation+ W%*%beta_exact +rnorm(nnodes*length(TimeNodes),mean=0,sd=0.05*(ran[2]-ran[1]))
+
+data = matrix(data,nrow(mesh$nodes),length(TimeNodes))
+datacov = matrix(datacov,nrow(mesh$nodes),length(TimeNodes))
+
+#########################################SEPARABLE####################################################
+solSep = smooth.FEM.time(observations=data,
+                         FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
+                         lambdaS = lambdaS, lambdaT = lambdaT,
+                         FLAG_PARABOLIC = FALSE)
+
+solSepCov = smooth.FEM.time(observations=datacov, covariates = W,
+                            FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            FLAG_PARABOLIC = FALSE)
+
+
+##########################################PARABOLIC####################################################
+### MONOLITIC METHOD
+solPar = smooth.FEM.time(observations=data,
+                         FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
+                         lambdaS = lambdaS, lambdaT = lambdaT,
+                         FLAG_PARABOLIC = TRUE)
+
+solParCov = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
+                            FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            IC=func_evaluation[1:nrow(mesh$nodes)],
+                            FLAG_PARABOLIC = TRUE)
+
+### ITERATIVE METHOD
+solParIter = smooth.FEM.time(observations=data,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
+                             lambdaS = lambdaS_par, lambdaT = lambdaT_par,
+                             FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)
+
+solParCovIter = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
+                                FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                                lambdaS = lambdaS, lambdaT = lambdaT,
+                                IC=func_evaluation[1:nrow(mesh$nodes)],
+                                FLAG_PARABOLIC = TRUE , FLAG_ITERATIVE = TRUE)
+# Example of RMSE computation
+TimeNodesEval=seq(0,4,length.out = 9)
+eval_locations = cbind(rep(TimeNodesEval,each=nnodes),rep(nodesLocations[,1],length(TimeNodesEval)),rep(nodesLocations[,2],length(TimeNodesEval)))
+sol_eval=eval.FEM.time(solSep$fit.FEM.time,locations = nodesLocations,time.instants = TimeNodesEval, lambdaS = solSep$optimization$lambda_position[1],lambdaT = solSep$optimization$lambda_position[2])
+sol_exact = func(eval_locations[,2],eval_locations[,3], eval_locations[,1])
 RMSE<-function(f,g) sqrt(mean((f-g)^2))
 RMSE(sol_eval,sol_exact)

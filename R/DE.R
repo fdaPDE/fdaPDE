@@ -47,8 +47,7 @@
 #' cross validation method is performed. If it is \code{SimplifiedCV} a simplified version is performed. 
 #' In the latter case the number of smoothing parameters \code{lambda} must be equal to the number of folds \code{nfolds}.
 #' Default is \code{NULL}.
-#' @param search An integer specifying the search algorithm to use. It is either 1 (Naive search algorithm) or 2 (Tree search algorithm).
-#' The default is 2.
+#' @param search a flag to decide the search algorithm type (tree or naive or walking search algorithm).
 #' @return A list with the following variables:
 #' \item{\code{treeFEMbasis}}{ Tree informations.}
 #' \item{\code{g}}{A vector of length #\code{nodes} that represents the value of the g-function estimated for each \code{node} of the mesh.
@@ -66,8 +65,15 @@
 #' planar mesh. The computation relies only on the C++ implementation of the algorithm.
 #' @usage DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
 #' tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2, nThreads_l=1, nThreads_fold=1, nfolds=NULL,
-#' nsimulations=500, step_method = "Fixed_Step", direction_method = "BFGS", preprocess_method="NoCrossValidation", search = 2)
+#' nsimulations=500, step_method = "Fixed_Step", direction_method = "BFGS", preprocess_method="NoCrossValidation", search = "tree")
 #' @export
+#'
+#' @references
+#' \itemize{
+#'    \item{Ferraccioli, F., Arnone, E., Finos, L., Ramsay, J. O., Sangalli, L. M. (2021). Nonparametric density estimation over complicated domains.
+#' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 83(2), 346-368.}
+#'    \item{Arnone, E., Ferraccioli, F., Pigolotti, C., Sangalli, L.M. (2021), A roughness penalty approach to estimate densities over two-dimensional manifolds, Computational Statistics and Data Analysis, to appear.}
+#' }
 #' @examples
 #' library(fdaPDE)
 #' 
@@ -96,7 +102,7 @@
 #'                   heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2,
 #'                   nThreads_l=1, nThreads_fold=1, nfolds=NULL, nsimulations=500, 
 #'                   step_method = "Fixed_Step", direction_method = "BFGS",
-#'                   preprocess_method="NoCrossValidation", search = 2)
+#'                   preprocess_method="NoCrossValidation", search = "tree")
 #' 
 #' ## Visualization 
 #' n = 100
@@ -114,7 +120,7 @@
 DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
                   tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2, nThreads_l=1, nThreads_fold=1,
                   nfolds=NULL, nsimulations=500, step_method = "Fixed_Step",
-                  direction_method = "BFGS", preprocess_method="NoCrossValidation", search = 2) 
+                  direction_method = "BFGS", preprocess_method="NoCrossValidation", search = "tree") 
 { 
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
@@ -125,10 +131,31 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
   }else if(class(FEMbasis$mesh) == "mesh.3D"){
     ndim = 3
     mydim = 3
+  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+    ndim=2
+    mydim=1
   }else{
     stop('Unknown mesh class')
   }
   
+
+      # Search algorithm
+  if(search=="naive"){
+    search=1
+  }else if(search=="tree"){
+    search=2
+  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.2.5D"){
+  stop("walking search is not available for mesh class mesh.2.5D.")
+  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.1.5D"){
+    stop("walking search is not available for mesh class mesh.1.5D.")
+  }else if(search=="walking" & 
+  	   class(FEMbasis$mesh) != "mesh.2.5D" & 
+  	   class(FEMbasis$mesh) != "mesh.1.5D" ){
+    search=3
+  }else{
+    stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
+  }
+
   ###################### Checking parameters, sizes and conversion #################################
   checkParametersDE(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, nThreads_int, nThreads_l, nThreads_fold, heatStep, heatIter, search) 
   
@@ -159,6 +186,11 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
   } else if(class(FEMbasis$mesh) == 'mesh.3D'){
     bigsol = CPP_FEM.volume.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                                stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
+  }else if(class(FEMbasis$mesh) == 'mesh.1.5D'){
+    
+    bigsol = CPP_FEM.graph.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                                 stepProposals, tol1, tol2, print,nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
+    
   }
   
   ###################### Collect Results ############################################################  

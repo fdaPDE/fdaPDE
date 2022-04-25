@@ -14,13 +14,15 @@
 class  RegressionData
 {
 	protected:
-		std::vector<Point> locations_; 			//!< Design matrix pointer and dimensions.
+		const RNumericMatrix locations_;		//!< Design matrix pointer and dimensions.
 		VectorXr 	   observations_; 		//!< Observations data
 		bool 		   locations_by_nodes_; 	//!< If location is on the mesh nodes or not.
 		UInt 		   nRegions_; 			//!< For areal data.
 		bool 		   arealDataAvg_; 		//!< Is areal data averaged ?
 		VectorXr	   WeightsMatrix_; 		//!< Weighted regression.
-		bool               isGAM = false;
+		bool           isGAM = false;
+
+
 
 	private:
 		std::vector<UInt> observations_indices_;
@@ -49,25 +51,26 @@ class  RegressionData
 		// Areal data
 		MatrixXi incidenceMatrix_;
 
-
 		bool flag_mass_;				//!< Mass penalization, only for separable version (flag_parabolic_==FALSE)
 		bool flag_parabolic_;
+		bool flag_iterative_;     //!<True if iterative-method for space time smoothing is selected
 		bool flag_SpaceTime_; // TRUE if space time smoothing
-
 		UInt search_; // search algorith type
+
+        // Iterative method
+        UInt max_num_iterations_; //!< Max number of iterations allowed.
+        Real threshold_; //!< Limit in difference among J_k and J_k+1 for which we stop iterative method.
 
 		// -- SETTERS --
 		void setObservations(SEXP Robservations);
 		void setObservationsTime(SEXP Robservations);
 		void setBaryLocations(SEXP RbaryLocations);
-		void setLocations(SEXP Rlocations);
 		void setTimeLocations(SEXP Rtime_locations);
 		void setCovariates(SEXP Rcovariates);
 		void setIncidenceMatrix(SEXP RincidenceMatrix);
 
 	public:
 		// -- CONSTRUCTORS --
-		RegressionData(){};
 
 		//! A basic version of the constructor.
 		/*!
@@ -88,21 +91,15 @@ class  RegressionData
 		        \param Rsearch an R-integer to decide the search algorithm type (tree or naive or walking search algorithm).
 		        \param Rtune an R-double parameter used in the computation of the GCV. The default value is 1.
 		        \param RarealDataAvg an R boolean indicating whether the areal data are averaged or not.
+
 		*/
 		explicit RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates,
 			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch);
 
 		explicit RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates,
-			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch);
+			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative,SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch);
 
-		explicit RegressionData(std::vector<Point> & locations, VectorXr & observations, UInt order, MatrixXr & covariates,
-			std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search);
-
-		explicit RegressionData(std::vector<Point> & locations, std::vector<Real> & time_locations, VectorXr & observations, UInt order,
-			MatrixXr & covariates, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,  MatrixXi & incidenceMatrix, bool arealDataAvg,
-			bool flag_mass, bool flag_parabolic, VectorXr & ic, UInt search);
-
-		explicit RegressionData(std::vector<Point> & locations, VectorXr & observations, UInt order, MatrixXr & covariates,
+		explicit RegressionData(Real* locations, UInt n_locations, UInt ndim, VectorXr & observations, UInt order, MatrixXr & covariates,
 			 VectorXr & WeightsMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,  MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search);
 
 		// -- PRINTERS --
@@ -114,69 +111,76 @@ class  RegressionData
 		// -- GETTERS --
 		// Observations [[GM passng to const pointers??]]
 		//! A method returning a const pointer to the observations vector
-		inline const VectorXr * getObservations(void) const {return &observations_;}
+		const VectorXr * getObservations(void) const {return &observations_;}
 		//! A method returning the number of observations
-		inline UInt getNumberofObservations(void) const {return observations_.size();}
+		UInt getNumberofObservations(void) const {return observations_.size();}
 		//! A method returning the number of space observations
-		inline UInt getNumberofSpaceObservations(void) const {return observations_.size()/time_locations_.size();}
+		UInt getNumberofSpaceObservations(void) const
+			{return observations_.size()/(time_locations_.size()==0 ? 1:time_locations_.size() );}
 		//! A method returning the number of time observations
-		inline UInt getNumberofTimeObservations(void) const {return time_locations_.size();}
-		inline const std::vector<UInt> * getObservationsIndices(void) const {return &observations_indices_;}
-		inline const std::vector<UInt> * getObservationsNA(void) const {return &observations_na_;}
+		UInt getNumberofTimeObservations(void) const {return time_locations_.size();}
+		const std::vector<UInt> * getObservationsIndices(void) const {return &observations_indices_;}
+		const std::vector<UInt> * getObservationsNA(void) const {return &observations_na_;}
+        //! A method returning the maximum iteration for the iterative method
+        const UInt get_maxiter() const {return max_num_iterations_;}
+        //! A method returning the treshold (iterative methos)
+        const Real get_treshold() const {return threshold_;}
 
 		// Locations [[GM passng to const pointers??]]
 		//! A method returning the locations of the observations
-		inline std::vector<Point> const & getLocations(void) const {return locations_;}
+		template<UInt ndim>
+		Point<ndim> getLocations(UInt i) const {return Point<ndim>(i, locations_);}
 		//! A method returning the locations of the time observations
-		inline std::vector<Real> const & getTimeLocations(void) const {return time_locations_;}
-		inline bool isLocationsByNodes(void) const {return locations_by_nodes_;}
-		inline bool isLocationsByBarycenter(void) const {return locations_by_barycenter_;}
-		inline MatrixXr const & getBarycenters(void) const {return barycenters_;} 	//not pointer to avoid compilation error in templates, not used in mixedFERegression
-		inline VectorXi const & getElementIds(void) const {return element_ids_;} 	//not pointer to avoid compilation error in templates, not used in mixedFERegression
-		inline Real getBarycenter(int i, int j) const {return barycenters_(i,j);}
-		inline UInt getElementId(Id i) const {return element_ids_(i);}
+		std::vector<Real> const & getTimeLocations(void) const {return time_locations_;}
+		bool isLocationsByNodes(void) const {return locations_by_nodes_;}
+		bool isLocationsByBarycenter(void) const {return locations_by_barycenter_;}
+		MatrixXr const & getBarycenters(void) const {return barycenters_;} 	//not pointer to avoid compilation error in templates, not used in mixedFERegression
+		VectorXi const & getElementIds(void) const {return element_ids_;} 	//not pointer to avoid compilation error in templates, not used in mixedFERegression
+		Real getBarycenter(int i, int j) const {return barycenters_(i,j);}
+		UInt getElementId(Id i) const {return element_ids_(i);}
 
 		// Covariates
 		//! A method returning a const pointer to the design matrix
-		inline const MatrixXr * getCovariates(void) const {return &covariates_;}
+		const MatrixXr * getCovariates(void) const {return &covariates_;}
 
 		// Bounday + Initial
 		//! A method returning the indexes of the nodes for which is needed to apply Dirichlet Conditions
-		inline const std::vector<UInt> * getDirichletIndices(void) const {return &bc_indices_;}
+		const std::vector<UInt> * getDirichletIndices(void) const {return &bc_indices_;}
 		//! A method returning the values to apply for Dirichlet Conditions
-		inline const std::vector<Real> * getDirichletValues(void) const {return &bc_values_;}
+		const std::vector<Real> * getDirichletValues(void) const {return &bc_values_;}
 		//! A method returning the values to apply for Initial Conditions
-		inline const VectorXr * getInitialValues(void) const {return &ic_;}
+		const VectorXr * getInitialValues(void) const {return &ic_;}
 
 		// Areal
 		//! A method returning a const pointer to the incidence matrix
-		inline const MatrixXi * getIncidenceMatrix(void) const {return &incidenceMatrix_;}
+		const MatrixXi * getIncidenceMatrix(void) const {return &incidenceMatrix_;}
 		//! A method returning the number of regions
-		inline UInt getNumberOfRegions(void) const {return nRegions_;}
-		inline bool isArealDataAvg(void) const {return arealDataAvg_;}
+		UInt getNumberOfRegions(void) const {return nRegions_;}
+		bool isArealDataAvg(void) const {return arealDataAvg_;}
 
 		//! A method returning the input order
-		inline UInt getOrder(void) const {return order_;}
+		UInt getOrder(void) const {return order_;}
 
 		//! A method returning a const pointer to the matrix of weights
-		inline const VectorXr * getWeightsMatrix(void) const {return &WeightsMatrix_;}
+		const VectorXr * getWeightsMatrix(void) const {return &WeightsMatrix_;}
 
-		inline bool isSpaceTime(void) const {return flag_SpaceTime_;}
-		inline bool getFlagMass(void) const {return flag_mass_;}
-		inline bool getFlagParabolic(void) const {return flag_parabolic_;}
-		inline bool getisGAM(void) const {return isGAM;}
+        bool isSpaceTime(void) const {return flag_SpaceTime_;}
+		bool getFlagMass(void) const {return flag_mass_;}
+		bool getFlagParabolic(void) const {return flag_parabolic_;}
+        bool getFlagIterative(void) const {return flag_iterative_;}
+		bool getisGAM(void) const {return isGAM;}
 
 		// Search
 		//! A method returning the input search
-		inline UInt getSearch(void) const {return search_;}
+		UInt getSearch(void) const {return search_;}
 };
 
 
 class  RegressionDataElliptic:public RegressionData
 {
 	private:
-		Eigen::Matrix<Real,2,2> K_;
-		Eigen::Matrix<Real,2,1> beta_;
+		Diffusion<PDEParameterOptions::Constant> K_;
+		Advection<PDEParameterOptions::Constant> beta_;
 		Real c_;
 
 	public:
@@ -206,27 +210,18 @@ class  RegressionDataElliptic:public RegressionData
 
 		explicit RegressionDataElliptic(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
-			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch);
+			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch);
 
-		explicit RegressionDataElliptic(std::vector<Point> & locations, VectorXr & observations, UInt order,
-			Eigen::Matrix<Real,2,2> & K, Eigen::Matrix<Real,2,1> & beta, Real c, MatrixXr & covariates,
-			std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search);
-
-		explicit RegressionDataElliptic(std::vector<Point> & locations, std::vector<Real> & time_locations, VectorXr & observations,
-			UInt order, Eigen::Matrix<Real,2,2> & K, Eigen::Matrix<Real,2,1> & beta, Real c, MatrixXr & covariates,
-			std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, MatrixXi & incidenceMatrix, bool arealDataAvg,
-			bool flag_mass, bool flag_parabolic, VectorXr & ic, UInt search);
-
-		inline Eigen::Matrix<Real,2,2> const & getK() const {return K_;}
-		inline Eigen::Matrix<Real,2,1> const & getBeta() const {return beta_;}
-		inline Real const getC() const {return c_;}
+		Diffusion<PDEParameterOptions::Constant> const & getK() const {return K_;}
+		Advection<PDEParameterOptions::Constant> const & getBeta() const {return beta_;}
+		Real const getC() const {return c_;}
 };
 
 class RegressionDataEllipticSpaceVarying:public RegressionData
 {
 	private:
-		Diffusivity K_;
-		Advection beta_;
+		Diffusion<PDEParameterOptions::SpaceVarying> K_;
+		Advection<PDEParameterOptions::SpaceVarying> beta_;
 		Reaction c_;
 		ForcingTerm u_;
 
@@ -259,27 +254,12 @@ class RegressionDataEllipticSpaceVarying:public RegressionData
 
 		explicit RegressionDataEllipticSpaceVarying(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
-			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch);
+			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch);
 
-		explicit RegressionDataEllipticSpaceVarying(std::vector<Point> & locations, VectorXr & observations, UInt order,
-			const std::vector<Eigen::Matrix<Real,2,2>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,2> > > & K,
-			const std::vector<Eigen::Matrix<Real,2,1>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,1> > > & beta,
-			const std::vector<Real> & c, const std::vector<Real> & u, MatrixXr & covariates,
-			std::vector<UInt> & bc_indices, std::vector<Real> & bc_values ,MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search);
-
-		explicit RegressionDataEllipticSpaceVarying(std::vector<Point> & locations, std::vector<Real> & time_locations, VectorXr & observations, UInt order,
-			const std::vector<Eigen::Matrix<Real,2,2>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,2> > > & K,
-			const std::vector<Eigen::Matrix<Real,2,1>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,1> > > & beta,
-			const std::vector<Real> & c, const std::vector<Real> & u, MatrixXr& covariates,
-			std::vector<UInt> & bc_indices,	std::vector<Real> & bc_values, MatrixXi & incidenceMatrix, bool arealDataAvg,
-			bool flag_mass, bool flag_parabolic, VectorXr & ic, UInt search);
-
-		inline Diffusivity const & getK() const {return K_;}
-		inline Advection const & getBeta() const {return beta_;}
-		inline Reaction const & getC() const {return c_;}
-		inline ForcingTerm const & getU() const {return u_;}
-
-		void print(std::ostream & out) const;
+		Diffusion<PDEParameterOptions::SpaceVarying> const & getK() const {return K_;}
+		Advection<PDEParameterOptions::SpaceVarying> const & getBeta() const {return beta_;}
+		Reaction const & getC() const {return c_;}
+		ForcingTerm const & getU() const {return u_;}
 };
 
 //----------------------------------------------------------------------------//
@@ -339,34 +319,32 @@ class  RegressionDataGAM : public RegressionHandler
 			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,
 			SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch, SEXP Rmax_num_iteration, SEXP Rthreshold);
 
-
-		//! A costructor for the Laplacian case
-		explicit RegressionDataGAM(std::vector<Point> & locations, VectorXr & observations, UInt order,
-			MatrixXr & covariates, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,
-			MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, UInt max_num_iterations, Real threshold);
-
-		//! A costructor for the PDE case
-		explicit RegressionDataGAM(std::vector<Point> & locations, VectorXr & observations, UInt order,
-			Eigen::Matrix<Real,2,2> & K, Eigen::Matrix<Real,2,1> & beta, Real c, MatrixXr & covariates,
-			std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, MatrixXi& incidenceMatrix, bool arealDataAvg,
-			UInt search, UInt max_num_iterations, Real threshold);
-
-		//! A costructor for the PDE SpaceVarying case
-		explicit RegressionDataGAM(std::vector<Point> & locations, VectorXr & observations, UInt order,
-			const std::vector<Eigen::Matrix<Real,2,2>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,2> > > & K,
-			const std::vector<Eigen::Matrix<Real,2,1>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,1> > > & beta,
-			const std::vector<Real> & c, const std::vector<Real> & u,
-			MatrixXr& covariates, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values,
-			MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, UInt max_num_iterations, Real threshold);
+		//Laplace time
+		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
+			SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
+			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, 
+			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls);
+		
+		// PDE time
+		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
+			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
+			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, 
+			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls);
+		
+		// PDE SpaceVarying time
+		explicit RegressionDataGAM(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rorder,
+			SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
+			SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative, SEXP Rmax_num_iteration, SEXP Rthreshold, SEXP Ric, SEXP Rsearch, 
+			SEXP Rmax_num_iteration_pirls, SEXP Rthreshold_pirls);
 
 		//! A method returning the maximum iteration for the iterative method
-		inline UInt get_maxiter() const {return max_num_iterations_;}
+		UInt get_maxiter() const {return max_num_iterations_;}
 		//! A method returning the treshold
-		inline Real get_treshold() const {return threshold_;}
+		Real get_treshold() const {return threshold_;}
 		//! A method returning a reference to the observations vector
-		inline const VectorXr * getInitialObservations() const {return &initialObservations_;}
+		const VectorXr * getInitialObservations() const {return &initialObservations_;}
 		//! A method returning the lambda used in the GAM data
-		inline UInt getNumberofInitialObservations() const {return initial_observations_indeces_.size();}
+		UInt getNumberofInitialObservations() const {return initial_observations_indeces_.size();}
 
 		//! Update Pseudodata (observations and weights)
 		void updatePseudodata(VectorXr& z_, VectorXr& P){this-> observations_ = z_; this-> WeightsMatrix_ = P;}

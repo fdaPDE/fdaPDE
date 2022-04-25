@@ -7,10 +7,10 @@
 #include <stdexcept>
 #include <type_traits>
 namespace GenericFactory{
-  
+
   /*! @brief A generic factory.
-    
-    It is implemented as a Singleton. The compulsory way to 
+
+    It is implemented as a Singleton. The compulsory way to
     access a method is Factory::Instance().method().
     Typycally to access the factory one does
     \code
@@ -28,8 +28,8 @@ namespace GenericFactory{
     //! The container for the rules.
     typedef  AbstractProduct AbstractProduct_type;
     //! The identifier.
-    /*  
-	We must have an ordering since we use a map with 
+    /*
+	We must have an ordering since we use a map with
 	the identifier as key.
     */
     typedef  Identifier Identifier_type;
@@ -44,7 +44,7 @@ namespace GenericFactory{
     typedef  Builder Builder_type;
     //! Method to access the only instance of the factory
     static Factory & Instance();
-    //! Get the rule with given name . 
+    //! Get the rule with given name .
     /*!
       The pointer is null if no rule is present.
       @todo use variadic templates to make it more general
@@ -71,7 +71,7 @@ namespace GenericFactory{
   };
 
 
-  
+
   //! We use the Meyer's trick to istantiate the factory.
   template
   <
@@ -79,18 +79,18 @@ namespace GenericFactory{
     typename Identifier,
     typename Builder
     >
-  Factory<AbstractProduct,Identifier,Builder> & 
+  Factory<AbstractProduct,Identifier,Builder> &
   Factory<AbstractProduct,Identifier,Builder>::Instance() {
     static Factory theFactory;
     return theFactory;
   }
-  
+
   //! Generic utility to convert identifiers to string (if possible)
-  /*! 
+  /*!
     I use type traits to identify the correct version
    */
   template<bool Convertible, typename Identifier>
-  struct 
+  struct
   M_identifierAsString
   {
     static std::string value (Identifier const & id);
@@ -116,8 +116,8 @@ namespace GenericFactory{
     typename Identifier,
     typename Builder
     >
-  std::unique_ptr<AbstractProduct> 
-  Factory<AbstractProduct,Identifier,Builder>::create(Identifier const & name) 
+  std::unique_ptr<AbstractProduct>
+  Factory<AbstractProduct,Identifier,Builder>::create(Identifier const & name)
     const {
     auto f = _storage.find(name); //C++11
     if (f == _storage.end())
@@ -131,33 +131,33 @@ namespace GenericFactory{
 	return std::unique_ptr<AbstractProduct>(f->second());
       }
     //Old version:
-    //return (f == _storage.end()) ? std::unique_ptr<AbstractProduct>(): 
+    //return (f == _storage.end()) ? std::unique_ptr<AbstractProduct>():
     //std::unique_ptr<AbstractProduct>(f->second());
   }
-  
+
   template
   <
     typename AbstractProduct,
     typename Identifier,
     typename Builder
     >
-  void  
-  Factory<AbstractProduct,Identifier,Builder>::add(Identifier const & name, 
+  void
+  Factory<AbstractProduct,Identifier,Builder>::add(Identifier const & name,
 					   Builder_type const & func){
-    auto f = 
+    auto f =
       _storage.insert(std::make_pair(name, func));
 //    if (f.second == false)
 //      throw std::invalid_argument("Double registration in Factory");
   }
-  
-  
+
+
   template
   <
     typename AbstractProduct,
     typename Identifier,
     typename Builder
     >
-  std::vector<Identifier>  Factory<AbstractProduct,Identifier,Builder>::registered() 
+  std::vector<Identifier>  Factory<AbstractProduct,Identifier,Builder>::registered()
     const {
     std::vector<Identifier> tmp;
     tmp.reserve(_storage.size());
@@ -168,7 +168,7 @@ namespace GenericFactory{
 
   /// SOME UTILITIES
   /*!
-    Converts an identifier to string if it is possible. 
+    Converts an identifier to string if it is possible.
    */
   template<typename Identifier>
   struct
@@ -180,7 +180,7 @@ namespace GenericFactory{
     }
   };
   //! Partial specialization if convertible (c++11)
-  template<typename Identifier> 
+  template<typename Identifier>
   struct
   M_identifierAsString<true,Identifier>
   {
