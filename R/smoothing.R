@@ -345,19 +345,19 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                      lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   # Mesh identification
-  if(class(FEMbasis$mesh) == "mesh.2D")
+  if(is(FEMbasis$mesh, "mesh.2D"))
   {
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D")
+  }else if(is(FEMbasis$mesh, "mesh.2.5D"))
   {
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D")
+  }else if(is(FEMbasis$mesh, "mesh.3D"))
   {
     ndim = 3
     mydim = 3
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D")
+  }else if(is(FEMbasis$mesh, "mesh.1.5D"))
   {
     ndim = 2
     mydim = 1
@@ -454,11 +454,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     search=1
   }else if(search=="tree"){
     search=2
-  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
   	stop("walking search is not available for mesh class mesh.2.5D.")
-  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.1.5D")){
     stop("walking search is not available for mesh class mesh.1.5D.")
-  }else if(search=="walking" & class(FEMbasis$mesh) != "mesh.2.5D" & class(FEMbasis$mesh) != "mesh.1.5D"){
+  }else if(search=="walking" & !is(FEMbasis$mesh, "mesh.2.5D") & !is(FEMbasis$mesh, "mesh.1.5D")){
     search=3
   }else{
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
@@ -546,7 +546,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     #----------------------------------------------------#
     ############# Standard Smooth method #################
     #----------------------------------------------------#
-    if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
+    if(is(FEMbasis$mesh, "mesh.2D") & is.null(PDE_parameters))
     {
       bigsol = NULL
       bigsol = CPP_smooth.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -556,7 +556,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
+    }else if(is(FEMbasis$mesh, "mesh.2D") & !is.null(PDE_parameters) & space_varying == FALSE)
     {
       bigsol = NULL
       bigsol = CPP_smooth.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -566,7 +566,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, 
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
+    }else if(is(FEMbasis$mesh, "mesh.2D") & !is.null(PDE_parameters) & space_varying == TRUE)
     {
       bigsol = NULL
       bigsol = CPP_smooth.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -576,7 +576,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
+    }else if(is(FEMbasis$mesh, "mesh.2.5D"))
     {
       bigsol = NULL
       # if(!is.null(locations))
@@ -588,7 +588,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
        optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
        DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-  	}else if(class(FEMbasis$mesh) == 'mesh.3D' & is.null(PDE_parameters))
+  	}else if(is(FEMbasis$mesh, "mesh.3D") & is.null(PDE_parameters))
     {
       bigsol = NULL
       bigsol = CPP_smooth.volume.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -598,7 +598,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    } else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==FALSE)
+    } else if(is(FEMbasis$mesh, "mesh.3D") & !is.null(PDE_parameters) & space_varying==FALSE)
     {
   	  bigsol = NULL
       bigsol = CPP_smooth.volume.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -608,7 +608,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-  	} else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==TRUE)
+  	} else if(is(FEMbasis$mesh, "mesh.3D") & !is.null(PDE_parameters) & space_varying==TRUE)
   	{
       bigsol = NULL
       bigsol = CPP_smooth.volume.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -618,7 +618,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-  	} else if(class(FEMbasis$mesh) == 'mesh.1.5D')
+  	} else if(is(FEMbasis$mesh, "mesh.1.5D"))
   	{
   	  bigsol = NULL
   	  bigsol = CPP_smooth.graph.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -636,7 +636,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     #----------------------------------------------------#
     checkGAMParameters(observations = observations, max.steps.FPIRLS = max.steps.FPIRLS, mu0 = mu0, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS, family = family)
 
-    if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
+    if(is(FEMbasis$mesh, "mesh.2D") & is.null(PDE_parameters))
     {
       bigsol = NULL
       bigsol = CPP_smooth.GAM.FEM(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -647,7 +647,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
+    }else if(is(FEMbasis$mesh, "mesh.2D") & !is.null(PDE_parameters) & space_varying == FALSE)
     {
         bigsol = NULL
         bigsol = CPP_smooth.GAM.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -658,7 +658,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
           DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
         numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
+    }else if(is(FEMbasis$mesh, "mesh.2D") & !is.null(PDE_parameters) & space_varying == TRUE)
     {
       bigsol = NULL
       bigsol = CPP_smooth.GAM.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -669,7 +669,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
+    }else if(is(FEMbasis$mesh, "mesh.2.5D"))
     {
       bigsol = NULL
       if(!is.null(locations))
@@ -682,7 +682,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.3D' & is.null(PDE_parameters))
+    }else if(is(FEMbasis$mesh, "mesh.3D") & is.null(PDE_parameters))
     {
       bigsol = NULL
       bigsol = CPP_smooth.volume.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -693,7 +693,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==FALSE)
+    }else if(is(FEMbasis$mesh, "mesh.3D") & !is.null(PDE_parameters) & space_varying==FALSE)
     {
       bigsol = NULL
       bigsol = CPP_smooth.volume.GAM.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -704,7 +704,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.3D' & !is.null(PDE_parameters) & space_varying==TRUE)
+    }else if(is(FEMbasis$mesh, "mesh.3D") & !is.null(PDE_parameters) & space_varying==TRUE)
     {
       bigsol = NULL
       bigsol = CPP_smooth.volume.GAM.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -715,7 +715,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
         DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    }else if(class(FEMbasis$mesh) == 'mesh.1.5D')
+    }else if(is(FEMbasis$mesh, "mesh.1.5D"))
     {
       bigsol = NULL
       bigsol = CPP_smooth.graph.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,

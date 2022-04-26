@@ -352,13 +352,13 @@ CPP_get_evaluations_points = function(mesh, order)
   #here we do not shift indices since this function is called inside CPP_smooth.FEM.PDE.sv.basis
 
   # Imposing types, this is necessary for correct reading from C++
-  if(class(mesh) == "mesh.2D"){
+  if(is(mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(mesh) == "mesh.2.5D"){
+  }else if(is(mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(mesh) == "mesh.3D"){
+  }else if(is(mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
@@ -390,16 +390,16 @@ CPP_get_evaluations_points = function(mesh, order)
 
 CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     ndim = 2
     mydim = 1
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
@@ -455,16 +455,16 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
 
 CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     ndim = 2
     mydim = 1
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
@@ -518,7 +518,7 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
 CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
 {
   search = 1
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
     
@@ -532,7 +532,7 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$edges) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
     
@@ -546,7 +546,7 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$faces) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
     
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(mesh, "mesh.1.5D")){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
@@ -597,7 +597,7 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
 CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
 {
   search = 1
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
     
@@ -611,7 +611,7 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$edges) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
     
@@ -625,7 +625,7 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$faces) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
     
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(mesh, "mesh.1.5D")){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
