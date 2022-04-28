@@ -47,25 +47,25 @@ create.FEM.basis = function(mesh=NULL, saveTree = FALSE)
   if (is.null(mesh))
     stop("mesh required;  is NULL.")
 
-  if(!is(FEMbasis$mesh, "mesh.1.5D") & !is(FEMbasis$mesh, "mesh.2D") & !is(FEMbasis$mesh, "mesh.2.5D") & !is(FEMbasis$mesh, "mesh.3D"))
+  if(!is(mesh, "mesh.1.5D") & !is(mesh, "mesh.2D") & !is(mesh, "mesh.2.5D") & !is(mesh, "mesh.3D"))
     stop("Unknown mesh class")
 
   if (saveTree == TRUE) {
       ## Call C++ function
       # Note: myDim and nDim are available outside the scope (different from C++)
-      if (is(FEMbasis$mesh, "mesh.2D")){
+      if (is(mesh, "mesh.2D")){
         myDim = 2
         nDim = 2
       }
-      if (is(FEMbasis$mesh, "mesh.2.5D")){
+      if (is(mesh, "mesh.2.5D")){
         myDim = 2
         nDim = 3
       }
-      if (is(FEMbasis$mesh, "mesh.3D")){
+      if (is(mesh, "mesh.3D")){
         myDim = 3
         nDim = 3
       }
-      if(is(FEMbasis$mesh, "mesh.1.5D")){
+      if(is(mesh, "mesh.1.5D")){
         myDim = 1
         nDim = 2
       }

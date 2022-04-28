@@ -75,6 +75,10 @@ std::pair<lambda::type<1>, UInt> Newton_ex<lambda::type<1>, Real, Extensions...>
 
                        ch.set_tolerance();
                        fx = this->F.evaluate_f(x);
+                       
+                       GCV_v.push_back(fx);
+                       lambda_v.push_back(x);
+                       
                        return {x, n_iter};
                }
 
@@ -83,6 +87,8 @@ std::pair<lambda::type<1>, UInt> Newton_ex<lambda::type<1>, Real, Extensions...>
        }
 
        fx = this->F.evaluate_f(x);
+       GCV_v.push_back(fx);
+       lambda_v.push_back(x);
        ch.set_max_iter();
        return {x, n_iter};
 }
@@ -158,6 +164,10 @@ std::pair<lambda::type<2>, UInt> Newton_ex<lambda::type<2>, MatrixXr, Extensions
 
                        ch.set_tolerance();
                        fx = this->F.evaluate_f(x);
+                       
+                       GCV_v.push_back(fx);
+                       lambda_v.push_back(x);
+                       
                        return {x, n_iter};
                }
 
@@ -170,6 +180,8 @@ std::pair<lambda::type<2>, UInt> Newton_ex<lambda::type<2>, MatrixXr, Extensions
        }
 
        fx = this->F.evaluate_f(x);
+       GCV_v.push_back(fx);
+       lambda_v.push_back(x);
        ch.set_max_iter();
        return {x, n_iter};
 }
@@ -254,6 +266,10 @@ std::pair<lambda::type<1>, UInt> Newton_fd<lambda::type<1>, Real, Extensions...>
                 {
                         ch.set_tolerance();
                         fx  = this->F.evaluate_f(x); //eventuale miglioramento: va fatto altirmenti prende gli z:hat di quellos sbagliato.
+                        
+                        GCV_v.push_back(fx);
+                        lambda_v.push_back(x);
+                       
                         return {x, n_iter};
                 }
 
@@ -266,6 +282,8 @@ std::pair<lambda::type<1>, UInt> Newton_fd<lambda::type<1>, Real, Extensions...>
                 // Rprintf("fs(x): %f\n", fsx);
         }
         fx  = this->F.evaluate_f(x);
+        GCV_v.push_back(fx);
+        lambda_v.push_back(x);
         ch.set_max_iter();
         return {x, n_iter};
 }
@@ -363,6 +381,10 @@ std::pair<lambda::type<2>, UInt> Newton_fd<lambda::type<2>, MatrixXr, Extensions
                 {
                         ch.set_tolerance();
                         fx  = this->F.evaluate_f(lambda::make_pair(exp(x(0)), exp(x(1))));
+                        
+                        GCV_v.push_back(fx);
+                        lambda_v.push_back(lambda::make_pair(exp(x(0)), exp(x(1))));
+                        
                         return {lambda::make_pair(exp(x(0)), exp(x(1))), n_iter};
                 }
 
@@ -384,6 +406,8 @@ std::pair<lambda::type<2>, UInt> Newton_fd<lambda::type<2>, MatrixXr, Extensions
                 //Rprintf("fs(x): %f\n", fsx);
         }
         fx  = this->F.evaluate_f(lambda::make_pair(exp(x(0)), exp(x(1))));
+        GCV_v.push_back(fx);
+        lambda_v.push_back(lambda::make_pair(exp(x(0)), exp(x(1))));
         ch.set_max_iter();
         return {lambda::make_pair(exp(x(0)), exp(x(1))), n_iter};
 }
