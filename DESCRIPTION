@@ -36,7 +36,7 @@ Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
     stats, grDevices, graphics, geometry,
-    rgl, Matrix, plot3D, plot3Drgl, shiny, methods
+    rgl, Matrix, plot3D, plot3Drgl, methods
 LinkingTo: 
 	RcppEigen
 Suggests: 
