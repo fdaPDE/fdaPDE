@@ -495,6 +495,10 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     ICestimated = list(IC.FEM=bigsol[[24]],bestlambdaindex=bigsol[[25]],bestlambda=bigsol[[26]],beta=bigsol[[27]])
 
   bestlambda = bigsol[[4]]+1
+  if(optim[1]!=0) # newton or newton_fd 
+  {
+   bestlambda = max(bestlambda[1], bestlambda[2])
+  }
 
   if(optim[1]==0)
   {
@@ -541,7 +545,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
         termination = termination,
         optimization_type = optimization_type),
     dof = bigsol[[2]],
-    lambda_vector = matrix(c(bigsol[[21]], bigsol[[22]]), nrow=length(lambdaS)*length(lambdaT), ncol=2),
+    lambda_vector = matrix(c(bigsol[[21]], bigsol[[22]]), nrow=length(bigsol[[21]]), ncol=2),
     GCV_vector = GCV_
   )
 
