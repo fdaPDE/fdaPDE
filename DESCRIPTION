@@ -3,7 +3,7 @@ Version: 1.1-4
 Date: 2022-04-05
 Title: Functional Data Analysis and Partial Differential Equations (PDE); Statistical Analysis of Functional and Spatial Data, Based on Regression with PDE Regularization
 Author: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
-		     email = "eleonora.arnone@unipd.it"),
+		     email = "eleonora.arnone@polimi.it"),
 	     person("Laura M.", "Sangalli", role = c("aut"),
 		     email = "laura.sangalli@polimi.it"),
 	     person("Eardi", "Lila", role = c("aut"),
@@ -36,7 +36,7 @@ Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
     stats, grDevices, graphics, geometry,
-    rgl, Matrix, plot3D, plot3Drgl, shiny
+    rgl, Matrix, plot3D, plot3Drgl, methods
 LinkingTo: 
 	RcppEigen
 Suggests: 

@@ -96,13 +96,13 @@ FPCA.FEM<-function(locations = NULL, datamatrix, FEMbasis, lambda, nPC = 1, vali
 {
   incidence_matrix=NULL # if areal fpca will be included in release, this should be put in the input
 
- if(class(FEMbasis$mesh) == "mesh.2D"){
+ if(is(FEMbasis$mesh, "mesh.2D")){
  	ndim = 2
  	mydim = 2
- }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+ }else if(is(FEMbasis$mesh, "mesh.2.5D")){
  	ndim = 3
  	mydim = 2
- }else if(class(FEMbasis$mesh) == "mesh.3D"){
+ }else if(is(FEMbasis$mesh, "mesh.3D")){
  	ndim = 3
  	mydim = 3
  }else{
@@ -122,9 +122,9 @@ FPCA.FEM<-function(locations = NULL, datamatrix, FEMbasis, lambda, nPC = 1, vali
     search=1
   }else if(search=="tree"){
     search=2
-  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
     stop("walking search is not available for mesh class mesh.2.5D.")
-  }else if(search=="walking" & class(FEMbasis$mesh) != "mesh.2.5D"){
+  }else if(search=="walking" & !is(FEMbasis$mesh, "mesh.2.5D")){
     search=3
   }else{
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
@@ -168,17 +168,17 @@ FPCA.FEM<-function(locations = NULL, datamatrix, FEMbasis, lambda, nPC = 1, vali
 	  ################## End checking parameters, sizes and conversion #############################
 
   bigsol = NULL
-  if(class(FEMbasis$mesh) == 'mesh.2D'){
+  if(is(FEMbasis$mesh, "mesh.2D")){
 	  
 	  bigsol = CPP_smooth.FEM.FPCA(locations=locations, bary.locations=bary.locations, datamatrix=datamatrix, FEMbasis=FEMbasis, incidence_matrix=incidence_matrix,
                                  lambda=lambda, ndim=ndim, mydim=mydim, nPC=nPC, validation=validation, NFolds=NFolds, GCVmethod=GCVmethod, nrealizations=nrealizations, search=search)
 	  numnodes = nrow(FEMbasis$mesh$nodes)
-  } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
+  } else if(is(FEMbasis$mesh, "mesh.2.5D")){
 	  
 	  bigsol = CPP_smooth.manifold.FEM.FPCA(locations=locations, bary.locations=bary.locations, datamatrix=datamatrix, FEMbasis=FEMbasis, incidence_matrix=incidence_matrix,
                                           lambda=lambda, ndim=ndim, mydim=mydim, nPC=nPC, validation=validation, NFolds=NFolds, GCVmethod=GCVmethod, nrealizations=nrealizations, search=search)
 	  numnodes = nrow(FEMbasis$mesh$nodes)
-  } else if(class(FEMbasis$mesh) == 'mesh.3D'){
+  } else if(is(FEMbasis$mesh, "mesh.3D")){
 	  
 	  bigsol = CPP_smooth.volume.FEM.FPCA(locations=locations, bary.locations=bary.locations, datamatrix=datamatrix, FEMbasis=FEMbasis, incidence_matrix=incidence_matrix,
                                       lambda=lambda, ndim=ndim, mydim=mydim, nPC=nPC, validation=validation, NFolds=NFolds, GCVmethod=GCVmethod, nrealizations=nrealizations, search=search)

@@ -18,7 +18,7 @@ checkSmoothingParametersFPCA<-function(locations = NULL, datamatrix, FEMbasis, i
     stop("observations required;  is NULL.")
   if (is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis)!= "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("'FEMbasis' is not class 'FEMbasis'")
 
   if (!is.null(locations) && !is.null(incidence_matrix))
@@ -69,10 +69,10 @@ checkSmoothingParametersSizeFPCA<-function(locations = NULL, datamatrix, FEMbasi
     stop("'datamatrix' must contain at least one element")
   if(is.null(locations))
   {
-    if(class(FEMbasis$mesh) == "mesh.2D"){
+    if(is(FEMbasis$mesh, "mesh.2D")){
     	if(ncol(datamatrix) > nrow(FEMbasis$mesh$nodes))
      	 stop("Size of 'datamatrix' is larger then the size of 'nodes' in the mesh")
-    }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(FEMbasis$mesh) == "mesh.3D"){
+    }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(FEMbasis$mesh, "mesh.3D")){
     	if(ncol(datamatrix) > nrow(FEMbasis$mesh$nodes))
      	 stop("Size of 'datamatrix' is larger then the size of 'nodes' in the mesh")
     }
@@ -92,11 +92,11 @@ checkSmoothingParametersSizeFPCA<-function(locations = NULL, datamatrix, FEMbasi
   {
     if (nrow(incidence_matrix) != ncol(datamatrix))
       stop("'incidence_matrix' and 'datamatrix' have incompatible size;")
-    if (class(FEMbasis$mesh) == 'mesh.2D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
+    if (is(FEMbasis$mesh, "mesh.2D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
       stop("'incidence_matrix' must be a ntriangles-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.2.5D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
+    else if (is(FEMbasis$mesh, "mesh.2.5D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
       stop("'incidence_matrix' must be a ntriangles-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.3D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$tetrahedrons))
+    else if (is(FEMbasis$mesh, "mesh.3D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$tetrahedrons))
       stop("'incidence_matrix' must be a ntetrahedrons-columns matrix;")
   }
   if(ncol(lambda) != 1)
