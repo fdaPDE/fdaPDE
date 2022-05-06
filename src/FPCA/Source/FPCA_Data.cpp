@@ -20,6 +20,7 @@ FPCAData::FPCAData(SEXP Rlocations, SEXP RbaryLocations, SEXP Rdatamatrix, SEXP 
 	locations_(Rlocations)
 {
 
+
 	setBaryLocations(RbaryLocations);
 	setIncidenceMatrix(RincidenceMatrix);
 	setDatamatrix(Rdatamatrix);

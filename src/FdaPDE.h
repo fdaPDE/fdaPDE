@@ -32,14 +32,8 @@
 #include <Eigen/IterativeLinearSolvers>
 #define  EIGEN_MPL2_ONLY
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-
 typedef double Real;
 typedef int UInt;
-
 
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixXr;
 typedef Eigen::Matrix<UInt,Eigen::Dynamic,Eigen::Dynamic> MatrixXi;

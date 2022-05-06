@@ -255,7 +255,6 @@ private:
   Real evaluate_point(const Eigen::Matrix<Real, 3, 1>&, const Eigen::Matrix<Real,NNODES,1>&) const;
 };
 
-
 //! Partial template specialization for line elements
 //!  This class implements an Edge as an objects composed by two or three nodes, embedded in a 2-dimensional space
 /*!

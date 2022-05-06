@@ -1,25 +1,19 @@
 #ifndef __FUNCTIONAL_PROBLEM_IMP_H__
 #define __FUNCTIONAL_PROBLEM_IMP_H__
 
-#pragma omp declare reduction(sumVectorXd: Eigen::VectorXd: omp_out = omp_out + omp_in)\
-										initializer(omp_priv = Eigen::VectorXd::Zero(omp_orig.size()))
-
 template<UInt ORDER, UInt mydim, UInt ndim>
 std::pair<Real,VectorXr>
 FunctionalProblem<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const{
 
-  using EigenMap2WEIGHTS = Eigen::Map<const Eigen::Matrix<Real, Integrator::NNODES, 1> >;
+	using EigenMap2WEIGHTS = Eigen::Map<const Eigen::Matrix<Real, Integrator::NNODES, 1> >;
 
   // Initialization
 	Real int1 = 0.;
 	VectorXr int2 = VectorXr::Zero(dataProblem_.getNumNodes());
 
-	omp_set_num_threads(dataProblem_.getNThreads_int()); // set the number of threads
-  #pragma omp parallel for reduction(+: int1) reduction(sumVectorXd: int2)
 	for(UInt triangle=0; triangle<dataProblem_.getNumElements(); triangle++){
 
-    Element<EL_NNODES, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
-
+		Element<EL_NNODES, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
 // (1) -------------------------------------------------
 
     Eigen::Matrix<Real,EL_NNODES,1> sub_g;
@@ -27,19 +21,19 @@ FunctionalProblem<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) const
       sub_g[i]=g[tri_activated[i].getId()];
     }
 // (2) -------------------------------------------------
-    Eigen::Matrix<Real,Integrator::NNODES,1> expg = (dataProblem_.getPsiQuad()*sub_g).array().exp();
+		Eigen::Matrix<Real,Integrator::NNODES,1> expg = (dataProblem_.getPsiQuad()*sub_g).array().exp();
 
     Eigen::Matrix<Real,EL_NNODES,1> sub_int2;
 
     int1+=expg.dot(EigenMap2WEIGHTS(&Integrator::WEIGHTS[0]))*tri_activated.getMeasure();
-    sub_int2 = dataProblem_.getPsiQuad().transpose() * expg.cwiseProduct(EigenMap2WEIGHTS(&Integrator::WEIGHTS[0]))*tri_activated.getMeasure();
+  	sub_int2 = dataProblem_.getPsiQuad().transpose() * expg.cwiseProduct(EigenMap2WEIGHTS(&Integrator::WEIGHTS[0]))*tri_activated.getMeasure();
 
-    for (UInt i=0; i<EL_NNODES; i++){
-      int2[tri_activated[i].getId()]+= sub_int2[i];
-    }
-  }
+  	for (UInt i=0; i<EL_NNODES; i++){
+  		int2[tri_activated[i].getId()]+= sub_int2[i];
+  	}
+	}
 
-  return std::pair<Real, VectorXr> (int1, int2);
+	return std::pair<Real, VectorXr> (int1, int2);
 }
 
 

@@ -2,7 +2,6 @@
 #define __FE_DENSITY_ESTIMATION_IMP_H__
 
 
-
 template<UInt ORDER, UInt mydim, UInt ndim>
 FEDE<ORDER, mydim, ndim>::
   FEDE(const DataProblem<ORDER, mydim, ndim>& dp,
@@ -31,6 +30,7 @@ FEDE<ORDER, mydim, ndim>::apply(){
 
   // final minimization descent
     Rprintf("##### FINAL STEP #####\n");
+
   gcoeff_ = minAlgo_->apply_core(dataProblem_.getGlobalPsi(), bestLambda_, gInit);
 
 }

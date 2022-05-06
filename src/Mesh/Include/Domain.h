@@ -4,13 +4,11 @@
  *	\author Pigoli Davide
  *  \author Prada Daniele
  */
+
 #ifndef __DOMAIN_H__
 #define __DOMAIN_H__
 
-
 #include "../../FdaPDE.h"
-
-
 
 
 /**	\class Domain

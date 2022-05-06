@@ -323,7 +323,6 @@ std::ostream& operator<<(std::ostream& os, const Element<nnodes, MYDIM, NDIM>& e
 }
 
 // Member functions for class Element (Line element specialization)
-
 template <UInt NNODES>
 void Element<NNODES,1,2>::computeProperties()
 {
@@ -424,4 +423,5 @@ inline Real Element<NNODES,1,2>::integrate(const Eigen::Matrix<Real,NNODES,1>& c
     return getMeasure() * integral;
 
 }
+
 #endif

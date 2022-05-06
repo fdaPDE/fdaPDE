@@ -5,14 +5,12 @@
  *	\author Prada Daniele
  */
 
+#ifndef __EXCEPTION_HANDLING_H__
+#define __EXCEPTION_HANDLING_H__
 
- #ifndef __EXCEPTION_HANDLING_H__
- #define __EXCEPTION_HANDLING_H__
-
- #include "../../FdaPDE.h"
- #include "Mesh_Objects.h"
- #include "Bounding_Box.h"
-
+#include "../../FdaPDE.h"
+#include "Mesh_Objects.h"
+#include "Bounding_Box.h"
 
 /**	\class TreeException
  *

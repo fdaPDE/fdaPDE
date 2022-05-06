@@ -268,42 +268,6 @@ void MixedFEFPCAGCV::computeDegreesOfFreedomStochastic(UInt output_index, Real l
 	this->var_[output_index]=var;
 }
 
-void MixedFEFPCAGCV::computeDegreesOfFreedom(UInt output_index)
-{
-	UInt nnodes = this->nnodes_;
-	UInt nlocations = this->fpcaData_.getNumberofObservations();
-
-	SpMat I(this->coeffmatrix_.rows(),this->coeffmatrix_.cols());
-	I.setIdentity();
-	SpMat coeff_inv = this->sparseSolver_.solve(I);
-
-
-	Real degrees=0;
-
-	if(this->fpcaData_.isLocationsByNodes())
-	{
-		VectorXr d = coeff_inv.diagonal();
-
-		for (auto i=0; i<nlocations;++i)
-		{
-			auto index_i = this->fpcaData_.getObservationsIndices()[i];
-			degrees+=d(index_i);
-		}
-	}
-	else
-	{
-		MatrixXr An(coeff_inv.topLeftCorner(nnodes, nnodes));
-		MatrixXr S = this->Psi_*An*this->Psi_.transpose();
-		for (auto i=0; i<nlocations;++i)
-		{
-			degrees+=S(i,i);
-		}
-	}
-
-	//std::cout<<"TRACE "<<degrees<<std::endl;
-
-	dof_[output_index] = degrees;
-}
 
 void MixedFEFPCAGCV::computeGCV(FPCAObject& FPCAinput,UInt output_index)
 {
@@ -320,6 +284,7 @@ void MixedFEFPCAGCV::computeGCV(FPCAObject& FPCAinput,UInt output_index)
 		zhat=FPCAinput.getObservationData();
 	}
 	Real norm_squared=(zhat-FPCAinput.getLoadings()).transpose()*(zhat-FPCAinput.getLoadings());
+	
 	if(s-dof_[output_index]<0)
 	{
 			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconsistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->fpcaData_.getLambda()[output_index]);
@@ -547,6 +512,9 @@ void MixedFEFPCAGCV::apply()
 	}
 	MixedFEFPCABase::computeVarianceExplained();
 	MixedFEFPCABase::computeCumulativePercentageExplained();
+
+	
+
 }
 
 

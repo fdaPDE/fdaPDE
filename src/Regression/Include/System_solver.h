@@ -42,16 +42,7 @@ public:
 	bool decomposed = false;
 
 	//// A method that stores the pointers to the additive blocks corresponding to time penalization
-	//virtual void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
-	//{
-	//	parabolic = flagParabolic;
-	//	if (parabolic)
-	//		LR0k = Mat;
-	//	else
-	//		Ptk = Mat;
-	//	lambdaT = lambda;
-	//	timeDependent = true;
-	//}
+	//virtual void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic);
 
 	// A method assembling the system matrix starting from the space-dependent blocks
 	virtual SpMat assembleMatrix(const SpMat & DMat, const SpMat & R0, const SpMat & R1, Real lambdaS);
@@ -174,15 +165,7 @@ protected:
 public:
 	BlockPreconditioner();
 	BlockPreconditioner(const SpMat& M) { compute(M); };
-	//void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic) override
-	//{
-	//	// If the time constant does not change, no need for recomputing the factorization and blocks
-	//	if (lambda == lambdaT)
-	//		recompute = false;
-	//	else
-	//		recompute = true;
-	//	//BaseSolver::addTimeCorrection(Mat, lambda, flagParabolic);
-	//}
+	//void addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic) override;
 	SpMat assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat& R1, Real lambdaS) override;
 	SpMat preconditioner() const; // Get the preconditioner 
 	MatrixXr preconditionRHS(const MatrixXr& b) const;

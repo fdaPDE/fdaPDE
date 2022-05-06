@@ -54,7 +54,7 @@ protected:
 	std::vector<Real> var_;
 
 	UInt nnodes_;
-
+	
 	//!A Eigen::VectorXr : Stores the final scores computed for each PC.
 	std::vector<VectorXr> scores_mat_;
 	//!A Eigen::VectorXr : Stores the final loadings computed for each PC.
@@ -88,6 +88,8 @@ protected:
 	void computeCumulativePercentageExplained();
 	//! A method for the computation of the iterations of the SF-PCA algorithm.
 	void computeIterations(MatrixXr & datamatrixResiduals_,FPCAObject & FPCAinput, UInt lambda_index, UInt nnodes);
+	//! A method for the initialization of all the parameters used in the iteration of the SF-PCA algorithm.
+	void SetAndFixParameters();
 
 public:
 	//!A Constructor.
@@ -159,8 +161,7 @@ protected:
 	void computeIterationsGCV(MatrixXr &datamatrixResiduals_, UInt nnodes, UInt np);
 	//! A method for the computation of the GCV
 	void computeGCV(FPCAObject& FPCAinput,UInt output_index);
-	//! A method for the computation of the degres of freedom
-	void computeDegreesOfFreedom(UInt output_index);
+
 public:
 	//!A Constructor.
 	MixedFEFPCAGCV(const FPCAData& fpcaData):MixedFEFPCABase(fpcaData){};
@@ -198,4 +199,3 @@ public:
 #include "Mixed_FE_FPCA_imp.h"
 
 #endif
-

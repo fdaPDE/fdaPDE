@@ -1,7 +1,6 @@
 #ifndef MESH_IMP_H_
 #define MESH_IMP_H_
 
-
 template <UInt ORDER, UInt mydim, UInt ndim>
 MeshHandler<ORDER,mydim,ndim>::MeshHandler(SEXP Rmesh, UInt search) :
 	points_(VECTOR_ELT(Rmesh, 0)), sides_(VECTOR_ELT(Rmesh, 6)),
@@ -55,7 +54,6 @@ MeshHandler<ORDER,mydim,ndim>::findLocation(const Point<ndim>& point) const {
 	else
 		return findLocationNaive(point);
 }
-
 
 template <UInt ORDER, UInt mydim, UInt ndim>
 typename MeshHandler<ORDER,mydim,ndim>::meshElement MeshHandler<ORDER,mydim,ndim>::findLocationNaive(const Point<ndim>& point) const
@@ -148,7 +146,7 @@ void MeshHandler<ORDER,mydim,ndim>::printTree(std::ostream & os) const
 		os << "No tree!" <<std::endl;
 }
 
-//Graph partial specialization
+//Linear Networks partial specialization
 template<UInt ORDER>
 MeshHandler<ORDER,1,2>::MeshHandler(SEXP Rmesh, UInt search) :
         points_(VECTOR_ELT(Rmesh, 0)),

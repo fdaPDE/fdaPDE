@@ -15,7 +15,7 @@ threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
 lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, preconditioner='no_preconditioner')
 }
 \arguments{
 \item{locations}{A matrix where each row specifies the spatial coordinates \code{x} and \code{y} (and \code{z} if ndim=3) of the corresponding observations in the vector \code{observations}.
@@ -134,6 +134,14 @@ It is advised to set it grather than 1 to avoid overfitting.}
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{preconditioner}{A string specifying which solving technique is applied to the resolution of the finite element
+system: \code{'no_preconditioner'} solves the original system, \code{'mass_lumping'} solves the system with lumped mass matrix,
+\code{'lambda_preconditioner'} performs a scaling both by rows and columns by a factor sqrt(lambda_s), \code{'block_preconditioner'}
+applies a block diagonal preconditioner that allows to substitute the mass matrix with an identity and neormalizes the 
+south-west block accordingly. Block preconditioner is the slowest, lambda preconditioner is the safest,
+mass lumping works particularly well for covariate model.
+Default is \code{preconditioner='no_preconditioner'}. Avoid mass lumping when the mesh is very irregular.}
 }
 \value{
 A list with the following variables:

@@ -4,7 +4,7 @@
 #include "Preprocess_Phase.h"
 #include "Preprocess_Factory.h"
 
-// This file is useful to perform the Density Estimation problem 
+// This file is useful to perform the Density Estimation problem
 
 /*! @brief A class to perform the whole density estimation problem.
 */
@@ -52,6 +52,5 @@ class FEDE{
 };
 
 #include "FE_Density_Estimation_imp.h"
-
 
 #endif

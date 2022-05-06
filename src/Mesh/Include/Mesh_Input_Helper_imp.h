@@ -184,6 +184,7 @@ void simplex_container<mydim>::order2extend(SEXP Routput, UInt index) const {
   }
 }
 
+
 template<UInt mydim>
 std::vector<UInt> simplex_container<mydim>::how_many_neighbors(UInt index) const{
     static_assert(mydim==1,
@@ -202,7 +203,6 @@ std::vector<UInt> simplex_container<mydim>::how_many_neighbors(UInt index) const
 }
 
 //Specialization is needed.
-//One could not set a priori the numbers of neighbors that each element has
 template<>
 void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
 
@@ -251,6 +251,6 @@ void simplex_container<1>::compute_neighbors(SEXP Routput, UInt index) const {
             }
         }
     }
-}
 
+}
 #endif

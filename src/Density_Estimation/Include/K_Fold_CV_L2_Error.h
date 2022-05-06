@@ -1,7 +1,7 @@
 #ifndef __K_FOLD_CV_L2_ERROR_H__
 #define __K_FOLD_CV_L2_ERROR_H__
 
-// This file implements the cross validation error based on the L2 norm useful for the Density Estimation problem 
+// This file implements the cross validation error based on the L2 norm useful for the Density Estimation problem
 
 //! @brief A class to compute the L2 error during cross-validation.
 template<UInt ORDER, UInt mydim, UInt ndim>
@@ -19,6 +19,5 @@ class KfoldCV_L2_error{
 };
 
 #include "K_Fold_CV_L2_Error_imp.h"
-
 
 #endif

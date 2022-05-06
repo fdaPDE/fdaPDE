@@ -20,9 +20,7 @@ class DescentDirection_factory
 			return make_unique<DirectionBFGS<ORDER,mydim,ndim>>(fp, dp.getNumNodes());
 		else{
 
-
 			Rprintf("Unknown direction option - using gradient direction");
-			
 
 			return make_unique<DirectionGradient<ORDER,mydim,ndim>>(fp);
 		}

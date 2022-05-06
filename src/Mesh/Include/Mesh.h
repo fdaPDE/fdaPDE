@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "../../FdaPDE.h"
-
+#include "../../Global_Utilities/Include/Make_Unique.h"
 // Note: how_many_nodes constexpr function is defined in mesh_objects.h
 // Also Point and Element
 #include "Mesh_Objects.h"
@@ -19,7 +19,6 @@ class MeshHandler{
                  "ERROR! TRYING TO INSTANTIATE MESH_HANDLER WITH WRONG NUMBER OF NODES AND/OR DIMENSIONS! See mesh.h");
 public:
   using meshElement = Element<how_many_nodes(ORDER,mydim),mydim,ndim>;
-
 
   //! A constructor.
     /*!
@@ -79,11 +78,8 @@ public:
   void printPoints(std::ostream &) const;
   void printElements(std::ostream &) const;
   void printNeighbors(std::ostream &) const;
-
-  void printTree(std::ostream & out) const;
-
-  
-  
+  void printTree(std::ostream &) const;
+    
   template <bool isManifold=(ndim!=mydim)>
   typename std::enable_if<!isManifold, meshElement>::type  
   findLocation(const Point<ndim>&) const;

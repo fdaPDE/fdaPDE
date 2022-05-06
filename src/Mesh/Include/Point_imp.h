@@ -5,7 +5,7 @@
 template<>
 constexpr Point<1>::Point(UInt id, UInt bcId, const Real(&coord)[1]) :
         Identifier(id, bcId), coord_({coord[0]}) {}
-        
+
 template<>
 constexpr Point<2>::Point(UInt id, UInt bcId, const Real(&coord)[2]) : 
   Identifier(id, bcId), coord_({coord[0],coord[1]}) {}

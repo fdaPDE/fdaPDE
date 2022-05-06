@@ -116,6 +116,7 @@ void ADTree<Shape>::setTree(SEXP Rmesh){
   }
 }
 
+
 template<class Shape>
 int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
   /*
@@ -149,7 +150,7 @@ int ADTree<Shape>::adtrb(Id shapeid, std::vector<Real> const & coords) {
   /* We scale the dimension of the "bounding box" of the Shape object
    * with coordinate values given by coords.
    */
-   
+
   Box<Shape::dp()> shapebox(coords);
   for(int i = 0; i < header_.getndimt(); ++i) {
     Real orig = header_.domainorig(i);
@@ -334,6 +335,8 @@ void ADTree<Shape>::gettri(int const & loc, std::vector<Real> & coord, Id & id) 
 
 template<class Shape>
 bool ADTree<Shape>::search(std::vector<Real> const & region, std::set<int> & found) const {
+
+  
     static constexpr Real eps = std::numeric_limits<Real>::epsilon(),
      tolerance = 10 * eps;
 

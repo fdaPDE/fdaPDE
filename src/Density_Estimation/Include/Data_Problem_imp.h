@@ -3,22 +3,19 @@
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
-  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
-  SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold,SEXP Rsearch, SEXP Rmesh):
-  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, RnThreads_int, RnThreads_l, RnThreads_fold),
+  SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh):
+  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch),
    mesh_(Rmesh, INTEGER(Rsearch)[0]){
-
 
     std::vector<Point<ndim> >& data = deData_.data();
 
     // PROJECTION
-
-    if(mydim == 2 && ndim == 3 || (mydim == 1 && ndim == 2)){
+    if((mydim == 2 && ndim == 3) || (mydim == 1 && ndim == 2)){
       Rprintf("##### DATA PROJECTION #####\n");
       projection<ORDER, mydim, ndim> projection(mesh_, data);
       data = projection.computeProjection();
     }
-
+    
     // REMOVE POINTS NOT IN THE DOMAIN
     for(auto it = data.begin(); it != data.end(); ){
       Element<EL_NNODES, mydim, ndim> tri_activated = mesh_.findLocation(data[it - data.begin()]); 
@@ -62,8 +59,8 @@ void DataProblem<ORDER, mydim, ndim>::fillFEMatrices(){
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 void DataProblem<ORDER, mydim, ndim>::fillPsiQuad(){
-  for(UInt i=0; i<Integrator::NNODES; ++i)
-     PsiQuad_.row(i)=reference_eval_point<EL_NNODES, mydim>(Integrator::NODES[i]);
+	for(UInt i=0; i<Integrator::NNODES; ++i)
+	   PsiQuad_.row(i)=reference_eval_point<EL_NNODES, mydim>(Integrator::NODES[i]);
 }
 
 
@@ -103,38 +100,38 @@ DataProblem<ORDER, mydim, ndim>::computePsi(const std::vector<UInt>& indices) co
      tolerance = 100 * eps;
 
   UInt nnodes = mesh_.num_nodes();
-  UInt nlocations = indices.size();
-  SpMat psi(nlocations, nnodes);
+	UInt nlocations = indices.size();
+	SpMat psi(nlocations, nnodes);
 
-  std::vector<coeff> triplets;
-  triplets.reserve(EL_NNODES*nlocations);
+	std::vector<coeff> triplets;
+	triplets.reserve(EL_NNODES*nlocations);
 
-  for(auto it = indices.cbegin(); it != indices.cend(); it++)
-  {
+	for(auto it = indices.cbegin(); it != indices.cend(); it++)
+	{
 
     Element<EL_NNODES, mydim, ndim> tri_activated = mesh_.findLocation(deData_.data(*it));
 
-    if(tri_activated.getId() == Identifier::NVAL)
-    {
-      Rprintf("WARNING: the following observation is not in the domain\n");
-      //(deData_.getDatum(*it)).print(std::cout);
-    }
+		if(tri_activated.getId() == Identifier::NVAL)
+		{
+			Rprintf("WARNING: the following observation is not in the domain\n");
+			//(deData_.getDatum(*it)).print(std::cout);
+		}
     else
     {
-      for(UInt node = 0; node < EL_NNODES ; ++node)
-      {
-        Real evaluator = tri_activated.evaluate_point(deData_.data(*it), Eigen::Matrix<Real,EL_NNODES,1>::Unit(node));
-        triplets.emplace_back(it-indices.cbegin(), tri_activated[node].getId(), evaluator);
-      }
-    }
-  }
+			for(UInt node = 0; node < EL_NNODES ; ++node)
+			{
+				Real evaluator = tri_activated.evaluate_point(deData_.data(*it), Eigen::Matrix<Real,EL_NNODES,1>::Unit(node));
+				triplets.emplace_back(it-indices.cbegin(), tri_activated[node].getId(), evaluator);
+			}
+		}
+	}
 
-  psi.setFromTriplets(triplets.begin(),triplets.end());
+	psi.setFromTriplets(triplets.begin(),triplets.end());
 
-  psi.prune(tolerance);
-  psi.makeCompressed();
+	psi.prune(tolerance);
+	psi.makeCompressed();
 
-  return psi;
+	return psi;
 }
 
 #endif

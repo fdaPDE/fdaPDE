@@ -65,8 +65,7 @@ protected:
     return std::pow(0.5, int(lev/dim)+1);
   }
 
-
-      /** It fills all the locations of the tree. Object's coordinates are stored to perform searching operations.
+    /** It fills all the locations of the tree. Object's coordinates are stored to perform searching operations.
    *  See mesh_handler to verify what points and triangle must contain.
    */
   void setTree(SEXP Rmesh);
@@ -74,9 +73,8 @@ protected:
   void setTree(const RNumericMatrix& points, const RIntegerMatrix& triangle);
 
 public:
-  
-  ADTree(SEXP Rmesh);
 
+	ADTree(SEXP Rmesh);
 
   /// Returns a reference to the tree header.
   inline TreeHeader<Shape> gettreeheader() const { return header_; }

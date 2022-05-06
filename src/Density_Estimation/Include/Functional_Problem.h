@@ -3,7 +3,7 @@
 
 #include "Data_Problem.h"
 
-// This file implements the functionals of the Density Estimation problem 
+// This file implements the functionals of the Density Estimation problem
 
 //! @brief A class to store methods regarding the functional of the problem.
 template<UInt ORDER, UInt mydim, UInt ndim>

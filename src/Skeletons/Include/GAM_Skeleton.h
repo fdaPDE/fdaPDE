@@ -25,7 +25,6 @@ SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, S
 	Real scale_parameter = REAL(RscaleParam)[0];
 	// Factory:
 	std::unique_ptr<FPIRLS<InputHandler, ORDER, mydim, ndim>> fpirls = FPIRLSfactory<InputHandler, ORDER, mydim, ndim>::createFPIRLSsolver(family, mesh, GAMData, optimizationData, mu0, scale_parameter);
-
 	fpirls->apply();
 
 	const MatrixXv& solution = fpirls->getSolution();

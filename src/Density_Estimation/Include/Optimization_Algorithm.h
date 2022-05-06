@@ -6,7 +6,7 @@
 #include "Descent_Direction.h"
 #include "Descent_Direction_Factory.h"
 
-// This file contains info of the optimization algorithm of the Density Estimation problem 
+// This file contains info of the optimization algorithm of the Density Estimation problem
 
 //! @brief An abtract base class to perform the minimization algorithm.
 template<UInt ORDER, UInt mydim, UInt ndim>
@@ -123,6 +123,6 @@ class WolfeMethod : public AdaptiveStep<ORDER, mydim, ndim>{
 
 };
 
-
 #include "Optimization_Algorithm_imp.h"
+
 #endif

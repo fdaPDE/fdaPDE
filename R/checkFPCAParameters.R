@@ -77,7 +77,6 @@ checkSmoothingParametersSizeFPCA<-function(locations = NULL, datamatrix, FEMbasi
      	 stop("Size of 'datamatrix' is larger then the size of 'nodes' in the mesh")
     }
   }
-  
   if(!is.null(locations))
   {
     if(ncol(locations) != ndim)

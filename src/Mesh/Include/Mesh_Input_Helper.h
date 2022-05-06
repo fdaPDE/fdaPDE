@@ -80,6 +80,7 @@ public:
   // NB after the sorting of simplexes all the edges sharing a node are in a row in the simplex container!
   //    these edges are all neighbors!
   std::vector<UInt> how_many_neighbors(UInt index) const;
+
 private:
   simplex_container_t simplexes;
   std::vector<bool> duplicates;
