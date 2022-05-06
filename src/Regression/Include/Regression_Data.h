@@ -24,6 +24,7 @@ class  RegressionData
 
 
 
+
 	private:
 		std::vector<UInt> observations_indices_;
 		std::vector<UInt> observations_na_;
@@ -58,7 +59,7 @@ class  RegressionData
 		UInt search_; // search algorith type
 
         // Iterative method
-        UInt max_num_iterations_; //!< Max number of iterations allowed.
+        UInt max_num_iterations_; //!< Max number of iterations allowed
         Real threshold_; //!< Limit in difference among J_k and J_k+1 for which we stop iterative method.
 
 		// -- SETTERS --
@@ -92,6 +93,7 @@ class  RegressionData
 		        \param Rtune an R-double parameter used in the computation of the GCV. The default value is 1.
 		        \param RarealDataAvg an R boolean indicating whether the areal data are averaged or not.
 
+
 		*/
 		explicit RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates,
 			SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch);
@@ -118,6 +120,7 @@ class  RegressionData
 		UInt getNumberofSpaceObservations(void) const
 			{return observations_.size()/(time_locations_.size()==0 ? 1:time_locations_.size() );}
 		//! A method returning the number of time observations
+		
 		UInt getNumberofTimeObservations(void) const {return time_locations_.size();}
 		const std::vector<UInt> * getObservationsIndices(void) const {return &observations_indices_;}
 		const std::vector<UInt> * getObservationsNA(void) const {return &observations_na_;}

@@ -107,8 +107,7 @@ std::pair<MatrixXr, output_Data<1>> >::type optimizer_method_selection(CarrierTy
 		output.z_hat.resize(carrier.get_psip()->rows(),carrier.get_opt_data()->get_size_S());
 		output.lambda_vec = carrier.get_opt_data()->get_lambda_S();
 		MatrixXr solution;
-		MatrixXv betas;
-
+ 		MatrixXv betas;
 		betas.resize(carrier.get_opt_data()->get_size_S(),1);
 
 		for(UInt j=0; j<carrier.get_opt_data()->get_size_S(); j++)
@@ -134,9 +133,9 @@ std::pair<MatrixXr, output_Data<1>> >::type optimizer_method_selection(CarrierTy
 		output.time_partial = T.tv_sec + 1e-9*T.tv_nsec;
 
                 // postponed after apply in order to have betas computed
-                output.betas = betas;
+        output.betas = betas;
 
-                return {solution, output};
+        return {solution, output};
 	}
 }
 

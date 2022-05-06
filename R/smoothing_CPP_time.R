@@ -710,6 +710,7 @@ CPP_eval.FEM.time <- function(FEM.time, locations, time_locations, incidence_mat
     storage.mode(bary.locations$element_ids) <- "integer"
     storage.mode(bary.locations$barycenters) <- "double"
   }
+
   
   #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
   evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))

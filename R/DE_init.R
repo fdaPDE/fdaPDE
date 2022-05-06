@@ -48,16 +48,16 @@
 
 DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500, init="Heat", nFolds=5, search="tree") 
 { 
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     ndim=2
     mydim=1
   }else{
@@ -78,18 +78,16 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   step_method=NULL
   direction_method=NULL
   preprocess_method=NULL
-
-
-      # Search algorithm
+    # Search algorithm
   if(search=="naive"){
     search=1
   }else if(search=="tree"){
     search=2
-  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
   stop("walking search is not available for mesh class mesh.2.5D.")
-  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.1.5D")){
     stop("walking search is not available for mesh class mesh.1.5D.")
-  }else if(search=="walking" & class(FEMbasis$mesh) != "mesh.2.5D" & class(FEMbasis$mesh) != "mesh.1.5D"){
+  }else if(search=="walking" & !is(FEMbasis$mesh, "mesh.2.5D") & !is(FEMbasis$mesh, "mesh.1.5D")){
     search=3
   }else{
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
@@ -109,22 +107,22 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   
   ###################### C++ Code Execution #########################################################
   bigsol = NULL
-  if(class(FEMbasis$mesh) == 'mesh.2D'){	  
-    print('C++ Code Execution')
+  if(is(FEMbasis$mesh, "mesh.2D")){	  
+    
     bigsol = CPP_FEM.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                         stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
     
-  } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
-    print('C++ Code Execution')
+  } else if(is(FEMbasis$mesh, "mesh.2.5D")){
+    
     bigsol = CPP_FEM.manifold.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                                  stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
     
-  } else if(class(FEMbasis$mesh) == 'mesh.3D'){
+  } else if(is(FEMbasis$mesh, "mesh.3D")){
     bigsol = CPP_FEM.volume.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
-  }else if( class(FEMbasis$mesh) == 'mesh.1.5D'){
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     bigsol = CPP_FEM.graph.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                    stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
   }
   
   ###################### Collect Results ############################################################  

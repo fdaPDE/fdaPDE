@@ -120,6 +120,7 @@ CPP_FEM.volume.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatI
   storage.mode(FEMbasis$mesh$tetrahedrons) <- "integer"
   storage.mode(FEMbasis$mesh$faces) <- "integer"
   storage.mode(FEMbasis$mesh$neighbors) <- "integer"
+
   storage.mode(lambda) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
@@ -155,7 +156,7 @@ CPP_FEM.volume.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatI
 }
 
 CPP_FEM.graph.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                            stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search, init, nFolds)
+                            stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
   
@@ -186,12 +187,6 @@ CPP_FEM.graph.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatIt
   storage.mode(tol1) <- "double"
   storage.mode(tol2) <- "double"
   storage.mode(print) <- "logical"
-  nThreads_int <- as.integer(nThreads_int)
-  nThreads_l <- as.integer(nThreads_l)
-  nThreads_fold <- as.integer(nThreads_fold)
-  storage.mode(nThreads_int) <- "integer"
-  storage.mode(nThreads_l) <- "integer"
-  storage.mode(nThreads_fold) <- "integer"
   nfolds <- as.integer(nfolds)
   storage.mode(nfolds) <- "integer"
   nsimulations <- as.integer(nsimulations)
@@ -204,7 +199,7 @@ CPP_FEM.graph.DE_init <- function(data, FEMbasis, lambda, fvec, heatStep, heatIt
   
   ## Call C++ function
   bigsol <- .Call("Density_Initialization", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec, heatStep, heatIter, lambda,
-                  nfolds, nsimulations, stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold,
+                  nfolds, nsimulations, stepProposals, tol1, tol2, print, 
                   search, init, nFolds, PACKAGE = "fdaPDE")
   
   return(bigsol)

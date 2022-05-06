@@ -38,18 +38,18 @@
 
 plot.FEM = function(x, colormap = "heat.colors", num_refinements = NULL, ...)
 {
-if(class(x$FEMbasis$mesh)=="mesh.2D"){
+if(is(x$FEMbasis$mesh, "mesh.2D")){
   if(x$FEMbasis$order == 1)
   {
     R_plot.ORD1.FEM(x, colormap, ...)
   }else{
     R_plot.ORDN.FEM(x, colormap, num_refinements, ...)
   }
-}else if(class(x$FEMbasis$mesh)=="mesh.2.5D"){
-  R_plot_manifold(x,...)
-}else if(class(x$FEMbasis$mesh)=="mesh.3D"){
-  R_plot_volume(x,...)
-}else if(class(x$FEMbasis$mesh)=="mesh.1.5D"){
+}else if(is(x$FEMbasis$mesh, "mesh.2.5D")){
+	R_plot_manifold(x,...)
+}else if(is(x$FEMbasis$mesh, "mesh.3D")){
+	R_plot_volume(x,...)
+}else if(is(x$FEMbasis$mesh, "mesh.1.5D")){
    R_plot_graph(x, ...)
 }
 }
@@ -117,7 +117,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
                          lambdaS = NULL, lambdaT = NULL, num_refinements = NULL, Nt = 100,
                          add = FALSE, main = NULL, col = "red", ...)
 {
-   if(class(x) != 'FEM.time')
+   if(!is(x, "FEM.time"))
       stop("x is not of class 'FEM.time'")
 
    if (!is.null(time_locations) && !is.null(locations))
@@ -216,7 +216,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
    if (is.null(time_locations) && !is.null(locations)) {
       # plot temporal evolution in the provided locations
 
-      if (class(x$FEMbasis$mesh) == "mesh.2D" | (class(x$FEMbasis$mesh) == "mesh.1.5D")){
+      if (is(x$FEMbasis$mesh, "mesh.2D") | is(x$FEMbasis$mesh, "mesh.1.5D")){
          # check locations dimension
          if (is.vector(locations) && length(locations) != 2)
             stop("locations does not have the correct dimension")
@@ -234,7 +234,7 @@ plot.FEM.time = function(x, time_locations = NULL, locations = NULL,
          eval_points = cbind(t, rep(locations[,1], each = Nt), rep(locations[,2], each = Nt))
       }
 
-      if ((class(x$FEMbasis$mesh) == "mesh.2.5D") | (class(x$FEMbasis$mesh) == "mesh.3D")){
+      if (is(x$FEMbasis$mesh, "mesh.2.5D") | is(x$FEMbasis$mesh, "mesh.3D")){
          # check locations dimension
          if (is.vector(locations) && length(locations) != 3)
             stop("locations does not have the correct dimension")
@@ -443,7 +443,7 @@ plot.mesh.1.5D<-function(x, ...)
 
    nodes <- FEM$FEMbasis$mesh$nodes
    triangles <- as.vector(t(FEM$FEMbasis$mesh$triangles))
-
+   
    colormap <- match.fun(colormap)
    heat <- colormap(100)
    # How many plots are needed?
@@ -474,7 +474,7 @@ plot.mesh.1.5D<-function(x, ...)
    FEMbasis = FEM$FEMbasis
 
    mesh = FEMbasis$mesh
-
+   
    colormap <- match.fun(colormap)
    heat <- colormap(100)
 
@@ -517,7 +517,6 @@ plot.mesh.1.5D<-function(x, ...)
      triangles[((i-1)*nrow(meshi$triangles)+1):(i*nrow(meshi$triangles)),] = meshi$triangles+tot
      tot = tot + nrow(meshi$nodes)
    }
-
 
    nsurf = dim(coeff)[[2]]
    for (isurf in 1:nsurf)
@@ -632,7 +631,6 @@ R_plot_graph = function(FEM, ...){
       if (i > 1)
          readline("Press any key for the next plot...")
       open3d()
-      axes3d()
       rgl.pop("lights")
       light3d(specular="black")
       
@@ -641,7 +639,7 @@ R_plot_graph = function(FEM, ...){
       col <- p[col]
       
       rgl.lines(nodes[edges,1], nodes[edges,2],rep(0,dim(nodes)[1]),
-                color = col,lwd=1.75,...)
+                color = col,lwd=2.5,...)
       rgl.viewpoint(0,0,zoom=0.75)  
    }
    
@@ -681,7 +679,7 @@ R_plot_graph = function(FEM, ...){
  #' image(FEMfunction)
  image.FEM = function(x, num_refinements = NULL, ...)
  {
-   if(class(x$FEMbasis$mesh)!='mesh.2D')
+   if(!is(x$FEMbasis$mesh, "mesh.2D"))
      stop('This function is implemented only for 2D mesh FEM objects')
 
    if(x$FEMbasis$order == 1)
@@ -732,7 +730,7 @@ R_plot_graph = function(FEM, ...){
  image.FEM.time = function(x,t,lambdaS=1,lambdaT=1,num_refinements=NULL,...)
  {
    t <- as.matrix(t)
-   if(class(x) != 'FEM.time')
+   if(!is(x, "FEM.time"))
      stop("x is not of class 'FEM.time'")
    if(is.null(t))
      stop("time required; is NULL")
@@ -744,7 +742,7 @@ R_plot_graph = function(FEM, ...){
      warning("the first value of lambdaS is being used")
    if(dim(x$coeff)[3]>1 && lambdaT==1)
      warning("the first value of lambdaT is being used")
-   if(class(x$FEMbasis$mesh)=="mesh.2D")
+   if(is(x$FEMbasis$mesh, "mesh.2D"))
      N = nrow(x$FEMbasis$mesh$nodes)
    else
       stop("x$FEMbasis$mesh is not of class 'mesh.2D'")

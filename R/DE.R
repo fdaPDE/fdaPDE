@@ -63,9 +63,10 @@
 #' @description This function implements a nonparametric density estimation method with differential regularization 
 #' (given by the square root of the L2 norm of the laplacian of the density function), when points are located over a 
 #' planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
-#' tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2, nThreads_l=1, nThreads_fold=1, nfolds=NULL,
-#' nsimulations=500, step_method = "Fixed_Step", direction_method = "BFGS", preprocess_method="NoCrossValidation", search = "tree")
+#' @usage DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, 
+#'               stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, 
+#'               nsimulations=500, step_method="Fixed_Step", direction_method="BFGS", 
+#'               preprocess_method="NoCrossValidation", search = "tree")
 #' @export
 #'
 #' @references
@@ -99,10 +100,9 @@
 #' ## Density Estimation
 #' lambda = 0.1
 #' sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, fvec=NULL, heatStep=0.1,
-#'                   heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2,
-#'                   nThreads_l=1, nThreads_fold=1, nfolds=NULL, nsimulations=500, 
-#'                   step_method = "Fixed_Step", direction_method = "BFGS",
-#'                   preprocess_method="NoCrossValidation", search = "tree")
+#'                   heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, 
+#'                   nfolds=NULL, nsimulations=300,step_method = "Fixed_Step", 
+#'                   direction_method = "BFGS",preprocess_method="NoCrossValidation")
 #' 
 #' ## Visualization 
 #' n = 100
@@ -118,25 +118,42 @@
 
 
 DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
-                  tol1=1e-4, tol2=0, print=FALSE, nThreads_int=2, nThreads_l=1, nThreads_fold=1,
-                  nfolds=NULL, nsimulations=500, step_method = "Fixed_Step",
-                  direction_method = "BFGS", preprocess_method="NoCrossValidation", search = "tree") 
+                  tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
+                  direction_method="BFGS", preprocess_method="NoCrossValidation", search = "tree") 
 { 
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     ndim=2
     mydim=1
   }else{
     stop('Unknown mesh class')
   }
+
+    # Search algorithm
+  if(search=="naive"){
+    search=1
+  }else if(search=="tree"){
+    search=2
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
+  stop("walking search is not available for mesh class mesh.2.5D.")
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.1.5D")){
+    stop("walking search is not available for mesh class mesh.1.5D.")
+  }else if(search=="walking" & 
+  	   !is(FEMbasis$mesh,  "mesh.2.5D") & 
+  	   !is(FEMbasis$mesh,  "mesh.1.5D")){
+    search=3
+  }else{
+    stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
+  }
+
   
 
       # Search algorithm
@@ -173,23 +190,23 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
   
   ###################### C++ Code Execution #########################################################
   bigsol = NULL
-  if(class(FEMbasis$mesh) == 'mesh.2D'){	  
-    print('C++ Code Execution')
+  if(is(FEMbasis$mesh, "mesh.2D")){	  
+    
     bigsol = CPP_FEM.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                         stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
     
-  } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
-    print('C++ Code Execution')
+  } else if(is(FEMbasis$mesh, "mesh.2.5D")){
+    
     bigsol = CPP_FEM.manifold.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
                                  stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
     
-  } else if(class(FEMbasis$mesh) == 'mesh.3D'){
+  } else if(is(FEMbasis$mesh, "mesh.3D")){
     bigsol = CPP_FEM.volume.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
-  }else if(class(FEMbasis$mesh) == 'mesh.1.5D'){
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+  } else if(is(FEMbasis$mesh, "mesh.1.5D")){
     
     bigsol = CPP_FEM.graph.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                 stepProposals, tol1, tol2, print,nThreads_int, nThreads_l, nThreads_fold, nfolds, nsimulations, search)
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
     
   }
   

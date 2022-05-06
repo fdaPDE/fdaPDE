@@ -8,7 +8,6 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
 
 
-
   if(is.null(covariates))
   {
     covariates<-matrix(nrow = 0, ncol = 1)
@@ -100,6 +99,7 @@ CPP_eval.manifold.FEM = function(FEM, locations, incidence_matrix, redundancy, n
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
 
+  
   # Imposing types, this is necessary for correct reading from C++
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)

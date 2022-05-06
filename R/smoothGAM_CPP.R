@@ -50,6 +50,11 @@ CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NUL
   if(is.null(scale.param))
   {
     scale.param<- -1
+  } 
+  
+  if(is.null(lambda))
+  {
+    lambda<-vector(length=0)
   }
   
   if(is.null(lambda))
@@ -93,10 +98,9 @@ CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NUL
 
   ## Call C++ function
   bigsol <- .Call("gam_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
-                  mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-                  FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
-                  optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
-  
+                 mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+                 FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
+                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
   return(bigsol)
 }
 
@@ -159,7 +163,7 @@ CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covari
   }
   
 
-  threshold.FPIRLS<-0.0004
+  threshold.FPIRLS<-0.0004 #??
   
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)
@@ -200,9 +204,9 @@ CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covari
   
   ## Call C++ function
   bigsol <- .Call("gam_PDE", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
-                  mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates, BC$BC_indices, BC$BC_values,
-                  incidence_matrix, areal.data.avg, FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
-                  optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                 mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates, BC$BC_indices, BC$BC_values,
+                 incidence_matrix, areal.data.avg, FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param, search,
+                 optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }
@@ -313,9 +317,9 @@ CPP_smooth.GAM.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, cov
 
   ## Call C++ function
   bigsol <- .Call("gam_PDE_space_varying", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
-                  mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates, BC$BC_indices, BC$BC_values,
-                  incidence_matrix, areal.data.avg, FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param,
-                  search, optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
+                 mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u, covariates, BC$BC_indices, BC$BC_values,
+                 incidence_matrix, areal.data.avg, FAMILY, max.steps.FPIRLS, threshold.FPIRLS, mu0, scale.param,
+                 search, optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, PACKAGE = "fdaPDE")
   
   return(bigsol)
 }
@@ -860,4 +864,3 @@ CPP_smooth.graph.GAM.FEM.basis<-function(locations, observations, FEMbasis, cova
   return(bigsol)
   
 }
-

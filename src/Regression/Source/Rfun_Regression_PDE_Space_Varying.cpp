@@ -67,8 +67,7 @@ extern "C"
             else if(regressionData.getOrder() == 2 && mydim==3 && ndim==3)
                 return(regression_skeleton<RegressionDataEllipticSpaceVarying, 2, 3, 3>(regressionData, optimizationData, Rmesh));
 
-            return(NILSXP);
-
+        	return(NILSXP);
         }
 
         //! This function manages the various options for Spatio-Temporal Regression
@@ -334,7 +333,8 @@ extern "C"
                         return(get_FEM_Matrix_skeleton<1,3,3>(Rmesh, c*mass+stiff[K]+beta.dot(grad)));
                 else if(regressionData.getOrder()==2 && ndim==3 && mydim==3)
                         return(get_FEM_Matrix_skeleton<2,3,3>(Rmesh, c*mass+stiff[K]+beta.dot(grad)));
-                
+
+
                 return(NILSXP);
         }
 }

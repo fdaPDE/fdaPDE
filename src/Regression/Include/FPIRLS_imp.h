@@ -1,5 +1,5 @@
-#ifndef FPIRLS_IMP_H
-#define FPIRLS_IMP_H
+#ifndef __FPIRLS_IMP_H__
+#define __FPIRLS_IMP_H__
 
 #include "FPIRLS.h"
 
@@ -9,7 +9,7 @@
 // Constructor
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
+  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
 {
   //Pre-allocate memory for all quatities
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
@@ -34,7 +34,7 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
 
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, const std::vector<Real>& mesh_time, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(mesh_time, inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T())
+  mesh_(mesh), mesh_time_(mesh_time), inputData_(inputData), optimizationData_(optimizationData), regression_(mesh_time, inputData, optimizationData, mesh.num_nodes()), lenS_(optimizationData.get_size_S()), lenT_(optimizationData.get_size_T()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
 {
   //Pre-allocate memory for all quatities
   mu_.resize(lenS_, std::vector<VectorXr>(lenT_));
@@ -61,19 +61,22 @@ FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDE
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
   // f-PRILS implementation
-  
+
+
   // Initialize the outputs. The temporal dimension is not implemented, for this reason the 2nd dimension is set to 1.
   if( this->inputData_.getCovariates()->rows() > 0 )_beta_hat.resize(lenS_, lenT_);
   _fn_hat.resize(lenS_, lenT_);
   _dof.resize(lenS_, lenT_);
   _solution.resize(lenS_,lenT_);
-  
+
+
   if(isSpaceVarying)
   {
     FiniteElement<ORDER, mydim, ndim> fe;
   	Assembler::forcingTerm(mesh_, fe, u, forcingTerm);
   }
-  
+
+
   for(UInt i=0 ; i < lenS_ ; i++){//for-cycle for each spatial penalization (lambdaS).
    for(UInt j=0 ; j < lenT_ ; j++){
     current_J_values[i][j][0] = past_J_values[i][j][0] + 2*inputData_.get_treshold();
@@ -81,20 +84,18 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
     this->optimizationData_.setCurrentLambda(i, j); // set right lambda for the current iteration.
 
-    Rprintf("Start FPIRLS for the lambda number %d \n", i+1);
+
+    //Rprintf("Start FPIRLS for the lambda number %d \n", i+1);
 
     // start the iterative method for the lambda index i
     while(stopping_criterion(i, j)){
 
       // STEP (1)
-
       compute_G(i, j);
       compute_Weights(i, j);
       compute_pseudoObs(i, j);
 
       // STEP (2)
-
-      this->inputData_.updatePseudodata(pseudoObservations_[i][j], WeightsMatrix_[i][j]);
       update_solution(i, j);
 
       // STEP (3)
@@ -106,17 +107,17 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
 
       if( !regression_.isMatrixNoCov_factorized() ) {
 
-         Rprintf("WARNING: System matrix cannot be factorized for optimization parameter in position %d (Space) and  %d (Time). Try increasing optimization parameter.\n", i+1, j+1) ;
+         Rprintf("WARNING: System matrix cannot be factorized for optimization parameters in position %d (Space) and  %d (Time). Try increasing optimization parameter.\n", i+1, j+1) ;
           break;
       }
       n_iterations[i][j]++;
 
     } //end while
 
-    Rprintf("\t n. iterations: %d\n \n", n_iterations[i][j]);
+    //Rprintf("\t n. iterations: %d\n \n", n_iterations[i]);
 
     _J_minima[i][j] = current_J_values[i][j][0]+current_J_values[i][j][1]; // compute the minimum value of the J fuctional
-    
+
     if(this->optimizationData_.get_loss_function()=="GCV"){ // compute GCV if it is required
 
         if( !regression_.isMatrixNoCov_factorized() ){
@@ -124,12 +125,13 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::apply( const ForcingTerm& u){
             _GCV[i][j] = std::numeric_limits<double>::quiet_NaN();
 
         }else{
-    
-      	   compute_GCV(i, j);
-        }
-        
-  }
 
+      	   compute_GCV(i,j);
+
+        }
+
+    }
+  
   } // end time for
  }// end space for
 
@@ -145,19 +147,19 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::update_solution(const UInt& l
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
   regression_.preapply(this->mesh_);
   regression_.apply();
-  
+
   // if the system matrix is correctly factorized
   if( regression_.isMatrixNoCov_factorized() ) {
   	const SpMat * Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
   	// get the solutions from the regression object.
-  	_solution(lambdaS_index,lambdaT_index) = regression_.getSolution()(0,0);
- 	_dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(0,0);
+  	_solution(lambdaS_index, lambdaT_index) = regression_.getSolution()(0,0);
+	_dof(lambdaS_index, lambdaT_index) = regression_.getDOF()(0,0);
 
   	if(inputData_.getCovariates()->rows()>0){
     	_beta_hat(lambdaS_index, lambdaT_index) = regression_.getBeta()(0,0);
   	}
-  	_fn_hat(lambdaS_index, lambdaT_index) = (*Psi) *_solution(lambdaS_index,lambdaT_index).topRows(Psi->cols());
+	_fn_hat(lambdaS_index, lambdaT_index) = (*Psi) *_solution(lambdaS_index,lambdaT_index).topRows(Psi->cols());
   }
 
 }
@@ -221,7 +223,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_mu(const UInt& lambda
   if(inputData_.getCovariates()->rows()>0)
     W_beta = (*(inputData_.getCovariates()))*_beta_hat(lambdaS_index,lambdaT_index);
 
-
   for(UInt j=0; j < W_beta.size(); j++){
       mu_[lambdaS_index][lambdaT_index](j) = inv_link(W_beta[j] + _fn_hat(lambdaS_index,lambdaT_index)(j));
   }
@@ -268,7 +269,7 @@ std::array<Real,2> FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_J(const
 
   Lf.resize(_solution(lambdaS_index,lambdaT_index).size()/2);
   for(UInt i=0; i< Lf.size(); i++){
-    Lf(i) = _solution(lambdaS_index,lambdaT_index)(Lf.size() + i);
+    Lf(i) = _solution(lambdaS_index, lambdaT_index)(Lf.size() + i);
   }
 
   if(isSpaceVarying)
@@ -343,7 +344,7 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_GCV(const UInt& lambd
 
         GCV_value *= y->size();
 
-        GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index, lambdaT_index))*(y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index,lambdaT_index));
+        GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index,lambdaT_index))*(y->size()-optimizationData_.get_tuning()*_dof(lambdaS_index,lambdaT_index));
 
         _GCV[lambdaS_index][lambdaT_index] = GCV_value;
 
@@ -357,7 +358,6 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_GCV(const UInt& lambd
 
 }
 
-
 template <typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_variance_est(){
   Real phi;
@@ -367,19 +367,18 @@ void FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_variance_est(){
 
     //scale parameter computed as: mean((var.link(mu)*phi)/mu), and phi is computed as in Wood IGAM
     for(UInt i=0; i < lenS_;i++){
-    	for(UInt j=0; j< lenT_; j++){
-      		phi = (this->scale_parameter_flag_ )? this->current_J_values[i][j][0]/(n_obs - this->_dof(i,j) ) : _scale_param;
-      		for(UInt k=0; k < this->mu_[i][j].size(); k++){
+    	for(UInt j=0; j< lenT_; j++){ 
+		phi = (this->scale_parameter_flag_ )? this->current_J_values[i][j][0]/(n_obs - this->_dof(i,j) ) : _scale_param;
+		for(UInt k=0; k < this->mu_[i][j].size(); k++){
         	_variance_estimates[i][j] += phi* this->var_function(this->mu_[i][j](k))/this->mu_[i][j](k);
-      		}
-      		_variance_estimates[i][j] /= this->mu_[i][j].size();
-    	}
+      }
+      _variance_estimates[i][j] /= this->mu_[i][j].size();
+    }
    }
   }else{
-  	_variance_estimates.resize(lenS_, std::vector<Real>(lenT_,-1));
+    _variance_estimates.resize(lenS_, std::vector<Real>(lenT_,-1));
   }
 }
-
 
 /*********** FPIRLS apply template specialization ************/
 

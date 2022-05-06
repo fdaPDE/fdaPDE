@@ -106,6 +106,8 @@ RegressionDataEllipticSpaceVarying::RegressionDataEllipticSpaceVarying(SEXP Rloc
 	K_(RK), beta_(Rbeta), c_(Rc), u_(Ru)
 {;}
 
+
+
 void RegressionData::setObservations(SEXP Robservations)
 {
 	UInt n_obs_ = Rf_length(Robservations);

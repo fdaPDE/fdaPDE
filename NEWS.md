@@ -1,4 +1,3 @@
-
 # fdaPDE 1.1-4
 
 ## New features
@@ -15,8 +14,6 @@ Optimization in spatio-temporal setting: introduced Newton method and refactored
 # fdaPDE 1.1-2
 
 ## New features
-
-Iterative method for spatio-temporal regression with PDE regularization (in this framework also two methods for the computation of GCV Exact and Stochastic)
 
 Iterative method for spatio-temporal regression with PDE regularization
 (in this framework also two methods for the computation of GCV Exact and Stochastic)

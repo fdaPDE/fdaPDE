@@ -5,17 +5,17 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   # Mesh type and methods
   if(is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis) != "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("'FEMbasis' is not class 'FEMbasis'")
 
-  if(class(FEMbasis$mesh)!='mesh.1.5D' & class(FEMbasis$mesh)!='mesh.2D' & class(FEMbasis$mesh) != "mesh.2.5D" & class(FEMbasis$mesh) != "mesh.3D")
+  if(!is(FEMbasis$mesh, "mesh.1.5D") & !is(FEMbasis$mesh, "mesh.2D") & !is(FEMbasis$mesh, "mesh.2.5D") & !is(FEMbasis$mesh, "mesh.3D"))
     stop('Unknown mesh class')
 
-  if((class(FEMbasis$mesh) == "mesh.2.5D") & !is.null(PDE_parameters) )
+  if(is(FEMbasis$mesh, "mesh.2.5D") & !is.null(PDE_parameters) )
     stop('For mesh class mesh.2.5D, anysotropic regularization is not yet implemented.
          Use Laplacian regularization instead')
   
-  if((class(FEMbasis$mesh) == "mesh.1.5D") & !is.null(PDE_parameters) )
+  if(is(FEMbasis$mesh, "mesh.1.5D") & !is.null(PDE_parameters) )
     stop('For mesh class mesh.1.5D, anysotropic regularization is not yet implemented.
          Use Laplacian regularization instead')
 
@@ -83,18 +83,18 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
 
   # Check the locations in 'bary.locations' and 'locations' are the same
   if(!is.null(bary.locations) & !is.null(locations)){
-    flag=TRUE
-    for (i in 1:nrow(locations)) {
-      if (!(locations[i,1]==bary.locations$locations[i,1] & locations[i,2] == bary.locations$locations[i,2])) {
+    flag = TRUE
+    for(i in 1:nrow(locations)){
+      if(!(locations[i,1] == bary.locations$locations[i,1] & locations[i,2] == bary.locations$locations[i,2])){
         flag = FALSE
         break
       }
     }
-    if (flag == FALSE) {
+    if(flag == FALSE){
       stop("Locations are not same as the one in barycenter information.")
     }
-  }  # end of bary.locations
-
+  } # end of bary.locations
+  
   # Optimization
   if(optim[1] == 1 & optim[2] == 1)
     stop("Newton method can only be applied in a 'DOF.evaluation' = 'exact' context")
@@ -107,6 +107,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
     if(length(lambda) > 1)
       warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
   }
+
   
   # --> Stochastic related data
   if(!is.numeric(DOF.stochastic.realizations))
@@ -173,7 +174,7 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
   
   # Locations
   if(is.null(locations)){
-    if(class(FEMbasis$mesh) == "mesh.2D"){
+    if(is(FEMbasis$mesh, "mesh.2D")){
       if(nrow(observations) > nrow(FEMbasis$mesh$nodes))
         stop("Size of 'observations' is larger then the size of 'nodes' in the mesh")
     }
@@ -187,6 +188,7 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
      if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2] & !(sum(abs(locations[,1]))==sum(abs(FEMbasis$mesh$nodes[,1])) & sum(abs(locations[,2]))==sum(abs(FEMbasis$mesh$nodes[,2]))) )
       warning("The locations matrix has the same dimensions as the mesh nodes. If the locations you are using are the mesh nodes, set locations=NULL instead")
   }
+
   
   #Covariates
   if(!is.null(covariates)){
@@ -198,14 +200,14 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
   if (!is.null(incidence_matrix)){
     if (nrow(incidence_matrix) != nrow(observations))
       stop("'incidence_matrix' and 'observations' have incompatible size;")
-    if (class(FEMbasis$mesh) == 'mesh.2D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
+    if (is(FEMbasis$mesh, "mesh.2D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
       stop("'incidence_matrix' must be a ntriangles-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.2.5D' && ncol(incidence_matrix) != FEMbasis$mesh$ntriangles)
+    else if (is(FEMbasis$mesh, "mesh.2.5D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
       stop("'incidence_matrix' must be a ntriangles-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.3D' && ncol(incidence_matrix) != FEMbasis$mesh$ntetrahedrons)
+    else if (is(FEMbasis$mesh, "mesh.3D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$tetrahedrons))
       stop("'incidence_matrix' must be a ntetrahedrons-columns matrix;")
-    else if (class(FEMbasis$mesh) == 'mesh.1.5D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$edges))
-      stop("'incidence_matrix' must be a nedges-columns matrix;")  
+    else if (is(FEMbasis$mesh, "mesh.1.5D") && ncol(incidence_matrix) != nrow(FEMbasis$mesh$edges))
+      stop("'incidence_matrix' must be a nedges-columns matrix;")
   }
   
   # BC
@@ -216,7 +218,7 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
       stop("'BC_values' must be a column vector")
     if(nrow(BC$BC_indices) != nrow(BC$BC_values))
       stop("'BC_indices' and 'BC_values' have incompatible size;")
-    if(class(FEMbasis$mesh) == "mesh.2D"){
+    if(is(FEMbasis$mesh, "mesh.2D")){
       if(sum(BC$BC_indices>nrow(nrow(FEMbasis$mesh$nodes))) > 0)
         stop("At least one index in 'BC_indices' larger then the number of 'nodes' in the mesh;")
     }
@@ -231,16 +233,17 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
     if(!all.equal(dim(PDE_parameters$c), c(1,1)))
       stop("'c' in 'PDE_parameters must be a double")
   }
-  
+
   if(!is.null(PDE_parameters) & space_varying==TRUE){
-    
+
     n_test_points = min(nrow(FEMbasis$mesh$nodes), 5)
     test_points = FEMbasis$mesh$nodes[1:n_test_points, ]
-    
+
     try_K_func = PDE_parameters$K(test_points)
     try_b_func = PDE_parameters$b(test_points)
     try_c_func = PDE_parameters$c(test_points)
     try_u_func = PDE_parameters$u(test_points)
+
     
     if(!is.numeric(try_K_func))
       stop("Test on function 'K' in 'PDE_parameters' not passed; output is not numeric")
@@ -251,11 +254,13 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
       stop("Test on function 'b' in 'PDE_parameters' not passed; output is not numeric")
     if(!all.equal(dim(try_b_func), c(ndim,n_test_points)))
       stop("Test on function 'b' in 'PDE_parameters' not passed; wrong size of the output")
+
     
     if(!is.numeric(try_c_func))
       stop("Test on function 'c' in 'PDE_parameters' not passed; output is not numeric")
     if(length(try_c_func) != n_test_points)
       stop("Test on function 'c' in 'PDE_parameters' not passed; wrong size of the output")
+
     
     if(!is.numeric(try_u_func))
       stop("Test on function 'u' in 'PDE_parameters' not passed; output is not numeric")

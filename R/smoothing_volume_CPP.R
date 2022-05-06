@@ -54,7 +54,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
   data <- as.vector(observations)
-  storage.mode(observations) <- "double"
+  storage.mode(data) <- "double"
   storage.mode(FEMbasis$mesh$order) <- "integer"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
   storage.mode(FEMbasis$mesh$faces) <- "integer"
@@ -79,7 +79,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   storage.mode(DOF.stochastic.seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
-
+  
   ## Call C++ function
   bigsol <- .Call("regression_Laplace", locations, bary.locations, data, FEMbasis$mesh, FEMbasis$mesh$order, mydim, ndim, covariates,
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
@@ -278,8 +278,6 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   return(bigsol)
 }
 
-
-
 CPP_eval.volume.FEM = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
 {
   FEMbasis = FEM$FEMbasis
@@ -330,3 +328,4 @@ CPP_eval.volume.FEM = function(FEM, locations, incidence_matrix, redundancy, ndi
   #Returning the evaluation matrix
   evalmat
 }
+

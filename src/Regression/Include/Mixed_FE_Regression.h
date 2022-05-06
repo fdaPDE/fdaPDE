@@ -31,11 +31,7 @@ class MixedFERegressionBase
 		const UInt M_;			//!< Number of temporal nodes
 
 		const InputHandler & regressionData_;
-
-
         OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
-
-
 		// For only space problems
 		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
 		//	                |     R1        | R0	      |      |         O             |  O |
@@ -49,9 +45,7 @@ class MixedFERegressionBase
 		//  system matrix= 	|          B^T * Ak *B           | -lambdaS*(R1k^T+lambdaT*LR0k)  |   +  |B^T * Ak * (-H) * B |  O |   =  matrixNoCov + matrixOnlyCov
 		//	                | -lambdaS*(R1k^T+lambdaT*LR0k)  |        -lambdaS*R0k	          |      |         O          |  O |
 
-
-
-		SpMat 		matrixNoCov_;	//!< System matrix without
+		SpMat 		matrixNoCov_;//!< System matrix without
 		SpMat 		DMat_;
 		SpMat 		R1_;		//!< R1 matrix of the model
 		SpMat 		R0_;	 	//!< Mass matrix in space
@@ -95,7 +89,6 @@ class MixedFERegressionBase
         VectorXr _rightHandSide_k_; //!< A Eigen::VectorXr: Stores the update system right hand side (iterative method)
 
         //Flag to avoid the computation of R0, R1, Psi_ onece already performed
-
 		bool isAComputed   = false;
 		bool isPsiComputed = false;
 		bool isR0Computed  = false;
@@ -111,7 +104,6 @@ class MixedFERegressionBase
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
 	    void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
-
 		//! A method computing the no-covariates version of the system matrix
 		void buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock);
 
@@ -122,10 +114,7 @@ class MixedFERegressionBase
 		//! A method which takes care of missing values setting to 0 the corresponding rows of B_
 		void addNA();
 	 	//! A member function which builds the A vector containing the areas of the regions in case of areal data
-
-
 	    template<UInt ORDER, UInt mydim, UInt ndim>
-
 		void setA(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 		//! A member function which sets psi_t_
 		void setpsi_t_(void);
@@ -157,6 +146,7 @@ class MixedFERegressionBase
 		void buildSystemMatrix(Real lambda);
 		//! Space-time version
 		void buildSystemMatrix(Real lambdaS, Real lambdaT);
+
 
 		// -- FACTORIZER --
 	  	//! A function to factorize the system, using Woodbury decomposition when there are covariates
@@ -257,10 +247,10 @@ class MixedFERegressionBase
 		UInt getM_(void) const {return this->M_;}
 		bool isSV(void) const {return this->isSpaceVarying;}
 		bool isIter(void) const {return this->isIterative;}
-
-		 //! A method checking the correct LU factorization of the system matrix
-        	bool isMatrixNoCov_factorized() const{return this->matrixNoCovdec_.info() == Eigen::ComputationInfo::Success;}		
 		
+		//! A method checking the correct LU factorization of the system matrix
+        	bool isMatrixNoCov_factorized() const{return this->matrixNoCovdec_.info() == Eigen::ComputationInfo::Success;}	
+        	
 		//! A function that given a vector u, performs Q*u efficiently
 		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
 

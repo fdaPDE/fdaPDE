@@ -181,7 +181,6 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
             }
         }
 
-
         // Send barycenter information to R
         SET_VECTOR_ELT(result, 20, Rf_allocVector(INTSXP, elementIds.rows())); //element id of the locations point (vector)
         int *rans10 = INTEGER(VECTOR_ELT(result, 20));

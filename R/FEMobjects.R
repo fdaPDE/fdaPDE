@@ -4,9 +4,9 @@
 #' @param saveTree a flag to decide to save the tree mesh information in advance (default is FALSE)
 #' @return A \code{FEMbasis} object. This contains the \code{mesh}, along with some additional quantities:
 #' \itemize{
-#'  \item{\code{order}}{Either "1" or "2" for the 2D and 2.5D case, and "1" for the 3D case.
-#'  Order of the Finite Element basis.}
-#'  \item{\code{nbasis}}{Scalar. The number of basis.}
+#' 	\item{\code{order}}{Either "1" or "2" for the 2D and 2.5D case, and "1" for the 3D case.
+#' 	Order of the Finite Element basis.}
+#' 	\item{\code{nbasis}}{Scalar. The number of basis.}
 #' }
 #' @description Sets up a Finite Element basis. It requires a \code{mesh.2D}, \code{mesh.2.5D} or \code{mesh.3D} object,
 #' as input.
@@ -47,25 +47,25 @@ create.FEM.basis = function(mesh=NULL, saveTree = FALSE)
   if (is.null(mesh))
     stop("mesh required;  is NULL.")
 
-  if(class(mesh)!='mesh.1.5D' & class(mesh)!='mesh.2D' & class(mesh)!='mesh.2.5D' & class(mesh)!='mesh.3D')
+  if(!is(mesh, "mesh.1.5D") & !is(mesh, "mesh.2D") & !is(mesh, "mesh.2.5D") & !is(mesh, "mesh.3D"))
     stop("Unknown mesh class")
 
   if (saveTree == TRUE) {
       ## Call C++ function
       # Note: myDim and nDim are available outside the scope (different from C++)
-      if (class(mesh)=='mesh.2D'){
+      if (is(mesh, "mesh.2D")){
         myDim = 2
         nDim = 2
       }
-      if (class(mesh)=='mesh.2.5D'){
+      if (is(mesh, "mesh.2.5D")){
         myDim = 2
         nDim = 3
       }
-      if (class(mesh)=='mesh.3D'){
+      if (is(mesh, "mesh.3D")){
         myDim = 3
         nDim = 3
       }
-      if(class(mesh)=='mesh.1.5D'){
+      if(is(mesh, "mesh.1.5D")){
         myDim = 1
         nDim = 2
       }
@@ -136,7 +136,7 @@ create.FEM.basis = function(mesh=NULL, saveTree = FALSE)
 #'
 #' ## Create the 2D mesh
 #' mesh = create.mesh.2D(nodes = rbind(horseshoe2D$boundary_nodes, horseshoe2D$locations), 
-#'			 segments = horseshoe2D$boundary_segments)
+#'                       segments = horseshoe2D$boundary_segments)
 #' ## Create the FEM basis
 #' FEMbasis = create.FEM.basis(mesh)
 #' ## Compute the coeff vector evaluating the desired function at the mesh nodes
@@ -154,7 +154,7 @@ FEM<-function(coeff,FEMbasis)
     stop("coeff required;  is NULL.")
   if (is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis) != "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("FEMbasis not of class 'FEMbasis'")
   coeff = as.matrix(coeff)
   if(nrow(coeff) != FEMbasis$nbasis)
@@ -183,7 +183,7 @@ FEM<-function(coeff,FEMbasis)
 #'
 #' ## Create the 2D mesh
 #' mesh = create.mesh.2D(nodes = rbind(horseshoe2D$boundary_nodes, horseshoe2D$locations), 
-#'		 	 segments = horseshoe2D$boundary_segments)
+#'                       segments = horseshoe2D$boundary_segments)
 #' ## Create the FEM basis
 #' FEMbasis = create.FEM.basis(mesh)
 #' ## Compute the coeff vector evaluating the desired function at the mesh nodes
@@ -212,7 +212,7 @@ FEM.time<-function(coeff,time_mesh,FEMbasis,FLAG_PARABOLIC=FALSE)
     stop("FLAG_PARABOLIC required;  is NULL.")
   if (is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis) != "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("FEMbasis not of class 'FEMbasis'")
   if(dim(coeff)[1] != (FEMbasis$nbasis*M))
     stop("Number of row of 'coeff' different from number of basis")

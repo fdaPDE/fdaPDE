@@ -11,13 +11,11 @@ extern "C"
         SEXP get_integration_points(SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim)
         {
         	//Declare pointer to access data from C++
+        	int order = INTEGER(Rorder)[0];
 
-            int order = INTEGER(Rorder)[0];
-
-            //Get mydim and ndim
-            UInt mydim=INTEGER(Rmydim)[0];
-            UInt ndim=INTEGER(Rndim)[0];
-
+        	//Get mydim and ndim
+        	UInt mydim=INTEGER(Rmydim)[0];
+        	UInt ndim=INTEGER(Rndim)[0];
 
             if(order == 1 && ndim==2)
                 return(get_integration_points_skeleton<1,2,2>(Rmesh));
@@ -63,7 +61,7 @@ extern "C"
             else if(order==2 && ndim==3 && mydim ==3)
                 return(get_FEM_Matrix_skeleton<2,3,3>(Rmesh, mass));
                 
-            	return(NILSXP);
+                return(NILSXP);
         }
 
         //! A utility, not used for system solution, may be used for debugging

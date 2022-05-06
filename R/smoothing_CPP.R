@@ -2,6 +2,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
 {
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
 
+  
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
@@ -78,6 +79,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(lambda.optimization.tolerance) <- "double"
 
+  
   ## Call C++ function
   bigsol <- .Call("regression_Laplace", locations, bary.locations, observations, FEMbasis$mesh, FEMbasis$order,
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
@@ -130,6 +132,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
+
   
   if(is.null(lambda))
   {
@@ -184,8 +187,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
 CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covariates = NULL, PDE_parameters, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
 
-  # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
-
+  # Indexes in C++ starts from 0, in R from 1, opportune transformation
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
@@ -282,6 +284,8 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   return(bigsol)
 }
 
+
+
 CPP_eval.FEM = function(FEM, locations, incidence_matrix, redundancy, ndim, mydim, search, bary.locations)
 {
 
@@ -352,13 +356,13 @@ CPP_get_evaluations_points = function(mesh, order)
   #here we do not shift indices since this function is called inside CPP_smooth.FEM.PDE.sv.basis
 
   # Imposing types, this is necessary for correct reading from C++
-  if(class(mesh) == "mesh.2D"){
+  if(is(mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(mesh) == "mesh.2.5D"){
+  }else if(is(mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(mesh) == "mesh.3D"){
+  }else if(is(mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
@@ -390,23 +394,23 @@ CPP_get_evaluations_points = function(mesh, order)
 
 CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     ndim = 2
     mydim = 1
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
     stop('Unknown mesh class')
   }
 
-   ## Set propr type for correct C++ reading
+  ## Set propr type for correct C++ reading
    if( (ndim==2 && mydim==2) || (ndim==3 && mydim==2) ){
    # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
 
@@ -443,6 +447,8 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
   storage.mode(ndim)<-"integer"
   storage.mode(mydim)<-"integer"
 
+
+  
   ## Call C++ function
   triplets <- .Call("get_FEM_mass_matrix", FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim,
@@ -454,16 +460,16 @@ CPP_get.FEM.Mass.Matrix<-function(FEMbasis)
 
 CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.1.5D")){
     ndim = 2
     mydim = 1
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
@@ -504,6 +510,7 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(ndim)<-"integer"
   storage.mode(mydim)<-"integer"
+
   
   ## Call C++ function
   triplets <- .Call("get_FEM_stiff_matrix", FEMbasis$mesh,
@@ -517,7 +524,7 @@ CPP_get.FEM.Stiff.Matrix<-function(FEMbasis)
 CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
 {
   search = 1
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
     
@@ -530,8 +537,8 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$triangles) <- "integer"
     storage.mode(FEMbasis$mesh$edges) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
-    
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
     
@@ -545,14 +552,14 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$faces) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
     
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(mesh, "mesh.1.5D")){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
   }
- 
+
   covariates <- matrix(nrow = 0, ncol = 1)
-  locations <- matrix(nrow = 0, ncol = 2)
+  locations <- matrix(nrow = 0, ncol = ndim)
   incidence_matrix <- matrix(nrow = 0, ncol = 1)
   areal.data.avg = 1
   BC_indices <- vector(length = 0)
@@ -560,7 +567,6 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
   bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
 
   ## Set proper type for correct C++ reading
-  
   locations <- as.matrix(locations)
   storage.mode(locations) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
@@ -583,6 +589,8 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
   storage.mode(bary.locations$element_ids) <- "integer"
   storage.mode(bary.locations$barycenters) <- "double"
 
+
+  
   ## Call C++ function
   triplets <- .Call("get_FEM_PDE_matrix", locations, bary.locations, observations, FEMbasis$mesh,
                     FEMbasis$order,mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariates,
@@ -596,7 +604,7 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
 CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
 {
   search = 1
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
     
@@ -609,8 +617,8 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$triangles) <- "integer"
     storage.mode(FEMbasis$mesh$edges) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
-    
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
     
@@ -624,14 +632,14 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$faces) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
     
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D" || class(mesh) == "mesh.1.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(mesh, "mesh.1.5D")){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
   }
 
   covariates<-matrix(nrow = 0, ncol = 1)
-  locations<-matrix(nrow = 0, ncol = 2)
+  locations<-matrix(nrow = 0, ncol = ndim)
   BC_indices<-vector(length=0)
   BC_values<-vector(length=0)
   incidence_matrix<-matrix(nrow = 0, ncol = 1)
@@ -639,7 +647,7 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
   bary.locations = list(locations=matrix(nrow=0,ncol=ndim), element_ids=matrix(nrow=0,ncol=1), barycenters=matrix(nrow=0,ncol=2))
 
   PDE_param_eval = NULL
-  points_eval = matrix(CPP_get_evaluations_points(mesh = FEMbasis$mesh, order = FEMbasis$order),ncol = 2)
+  points_eval = matrix(CPP_get_evaluations_points(mesh = FEMbasis$mesh, order = FEMbasis$order),ncol = ndim)
   PDE_param_eval$K = (PDE_parameters$K)(points_eval)
   PDE_param_eval$b = (PDE_parameters$b)(points_eval)
   PDE_param_eval$c = (PDE_parameters$c)(points_eval)
@@ -652,11 +660,13 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
   storage.mode(FEMbasis$order) <- "integer"
   covariates <- as.matrix(covariates)
   storage.mode(covariates) <- "double"
+
   
   storage.mode(PDE_param_eval$K) <- "double"
   storage.mode(PDE_param_eval$b) <- "double"
   storage.mode(PDE_param_eval$c) <- "double"
   storage.mode(PDE_param_eval$u) <- "double"
+
   
   storage.mode(BC_indices) <- "integer"
   storage.mode(BC_values) <- "double"
@@ -670,6 +680,8 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
   storage.mode(bary.locations$locations) <- "double"
   storage.mode(bary.locations$element_ids) <- "integer"
   storage.mode(bary.locations$barycenters) <- "double"
+
+  
   
   ## Call C++ function
   triplets <- .Call("get_FEM_PDE_space_varying_matrix", locations, bary.locations, observations, FEMbasis$mesh,

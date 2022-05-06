@@ -117,7 +117,7 @@ extern "C"
 	{
 	    	//Set input data
 		RegressionData regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
-		        RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic,Rflag_iterative, Rmax_num_iteration, Rtreshold, Ric, Rsearch);
+			RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic,Rflag_iterative, Rmax_num_iteration, Rtreshold, Ric, Rsearch);
 		OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
 
 		UInt mydim = INTEGER(Rmydim)[0];
@@ -139,8 +139,8 @@ extern "C"
             		return(regression_skeleton_time<RegressionData, 1, 1, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
         	else if(regressionData.getOrder()==2 && mydim==1 && ndim==2)
             		return(regression_skeleton_time<RegressionData, 2, 1, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
-
-	    	return(NILSXP);
+            	
+            	return(NILSXP);
 	}
 
 	//! This function manages the various options for GAM Spatial Regression
@@ -208,8 +208,8 @@ extern "C"
             		return(GAM_skeleton<GAMDataLaplace, 1, 1, 2>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
         	else if(regressionData.getOrder()==2 && mydim==1 && ndim==2)
             		return(GAM_skeleton<GAMDataLaplace, 2, 1, 2>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
-            
-		return(R_NilValue);
+
+	return(R_NilValue);
 	}
 	
 	//! This function manages the various options for GAM Spatio-Temporal Regression

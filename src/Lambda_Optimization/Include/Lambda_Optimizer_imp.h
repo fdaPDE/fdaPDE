@@ -959,6 +959,7 @@ void GCV_Stochastic<InputCarrier, size>::set_US_(void)
                                 this->US_.coeffRef(i, j) = -1.0;
                 }
 
+
         // Validate the completion of the task
         this->us = true;
         //Debugging purpose

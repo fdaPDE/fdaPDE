@@ -17,11 +17,11 @@
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP DE_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
-	SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP RnThreads_int, SEXP RnThreads_l, SEXP RnThreads_fold, SEXP Rmesh, SEXP Rsearch,
+	SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rmesh, SEXP Rsearch,
 	const std::string & step_method, const std::string & direction_method, const std::string & preprocess_method)
 {
 	// Construct data problem object
-	DataProblem<ORDER, mydim, ndim> dataProblem(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, RnThreads_int, RnThreads_l, RnThreads_fold, Rsearch, Rmesh);
+	DataProblem<ORDER, mydim, ndim> dataProblem(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, Rmesh);
 
 	// Construct functional problem object
 	FunctionalProblem<ORDER, mydim, ndim> functionalProblem(dataProblem);
@@ -33,7 +33,7 @@ SEXP DE_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP Rheat
 	// Construct FEDE object
 	FEDE<ORDER, mydim, ndim> fede(dataProblem, functionalProblem, minimizationAlgo, preprocess_method);
 
-  // Perform the whole task
+  	// Perform the whole task
 	fede.apply();
 
 	// Collect results
