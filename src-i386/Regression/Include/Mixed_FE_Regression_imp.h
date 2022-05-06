@@ -653,7 +653,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize(Solver* solverobj)
 
 		if (!this->isIterative)
 		{
-			MatrixXr y = matrixNoCovdec_.solve(U_);// solverobj->system_solve(U_);
+			MatrixXr y = solverobj->system_solve(U_);
             MatrixXr D = V_ * y;
 
             // G = C + D
@@ -709,13 +709,13 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr & b, S
 	solverobj->compute(this->matrixNoCov_);
 	if(isMatrixNoCov_factorized()) {
 	 // Resolution of the system matrixNoCov * x1 = b
-		MatrixXr x1 = matrixNoCovdec_.solve(b);// solverobj->system_solve(b);
+	 MatrixXr x1 = solverobj->system_solve(b);
 	 if(regressionData_.getCovariates()->rows() != 0 && !this->isIterative)
 	 {
 		 // Resolution of G * x2 = V * x1
 		 MatrixXr x2 = Gdec_.solve(V_*x1);
 		 // Resolution of the system matrixNoCov * x3 = U * x2
-		 MatrixXr x3 = matrixNoCovdec_.solve(U_ * x2));// solverobj->system_solve(MatrixXr(U_ * x2));
+		 MatrixXr x3 = solverobj->system_solve(MatrixXr(U_ * x2));
 		 x1 -= x3;
 	 }
 	return x1;
@@ -1233,13 +1233,7 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S, Solve
 	else
 		solverobj->setM(1);
 
-
-	this->R0_lambda = (-lambda_S) * R0_; // build the SouthEast block of the matrix
-	this->R1_lambda = (-lambda_S) * R1_;
-
-	this->buildMatrixNoCov(this->DMat_, this->R1_lambda, this->R0_lambda);
-		// matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
-	solverobj->compute(matrixNoCov_);
+	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
 	isMatrixNoCov_computed = true;
 }
 

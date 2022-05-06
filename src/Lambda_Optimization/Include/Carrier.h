@@ -217,7 +217,6 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply_to_b(const MatrixXr & b, lambda::type<1> lambda)
                 {
-                    Rprintf("carrier_app_b");
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         if (this->model->getSolver() == 1)
                             return this->model->template apply_to_b<MassLumping>(b);
@@ -237,7 +236,6 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply_to_b(const MatrixXr & b, lambda::type<2> lambda)
                 {
-                    Rprintf("carrier_app_b");
                         this->opt_data->set_current_lambdaS(lambda(0)); // set the lambdaS value
                         this->opt_data->set_current_lambdaT(lambda(1)); // set the lambdaT value
                         if (this->model->getSolver() == 1)
@@ -252,7 +250,6 @@ class Carrier: public Extensions...
                 
                 inline MatrixXr apply_to_b_iter(const MatrixXr & b, lambda::type<1> lambda, UInt time_index)
                 {
-                    Rprintf("carrier_app_b_iter");
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         if (this->model->getSolver() == 1)
                             return this->model->template apply_to_b_iter<MassLumping>(b, time_index);
@@ -266,7 +263,6 @@ class Carrier: public Extensions...
                 
                 inline MatrixXr apply_to_b_iter(const MatrixXr & b, lambda::type<2> lambda, UInt time_index)
                 {
-                    Rprintf("carrier_app_b_iter");
                         this->opt_data->set_current_lambdaS(lambda(0)); // set the lambdaS value
                         this->opt_data->set_current_lambdaT(lambda(1)); // set the lambdaT value
                         if (this->model->getSolver() == 1)
@@ -287,7 +283,6 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply(lambda::type<1> lambda)
                 {
-                    Rprintf("carrier_app");
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         if (this->model->isIter())
                         {
@@ -322,12 +317,10 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply(lambda::type<2> lambda)
                 {
-                    Rprintf("carrier_app");
 			        this->opt_data->set_current_lambdaS(lambda(0)); // set the lambdaS value
 			        this->opt_data->set_current_lambdaT(lambda(1)); // set the lambdaT value
                     if (this->model->isIter())
                     {
-                        Rprintf("iter");
                         if (this->model->getSolver() == 1)
                             return (this->model->template apply_iterative<MassLumping>())(0, 0);
                         else if (this->model->getSolver() == 2)

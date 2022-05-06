@@ -73,7 +73,7 @@ class AdaptiveStep : public MinimizationAlgorithm<ORDER, mydim, ndim>{
       const std::string& d):
       MinimizationAlgorithm<ORDER, mydim, ndim>(dp, fp, d){};
     //! A pure virtual clone method.
-    virtual std::unique_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> clone() const = 0;
+    virtual std::unique_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> clone() const override = 0;
     //! A method to perform the minimization algorithm when the step is computed for each iteration.
     VectorXr apply_core(const SpMat& Psi, Real lambda, const VectorXr& g) const override;
 

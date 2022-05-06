@@ -706,7 +706,7 @@ template<typename InputHandler>
 template<typename Solver>
 MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr & b, Solver* solverobj)
 {
-	solverobj->compute(this->matrixNoCov_);
+	//solverobj->compute(this->matrixNoCov_);
 	if(isMatrixNoCov_factorized()) {
 	 // Resolution of the system matrixNoCov * x1 = b
 	 MatrixXr x1 = solverobj->system_solve(b);
