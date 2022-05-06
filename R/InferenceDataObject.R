@@ -24,7 +24,7 @@
 #'@slot f0_eval Vector of f0 evaluations at the choosen test locations. It will be eventually set later in checkInferenceParameters, if nonparametric inference is required. 
 #'@slot f_var An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
 #'whereas if 2 they will not.
-#'@slot quantile Quantile needed for confidence intervals. Used only if interval is not 0.
+#'@slot quantile Quantile needed for confidence intervals, used only if interval is not 0.
 #'@slot alpha Level vector of Eigen-Sign-Flip confidence intervals. Used only if interval is not 0.
 #'@slot n_flip An integer representing the number of permutations in the case of eigen-sign-flip test.
 #'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.
