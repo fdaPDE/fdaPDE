@@ -194,7 +194,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   if(!is.null(n_cov)){
     if(class(n_cov)!="numeric" && class(n_cov)!="integer")
-      stop("'dim' should be an integer or convertible to integer type")
+      stop("'n_cov' should be an integer or convertible to integer type")
     n_cov=as.integer(n_cov)
   }
   
@@ -315,8 +315,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
     }
   }else{
-    # inference on beta is not required, set n_cov to 0 and coeff to a 1x1 matrix
-    n_cov = as.integer(0)
+    # inference on beta is not required, set n_cov and coeff to a 1x1 matrix
+    if(n_cov >= 0){
+      n_cov = as.integer(n_cov)
+    }
+    else{
+      n_cov = as.integer(0)
+    }
     coeff = matrix(data=0, nrow=1, ncol=1)
   }
   
