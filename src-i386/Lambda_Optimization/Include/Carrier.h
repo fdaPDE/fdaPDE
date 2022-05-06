@@ -283,7 +283,6 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply(lambda::type<1> lambda)
                 {
-                    Rprintf("carrier_app");
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         if (this->model->isIter())
                         {
@@ -318,7 +317,6 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply(lambda::type<2> lambda)
                 {
-                    Rprintf("carrier_app");
 			        this->opt_data->set_current_lambdaS(lambda(0)); // set the lambdaS value
 			        this->opt_data->set_current_lambdaT(lambda(1)); // set the lambdaT value
                     if (this->model->isIter())

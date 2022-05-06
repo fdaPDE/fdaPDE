@@ -273,12 +273,12 @@ MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
 	return res;
 }
 
-void BaseSolver::addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
-	{
-		// If the time constant does not change, no need for recomputing the factorization and blocks
-		if (lambda == lambdaT)
-			recompute = false;
-		else
-			recompute = true;
-		//BaseSolver::addTimeCorrection(Mat, lambda, flagParabolic);
-	}
+//void BlockPreconditioner::addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
+//	{
+//		// If the time constant does not change, no need for recomputing the factorization and blocks
+//		if (lambda == lambdaT)
+//			recompute = false;
+//		else
+//			recompute = true;
+//		//BaseSolver::addTimeCorrection(Mat, lambda, flagParabolic);
+//	}
