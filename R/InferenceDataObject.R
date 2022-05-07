@@ -1,43 +1,42 @@
 #' Class for inference data
 #'
-#'@slot test A vector of integers taking value 0, 1 or 2; in the first case no test is performed, in the second one-at-the-time tests are performed,
-#'in the third a simultaneous test is performed.
-#'@slot interval A vector of integers taking value 0, 1, 2 or 3; In the first case no confidence interval is computed, in the second case one-at-the-time confidence intervals are computed, 
-#'in the third case simultaneous confidence intervals are computed, in the fourth case Bonferroni confidence intervals are computed.
-#'@slot type A vector of integers taking value 1, 2, 3, 4 or 5 corresponding to Wald, Speckman, Eigen-Sign-Flip, Enhanced-Eigen-Sign-Flip or Sign-Flip implementation 
-#'of the inference analysis.
+#'@slot test A vector of integers taking value 0, 1 or 2; if 0 no test is performed, if 1 one-at-the-time tests are performed, if 2 a simultaneous test is performed.
+#'@slot interval A vector of integers taking value 0, 1, 2 or 3; if 0 no confidence interval is computed, if 1 one-at-the-time confidence intervals are computed, 
+#'if 2 simultaneous confidence intervals are computed, if 3 Bonferroni confidence intervals are computed.
+#'@slot type A vector of integers taking value 1, 2, 3, 4 or 5 corresponding to Wald, Speckman, Eigen-Sign-Flip, Enhanced-Eigen-Sign-Flip or Sign-Flip inferential approach.
+#'@slot component A vector of integers taking value 1, 2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.  
 #'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 #'whereas if 2 an approximated computation will be carried out.
-#'@slot component A vector of integers taking value 1,2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.  
 #'@slot dim Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases. 
 #'@slot n_cov Number of covariates taken into account in the linear part of the regression problem.
-#'@slot locations A matrix of numeric coefficients. When nonparametric inference is requested it represents the set of spatial locations for which the inferential analysis should be performed. 
+#'@slot locations A matrix of numeric coefficients with columns of dimension \code{dim}. When nonparametric inference is requested it represents the set of spatial locations for which the inferential analysis should be performed. 
 #' The default values is a one-dimensional matrix of value 1 indicating that all the observed location points should be considered. 
 #' In the sign-flip and eigen-sign-flip implementations only observed points are allowed. 
-#'@slot locations_indices A vector of indices indicating the which spatial points have to be considered among the observed ones for nonparametric inference. If a vector of location indices is provided
+#'@slot locations_indices A vector of indices indicating which spatial points have to be considered among the observed ones for nonparametric inference. If a vector of location indices is provided
 #'then the slot 'location' is discarded. 
 #'@slot locations_are_nodes An integer taking value 1 or 2; in the first case it indicates that the selected locations to perform inference on f are all coinciding with the nodes; otherwise it takes value 2;  
-#'@slot coeff A matrix of numeric coefficients with columns of dimension \code{dim} and each row represents a linear combination of the linear parameters to be tested and/or to be
+#'@slot coeff A matrix of numeric coefficients with columns of dimension \code{n_cov} and each row represents a linear combination of the linear parameters to be tested and/or to be
 #' estimated via confidence interval. 
-#'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0.
-#'@slot f0 Function representing the expression of the nonparametric component f under the null hypothesis.
+#'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0 and \code{component} is not 2.
+#'@slot f0 Function representing the expression of the nonparametric component f under the null hypothesis. Used only if \code{component} is not 1.
 #'@slot f0_eval Vector of f0 evaluations at the choosen test locations. It will be eventually set later in checkInferenceParameters, if nonparametric inference is required. 
 #'@slot f_var An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
 #'whereas if 2 they will not.
-#'@slot quantile Quantile needed for confidence intervals, used only if interval is not 0.
-#'@slot alpha Level vector of Eigen-Sign-Flip confidence intervals. Used only if interval is not 0.
-#'@slot n_flip An integer representing the number of permutations in the case of eigen-sign-flip test.
+#'@slot quantile Vector of quantiles needed for confidence intervals, used only if interval is not 0.
+#'@slot alpha 1 minus confidence level vector of sign-flipping approaches confidence intervals. Used only if interval is not 0.
+#'@slot n_flip An integer representing the number of sign-flips in the case of sign-flipping approaches.
 #'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.
-#'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function [inferenceDataObjectBuilder],
+#'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function \code{\link{inferenceDataObjectBuilder}},
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
 #'@description
 #' A class that contains all possible information for inference over linear parameters and/or nonparametric field in spatial regression with
-#' differential regularization problem. This object can be used as parameter in smoothing function of the fdaPDE library [smooth.FEM].
+#' differential regularization problem. This object can be used as parameter in smoothing function of the fdaPDE library \code{\link{smooth.FEM}}.
 #' 
-#'@details #Warning
-#'At least one between test and interval must be nonzero. \code{n_cov}, \code{coeff} and \code{beta0} need to be coherent.
-#'The usage of [inferenceDataObjectBuilder] is recommended for the construction of an object of this class.
+#'@details
+#'At least one between test and interval must be nonzero. \code{n_cov}, \code{coeff} and \code{beta0}, if provided, need to be coherent. 
+#'\code{dim} and \code{locations}, if provided, need to be coherent.
+#'The usage of \code{\link{inferenceDataObjectBuilder}} is recommended for the construction of an object of this class.
 
 inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "integer", 
                                                                   interval = "integer", 
@@ -63,40 +62,56 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 
 #'Constructor for inferenceDataObject class
 #'
-#'@param test A list of strings defining the type of test to be performed, with the same length of \code{interval} and \code{type} lists. The default is NULL, and can take values 'one-at-the-time' 
-#'or 'simultaneous'. If the value is NULL, no test is performed, and the \code{interval} parameter in the same position of the list needs to be not NULL. If it takes value
-#''one-at-the-time', the parameters \code{beta0}, \code{dim}, \code{coeff} are taken into account, and one-at-the-time tests will be performed. If it takes value 
-#''simultaneous', a global simultaneous test will be performed.
-#'@param interval A list of strings defining the type of confidence intervals to be computed, with the same length of \code{test} and \code{type} lists. The default is NULL,
-#' and can take values 'one-at-the-time', 'simultaneous' (available only for Wald and Speckman cases) and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
-#'  Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account.
-#'@param type A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
-#''wald'(default), 'speckman', 'sign-flip', 'eigen-sign-flip' or 'enhanced-eigen-sign-flip'.
-#'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric', 'nonparametric' or 'both'. The default is 'parametric'.
+#'@param test A string defining the type of test to be performed. Multiple tests can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
+#' \code{component} and \code{interval}. The default is NULL, and can take values:
+#'\itemize{
+#'\item{'oat'}{one-at-the-time tests, available only when \code{component} is 'parametric'.}
+#'\item{'sim'}{simultaneous tests.}
+#'\item{'none'}{no test required. \code{interval} must be set.}
+#'}
+#'@param interval A string defining the type of confidence intervals to be computed. Multiple intervals can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
+#'\code{component} and \code{test}. The default is NULL, and can take values:
+#'\itemize{
+#'\item{'oat'}{one-at-the-time intervals.}
+#'\item{'sim'}{simultaneous intervals, available only when \code{component} is 'parametric' and no sign-flipping approaches are required.}
+#'\item{'bonf'}{Bonferroni intervals, available only when \code{component} is 'parametric'}
+#'\item{'none'}{no interval required. \code{test} must be set.}
+#'}
+#'@param type A list of strings defining the type of implementation for the inferential analysis. The possible values are:
+#'\itemize{
+#'\item{'w'}{Wald parametric approach (default).}
+#'\item{'s'}{Speckman parametric approach.}
+#'\item{'sf'}{sign-flip nonparametric approach.}
+#'\item{'esf'}{eigen-sign-flip nonparametric approach.}
+#'\item{'enh-esf'}{enhanced-eigen-sign-flip nonparametric approach.}
+#'}
+#'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
 #'The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
 #'In the second case the evaluation is exact but computationally expensive.
-#'@param dim Dimension of the problem, defaulted to NULL. (Must be set by the user)
+#'@param dim Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 2D or 2.5D/3D problems (Must be set by the user)
 #'@param n_cov Number of the covariates, defaulted to NULL. (Must be set by the user)
-#'@param locations A matrix of the locations of interest when testing the nonparametric component f
-#'@param locations_indices A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference. If a vector of indices is provided, then the slot 'locations' is discarded.
-#'@param coeff A matrix, with \code{n_cov} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
-#'in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.
-#'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
+#'@param locations A matrix of the locations of interest when testing the nonparametric component f, defaulted to NULL
+#'@param locations_indices A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference, defaulted to NULL.
+#'If a vector of indices is provided, then the slot 'locations' is discarded.
+#'@param coeff A matrix, with \code{n_cov} number of columns, of numeric coefficients representing the linear combinations of the parametric components of the model.
+#'The default is NULL, corresponding to an identity matrix. If at least one sing-flipping approach is required in \code{type}, needs to be an identity matrix.
+#'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and \code{component} is not 'nonparametric'; its length is the number of rows of matrix \code{coeff} if provided. 
 #'If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.
-#'@param f0 A function object representing the expression of the nonparametric component f under the null hypothesis. If NULL, the default is the null function, hence a test on the significance of the nonparametric component is carried out. 
+#'@param f0 A function object representing the expression of the nonparametric component f under the null hypothesis. Taken into account if \code{test} is set and \code{component} is not parametric.
+#'If NULL, the default is the null function, hence a test on the significance of the nonparametric component is carried out. 
 #'@param f_var A logical used to decide whether to estimate the local variance of the nonlinear part of the model.
 #'The possible values are: FALSE (default) and TRUE. 
 #'@param level A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
-#'@param n_flip Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.
-#'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to 'False'. The lower is the tolerance, the heavier is the computation.
-#'@return The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
-#'@description A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
-#'that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
+#'@param n_flip Number of flips performed in sign-flipping approaches, defaulted to 1000.
+#'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.
+#'@return The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
+#'@description A function that build an \code{\link{inferenceDataObject}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
+#'that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
 #'
 #'@usage inferenceDataObjectBuilder<-function(test = NULL, 
 #'interval = NULL, 
-#'type = 'wald', 
+#'type = 'w', 
 #'component = 'parametric',
 #'exact = FALSE, 
 #'dim = NULL, 
@@ -114,16 +129,14 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' 
 #' 
 #' @examples 
-#' obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 2, n_cov = 4);
-#' obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 3, n_cov = 5, level = 0.99);
-#' obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','one-at-the-time'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
-#'  type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
-#' obj4<-inferenceDataObjectBuilder(test = "simultaneous", interval = c("one-at-the-time", "simultaneous"), type = "wald", component = c("parametric", "nonparametric"), dim = 2, n_cov = 2, exact = T, locations_indices = 1:10, level = c(0.95, 0.9))
-
+#' obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
+#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, n_cov = 3, location_indices = 1:100);
+#' obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
+#'  type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
-                                type = "wald", 
+                                type = "w", 
                                 component = "parametric",
                                 exact = F,
                                 dim = NULL,
@@ -142,24 +155,24 @@ inferenceDataObjectBuilder<-function(test = NULL,
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
     if(class(test)!="character")
-      stop("'test'should be a character: choose one between 'one-at-the-time', 'simultaneous', 'none'")
+      stop("'test'should be a character: choose one between 'oat', 'sim', 'none'")
     if(length(test)==0)
-      stop("'test' is zero dimensional, should be a vector taking values among 'ont-at-the-time', 'simultaneous', 'none'")
+      stop("'test' is zero dimensional, should be a vector taking values among 'ont-at-the-time', 'sim', 'none'")
   }
   
   if(!is.null(interval)){
     if(class(interval)!="character")
-      stop("'interval'should be a character: choose one between 'one-at-the-time' , 'simultaneous', 'bonferroni', 'none'")
+      stop("'interval'should be a character: choose one between 'oat' , 'sim', 'bonf', 'none'")
     if(length(interval)==0)
-      stop("'interval' is zero dimensional, should be a vector taking values among 'one-at-the-time', 'simultaneous', 'bonferroni', 'none'")
+      stop("'interval' is zero dimensional, should be a vector taking values among 'oat', 'sim', 'bonf', 'none'")
   }
   
   if(length(type)==0)
-    stop("'type' is zero dimensional, should be a vector taking values among 'wald', 'speckman', 'sign-flip' or 'eigen-sign-flip'")
+    stop("'type' is zero dimensional, should be a vector taking values among 'w', 's', 'sf' or 'esf'")
  
-   if(length(type) > 1 || type!="wald"){
+   if(length(type) > 1 || type!="w"){
     if(class(type)!="character")
-      stop("'type' should be a vector of characters: choose among 'wald', 'speckman', 'sign-flip' or 'eigen-sign-flip'" )
+      stop("'type' should be a vector of characters: choose among 'w', 's', 'sf' or 'esf'" )
   }
   
   
@@ -337,8 +350,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
     locations <- matrix(data=1, nrow=1, ncol=1)                                 # Just for convenience, the actual default will be set inside checkInferenceParameters
   }
   else if(is.null(locations_indices)){
-    if(sum(type == "eigen-sign-flip")==1 || sum(type == "sign-flip")==1)
-      stop("For the eigen-sign-flip implementation a vector of location indices is required")
+    if(sum(type == "esf")==1 || sum(type == "sf")==1)
+      stop("For the esf implementation a vector of location indices is required")
     if(ncol(locations)!=dim)
       stop("number of columns of 'locations' and 'dim' do not match")
   }
@@ -433,13 +446,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   for (index in 1:n_of_implementations){
     
-      if(type[index]!="wald" && type[index]!="speckman" && type[index]!="eigen-sign-flip" && type[index]!="enhanced-eigen-sign-flip" && type[index]!="sign-flip"){
-        stop("type should be chosen between 'wald', 'speckman' 'sign-flip', 'eigen-sign-flip' or 'enhanced-eigen-sign-flip'")}else{
-          if(type[index]=="wald") type_numeric[index]=as.integer(1)
-          if(type[index]=="speckman") type_numeric[index]=as.integer(2)
-          if(type[index]=="eigen-sign-flip") type_numeric[index]=as.integer(3)
-          if(type[index]=="enhanced-eigen-sign-flip") type_numeric[index]=as.integer(4)
-          if(type[index]=="sign-flip") type_numeric[index]=as.integer(5)
+      if(type[index]!="w" && type[index]!="s" && type[index]!="esf" && type[index]!="enh-esf" && type[index]!="sf"){
+        stop("type should be chosen between 'w', 's' 'sf', 'esf' or 'enh-esf'")}else{
+          if(type[index]=="w") type_numeric[index]=as.integer(1)
+          if(type[index]=="s") type_numeric[index]=as.integer(2)
+          if(type[index]=="esf") type_numeric[index]=as.integer(3)
+          if(type[index]=="enh-esf") type_numeric[index]=as.integer(4)
+          if(type[index]=="sf") type_numeric[index]=as.integer(5)
         }
     
     if(component[index]!="parametric" && component[index]!="nonparametric" && component[index]!="both"){
@@ -449,44 +462,44 @@ inferenceDataObjectBuilder<-function(test = NULL,
         if(component[index]=="both") component_numeric[index]=as.integer(3)
       }
       
-    if(type[index]=="sign-flip" && component[index]!="nonparametric")
+    if(type[index]=="sf" && component[index]!="nonparametric")
        stop("sign-flip test is implemented only for the nonparametric component")
     
-    if(type[index]=="speckman" && component[index]!="parametric")
-      stop("speckman test and confidence intervals are implemented only for the parametric component")
+    if(type[index]=="s" && component[index]!="parametric")
+      stop("s test and confidence intervals are implemented only for the parametric component")
     
     if(test[index]=='none' && interval[index]=='none'){
         stop("At least one between test and interval should be required for each implementation")
       }
     
-      if(test[index]!="one-at-the-time" && test[index]!="simultaneous" &&  test[index]!="none"){
-        stop("test should be either 'one-at-the-time', 'simultaneous' or 'none'")}else{
+      if(test[index]!="oat" && test[index]!="sim" &&  test[index]!="none"){
+        stop("test should be either 'oat', 'sim' or 'none'")}else{
           if(test[index]=="none") test_numeric[index]=as.integer(0)
-          if(test[index]=="one-at-the-time") test_numeric[index]=as.integer(1)
-          if(test[index]=="simultaneous") test_numeric[index]=as.integer(2)
+          if(test[index]=="oat") test_numeric[index]=as.integer(1)
+          if(test[index]=="sim") test_numeric[index]=as.integer(2)
        }
       
       if(interval[index]!="none"){
-        if(interval[index]!="one-at-the-time" && interval[index]!="simultaneous" && interval[index]!="bonferroni" && interval[index]!="none"){
-          stop("interval should be either 'one-at-the-time' 'simultaneous', 'bonferroni' or 'none'")}else{
+        if(interval[index]!="oat" && interval[index]!="sim" && interval[index]!="bonf" && interval[index]!="none"){
+          stop("interval should be either 'oat' 'sim', 'bonf' or 'none'")}else{
             if(interval[index]=="none") interval_numeric[index]=as.integer(0)
-            if(interval[index]=="one-at-the-time") interval_numeric[index]=as.integer(1)
-            if(interval[index]=="simultaneous") interval_numeric[index]=as.integer(2)
-            if(interval[index]=="bonferroni") interval_numeric[index]=as.integer(3)
+            if(interval[index]=="oat") interval_numeric[index]=as.integer(1)
+            if(interval[index]=="sim") interval_numeric[index]=as.integer(2)
+            if(interval[index]=="bonf") interval_numeric[index]=as.integer(3)
           }
         
         if(level[index] <= 0 || level[index] > 1)                                                
           stop("level should be a positive value smaller or equal to 1")
       }
     
-      if(interval[index]=="simultaneous" && (type[index]=="eigen-sign-flip" || type[index] == "enhanced-eigen-sign-flip")){
-        stop("simultaneous confidence intervals are not implemented in the eigen-sign-flip cases")
+      if(interval[index]=="sim" && (type[index]=="esf" || type[index] == "enh-esf")){
+        stop("sim confidence intervals are not implemented in the esf cases")
       }
       
-      if((interval[index]=="simultaneous" || interval[index]=="bonferroni") && component[index]!="parametric")
-        stop("only one-at-the-time confidence intervals are allowed for the nonparametric component")
+      if((interval[index]=="sim" || interval[index]=="bonf") && component[index]!="parametric")
+        stop("only oat confidence intervals are allowed for the nonparametric component")
       
-      if((type[index] == "eigen-sign-flip" || type[index] == "enhanced-eigen-sign-flip") && component[index]!="nonparametric"){
+      if((type[index] == "esf" || type[index] == "enh-esf") && component[index]!="nonparametric"){
         for(i in 1:dim(coeff)[1]){
           count=0
           for(j in 1:dim(coeff)[2]){
@@ -500,19 +513,19 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
       
       # Well posedness check for coeff in simultaneous case;
-      if(test[index]=="simultaneous" && component[index]!="nonparametric"){
+      if(test[index]=="sim" && component[index]!="nonparametric"){
         if(det(coeff %*% t(coeff)) < 0.001){
           stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
         }
       }
         
-      if(interval[index]=="simultaneous" && component[index]!="nonparametric"){
+      if(interval[index]=="sim" && component[index]!="nonparametric"){
         if(det(coeff %*% t(coeff)) < 0.001){
           stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
         }
       }
     
-      if((test[index]=="one-at-the-time") && component[index] != "parametric"){
+      if((test[index]=="oat") && component[index] != "parametric"){
         warning("only simultaneous tests are available for the nonparametric component, proceeding with simultaneous inference")
         test_numeric[index] = as.integer(2)
       }
@@ -523,13 +536,13 @@ inferenceDataObjectBuilder<-function(test = NULL,
          quantile[index]=0
         }else{
           if(level[index] > 0){
-              if(interval[index] == "simultaneous"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
+              if(interval[index] == "sim"){ # Simultaneous CI -> Chi-Squared (q) law for statistic
                 quantile[index]=sqrt(qchisq(level[index], dim(coeff)[1]))  
               }else{
-                if(interval[index]=="one-at-the-time"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
+                if(interval[index]=="oat"){  # One at the time CI (each interval has confidence alpha) -> Gaussian law for statistic
                   quantile[index]=qnorm((1-(1-level[index])/2),0,1)
               }else{ 
-                  if(interval[index]== "bonferroni"){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
+                  if(interval[index]== "bonf"){# One at the time CI (overall confidence alpha) -> Gaussian law for statistic
                   quantile[index]=qnorm((1-(1-level[index])/(2*dim(coeff)[1])),0,1)
                   }
               }

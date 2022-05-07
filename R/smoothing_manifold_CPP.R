@@ -1,4 +1,4 @@
-CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, R_Inference_Data_Object)
+CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covariates = NULL, ndim, mydim, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search, bary.locations, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, inference.data.object)
 {
 
   # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
@@ -52,24 +52,24 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
     lambda<-as.vector(lambda)
   }
   
-  ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reading
-  test_Type<-as.vector(R_Inference_Data_Object@test)
-  interval_Type<-as.vector(R_Inference_Data_Object@interval)
-  implementation_Type<-as.vector(R_Inference_Data_Object@type)
-  component_Type<-as.vector(R_Inference_Data_Object@component)
-  exact_Inference<-R_Inference_Data_Object@exact
-  locs_Inference<-as.matrix(R_Inference_Data_Object@locations)
-  locs_index_Inference<-as.vector(R_Inference_Data_Object@locations_indices - 1) #converting indices from R to c++ ones
-  locs_are_nodes_Inference <- R_Inference_Data_Object@locations_are_nodes
-  coeff_Inference<-as.matrix(R_Inference_Data_Object@coeff)
-  beta_0<-as.vector(R_Inference_Data_Object@beta0)
-  f_0_eval<-as.vector(R_Inference_Data_Object@f0_eval)
-  f_var_Inference<-R_Inference_Data_Object@f_var
-  inference_Quantile<-as.vector(R_Inference_Data_Object@quantile)
-  inference_Alpha<-as.vector(R_Inference_Data_Object@alpha)
-  inference_N_Flip<-R_Inference_Data_Object@n_flip
-  inference_Tol_Fspai<-R_Inference_Data_Object@tol_fspai
-  inference_Defined<-R_Inference_Data_Object@definition
+  ## Extract the parameters for inference from inference.data.object to prepare them for c++ reading
+  test_Type<-as.vector(inference.data.object@test)
+  interval_Type<-as.vector(inference.data.object@interval)
+  implementation_Type<-as.vector(inference.data.object@type)
+  component_Type<-as.vector(inference.data.object@component)
+  exact_Inference<-inference.data.object@exact
+  locs_Inference<-as.matrix(inference.data.object@locations)
+  locs_index_Inference<-as.vector(inference.data.object@locations_indices - 1) #converting indices from R to c++ ones
+  locs_are_nodes_Inference <- inference.data.object@locations_are_nodes
+  coeff_Inference<-as.matrix(inference.data.object@coeff)
+  beta_0<-as.vector(inference.data.object@beta0)
+  f_0_eval<-as.vector(inference.data.object@f0_eval)
+  f_var_Inference<-inference.data.object@f_var
+  inference_Quantile<-as.vector(inference.data.object@quantile)
+  inference_Alpha<-as.vector(inference.data.object@alpha)
+  inference_N_Flip<-inference.data.object@n_flip
+  inference_Tol_Fspai<-inference.data.object@tol_fspai
+  inference_Defined<-inference.data.object@definition
 
   ## Set proper type for correct C++ reading
   locations <- as.matrix(locations)

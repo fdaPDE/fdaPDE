@@ -6,10 +6,9 @@
 \usage{
 inferenceDataObjectBuilder<-function(test = NULL, 
 interval = NULL, 
-type = 'wald', 
+type = 'w', 
 component = 'parametric',
 exact = FALSE, 
-enhanced = FALSE,
 dim = NULL, 
 n_cov = NULL,
 locations = NULL,
@@ -23,64 +22,75 @@ n_flip = 1000,
 tol_fspai = 0.05)
 }
 \arguments{
-\item{test}{A list of strings defining the type of test to be performed, with the same length of \code{interval} and \code{type} lists. The default is NULL, and can take values 'one-at-the-time' 
-or 'simultaneous'. If the value is NULL, no test is performed, and the \code{interval} parameter in the same position of the list needs to be not NULL. If it takes value
-'one-at-the-time', the parameters \code{beta0}, \code{dim}, \code{coeff} are taken into account, and one-at-the-time tests will be performed. If it takes value 
-'simultaneous', a global simultaneous test will be performed.}
+\item{test}{A string defining the type of test to be performed. Multiple tests can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
+\code{component} and \code{interval}. The default is NULL, and can take values:
+\itemize{
+\item{'oat'}{one-at-the-time tests, available only when \code{component} is 'parametric'.}
+\item{'sim'}{simultaneous tests.}
+\item{'none'}{no test required. \code{interval} must be set.}
+}}
 
-\item{interval}{A list of strings defining the type of confidence intervals to be computed, with the same length of \code{test} and \code{type} lists. The default is NULL,
-and can take values 'one-at-the-time', 'simultaneous' (available only for Wald and Speckman cases) and 'bonferroni'. If the value is NULL, no interval will be computed, and the \code{test} parameter in the corresponding position needs to be set.
- Otherwise one at the time, simultaneous or Bonferroni correction intervals will be computed. If it is not NULL, the parameter \code{level} will be taken into account.}
+\item{interval}{A string defining the type of confidence intervals to be computed. Multiple intervals can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
+\code{component} and \code{test}. The default is NULL, and can take values:
+\itemize{
+\item{'oat'}{one-at-the-time intervals.}
+\item{'sim'}{simultaneous intervals, available only when \code{component} is 'parametric' and no sign-flipping approaches are required.}
+\item{'bonf'}{Bonferroni intervals, available only when \code{component} is 'parametric'}
+\item{'none'}{no interval required. \code{test} must be set.}
+}}
 
-\item{type}{A list of strings defining the type of implementation for the inferential analysis, with the same length of \code{test} list and \code{interval} list . The possible values are three:
-'wald'(default), 'speckman' 'sign-flip' or 'eigen-sign-flip'. If 'eigen-sign-flip' is set, the corresponding \code{interval} position needs to be NULL.}
+\item{type}{A list of strings defining the type of implementation for the inferential analysis. The possible values are:
+\itemize{
+\item{'w'}{Wald parametric approach (default).}
+\item{'s'}{Speckman parametric approach.}
+\item{'sf'}{sign-flip nonparametric approach.}
+\item{'esf'}{eigen-sign-flip nonparametric approach.}
+\item{'enh-esf'}{enhanced-eigen-sign-flip nonparametric approach.}
+}}
 
-\item{component}{A list of strings defining on which model component inference has to be performed. It can take values 'parametric', 'nonparametric' or 'both'. The default is 'parametric'.}
+\item{component}{A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.}
 
 \item{exact}{A logical used to decide the method used to estimate the statistics variance.
 The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
 In the second case the evaluation is exact but computationally expensive.}
 
-\item{enhanced}{A logical used to decide wether to perform enhaned on classical ESF tests.
-The possible values are: FALSE (default) and TRUE. In the first case classical ESF test will be performed.
-In the second case enhanced ESF procedures will be employed leading to a better Type-I error but slight lower power.}
-
-\item{dim}{Dimension of the problem, defaulted to NULL. (Must be set by the user)}
+\item{dim}{Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 2D or 2.5D/3D problems (Must be set by the user)}
 
 \item{n_cov}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
 
-\item{locations}{A matrix of the locations of interest when testing the nonparametric component f}
+\item{locations}{A matrix of the locations of interest when testing the nonparametric component f, defaulted to NULL}
 
-\item{locations_indices}{A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference. If a vector of indices is provided, then the slot 'locations' is discarded.}
+\item{locations_indices}{A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference, defaulted to NULL.
+If a vector of indices is provided, then the slot 'locations' is discarded.}
 
-\item{coeff}{A matrix, with \code{n_cov} number of columns, of numeric coefficients, defaulted to NULL. If this parameter is NULL,
-in the corresponding inferenceDataObject it will be defaulted to an identity matrix. If at least one 'eigen-sign-flip' value is present in \code{type}, needs to be an identity matrix.}
+\item{coeff}{A matrix, with \code{n_cov} number of columns, of numeric coefficients representing the linear combinations of the parametric components of the model.
+The default is NULL, corresponding to an identity matrix. If at least one sing-flipping approach is required in \code{type}, needs to be an identity matrix.}
 
-\item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and has length the number of rows of matrix \code{coeff}. 
+\item{beta0}{Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and \code{component} is not 'nonparametric'; its length is the number of rows of matrix \code{coeff} if provided. 
 If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.}
 
-\item{f0}{A function object representing the expression of the nonparametric component f under the null hypothesis. If NULL, the default is the null function, hence a test on the significance of the nonparametric component is carried out.}
+\item{f0}{A function object representing the expression of the nonparametric component f under the null hypothesis. Taken into account if \code{test} is set and \code{component} is not parametric.
+If NULL, the default is the null function, hence a test on the significance of the nonparametric component is carried out.}
 
 \item{f_var}{A logical used to decide whether to estimate the local variance of the nonlinear part of the model.
 The possible values are: FALSE (default) and TRUE.}
 
 \item{level}{A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.}
 
-\item{n_flip}{Number of flips performed in Eigen-Sign-Flip test, defaulted to 1000. It is taken into account only if at least one position of \code{type} is set to 'eigen-sign-flip'.}
+\item{n_flip}{Number of flips performed in sign-flipping approaches, defaulted to 1000.}
 
-\item{tol_fspai}{Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to 'False'. The lower is the tolerance, the heavier is the computation.}
+\item{tol_fspai}{Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.}
 }
 \value{
-The output is a well defined [inferenceDataObject], that can be used as parameter in the [smooth.FEM] function.
+The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
 }
 \description{
-A function that build an [inferenceDataObject]. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
-that can be used as parameter in [smooth.FEM] function. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with smooth.FEM parameters will be carried out inside that function.
+A function that build an \code{\link{inferenceDataObject}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
+that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
 }
 \examples{
-obj1<-inferenceDataObjectBuilder(test = "simultaneous", interval = NULL, exact = T, dim = 2, n_cov = 4);
-obj2<-inferenceDataObjectBuilder(interval = "one-at-the-time", dim = 3, n_cov = 5, level = 0.99);
-obj3<-inferenceDataObjectBuilder(test=c('one-at-the-time', 'simultaneous', 'one-at-the-time','one-at-the-time'), interval=c('bonferroni','one-at-the-time','none','simultaneous'),
- type=c('wald','speckman','eigen-sign-flip','speckman'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
-obj4<-inferenceDataObjectBuilder(test = "simultaneous", interval = c("one-at-the-time", "simultaneous"), type = "wald", component = c("parametric", "nonparametric"), dim = 2, n_cov = 2, exact = T, locations_indices = 1:10, level = c(0.95, 0.9))
+obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
+obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, n_cov = 3, location_indices = 1:100);
+obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
+ type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
 }

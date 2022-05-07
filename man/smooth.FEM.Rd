@@ -13,7 +13,7 @@ smooth.FEM(locations = NULL, observations, FEMbasis,
  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
  lambda.optimization.tolerance = 0.05,
- R_Inference_Data_Object=NULL)
+ inference.data.object=NULL)
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -134,8 +134,8 @@ It is advised to set it grather than 1 to avoid overfitting.}
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 Default value \code{lambda.optimization.tolerance=0.05}.}
 
-\item{R_Inference_Data_Object}{An [inferenceDataObject] that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
-consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via [inferenceDataObjectBuilder] function, so that the object is guaranteed to be well defined.}
+\item{inference.data.object}{An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.}
 }
 \value{
 A list with the following variables in \code{family="gaussian"} case:
@@ -164,13 +164,13 @@ A list with the following variables in \code{family="gaussian"} case:
    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
    \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
          \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
-              \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
-              \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
-              \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+              \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
               }
         \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
-              \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
-              \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+              \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+              \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
              }
         }
 }
@@ -221,11 +221,11 @@ covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 
 #Inferential tests and confidence intervals
-R_inference_data_object = inferenceDataObjectBuilder(test = c('one-at-the-time','simultaneous','one-at-the-time'), interval = c('simultaneous','one-at-the-time','none'), exact = TRUE, type = c('wald','speckman','eigen-sign-flip'), dim = 1)
+inference.data.object = inferenceDataObjectBuilder(test = c('one-at-the-time','simultaneous','one-at-the-time'), interval = c('simultaneous','one-at-the-time','none'), exact = TRUE, type = c('wald','speckman','eigen-sign-flip'), dim = 1)
 
 solution = smooth.FEM(observations = data, covariates = covariate, 
                       FEMbasis = FEMbasis, lambda = lambda,
-                      R_Inference_Data_Object=R_inference_data_object)
+                      inference.data.object=inference.data.object)
 
 # beta estimate:
 solution$solution$beta

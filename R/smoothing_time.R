@@ -73,9 +73,9 @@ NULL
 #' It is advised to set it grather than 1 to avoid overfitting.
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
-#' @param R_Inference_Data_Object An [inferenceDataObject] that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
-#' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via [inferenceDataObjectBuilder] function, so that the object is guaranteed to be well defined.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
+#' @param inference.data.object An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+#' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.
 #' @return A list with the following variables:
 #' \itemize{
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
@@ -90,13 +90,13 @@ NULL
 #' \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #' \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
 #'          \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
-#'               \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
-#'               \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
-#'               \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{R_Inference_Data_Object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{R_Inference_Data_Object}.}
+#'               \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+#'               \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+#'               \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
 #'               }
 #'         \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
-#'               \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
-#'               \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{R_Inference_Data_Object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{R_Inference_Data_Object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+#'               \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+#'               \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
 #'              }
 #'         }
 #' }         
@@ -110,7 +110,7 @@ NULL
 #' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 #' DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
 #' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05
-#' R_Inference_Data_Object=NULL)
+#' inference.data.object=NULL)
 #' @export
 #' @references #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
 #' spatially dependent functional data via regression with differential regularization. 
@@ -164,7 +164,7 @@ NULL
 #'                         observations=observations, 
 #'                         covariates = cov1,
 #'                         FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
-#'                         lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', R_Inference_Data_Object = inf_obj)
+#'                         lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
 #'
 #' # beta estimate:
 #' solution$solution$beta
@@ -180,7 +180,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           search = "tree", bary.locations = NULL,
                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
                           lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
-                          R_Inference_Data_Object = NULL)
+                          inference.data.object = NULL)
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
@@ -329,12 +329,12 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   
   # Checking inference data
   # Most of the checks have already been carried out by inferenceDataObjectBuilder function
-  R_Inference_Data_Object <- checkInferenceParameters(R_Inference_Data_Object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
+  inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
   
   # Check that GCV is set for inference
-  if(R_Inference_Data_Object@definition==1 && is.null(lambda.selection.lossfunction) && (dim(lambdaS)!=1 || dim(lambdaT)!=1)){
+  if(inference.data.object@definition==1 && is.null(lambda.selection.lossfunction) && (dim(lambdaS)!=1 || dim(lambdaT)!=1)){
     warning("Inference is not defined when lambda grid is provided without GCV")
-    R_Inference_Data_Object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
+    inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                 coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha=0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
   
@@ -400,7 +400,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, R_Inference_Data_Object = R_Inference_Data_Object)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, inference.data.object = inference.data.object)
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE)
   {
     bigsol = NULL
@@ -409,7 +409,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
        search = search, bary.locations = bary.locations,
-       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, R_Inference_Data_Object = R_Inference_Data_Object)
+       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, inference.data.object = inference.data.object)
                                       
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE)
   {
@@ -419,7 +419,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, R_Inference_Data_Object = R_Inference_Data_Object)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, inference.data.object = inference.data.object)
   }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
   {
     bigsol = NULL
@@ -428,7 +428,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, R_Inference_Data_Object = R_Inference_Data_Object)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, inference.data.object = inference.data.object)
   }else if(class(FEMbasis$mesh) == 'mesh.3D')
   {
     bigsol = NULL
@@ -437,7 +437,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, R_Inference_Data_Object = R_Inference_Data_Object)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, inference.data.object = inference.data.object)
   }
 
   # ---------- Solution -----------
@@ -509,26 +509,26 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   reslist = NULL
   
   # Save statistics and intervals
-  if(R_Inference_Data_Object@definition==1){
+  if(inference.data.object@definition==1){
     inference = {}
-    confidence_intervals = matrix(data = bigsol[[14]], nrow = 2*3*length(R_Inference_Data_Object@type), ncol = dim(R_Inference_Data_Object@coeff)[1]) #since inference for f is not implemented for ST
-    p_val = matrix(data = bigsol[[13]], nrow = dim(R_Inference_Data_Object@coeff)[1]+1, ncol = length(R_Inference_Data_Object@type))
+    confidence_intervals = matrix(data = bigsol[[14]], nrow = 2*3*length(inference.data.object@type), ncol = dim(inference.data.object@coeff)[1]) #since inference for f is not implemented for ST
+    p_val = matrix(data = bigsol[[13]], nrow = dim(inference.data.object@coeff)[1]+1, ncol = length(inference.data.object@type))
     
-    for(i in 1:length(R_Inference_Data_Object@type)){ # each element is a different inferential setting
-      if(R_Inference_Data_Object@interval[i]!=0){ # Intervals requested by this setting, adding them to the right implementation position
+    for(i in 1:length(inference.data.object@type)){ # each element is a different inferential setting
+      if(inference.data.object@interval[i]!=0){ # Intervals requested by this setting, adding them to the right implementation position
         
-        if(R_Inference_Data_Object@component[i]!=2){ # intervals for beta were requested, just for safety, actually it cannot be equal to 2
-          p = dim(R_Inference_Data_Object@coeff)[1]
+        if(inference.data.object@component[i]!=2){ # intervals for beta were requested, just for safety, actually it cannot be equal to 2
+          p = dim(inference.data.object@coeff)[1]
           ci_beta=t(confidence_intervals[(3*(2*i-2)+1):(3*(2*i-2)+3),1:p])
-          if(R_Inference_Data_Object@type[i]==1){
+          if(inference.data.object@type[i]==1){
             inference$beta$CI$wald[[length(inference$beta$CI$wald)+1]] = ci_beta
             inference$beta$CI$wald=as.list(inference$beta$CI$wald)
           }
-          else if(R_Inference_Data_Object@type[i]==2){
+          else if(inference.data.object@type[i]==2){
             inference$beta$CI$speckman[[length(inference$beta$CI$speckman)+1]] = ci_beta
             inference$beta$CI$speckman=as.list(inference$beta$CI$speckman)
           }
-          else if(R_Inference_Data_Object@type[i]==3){
+          else if(inference.data.object@type[i]==3){
             if(ci_beta[2]> 10^20){
               warning("ESF CI bisection algorithm did not converge, returning NA")
               for(h in 1:nrow(ci_beta))
@@ -538,7 +538,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
             inference$beta$CI$eigen_sign_flip[[length(inference$beta$CI$eigen_sign_flip)+1]] = ci_beta
             inference$beta$CI$eigen_sign_flip=as.list(inference$beta$CI$eigen_sign_flip)
           }
-          else if(R_Inference_Data_Object@type[i]==4){
+          else if(inference.data.object@type[i]==4){
             if(ci_beta[2]> 10^20){
               warning("Enhanced ESF CI bisection algorithm did not converge, returning NA")
               for(h in 1:nrow(ci_beta))
@@ -551,49 +551,49 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
         }
       }
       
-      if(R_Inference_Data_Object@test[i]!=0){ # Test requested by this setting, adding them to the right implementation position
+      if(inference.data.object@test[i]!=0){ # Test requested by this setting, adding them to the right implementation position
         statistics=p_val[,i]
-        if(R_Inference_Data_Object@component[i]!=2){ # test on beta was requested, just for safety, it cannot be otherwise
-          beta_statistics = statistics[1:dim(R_Inference_Data_Object@coeff)[1]]
+        if(inference.data.object@component[i]!=2){ # test on beta was requested, just for safety, it cannot be otherwise
+          beta_statistics = statistics[1:dim(inference.data.object@coeff)[1]]
           p_values = numeric()
-          if(R_Inference_Data_Object@type[i]==3 || R_Inference_Data_Object@type[i]==4){ # eigen-sign-flip p-value is already computed in cpp code
-            if(R_Inference_Data_Object@test[i]==1){ 
+          if(inference.data.object@type[i]==3 || inference.data.object@type[i]==4){ # eigen-sign-flip p-value is already computed in cpp code
+            if(inference.data.object@test[i]==1){ 
               # one-at-the-time tests
               p_values = beta_statistics
             }
-            else if(R_Inference_Data_Object@test[i]==2){
+            else if(inference.data.object@test[i]==2){
               # simultaneous test
               p_values = beta_statistics[1]
             }
           }else{
             # Compute p-values
-            if(R_Inference_Data_Object@test[i]==1){ # Wald and Speckman return statistics and needs computation of p-values (no internal use of distributions quantiles)
+            if(inference.data.object@test[i]==1){ # Wald and Speckman return statistics and needs computation of p-values (no internal use of distributions quantiles)
               # one-at-the-time-tests
               p_values = numeric(length(beta_statistics))
               for(l in 1:length(beta_statistics)){
                 p_values[l] = 2*pnorm(-abs(beta_statistics[l]))
               }
             }
-            else if(R_Inference_Data_Object@test[i]==2){
+            else if(inference.data.object@test[i]==2){
               # simultaneous tests
-              p = dim(R_Inference_Data_Object@coeff)[1]
+              p = dim(inference.data.object@coeff)[1]
               p_values = 1-pchisq(beta_statistics[1], p)
             }
           }
           # add p-values in the right position
-          if(R_Inference_Data_Object@type[i]==1){
+          if(inference.data.object@type[i]==1){
             inference$beta$p_values$wald[[length(inference$beta$p_values$wald)+1]] = p_values
             inference$beta$p_values$wald=as.list(inference$beta$p_values$wald)
           }
-          else if(R_Inference_Data_Object@type[i]==2){
+          else if(inference.data.object@type[i]==2){
             inference$beta$p_values$speckman[[length(inference$beta$p_values$speckman)+1]] = p_values
             inference$beta$p_values$speckman=as.list(inference$beta$p_values$speckman)
           }
-          else if(R_Inference_Data_Object@type[i]==3){
+          else if(inference.data.object@type[i]==3){
             inference$beta$p_values$eigen_sign_flip[[length(inference$beta$p_values$eigen_sign_flip)+1]] = p_values
             inference$beta$p_values$eigen_sign_flip=as.list(inference$beta$p_values$eigen_sign_flip)
           }
-          else if(R_Inference_Data_Object@type[i]==4){
+          else if(inference.data.object@type[i]==4){
             inference$beta$p_values$enh_eigen_sign_flip[[length(inference$beta$p_values$enh_eigen_sign_flip)+1]] = p_values
             inference$beta$p_values$enh_eigen_sign_flip=as.list(inference$beta$p_values$enh_eigen_sign_flip)
           }
@@ -601,7 +601,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       }
     }
     
-    if(R_Inference_Data_Object@f_var==1){
+    if(inference.data.object@f_var==1){
       f_variances = matrix(data = bigsol[[15]], nrow = N*M, ncol = 1)
       inference$f_var = f_variances
     }  

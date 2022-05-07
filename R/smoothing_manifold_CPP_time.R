@@ -2,7 +2,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
                                        covariates = NULL, ndim, mydim, BC = NULL,
                                        incidence_matrix = NULL, areal.data.avg = TRUE,
                                        FLAG_MASS, FLAG_PARABOLIC, IC,
-                                       search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, R_Inference_Data_Object)
+                                       search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05, inference.data.object)
 {
 
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
@@ -67,43 +67,43 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
     lambdaT<-as.vector(lambdaT)
   }
   # Create a null inference object for preliminary computations 
-  R_Inference_Data_Object_Null=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
+  inference.data.object.null=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                                    locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
                                    f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   
-  ## Extract the parameters for inference from R_Inference_Data_Object to prepare them for c++ reading
-  test_Type<-as.vector(R_Inference_Data_Object@test)
-  interval_Type<-as.vector(R_Inference_Data_Object@interval)
-  implementation_Type<-as.vector(R_Inference_Data_Object@type)
-  component_Type<-as.vector(R_Inference_Data_Object@component)
-  exact_Inference<-R_Inference_Data_Object@exact
-  coeff_Inference=as.matrix(R_Inference_Data_Object@coeff)
-  beta_0=as.vector(R_Inference_Data_Object@beta0)
-  f_var_Inference<-R_Inference_Data_Object@f_var
-  inference_Quantile=as.vector(R_Inference_Data_Object@quantile)
-  inference_Alpha=R_Inference_Data_Object@alpha
-  inference_N_Flip=R_Inference_Data_Object@n_flip
-  inference_Tol_Fspai=R_Inference_Data_Object@tol_fspai
-  inference_Defined=R_Inference_Data_Object@definition
+  ## Extract the parameters for inference from inference.data.object to prepare them for c++ reading
+  test_Type<-as.vector(inference.data.object@test)
+  interval_Type<-as.vector(inference.data.object@interval)
+  implementation_Type<-as.vector(inference.data.object@type)
+  component_Type<-as.vector(inference.data.object@component)
+  exact_Inference<-inference.data.object@exact
+  coeff_Inference=as.matrix(inference.data.object@coeff)
+  beta_0=as.vector(inference.data.object@beta0)
+  f_var_Inference<-inference.data.object@f_var
+  inference_Quantile=as.vector(inference.data.object@quantile)
+  inference_Alpha=inference.data.object@alpha
+  inference_N_Flip=inference.data.object@n_flip
+  inference_Tol_Fspai=inference.data.object@tol_fspai
+  inference_Defined=inference.data.object@definition
   
-  ## Extract the parameters for preliminary computations from R_Inference_Data_Object_Null to prepare them for c++ reading
-  test_Type_Null<-as.vector(R_Inference_Data_Object_Null@test)
-  interval_Type_Null<-as.vector(R_Inference_Data_Object_Null@interval)
-  implementation_Type_Null<-as.vector(R_Inference_Data_Object_Null@type)
-  component_Type_Null<-as.vector(R_Inference_Data_Object_Null@component)
-  exact_Inference_Null<-R_Inference_Data_Object_Null@exact
-  locs_Inference_Null<-as.matrix(R_Inference_Data_Object_Null@locations)
-  locs_index_Inference_Null<-as.vector(R_Inference_Data_Object_Null@locations_indices - 1) #converting the indices from R to c++ ones 
-  locs_are_nodes_Inference_Null<-R_Inference_Data_Object_Null@locations_are_nodes
-  coeff_Inference_Null=as.matrix(R_Inference_Data_Object_Null@coeff)
-  beta_0_Null=as.vector(R_Inference_Data_Object_Null@beta0)
-  f_0_eval_Null<-as.vector(R_Inference_Data_Object_Null@f0_eval)
-  f_var_Inference_Null<-R_Inference_Data_Object_Null@f_var
-  inference_Quantile_Null=as.vector(R_Inference_Data_Object_Null@quantile)
-  inference_Alpha_Null=R_Inference_Data_Object_Null@alpha
-  inference_N_Flip_Null=R_Inference_Data_Object_Null@n_flip
-  inference_Tol_Fspai_Null=R_Inference_Data_Object_Null@tol_fspai
-  inference_Defined_Null=R_Inference_Data_Object_Null@definition
+  ## Extract the parameters for preliminary computations from inference.data.object.null to prepare them for c++ reading
+  test_Type_Null<-as.vector(inference.data.object.null@test)
+  interval_Type_Null<-as.vector(inference.data.object.null@interval)
+  implementation_Type_Null<-as.vector(inference.data.object.null@type)
+  component_Type_Null<-as.vector(inference.data.object.null@component)
+  exact_Inference_Null<-inference.data.object.null@exact
+  locs_Inference_Null<-as.matrix(inference.data.object.null@locations)
+  locs_index_Inference_Null<-as.vector(inference.data.object.null@locations_indices - 1) #converting the indices from R to c++ ones 
+  locs_are_nodes_Inference_Null<-inference.data.object.null@locations_are_nodes
+  coeff_Inference_Null=as.matrix(inference.data.object.null@coeff)
+  beta_0_Null=as.vector(inference.data.object.null@beta0)
+  f_0_eval_Null<-as.vector(inference.data.object.null@f0_eval)
+  f_var_Inference_Null<-inference.data.object.null@f_var
+  inference_Quantile_Null=as.vector(inference.data.object.null@quantile)
+  inference_Alpha_Null=inference.data.object.null@alpha
+  inference_N_Flip_Null=inference.data.object.null@n_flip
+  inference_Tol_Fspai_Null=inference.data.object.null@tol_fspai
+  inference_Defined_Null=inference.data.object.null@definition
 
 
   ## Set proper type for correct C++ reading
