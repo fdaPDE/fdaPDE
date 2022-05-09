@@ -265,7 +265,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
   \tparam InputHandler the type of regression problem
   \param opt_data the object containing optimization data
   \param output the object containing the solution of the optimization problem 
-  \param inf_car the object wrapping all the objects needed to make inference
+  \param inf_car the inference carrier object wrapping all the objects needed to make inference
   \param inference_output the object to be filled with inference output 
   \return void
 */
@@ -279,7 +279,8 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
   UInt n_loc = inf_car.getN_loc();
 
   UInt out_dim = (p > n_loc) ? p : n_loc; 
-
+  
+  // Preallocate with the correct dimension
   inference_output.resize(2*n_implementations+1, out_dim+1);
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
@@ -332,9 +333,9 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
   \tparam InputHandler the type of regression problem
   \param optimization_data the object containing optimization data
   \param output_Data the object containing the solution of the optimization problem
-  \param inferenceData the object containing the data needed for for inference
+  \param inferenceData the object containing the data needed for inference
   \param regression the object containing the model of the problem
-  \param lambda_inference the lambda that will be used to compute the optimal model and the right inferential solutions
+  \param lambda_inference the smoothing parameter that will be used to compute the optimal model and the right inferential solutions
   \return void
 */
 template<typename InputHandler>
@@ -343,10 +344,8 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
 		lambda_inference = output.lambda_sol;
 		if(optimizationData.get_last_lS_used() != lambda_inference){
 			regression.build_regression_inference(lambda_inference);
-			// for debug only 
-			//Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 			}
-	}else{ 		// supposing we have only one lambda, otherwise inference gets discarded in smoothing.R
+	}else{ 		// supposing we have only one lambda when GCV is unused, otherwise inference gets discarded in smoothing.R
 		if(inferenceData.get_definition()==true){
 			lambda_inference = optimizationData.get_last_lS_used();
 			}
@@ -362,14 +361,14 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
   \tparam ndim specifies if the local dimension is 2 or 3
   \param mesh_ the mesh of the problem
   \param regressionData_ the object containing regression informations 
-  \param inferenceData_ the object containing the data needed for for inference
+  \param inferenceData_ the object containing the data needed for inference
   \param inf_car_ the inference carrier object to be modified 
   \return void
 */
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
   // if a matrix of locations has been provided, compute Psi_loc by directly evaluating the spatial basis functions in the provided points
-  // only wald implementation can enter here, no other additional matrices are needed
+  // only with wald implementation this can be true, no other additional matrices are needed
   if((inferenceData_.get_locs_index_inference())[0] == -1){
     // define the psi matrix
     SpMat psi;

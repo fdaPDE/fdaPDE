@@ -70,8 +70,6 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 		if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
 		if((bestLambdaS != optimizationData.get_size_S()-1) || (bestLambdaT != optimizationData.get_size_T()-1)){
 			regression.build_regression_inference(Optimal_lambda_S, Optimal_lambda_T);
-			// for debug only 
-			//Rprintf("I'm computing again the matrices in Mixed_FERegression\n");
 			}
 		}
 
@@ -283,7 +281,7 @@ void inference_wrapper_time(const OptimizationData & opt_data, const Inference_C
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
 
-  // since only inference on beta is implemented for ST 
+  // since only inference on beta is implemented for ST, the rows corresponding to f inference will be empty to be coherent with the size of inference_Solver's output
   inference_output.resize(2*n_implementations+1, p+1);
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){

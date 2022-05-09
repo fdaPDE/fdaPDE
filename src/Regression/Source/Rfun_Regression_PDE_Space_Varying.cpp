@@ -44,7 +44,7 @@ extern "C"
     \param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
     \param RtestType an R-vector defining if hypotesis testing is required, and which type (one at the time, simultaneous)
     \param RintervalType an R-vector defining if confidence intervals are required, and which type (one at the time, simultaneous, bonferroni)
-    \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, sign-flip, eigen-sign-flip)
+    \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, sign-flip, eigen-sign-flip, enhanced-eigen-sign-flip)
     \param RcomponentType an R-vector specifying on which component of the model the inferential analysis should be peformed (parametric, nonparametric, both)
     \param RexactInference an R-integer that defines if an exact inferential analysis is required or not
     \param RlocsInference an R-matrix of location points selected for inference on the nonparametric component
@@ -55,7 +55,7 @@ extern "C"
     \param Rf0eval an R-vector containing the evaluation of the nonparametric component under the null hypothesis at the selected locations
     \param RfvarInference an R-integer that defines if local f variance has to be estimated or not
     \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
-    \param RinferenceAlpha an R-vector defining the significance used to compute the ESF confidence intervals
+    \param RinferenceAlpha an R-vector defining the significance used to compute the sign-flip confidence intervals
     \param RinferenceFlip an R-integer defining the number of sign-flips needed in eigen-sign-flip inference
     \param RinferenceTolFspai an R-double defining the tolerance of the FSPAI algorithm needed if non-exact implementation of inference is required
     \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
@@ -132,14 +132,14 @@ extern "C"
     \param Rsct user defined stopping criterion tolerance for optimized methods (newton or newton with finite differences)
     \param RtestType an R-vector defining if hypotesis testing is required, and which type (one at the time, simultaneous)
     \param RintervalType an R-vector defining if confidence intervals are required, and which type (one at the time, simultaneous, bonferroni)
-    \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, eigen-sign-flip)
+    \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, eigen-sign-flip, enhanced-eigen-sign-flip)
     \param RcomponentType an R-vector specifying on which component of the model the inferential analysis should be peformed (parametric, nonparametric, both)
     \param RexactInference an R-integer that defines if an exact inferential analysis is required or not
     \param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
     \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
     \param RfvarInference an R-integer that defines if local f variance has to be estimated or not
     \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
-    \param RinferenceAlpha an R-double defining the significance used to compute the ESF confidence intervals
+    \param RinferenceAlpha an R-double defining the significance used to compute the sign-flip confidence intervals
     \param RinferenceFlip an R-integer defining the number of sign-flip needed in eigen-sign-flip inference
     \param RinferenceTolFspai an R-double defining the tolerance of the FSPAI algorithm needed if non-exact implementation of inference is required
     \param RinferenceDefined R-integer taking value 0 or 1; if equal to 0, inference analysis will not be carried out
