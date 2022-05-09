@@ -14,9 +14,11 @@
 #include <memory>
 
 // *** Eigen_Sign_Flip_Base Class ***
-//! Hypothesis testing using eigen-sign-flip implementation
+//! Hypothesis testing and confidence intervals using eigen-sign-flip implementation
 /*!
-  This template class is an abstract base class to perform hypothesis testing using an eigen-sign-flip approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the partial residuals under the null hypothesis and a boolean indicating if the matrix Lambda has been computed. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the eigen-sign-flip apporach, but the latter is not actually implemented. It has a pure virtual method for the computation of Lambda, since it relies on the inversion of MatrixNoCov in an exact or non-exact way.
+  This template class is an abstract base class to perform hypothesis testing and computing confidence intervals using an eigen-sign-flip approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the partial residuals under the null hypothesis and a boolean indicating if the matrix Lambda has been computed. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the eigen-sign-flip apporach. It has a pure virtual method for the computation of Lambda, since it relies on the inversion of MatrixNoCov in an exact or non-exact way.
+\tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type in Inference_Carrier<InputHandler>
+\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoothers S and Lambda. SpMat type is related to approximated inference computation.
 */
 template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
@@ -92,7 +94,7 @@ public:
 inline bool operator > (VectorXr v, VectorXr u){
   UInt q=v.size();
   if(u.size()!=q){
-    Rprintf("Errore: dimensioni non combaciano");
+    Rprintf("Error: in Eigen-Sign-Flip procedure two vectors of different length have been compared");
     return false;
   }
   for (UInt i=0; i< q; i++){
@@ -109,7 +111,7 @@ inline bool operator > (VectorXr v, VectorXr u){
 inline bool is_Unilaterally_Greater (VectorXr v, VectorXr u){
   UInt q=v.size();
   if(u.size()!=q){
-    Rprintf("Errore: dimensioni non combaciano");
+    Rprintf("Error: in Eigen-Sign-Flip procedure two vectors of different length have been compared");
     return false;
   }
   for (UInt i=0; i< q; i++){
@@ -126,7 +128,7 @@ inline bool is_Unilaterally_Greater (VectorXr v, VectorXr u){
 inline bool is_Unilaterally_Smaller (VectorXr v, VectorXr u){
   UInt q=v.size();
   if(u.size()!=q){
-    Rprintf("Errore: dimensioni non combaciano");
+    Rprintf("Error: in Eigen-Sign-Flip procedure two vectors of different length have been compared");
     return false;
   }
   for (UInt i=0; i< q; i++){

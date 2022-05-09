@@ -100,10 +100,10 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
   // compute the vectors needed for the statistic 
   VectorXr Tilder = Tilder_star * partial_res_H0_CI;
 
-  // Observed statistic
+  // Initialize observed statistic and sign_flipped statistic
   MatrixXr stat_temp = TildeX*Tilder;
   Real stat=stat_temp(0);
-  Real stat_perm=stat;
+  Real stat_flip=stat;
 
   UInt n_obs = this->inf_car.getN_obs();
 
@@ -113,7 +113,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
   Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
 
   Real threshold = 10*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
-  UInt N_Eig_Out=0;
+  UInt N_Eig_Out=0; // Initialize number of biased components that will be fixed in Enhanced ESF p_value computation
     
 
   // Random sign-flips
@@ -132,23 +132,23 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
     N_Eig_Out=0;
     for(unsigned long int j=0;j<TildeX.cols();j++){
       UInt flip;
-      if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
-	flip=1;
+      if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){ // Enhanced ESF test has been required and component biased
+	flip=1; // Fix the biased component
 	++N_Eig_Out;
       }else{
 	flip=2*distr(eng)-1;
       }
       Tilder_perm(j)=Tilder(j)*flip;
     }
-    MatrixXr stat_perm_temp = TildeX*Tilder_perm; 
-    stat_perm= stat_perm_temp(0);// Flipped statistic
-    if(stat_perm > stat){ ++count_Up;}else{ 
-      if(stat_perm < stat){ ++count_Down;}  
+    MatrixXr stat_flip_temp = TildeX*Tilder_perm; 
+    stat_flip= stat_flip_temp(0);// Flipped statistic
+    if(stat_flip > stat){ ++count_Up;}else{ 
+      if(stat_flip < stat){ ++count_Down;}  
     }
   }
     
-  Real pval_Up = count_Up/n_flip;     // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b>b_0
-  Real pval_Down = count_Down/n_flip; // This is the unilateral p_value in the case of H0 b=b_0 vs H1 b<b_0
+  Real pval_Up = count_Up/n_flip;     
+  Real pval_Down = count_Down/n_flip; 
 
   result = std::min(pval_Up, pval_Down); // Selecting the correct unilateral p_value 
 
@@ -347,7 +347,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
         
     UInt n_obs = this->inf_car.getN_obs();
 
-    // Seclect eigenvalues that will not be flipped basing on the estimated bias carried
+    // Prepare vectors for enhanced-ESF if requested
     VectorXr Tilder_hat = Lambda_dec.eigenvectors().transpose()* (*(this->inf_car.getZp()) - (*W)* beta_hat); // This vector represents Tilder using only beta_hat, needed for bias estimation
 
     // Estimate the standard error
@@ -356,11 +356,11 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
 
     Real threshold = 10*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
-    UInt N_Eig_Out=0;
+    UInt N_Eig_Out=0; // It will store the number of biased components that will be kept fixed if enhanced-ESF is required
     
-    // Observed statistic
+    // Initialize observed statistic and sign-flipped statistic
     VectorXr stat=TildeX*Tilder;
-    VectorXr stat_perm=stat;
+    VectorXr stat_flip=stat;
     
     //Random sign-flips
     std::random_device rd; 
@@ -375,17 +375,17 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
       N_Eig_Out=0;
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
-        if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
-	  flip=1;
+        if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){ // If enhanced-ESF is required and component is biased
+	  flip=1; // Fix the biased component
           ++N_Eig_Out;
         }else{
 	  flip=2*distr(eng)-1;
         }
 	Tilder_perm(j)=Tilder(j)*flip;
       }
-      stat_perm=TildeX*Tilder_perm; // Flipped statistic
-      if(is_Unilaterally_Greater(stat_perm,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
-	if(is_Unilaterally_Smaller(stat_perm,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
+      stat_flip=TildeX*Tilder_perm; // Flipped statistic
+      if(is_Unilaterally_Greater(stat_flip,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
+	if(is_Unilaterally_Smaller(stat_flip,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
       }
     }
     
@@ -427,11 +427,11 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
     Real Sigma_hat = std::sqrt(SS_res/(n_obs-1));
 
     Real threshold = 10*Sigma_hat; // This threshold is used to determine how many components will not be flipped: we drop those that show large alpha_hat w.r.t. the expected standar error
-    UInt N_Eig_Out=0;
+    UInt N_Eig_Out=0; // It will store the number of biased components that will be kept fixed if enhanced-ESF is required
 
     // Observed statistic
     MatrixXr stat=TildeX*Tilder;
-    MatrixXr stat_perm=stat;
+    MatrixXr stat_flip=stat;
 
     // Random sign-flips
     std::random_device rd; 
@@ -446,18 +446,18 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
       N_Eig_Out=0;
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
-	if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){
-	  flip=1;
+	if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){ // If enhanced-ESF is required and component is biased
+	  flip=1; // Fix the biased component
           ++N_Eig_Out;
 	}else{
 	  flip=2*distr(eng)-1;
 	}
 	Tilder_perm.row(j)=Tilder.row(j)*flip;
       }
-      stat_perm=TildeX*Tilder_perm; // Flipped statistic
+      stat_flip=TildeX*Tilder_perm; // Flipped statistic
       
       for(UInt k=0; k<p; ++k){
-	if(stat_perm(k,k) > stat(k,k)){
+	if(stat_flip(k,k) > stat(k,k)){
 	  ++count_Up(k);
 	}else{
 	  ++count_Down(k);
@@ -1188,7 +1188,7 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   UInt q = this->inf_car.getq(); 
   
   this->Lambda.resize(n_obs,n_obs);
-  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t))); // I - Psi(Psi^T Psi + P)^-1 Psi^T
   this->is_Lambda_computed = true;
   
   return; 
@@ -1215,7 +1215,7 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->Lambda.resize(n_obs,n_obs);
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
-  this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t))); // I - Psi( Psi^T Psi + P)^-1 Psi^T
   this->is_Lambda_computed = true;
   
   return; 
