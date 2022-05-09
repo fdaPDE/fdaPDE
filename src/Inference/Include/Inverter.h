@@ -10,7 +10,7 @@
 /*!
   \tparam MatrixType the type of the inverse of MatrixNoCov, it will be either MatrixXr or SpMat 
   This template class provides the base for the classes that are used to compute the exact or non exact inverse of sparse matrices needed for inferential work
-  The class is pure virtual, as one needs to specify the policy of inversion by using one of its derivation (inverse_Exact or inverse_Approximated)
+  The class is pure virtual, as one needs to specify the policy of inversion by using one of its derivation (inverse_Exact or inverse_Non_Exact)
 */
 template<typename MatrixType>
 class Inverse_Base {
@@ -23,9 +23,9 @@ public:
   Inverse_Base() = default;		//!< Default constructor
 		
   // Getters
-  inline const MatrixType * getInv(void){if(inverse_computed==false){Compute_Inv();} return &E_inv;}; 	//!< Getter for the Inverse Matrix [Need to call Compute_inv before calling this]
-  virtual inline bool get_status_inverse (void) const {return true;} 					//!< Virtual method that will be overriden by the non exact derived class to get the FSPAI status
-  virtual void Compute_Inv (void) = 0; 						     //!< Pure virtual function for the computation of the inverse matrix, takes as input MatrixNoCov decomposition
+  inline const MatrixType * getInv(void){if(inverse_computed==false){Compute_Inv();} return &E_inv;}; 	//!< Getter for the Inverse Matrix [Needs to call Compute_Inv() before calling this]
+  virtual inline bool get_status_inverse (void) const {return true;} 					//!< Virtual method that will be overriden by the Non_Exact derived class to get the FSPAI status
+  virtual void Compute_Inv (void) = 0; 						     			//!< Pure virtual function for the computation of the inverse matrix
   
   // Destructor
   virtual ~Inverse_Base() {};

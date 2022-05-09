@@ -16,14 +16,16 @@
 // *** Wald_Base Class ***
 //! Hypothesis testing and confidence intervals using Wald implementation
 /*!
-  This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Wald-type approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the smoothing matrix S, its trace, the estimator of the residuals variance, the variance-covariance matrix of the beta parameters V, alongside with some convenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Wald apporach. It has a pure virtual method for the computation of the smoothing matrix S, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it also overrides the method for the computation of the exact GCV, since it can be computed in a straight-forward way after having computed the smoothing matrix S and its trace. 
+This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a parametric Wald-type approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the smoothing matrix S, its trace, the estimator of the residuals variance, the variance-covariance matrix of the beta parameters V and the one of the estimator f_hat V_f, alongside with some convenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Wald apporach. It has a pure virtual method for the computation of the smoothing matrix S, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it also overrides the method for the computation of the exact GCV, since it can be computed in a straight-forward way after having computed the smoothing matrix S and its trace. 
+\tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type in Inference_Carrier<InputHandler>
+\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoothers S and B (I-Lambda). SpMat type is related to approximated inference computation.
 */
 template<typename InputHandler, typename MatrixType>
 class Wald_Base:public Inference_Base<InputHandler, MatrixType>{
 protected:
   MatrixXr S;						//!< Smoothing matrix 
   MatrixXr B;                                           //!< Smoothing matrix without covariates
-  MatrixXr Partial_S;                                   //!< (Psi^t*Q*Psi + lambda*P)^-1 * Psi^t computed only if local f variance is required 
+  MatrixXr Partial_S;                                   //!< (Psi^t*Q*Psi + lambda*P)^-1 * Psi^t computed only if local f variance and/or inference on f are required 
   Real tr_S=0; 						//!< Trace of smoothing matrix, needed for the variance-covariance matrix (V) and eventually GCV computation
   Real sigma_hat_sq; 					//!< Estimator for the variance of the residuals (SSres/(n_obs-(q+tr_S)))
   bool is_sigma_hat_sq_computed = false;                //!< Boolean that tells whether sigma_hat_sq has been computed or not
@@ -64,7 +66,7 @@ public:
 // *** Wald_Exact Class ***
 //! Hypothesis testing and confidence intervals using Wald implementation in an exact way 
 /*!
-   This template class derives from the Wald_Base class and it overrides the method that manages the computation of the smoothing matrix S, relying on an exact inversion of the MatrixNoCov. 
+   This template class derives from the Wald_Base class and it overrides the method that manages the computation of the smoothing matrices S and B, relying on an exact inversion of the MatrixNoCov. 
 */
 template<typename InputHandler, typename MatrixType>
 class Wald_Exact:public Wald_Base<InputHandler, MatrixType>{
@@ -80,7 +82,7 @@ public:
 // *** Wald_Non_Exact Class ***
 //! Hypothesis testing and confidence intervals using Wald implementation in a non-exact way
 /*!
-   This template class derives from the Wald_Base class and it overrides the method that manages the computation of the smoothing matrix S, relying on an approximated inversion of the MatrixNoCov.
+   This template class derives from the Wald_Base class and it overrides the method that manages the computation of the smoothing matrices S and B, relying on an approximated inversion of the MatrixNoCov.
 */
 template<typename InputHandler, typename MatrixType>
 class Wald_Non_Exact:public Wald_Base<InputHandler, MatrixType>{

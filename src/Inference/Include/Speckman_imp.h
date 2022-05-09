@@ -15,7 +15,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   
   // get the residuals needed
   VectorXr eps_hat = (*(this->inf_car.getZp())) - (this->inf_car.getZ_hat());
-  // build squared residuals
+  // compute squared residuals
   VectorXr Res2=eps_hat.array()*eps_hat.array();
   
   // resize the variance-covariance matrix
@@ -42,7 +42,6 @@ void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
   
   // compute the decomposition of W^T*Lambda^2*W
   const MatrixXr * W = this->inf_car.getWp();
-  
   WLW_dec.compute(W->transpose()*Lambda2*(*W));
   is_WLW_computed=true;
 };
@@ -81,6 +80,8 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
       return result;
     }
   }
+
+  // check if V has been computed
   if(!is_V_computed){
     compute_V();
   }
@@ -185,6 +186,8 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_beta_CI(void){
       return result;
     }
   }
+
+  // check if V has been computed
   if(!is_V_computed){
     compute_V();
   }

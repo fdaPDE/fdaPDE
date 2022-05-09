@@ -10,22 +10,22 @@ void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
   Real SS_res = eps_hat.squaredNorm();
   UInt n = this->inf_car.getN_obs();
   
-  if(this->inf_car.getRegData()->getCovariates()->rows()!=0){ // case with covariates
+  if(this->inf_car.getRegData()->getCovariates()->rows()!=0){ //case with covariates
     //check if S has been computed 
-    if(is_S_computed==false){
-      this->compute_S();
-    }
+		   if(is_S_computed==false){
+		     this->compute_S();
+		   }
 
     UInt q = this->inf_car.getq();
     tr_S = this->S.trace();
     sigma_hat_sq = SS_res/(n - (q + tr_S));
   }
 
-  else{
+  else{//no covariates case
     //check if B has been computed 
-    if(is_B_computed==false){
-      this->compute_B();
-    }
+		   if(is_B_computed==false){
+		     this->compute_B();
+		   }
 
     Real tr_B = this->B.trace();
     sigma_hat_sq = SS_res/(n - tr_B);
@@ -39,9 +39,9 @@ void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_V(void){
   //check if S has been computed 
-  if(is_S_computed==false){
-    this->compute_S();
-  }
+		 if(is_S_computed==false){
+		   this->compute_S();
+		 }
   
   // resize the variance-covariance matrix
   UInt q = this->inf_car.getq();
@@ -61,15 +61,15 @@ void Wald_Base<InputHandler, MatrixType>::compute_V(void){
 
 template<typename InputHandler, typename MatrixType> 
 void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
-  // make sure that Partial_S has been computed
+  // make sure that B and Partial_S has been computed
   if(this->inf_car.getRegData()->getCovariates()->rows()==0){ // case with no covariates
     if(!is_B_computed){
       compute_B();
     }
     if(!is_B_computed){
-     // something went wrong with FSPAI inversion 
-     this->is_V_f_computed = false;
-     return; 
+      // something went wrong with FSPAI inversion 
+	this->is_V_f_computed = false;
+      return; 
     }
   }
   else{ // case with covariates
@@ -77,9 +77,9 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
       compute_S();
     }
     if(!is_S_computed){
-     // something went wrong with FSPAI inversion 
-     this->is_V_f_computed = false;
-     return; 
+      // something went wrong with FSPAI inversion 
+	this->is_V_f_computed = false;
+      return; 
     }
   }
   // make sure sigma_hat_sq has been computed
@@ -89,9 +89,9 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
 
   UInt n = this->inf_car.getN_obs(); 
   MatrixXr Q = MatrixXr::Identity(n, n); // if there are no covariates Q is just an identity 
-  if(this->inf_car.getRegData()->getCovariates()->rows()!=0){
-    Q = Q - *(this->inf_car.getHp());
-  }
+						       if(this->inf_car.getRegData()->getCovariates()->rows()!=0){
+							 Q = Q - *(this->inf_car.getHp());
+						       }
   
   // compute variance-covariance matrix of f_hat
   this->V_f = this->sigma_hat_sq * (this->Partial_S) * Q * (this->Partial_S.transpose());
@@ -192,23 +192,23 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
 
   // check that FSPAI inversion went well (if non-exact inference was required)
   if(!is_V_f_computed){
-   Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
-   result = 10e20;
-   return result; 
+    Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
+    result = 10e20;
+    return result; 
   }
   
   // get the estimator f_hat 
-  UInt nnodes = this->inf_car.getN_nodes();
+       UInt nnodes = this->inf_car.getN_nodes();
   const VectorXr f_hat = this->inf_car.getSolutionp()->topRows(nnodes);
 
   // get f0 
-  const VectorXr f_0 = this->inf_car.getInfData()->get_f_0();
+       const VectorXr f_0 = this->inf_car.getInfData()->get_f_0();
 
   // get Psi_loc
   const SpMat Psi_loc = this->inf_car.getPsi_loc();
   
   // compute local estimator 
-  VectorXr f_loc_hat = Psi_loc * f_hat; 
+       VectorXr f_loc_hat = Psi_loc * f_hat; 
 
   // derive the variance-covariance matrix of f_loc_hat
   MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
@@ -230,11 +230,11 @@ Real Wald_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   }
 
   // check that at least one eigenvalue > threshold is found (this may happen with FSPAI implementation) 
-  if(max_it - k + 1 == 0){
-   Rprintf("error: cannot invert variance-covariance matrix in Wald-type inference for f, returning NA");
-   result = 10e20;
-   return result;  
-  }
+       if(max_it - k + 1 == 0){
+	 Rprintf("error: cannot invert variance-covariance matrix in Wald-type inference for f, returning NA");
+	 result = 10e20;
+	 return result;  
+       }
 
   MatrixXr eig_values_red = eig_values.bottomRightCorner(max_it - k + 1, max_it - k + 1);
   MatrixXr eig_vector_red = V_f_loc_eig.eigenvectors().rightCols(max_it - k + 1);
@@ -332,39 +332,38 @@ MatrixXv Wald_Base<InputHandler, MatrixType>::compute_f_CI(void){
 
   // check that FSPAI inversion went well (if non-exact inference was required)
   if(!is_V_f_computed){
-   Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
-   for(UInt i=0; i < n_loc; ++i){
-     result(i).resize(3); 
-     result(i)(1) = 10e20; 
-     result(i)(2) = 10e20;
-     result(i)(3) = 10e20;
-   }
-   return result; 
+    Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
+    for(UInt i=0; i < n_loc; ++i){
+      result(i).resize(3); 
+      result(i)(1) = 10e20; 
+      result(i)(2) = 10e20;
+      result(i)(3) = 10e20;
+    }
+    return result; 
   }
   
   // get the estimator f_hat 
-  UInt nnodes = this->inf_car.getN_nodes();
+       UInt nnodes = this->inf_car.getN_nodes();
   const VectorXr f_hat = this->inf_car.getSolutionp()->topRows(nnodes);
 
   // get Psi_loc
   const SpMat Psi_loc = this->inf_car.getPsi_loc();
   
   // compute local estimator 
-  VectorXr f_loc_hat = Psi_loc * f_hat; 
+       VectorXr f_loc_hat = Psi_loc * f_hat; 
 
   // derive the variance-covariance matrix of f_loc_hat
   MatrixXr V_f_loc = Psi_loc * this->V_f * Psi_loc.transpose();
 
   // compute the quantile 
-  Real alpha = this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
+       Real alpha = this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
   Real quant;
   
-  //ONE-AT-THE-TIME is the only possible implementation
-  //if(this->inf_car.getInfData()->get_interval_type()[this->pos_impl]=="one-at-the-time"){
-    // generate the distribution
-    boost::math::normal dist; // default is a standard normal
-    quant = boost::math::quantile(complement(dist, alpha/2));
-  //}
+  //ont-at-the-time confidence intervals is the only possible implementation here
+  // generate the distribution
+  boost::math::normal dist; // default is a standard normal
+  quant = boost::math::quantile(complement(dist, alpha/2));
+  
 
   for(UInt i=0; i<n_loc; ++i){
     result(i).resize(3);
@@ -441,7 +440,6 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
   this->S.resize(n_obs, n_obs);
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  //UInt q = this->inf_car.getq(); 
   MatrixXr Q = MatrixXr::Identity(n_obs, n_obs) - *(this->inf_car.getHp()); 
 
   if(this->inf_car.getInfData()->get_f_var() || (this->inf_car.getInfData()->get_component_type())[this->pos_impl]!="parametric"){
