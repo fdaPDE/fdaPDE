@@ -6,7 +6,7 @@
 #'@slot type A vector of integers taking value 1, 2, 3, 4 or 5 corresponding to Wald, Speckman, Eigen-Sign-Flip, Enhanced-Eigen-Sign-Flip or Sign-Flip inferential approach.
 #'@slot component A vector of integers taking value 1, 2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.  
 #'@slot exact An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
-#'whereas if 2 an approximated computation will be carried out.
+#'whereas if 2 an approximated computation will be carried out (not implemented in this version).
 #'@slot dim Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases. 
 #'@slot n_cov Number of covariates taken into account in the linear part of the regression problem.
 #'@slot locations A matrix of numeric coefficients with columns of dimension \code{dim}. When nonparametric inference is requested it represents the set of spatial locations for which the inferential analysis should be performed. 
@@ -25,7 +25,7 @@
 #'@slot quantile Vector of quantiles needed for confidence intervals, used only if interval is not 0.
 #'@slot alpha 1 minus confidence level vector of sign-flipping approaches confidence intervals. Used only if interval is not 0.
 #'@slot n_flip An integer representing the number of sign-flips in the case of sign-flipping approaches.
-#'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.
+#'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference (not implemented in this version).
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function \code{\link{inferenceDataObjectBuilder}},
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
@@ -86,9 +86,6 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'\item{'enh-esf'}{enhanced-eigen-sign-flip nonparametric approach.}
 #'}
 #'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.
-#'@param exact A logical used to decide the method used to estimate the statistics variance.
-#'The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
-#'In the second case the evaluation is exact but computationally expensive.
 #'@param dim Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 2D or 2.5D/3D problems (Must be set by the user)
 #'@param n_cov Number of the covariates, defaulted to NULL. (Must be set by the user)
 #'@param locations A matrix of the locations of interest when testing the nonparametric component f, defaulted to NULL
@@ -104,7 +101,6 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'The possible values are: FALSE (default) and TRUE. 
 #'@param level A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
 #'@param n_flip Number of flips performed in sign-flipping approaches, defaulted to 1000.
-#'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.
 #'@return The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
 #'@description A function that build an \code{\link{inferenceDataObject}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
@@ -113,7 +109,6 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'interval = NULL, 
 #'type = 'w', 
 #'component = 'parametric',
-#'exact = FALSE, 
 #'dim = NULL, 
 #'n_cov = NULL,
 #'locations = NULL,
@@ -123,22 +118,20 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'f0 = NULL,
 #'f_var = FALSE,
 #'level = 0.95,
-#'n_flip = 1000,
-#'tol_fspai = 0.05)
+#'n_flip = 1000)
 #' @export
 #' 
 #' 
 #' @examples 
-#' obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
+#' obj1<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
 #' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, n_cov = 3, location_indices = 1:100);
 #' obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
-#'  type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
+#'  type=c('w','s','esf','s'), dim=2, n_cov = 2, level=0.99)
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
                                 type = "w", 
                                 component = "parametric",
-                                exact = F,
                                 dim = NULL,
                                 n_cov = NULL,
                                 locations = NULL,
@@ -149,8 +142,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 f0 = NULL,
                                 f_var = F,
                                 level = 0.95,
-                                n_flip = 1000,
-                                tol_fspai = 0.05){
+                                n_flip = 1000
+                                ){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -182,18 +175,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(length(component) > 1 || component!="parametric"){
     if(class(component)!="character")
       stop("'component' should be a vector of characters with values among 'parametric', 'nonparametric' or 'both'" )
-  }
-  
-  if(exact != F){
-    if(class(exact)!="logical")
-      stop("'exact' should be either TRUE or FALSE ")
-    if(length(exact)==0)
-      stop("'exact' is zero dimensional, should be either TRUE or FALSE")
-    if(exact!=T)
-      stop("'exact' should be either TRUE or FALSE")
-    exact_numeric=as.integer(1)
-  }else{
-    exact_numeric=as.integer(2)
   }
   
   if(!is.null(dim)){
@@ -284,13 +265,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
     if(class(n_flip)!="numeric" && class(n_flip)!="integer")
       stop("'n_flip' should be an integer or convertible to integer type")
     n_flip=as.integer(n_flip)
-  }
-  
-  if(tol_fspai!=0.05){
-    if(class(tol_fspai)!="numeric")
-      stop("'tol_fspai' should be numeric")
-    if(length(tol_fspai)==0)
-      stop("'tol_fspai' is zerodimensional, should be a positive number between 0 and 1")
   }
   
   # Check of consistency of parameters. Translation into numeric representation. The checks are repeated for each element of the vectors test, interval and type
@@ -600,21 +574,15 @@ if(sum(component == "nonparametric")!=length(component)){
     n_flip <- as.integer(1000)
   }
   
-  if(exact==FALSE){
-    if(tol_fspai <= 0 )                                                
-      stop("tol_fspai should be a positive value")
-  }
-  
-  
   definition=as.integer(1)
   
   # Building the output object, returning it
   if(!is.null(locations_indices))
-    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
-              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = as.integer(1), dim = dim, n_cov = n_cov,
+              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = 0.05, definition=definition)
   else
-    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
-                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+    result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = as.integer(1), dim = dim, n_cov = n_cov,
+                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = 0.05, definition=definition)
     
   
   return(result)

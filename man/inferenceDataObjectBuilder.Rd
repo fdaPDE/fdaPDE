@@ -8,7 +8,6 @@ inferenceDataObjectBuilder<-function(test = NULL,
 interval = NULL, 
 type = 'w', 
 component = 'parametric',
-exact = FALSE, 
 dim = NULL, 
 n_cov = NULL,
 locations = NULL,
@@ -18,8 +17,7 @@ beta0 = NULL,
 f0 = NULL,
 f_var = FALSE,
 level = 0.95,
-n_flip = 1000,
-tol_fspai = 0.05)
+n_flip = 1000)
 }
 \arguments{
 \item{test}{A string defining the type of test to be performed. Multiple tests can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
@@ -50,10 +48,6 @@ tol_fspai = 0.05)
 
 \item{component}{A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.}
 
-\item{exact}{A logical used to decide the method used to estimate the statistics variance.
-The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
-In the second case the evaluation is exact but computationally expensive.}
-
 \item{dim}{Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 2D or 2.5D/3D problems (Must be set by the user)}
 
 \item{n_cov}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
@@ -78,8 +72,6 @@ The possible values are: FALSE (default) and TRUE.}
 \item{level}{A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.}
 
 \item{n_flip}{Number of flips performed in sign-flipping approaches, defaulted to 1000.}
-
-\item{tol_fspai}{Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.}
 }
 \value{
 The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
@@ -89,8 +81,8 @@ A function that build an \code{\link{inferenceDataObject}}. In the process of co
 that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
 }
 \examples{
-obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
+obj1<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
 obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, n_cov = 3, location_indices = 1:100);
 obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
- type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
+ type=c('w','s','esf','s'), dim=2, n_cov = 2, level=0.99)
 }

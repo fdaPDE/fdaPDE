@@ -17,7 +17,7 @@ class InferenceData
   		std::vector<std::string> interval_Type  	= {"not-defined"};	        //!< Values: not-defined [default], one-at-the-time, simultaneous, bonferroni
   		std::vector<std::string> implementation_Type  	= {"wald"}; 	                //!< Values: wald [default], speckman, sign-flip, eigen-sign-flip
 		std::vector<std::string> component_Type		= {"parametric"};		//!< Values: parametric [default], nonparametric, both
-  		std::string exact_Inference			= "non-exact";		        //!< Values: non-exact [default], exact 
+  		std::string exact_Inference			= "exact";		        //!< Values: exact [default], non-exact (not implemented in this version)
 		std::vector<bool> enhanced_Inference		= {false};			//!< Values: false [default], true 
 		// Parameters needed
 		MatrixXr locs_Inference;							//!< Matrix of spatial locations to be considered for nonparametric inference

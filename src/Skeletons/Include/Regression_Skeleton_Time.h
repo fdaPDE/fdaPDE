@@ -12,7 +12,6 @@
 #include "../../Inference/Include/Speckman.h"
 #include "../../Inference/Include/Eigen_Sign_Flip.h"
 #include "../../Inference/Include/Inference_Factory.h"
-#include "../../Global_Utilities/Include/FSPAI_Wrapper.h"
 #include <memory>
 
 template<typename InputHandler>
@@ -284,42 +283,20 @@ void inference_wrapper_time(const OptimizationData & opt_data, const Inference_C
   // since only inference on beta is implemented for ST, the rows corresponding to f inference will be empty to be coherent with the size of inference_Solver's output
   inference_output.resize(2*n_implementations+1, p+1);
 
-  if(inf_car.getInfData()->get_exact_inference() == "exact"){
-    // Select the right policy for inversion of MatrixNoCov
-    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
+  
+  // Select the right policy for inversion of MatrixNoCov
+  std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
 
-    for(UInt i=0; i<n_implementations; ++i){
-      // Factory instantiation for solver: using factory provided in Inference_Factory.h
-      std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
-		
-      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
-
-    }
-    
-    // Check if local f variance has to be computed
-    if(inf_car.getInfData()->get_f_var()){
-      std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
-    }
+  for(UInt i=0; i<n_implementations; ++i){
+    // Factory instantiation for solver: using factory provided in Inference_Factory.h
+    std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems
+    inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
   }
-  else{
-    // Select the right policy for inversion of MatrixNoCov
-    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = std::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
-
-    for(UInt i=0; i<n_implementations; ++i){
-      // Factory instantiation for solver: using factory provided in Inference_Factory.h
-      std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
-		
-      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
-
-
-    }
     
-    // Check if local f variance has to be computed
-    if(inf_car.getInfData()->get_f_var()){
-      std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
-    }
+  // Check if local f variance has to be computed
+  if(inf_car.getInfData()->get_f_var()){
+    std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
+    inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
   }
 
   return;

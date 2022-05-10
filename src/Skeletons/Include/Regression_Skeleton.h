@@ -18,7 +18,6 @@
 #include "../../Inference/Include/Inference_Factory.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
-#include "../../Global_Utilities/Include/FSPAI_Wrapper.h"
 #include <memory>
 #include <algorithm>
 #include <set>
@@ -283,47 +282,25 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data & ou
   // Preallocate with the correct dimension
   inference_output.resize(2*n_implementations+1, out_dim+1);
 
-  if(inf_car.getInfData()->get_exact_inference() == "exact"){
-    // Select the right policy for inversion of MatrixNoCov
-    std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
+  // Select the right policy for inversion of MatrixNoCov (Only exact inversion implemented in this CRAN version)
+  std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
 
-    for(UInt i=0; i<n_implementations; ++i){
-      // Factory instantiation for solver: using factory provided in Inference_Factory.h
-      std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
-		
-      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
+  for(UInt i=0; i<n_implementations; ++i){
+    // Factory instantiation for solver: using factory provided in Inference_Factory.h
+    std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems
+    inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
 
-      if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
-	output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
-      }
-    }
-    
-    // Check if local f variance has to be computed
-    if(inf_car.getInfData()->get_f_var()){
-      std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
+    if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1){
+      output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
     }
   }
-  else{
-    // Select the right policy for inversion of MatrixNoCov
-    std::shared_ptr<Inverse_Base<SpMat>> inference_Inverter = std::make_shared<Inverse_Non_Exact<InputHandler>>(inf_car);
-
-    for(UInt i=0; i<n_implementations; ++i){
-      // Factory instantiation for solver: using factory provided in Inference_Factory.h
-      std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems		
-		
-      inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
-
-
-    }
     
-    // Check if local f variance has to be computed
-    if(inf_car.getInfData()->get_f_var()){
-      std::shared_ptr<Inference_Base<InputHandler,SpMat>> inference_Solver = Inference_Factory<InputHandler,SpMat>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
-      inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
-    }
+  // Check if local f variance has to be computed
+  if(inf_car.getInfData()->get_f_var()){
+    std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
+    inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
   }
-
+  
   return;
   
 }

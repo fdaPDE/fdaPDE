@@ -16,9 +16,9 @@
 // *** Eigen_Sign_Flip_Base Class ***
 //! Hypothesis testing and confidence intervals using eigen-sign-flip implementation
 /*!
-  This template class is an abstract base class to perform hypothesis testing and computing confidence intervals using an eigen-sign-flip approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the partial residuals under the null hypothesis and a boolean indicating if the matrix Lambda has been computed. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the eigen-sign-flip apporach. It has a pure virtual method for the computation of Lambda, since it relies on the inversion of MatrixNoCov in an exact or non-exact way.
+  This template class is an abstract base class to perform hypothesis testing and computing confidence intervals using an eigen-sign-flip approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the partial residuals under the null hypothesis and a boolean indicating if the matrix Lambda has been computed. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the eigen-sign-flip apporach. It has a pure virtual method for the computation of Lambda, since it relies on the inversion of MatrixNoCov in an exact or non-exact way (not implemented in this version).
 \tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type in Inference_Carrier<InputHandler>
-\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoothers S and Lambda. SpMat type is related to approximated inference computation.
+\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoothers S and Lambda. SpMat type is related to approximated inference computation (not implemented in this version).
 */
 template<typename InputHandler, typename MatrixType>
 class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
@@ -73,37 +73,6 @@ public:
   Eigen_Sign_Flip_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
 };
 
-// *** Eigen_Sign_Flip_Non_Exact Class ***
-//! Hypothesis testing using Eigen-Sign-Flip implementation in a non-exact way 
-/*!
-  This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an approximated inversion of the MatrixNoCov. 
-*/
-template<typename InputHandler, typename MatrixType>
-class Eigen_Sign_Flip_Non_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
-private: 
-  void compute_Lambda(void) override;
-public:
-  // CONSTUCTOR
-  Eigen_Sign_Flip_Non_Exact()=delete;	//The default constructor is deleted
-  Eigen_Sign_Flip_Non_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
-};
-
-//We define the naive operator to compare two vectors, namely v > u if and only if 
-//each component of v (in absolute value) is strictly greater than 
-//the corresponding component of u (in absolute value)
-inline bool operator > (VectorXr v, VectorXr u){
-  UInt q=v.size();
-  if(u.size()!=q){
-    Rprintf("Error: in Eigen-Sign-Flip procedure two vectors of different length have been compared");
-    return false;
-  }
-  for (UInt i=0; i< q; i++){
-    if(fabs(v(i))<=fabs(u(i))){
-      return false;
-    }
-  }
-  return true;
-};
 
 //We define the naive operator to compare unilaterally two vectors, namely v > u if and only if 
 //each component of v is strictly greater than 

@@ -459,58 +459,6 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
-  // compute the inverse of the system matrix M by reconstructing the Woodbury decomposition
-  this->inverter->Compute_Inv();
- 
-  // check if the FSPAI algorithm has succeded in computing the inverse
-  if(this->inverter->get_status_inverse()==false){
-    this->is_S_computed = false;
-    return;
-  }
-
-  MatrixXr M_tilde_inv;
-  M_tilde_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
-
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();  
-  UInt q = this->inf_car.getq(); 
-
-  const MatrixType * E_tilde_inv = this->inverter->getInv();
-  const MatrixXr U_tilde = this->inf_car.getUp()->topRows(n_nodes);
-  const MatrixXr V_tilde = this->inf_car.getVp()->leftCols(n_nodes);
-  const MatrixXr C_tilde = -this->inf_car.getWtW_decp()->solve(MatrixXr::Identity(q, q));
-  const MatrixXr G_tilde = C_tilde + V_tilde*(*E_tilde_inv)*U_tilde;
-  
-  Eigen::PartialPivLU<MatrixXr> G_tilde_decp; 
-  G_tilde_decp.compute(G_tilde);
-  
-  M_tilde_inv = *E_tilde_inv - (*E_tilde_inv)*U_tilde*(G_tilde_decp.solve(V_tilde*(*E_tilde_inv)));
-  
-  this->S.resize(n_obs, n_obs);
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  MatrixXr Q = MatrixXr::Identity(n_obs, n_obs) - *(this->inf_car.getHp()); 
-
-  if(this->inf_car.getInfData()->get_f_var() || (this->inf_car.getInfData()->get_component_type())[this->pos_impl]!="parametric"){
-    this->Partial_S.resize(n_nodes, n_obs);
-    this->Partial_S = M_tilde_inv*(*Psi_t);
-  }
-  else{
-    this->Partial_S.resize(1,1);
-    this->Partial_S(0) = 0;
-  }
-  
-  
-  this->S = (*Psi)*M_tilde_inv*((*Psi_t)*Q);
-  
-  this->is_S_computed = true;
-  
-  return; 
-};
-
-
-template<typename InputHandler, typename MatrixType> 
 void Wald_Exact<InputHandler, MatrixType>::compute_B(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
@@ -531,34 +479,3 @@ void Wald_Exact<InputHandler, MatrixType>::compute_B(void){
   
   return; 
 };
-
-template<typename InputHandler, typename MatrixType> 
-void Wald_Non_Exact<InputHandler, MatrixType>::compute_B(void){
-  this->inverter->Compute_Inv();
-  
-  if(this->inverter->get_status_inverse()==false){
-    this->is_B_computed=false;
-    return;
-  }
-  
-  // extract the inverse of E
-  const MatrixType * E_tilde_inv = this->inverter->getInv();
-  
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp();
-    
-  this->B.resize(n_obs,n_obs);
- 
-  this->B = (*Psi)*((*E_tilde_inv)*(*Psi_t));
-  this->is_B_computed = true;
-
-  // compute also Partial_S
-  this->Partial_S.resize(n_nodes, n_obs);
-  this->Partial_S = (*E_tilde_inv)*(*Psi_t);
-  
-  return; 
-};
-
-

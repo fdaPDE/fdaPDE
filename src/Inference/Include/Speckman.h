@@ -16,9 +16,9 @@
 // *** Speckman_Base Class ***
 //! Hypothesis testing and confidence intervals using Speckman implementation
 /*!
-This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Speckman correction approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda squared, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the variance-covariance matrix V of the beta parameters, the vector of estimated beta parameters via Speckaman estimator, the LU decomposition of W^T *Lambda^2 * W, alongside with some covenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Speckman apporach. The methods related to the nonparametric component are overriden, but they are not actually implemented. It has a pure virtual method for the computation of Lambda squared, since it relies on the inversion of MatrixNoCov in an exact or non-exact way. Moreover it has also a method for the computation of the estimators beta_hat required by the Speckman inferential approach. 
+This template class is an abstract base class to perform hypothesis testing and/or compute confidence intervals using a Speckman correction approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda squared, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the variance-covariance matrix V of the beta parameters, the vector of estimated beta parameters via Speckaman estimator, the LU decomposition of W^T *Lambda^2 * W, alongside with some covenient boolean objects. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the Speckman apporach. The methods related to the nonparametric component are overriden, but they are not actually implemented. It has a pure virtual method for the computation of Lambda squared, since it relies on the inversion of MatrixNoCov in an exact or non-exact way (not implemented in this CRAN version). Moreover it has also a method for the computation of the estimators beta_hat required by the Speckman inferential approach. 
 \tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type in Inference_Carrier<InputHandler>
-\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoother Lambda. SpMat type is related to approximated inference computation.
+\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoother Lambda. SpMat type is related to approximated inference computation (not implemented in this CRAN version).
 */
 template<typename InputHandler, typename MatrixType>
 class Speckman_Base:public Inference_Base<InputHandler, MatrixType>{
@@ -71,23 +71,6 @@ public:
   Speckman_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Speckman_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
 
 };
-
-// *** Speckman_Non_Exact Class ***
-//! Hypothesis testing and confidence intervals using Speckman implementation in a non-exact way 
-/*!
-   This template class derives from the Speckman_Base class and it overrides the method that manages the computation of the matrix Lambda2, relying on an approximated inversion of the MatrixNoCov. 
-*/
-template<typename InputHandler, typename MatrixType>
-class Speckman_Non_Exact:public Speckman_Base<InputHandler, MatrixType>{
-private: 
-  void compute_Lambda2(void) override;
-public:
-  // CONSTUCTOR
-  Speckman_Non_Exact()=delete;	//The default constructor is deleted
-  Speckman_Non_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Speckman_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
-
-};
-
 
 #include "Speckman_imp.h"
 

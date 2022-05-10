@@ -27,7 +27,7 @@ if 2 simultaneous confidence intervals are computed, if 3 Bonferroni confidence 
 \item{\code{component}}{A vector of integers taking value 1, 2 or 3, indicating whether the inferential analysis should be carried out respectively for the parametric, nonparametric or both the components.}
 
 \item{\code{exact}}{An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
-whereas if 2 an approximated computation will be carried out.}
+whereas if 2 an approximated computation will be carried out (not implemented in this version).}
 
 \item{\code{dim}}{Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases.}
 
@@ -60,7 +60,7 @@ whereas if 2 they will not.}
 
 \item{\code{n_flip}}{An integer representing the number of sign-flips in the case of sign-flipping approaches.}
 
-\item{\code{tol_fspai}}{A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference.}
+\item{\code{tol_fspai}}{A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference (not implemented in this version).}
 
 \item{\code{definition}}{An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function \code{\link{inferenceDataObjectBuilder}},
 leading to avoid some of the checks that are performed on inference data within smoothing functions.}

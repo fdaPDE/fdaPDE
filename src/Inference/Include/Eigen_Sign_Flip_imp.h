@@ -1193,30 +1193,3 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   
   return; 
 };
-
-template<typename InputHandler, typename MatrixType> 
-void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
-  this->inverter->Compute_Inv();
-  
-  if(this->inverter->get_status_inverse()==false){
-    this->is_Lambda_computed=false;
-    return;
-  }
-  
-  // extract the inverse of E
-  const MatrixType * E_tilde_inv = this->inverter->getInv();
-  
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp();
-  UInt q = this->inf_car.getq(); 
-  
-  this->Lambda.resize(n_obs,n_obs);
-  SpMat Identity(n_obs, n_obs);
-  Identity.setIdentity();
-  this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t))); // I - Psi( Psi^T Psi + P)^-1 Psi^T
-  this->is_Lambda_computed = true;
-  
-  return; 
-};

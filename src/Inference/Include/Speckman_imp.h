@@ -245,29 +245,3 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   return; 
 };
 
-template<typename InputHandler, typename MatrixType> 
-void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
-  this->inverter->Compute_Inv();
-
-  if(this->inverter->get_status_inverse()==false){
-    this->is_Lambda2_computed = false;
-    return;
-  } 
-
-  // extract the inverse of E_tilde
-  const MatrixType * E_tilde_inv = this->inverter->getInv();
-  
-  UInt n_obs = this->inf_car.getN_obs();
-  UInt n_nodes = this->inf_car.getN_nodes();
-  
-  const SpMat * Psi = this->inf_car.getPsip();
-  const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
-  
-  this->Lambda2.resize(n_obs, n_obs);
-  SpMat Identity(n_obs, n_obs);
-  Identity.setIdentity();
-  this->Lambda2 = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
-  this->is_Lambda2_computed = true;
-  
-  return; 
-};
