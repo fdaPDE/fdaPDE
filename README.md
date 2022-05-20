@@ -19,9 +19,6 @@ Compiled in Win RStudio, Ubuntu using g++ compiler and in macOS: for the precise
 
 /data contains the data to run the tests in /tests.
 
-<<<<<<< HEAD
-/tests contains the test to be run: smooth.FEM.2D.tests, smooth.FEM.2.5D.tests.R, smooth.FEM.3D.tests.R.    In particular for the iterative method:   smooth.FEM.time.tests.R
-=======
 /tests contains the test to be run: smooth.FEM.2D.tests, smooth.FEM.2.5D.tests.R, smooth.FEM.3D.tests.R.  In particular for the iterative method:   smooth.FEM.time.tests.R
 >>>>>>> master
 ## Installation:
@@ -29,7 +26,7 @@ Two different methods are proposed in order to install the package in the R envi
 Download the `.zip` file from the repository, unzip it, and for the installation choose one of the two following methods:  
 
 - R console:
-        ```install.packages("/path/to/fdaPDE_Massardi_Spaziani-master", type='source', repos=NULL)```
+        ```install.packages("/path/to/fdaPDE", type='source', repos=NULL)```
 
 - From the Terminal: 
         ```$ R CMD build <path to folder to be installed>```     
