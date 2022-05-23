@@ -108,7 +108,7 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 	psi_.resize(nlocations, nnodes);	// Resize the matrix
 
 	// Optimized strategies according to the presence of locations
-	if(regressionData_.isLocationsByNodes() & !regressionData_.isLocationsByBarycenter()) // .Pointwise data -- no barycenters
+	if(regressionData_.isLocationsByNodes() && !regressionData_.isLocationsByBarycenter()) // .Pointwise data -- no barycenters
 	{
 		std::vector<coeff> tripletAll;
 		if(!regressionData_.isSpaceTime()) // Just spatial case
