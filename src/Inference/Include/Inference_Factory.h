@@ -26,7 +26,7 @@ private:
   }
 
 public:
-  //! A method that takes as parameter a string and builds a pointer to the right implementation object
+  //! A method that takes as parameter a string and builds a pointer to the right implementation object. If the same implementation is required more than once, the same unique object is returned and reused.
   /*!
     \param implementation_type_ type of implementation required
     \param inverter_ class demanded to the computation of MatrixNoCov inverse

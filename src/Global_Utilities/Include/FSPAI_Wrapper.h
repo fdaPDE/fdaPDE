@@ -21,7 +21,7 @@ struct FSPAI_data{
   };
 
 
-//! Wrapper for FSPAI methods used to approximate the inverse of a sparse matrix
+//! Wrapper for FSPAI methods used to approximate the inverse of a sparse matrix. This function builds the input arguments of FSPAI_Solver_Wrapper(argc,argv) function according to the requirements of the original main.cpp function in FSPAI library. The original code, documentation and manual can be found at the link https://www5.in.tum.de/wiki/index.php/FSPAI.
 /*
   \param A the sparse matrix to be inverted 
   \param A_inv the inverse of A that will be computed by FSPAI

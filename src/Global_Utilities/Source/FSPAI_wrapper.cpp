@@ -24,7 +24,7 @@ bool FSPAI_Wrapper(const SpMat & A, SpMat & A_inv, Real tol_Inverse){
   
   // Vector of parameters that are needed by FSPAI library for the computation of the inverse
   std::vector<std::string> SPAI_Arguments = {"FSPAI_Solver_Wrapper", Temp_name_write.c_str(), "-diag", "1", "-ep", FSPAI_dat.tol_Inverse.c_str(),
-    "-ns", FSPAI_dat.max_Step_Col.c_str(), "-mn", FSPAI_dat.max_New_Nz.c_str(), "-out", FSPAI_dat.out_File.c_str(), "-sol", FSPAI_dat.sol.c_str()}; //ONLY SEQUENTIAL UP TO NOW
+    "-ns", FSPAI_dat.max_Step_Col.c_str(), "-mn", FSPAI_dat.max_New_Nz.c_str(), "-out", FSPAI_dat.out_File.c_str(), "-sol", FSPAI_dat.sol.c_str()}; //The meaning of the parameters can be found in the FSPAI original manual
 
   // Since FSPAI_Solver_Wrapper is expecting as inputs: (int argc, char *argv[])
   std::vector<char*> SPAI_Argv;
