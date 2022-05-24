@@ -27,9 +27,9 @@ protected:
 	//Real lambdaT = 1.0;					// time smoothing parameter
 	//bool parabolic = false;
 	//bool timeDependent = false;
-	bool iterative = false;
+	//bool iterative = false;
 
-	UInt M_;
+	//UInt M_;
 	Real lambda = 1.0;      // The space smoothing parameter
 
 	//Only used for BlockPreconditioner
@@ -56,10 +56,10 @@ public:
 	// Solve the system
 	virtual MatrixXr system_solve(const MatrixXr & b) const;
 
-	// Iterative method flag setter
-	void setIterative(bool flag) { iterative = flag; }
+	//// Iterative method flag setter
+	//void setIterative(bool flag) { iterative = flag; }
 
-	void setM(UInt M) { M_ = M; }
+	//void setM(UInt M) { M_ = M; }
 
 	// Only used for BlockPreconditioner: A method storing the SE block of the original matrix
 	virtual void setSEblock(const SpMat & SE) { SEblock = SE; }

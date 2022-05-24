@@ -108,7 +108,7 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 	psi_.resize(nlocations, nnodes);	// Resize the matrix
 
 	// Optimized strategies according to the presence of locations
-	if(regressionData_.isLocationsByNodes() & !regressionData_.isLocationsByBarycenter()) // .Pointwise data -- no barycenters
+	if(regressionData_.isLocationsByNodes() && !regressionData_.isLocationsByBarycenter()) // .Pointwise data -- no barycenters
 	{
 		std::vector<coeff> tripletAll;
 		if(!regressionData_.isSpaceTime()) // Just spatial case
@@ -608,6 +608,7 @@ template<typename InputHandler>
 template<typename Solver>
 void MixedFERegressionBase<InputHandler>::system_factorize(Solver* solverobj)
 {
+
     UInt nnodes = N_*M_;	// Note that is only space M_=1
 	const VectorXr * P = regressionData_.getWeightsMatrix(); // Matrix of weights for GAM
 
@@ -654,7 +655,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize(Solver* solverobj)
 		if (!this->isIterative)
 		{
 			MatrixXr y = solverobj->system_solve(U_);
-            MatrixXr D = V_ * y;
+			MatrixXr D = V_ * y;
 
             // G = C + D
             MatrixXr G;
@@ -673,50 +674,49 @@ template<typename InputHandler>
 template<typename Derived, typename Solver>
 MatrixXr MixedFERegressionBase<InputHandler>::solve_covariates_iter(const Eigen::MatrixBase<Derived>& b, UInt time_index, Solver* solverobj)
 {
-	//Iterative method, called only if there are covariates
-	//splits the matrices U,V (built in system_factorize) and find the solution
+    //Iterative method, called only if there are covariates
+    //splits the matrices U,V (built in system_factorize) and find the solution
 
-	MatrixXr W(*(this->regressionData_.getCovariates()));
-	MatrixXr V_k = MatrixXr::Zero(V_.rows(), 2 * N_);
-	V_k.leftCols(N_) = V_.block(0, time_index * N_, V_.rows(), N_);
+    MatrixXr W(*(this->regressionData_.getCovariates()));
+        MatrixXr V_k =  MatrixXr::Zero(V_.rows(),2*N_);
+        V_k.leftCols(N_) = V_.block(0, time_index*N_ , V_.rows(), N_ );
 
-	MatrixXr U_k = MatrixXr::Zero(2 * N_, U_.cols());
-	U_k.topRows(N_) = U_.block(time_index * N_, 0, N_, U_.cols());
+        MatrixXr U_k =  MatrixXr::Zero(2*N_, U_.cols());
+        U_k.topRows(N_) = U_.block(time_index*N_ ,0, N_, U_.cols());
 
-	MatrixXr y = solverobj->system_solve(U_k);
-	MatrixXr D = V_k * y;
+		MatrixXr y = solverobj->system_solve(U_k);
+		MatrixXr D = V_k * y;
 
-	// G = C + D
-	MatrixXr G;
-	G = -W.transpose() * W + D;
-	Gdec_.compute(G);
+        // G = C + D
+        MatrixXr G;
+        G = -W.transpose()*W + D;
+        Gdec_.compute(G);
 
-	MatrixXr x1 = solverobj->system_solve(b);
+		MatrixXr x1 = solverobj->system_solve(b);
 
-	// Resolution of G * x2 = V * x1
-	MatrixXr x2 = Gdec_.solve(V_k * x1);
+        // Resolution of G * x2 = V * x1
+        MatrixXr x2 = Gdec_.solve(V_k*x1);
 
-	// Resolution of the system matrixNoCov * x3 = U * x2
-	x1 -= solverobj->system_solve(U_k * x2);
+        // Resolution of the system matrixNoCov * x3 = U * x2
+		x1 -= solverobj->system_solve(U_k * x2);
 
-	return x1;
+        return x1;
 }
 
 template<typename InputHandler>
 template<typename Solver>
-MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr & b, Solver* solverobj)
+MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr& b, Solver* solverobj)
 {
-	//solverobj->compute(this->matrixNoCov_);
 	if(isMatrixNoCov_factorized()) {
 	 // Resolution of the system matrixNoCov * x1 = b
-	 MatrixXr x1 = solverobj->system_solve(b);
-	 if(regressionData_.getCovariates()->rows() != 0 && !this->isIterative)
-	 {
-		 // Resolution of G * x2 = V * x1
-		 MatrixXr x2 = Gdec_.solve(V_*x1);
-		 // Resolution of the system matrixNoCov * x3 = U * x2
-		 MatrixXr x3 = solverobj->system_solve(MatrixXr(U_ * x2));
-		 x1 -= x3;
+		MatrixXr x1 = solverobj->system_solve(b);
+		if (regressionData_.getCovariates()->rows() != 0 && !this->isIterative)
+		{
+			// Resolution of G * x2 = V * x1
+			MatrixXr x2 = Gdec_.solve(V_ * x1);
+			// Resolution of the system matrixNoCov * x3 = U * x2
+			MatrixXr x3 = solverobj->system_solve(MatrixXr(U_ * x2));
+			x1 -= x3;
 	 }
 	return x1;
 	}
@@ -746,18 +746,18 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_in
 
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
 	switch (GCVmethod == "exact") {
-	case 1:
-		if (this->isIterative & !isGAMData)
-			Rprintf("Function computeDOFExact_iterative moved to Lambda_optimizer\n");
-		else
-			computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
-		break;
-	case 0:
-		if (this->isIterative & !isGAMData)
-			Rprintf("Function computeDOFStochastic_iterative moved to Lambda_optimizer\n");
-		else
-			this->template computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT, &solverobj);
-		break;
+		case 1:
+			if(this->isIterative & !isGAMData)
+				Rprintf("Function computeDOFExact_iterative moved to Lambda_optimizer\n");
+			else
+				computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
+			break;
+		case 0:
+			if(this->isIterative & !isGAMData)
+				Rprintf("Function computeDOFStochastic_iterative moved to Lambda_optimizer\n");
+			else
+				this->template computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT, &solverobj);
+			break;
 	}
 }
 
@@ -1224,39 +1224,42 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 //----------------------------------------------------------------------------//
 // Composed operations
 
+// To be general, it takes in input the value of lambda
 template<typename InputHandler>
 template<typename Solver>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S, Solver* solverobj)
 {
-	if(!this->isIterative)
-		solverobj->setM(this->M_);
-	else
-		solverobj->setM(1);
+	//if (!this->isIterative)
+	//	solverobj->setM(this->M_);
+	//else
+	//	solverobj->setM(1);
 
 	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
 	isMatrixNoCov_computed = true;
 }
 
+
 template<typename InputHandler>
 template<typename Solver>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real lambdaT, Solver* solverobj)
 {
-	this->R0_lambda = (-lambdaS) * R0_; // build the SouthEast block of the matrix
-	this->R1_lambda = (-lambdaS) * R1_;
-	// Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
-	// distinguishing between iterative and monolithic method
-	if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && !this->isIterative)
-	{
-		this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
-	}
-	if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && this->isIterative)
-	{
-		//Recall: with the iterative method the  matrix of the systems have dimension 2N_*2N_ i
-		Real delta = mesh_time_[1] - mesh_time_[0];
-		this->R1_lambda = (lambdaS)*R1_ - (lambdaT / delta) * R0_lambda;
-	}
 
-	SpMat R1_lambdaT(R1_lambda.transpose());
+    this->R0_lambda = (-lambdaS) * R0_; // build the SouthEast block of the matrix
+    this->R1_lambda = (-lambdaS) * R1_;
+    // Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
+    // distinguishing between iterative and monolithic method
+    if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && !this->isIterative)
+    {
+        this->R1_lambda -= lambdaS * (lambdaT * LR0k_);
+    }
+    if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && this->isIterative)
+    {
+        //Recall: with the iterative method the  matrix of the systems have dimension 2N_*2N_ i
+        Real delta = mesh_time_[1] - mesh_time_[0];
+        this->R1_lambda = (lambdaS) * R1_ - (lambdaT / delta) * R0_lambda;
+    }
+
+	//SpMat R1_lambdaT(R1_lambda.transpose());
 	//if(!this->isIterative)
 	//	solverobj->setM(this->M_);
 	//else
@@ -1273,58 +1276,31 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
 	//	matrixNoCov_ = solverobj->buildSystemMatrix(this->DMat_, this->R0_lambda, this->R1_lambda, R1_lambdaT);
 	//}
 
-
-	if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
-	{
-		this->buildMatrixNoCov(this->DMat_ + lambdaT * Ptk_, this->R1_lambda, this->R0_lambda);
-	}
-	else
-	{
-		this->buildMatrixNoCov(this->DMat_, this->R1_lambda, this->R0_lambda);
-	}
+    // Update NorthWest block of matrix if separable problem
+    if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
+    {
+        this->buildMatrixNoCov(this->DMat_ + lambdaT * Ptk_, R1_lambda, R0_lambda);
+    }
+    else
+    {
+        this->buildMatrixNoCov(this->DMat_, R1_lambda, R0_lambda);
+    }
 	solverobj->compute(matrixNoCov_);
-
-	//if (this->isIterative)
-	//	solverobj->setIterative(true);
-
-	//// Update the SouthWest block of the matrix (also the NorthEast block transposed) if parabolic
-	//// distinguishing between iterative and monolithic method
-	//if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && !this->isIterative)
-	//{
-	//	solverobj->addTimeCorrection(std::make_shared<SpMat>(LR0k_), lambdaT, true);
-	//}
-	//if (regressionData_.isSpaceTime() && regressionData_.getFlagParabolic() && this->isIterative)
-	//{
-	//	//Recall: with the iterative method the  matrix of the systems have dimension 2N_*2N_ i
-	//	Real delta = mesh_time_[1] - mesh_time_[0];
-	//	//this->R1_lambda = (lambdaS) * R1_ - (lambdaT / delta) * R0_lambda;
-	//	solverobj->addTimeCorrection(std::make_shared<SpMat>(LR0k_), lambdaT / delta, true);
-	//}
-
-	//// Update NorthWest block of matrix if separable problem
-	//else if (regressionData_.isSpaceTime() && !regressionData_.getFlagParabolic())
-	//{
-	//	solverobj->addTimeCorrection(std::make_shared<SpMat>(Ptk_), lambdaT, false);
-	//}
-
-	//solverobj->setM(M_);
-	//matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambdaS);
 	isMatrixNoCov_computed = true;
 }
-
 
 //----------------------------------------------------------------------------//
 // Public solvers
 template<typename InputHandler>
 template<typename Solver>
-MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr& b)
+MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 {
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
 	{
 		if (this->getSolver() == 3)
 		{
-			UInt nnodes = N_*M_;
+			UInt nnodes = N_ * M_;
 			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
 			solverobj.setSEblock(tempSE);
 		}
@@ -1339,37 +1315,38 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr& b)
 	if (this->getSolver() == 2)
 		solverobj.set_lambdaS(lambdaS);
 
-    if(lambdaS!=last_lambdaS || lambdaT!=last_lambdaT)
+	if (lambdaS != last_lambdaS || lambdaT != last_lambdaT)
 	{
-		if(!regressionData_.isSpaceTime())
+		if (!regressionData_.isSpaceTime())
 			this->template buildSystemMatrix(lambdaS, &solverobj);
-        else
+		else
 			this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
 
-		if (regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
+
+		if(regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
 		{
 			this->addDirichletBC_matrix();
 			solverobj.compute(matrixNoCov_);
 		}
-        this->template system_factorize(&solverobj);
+		this->template system_factorize(&solverobj);
     }
 
 	optimizationData_.set_last_lS_used(lambdaS);
 	optimizationData_.set_last_lT_used(lambdaT);
 
-    return this->template system_solve(b, &solverobj);
+	return this->template system_solve(b, &solverobj);
 }
 
 template<typename InputHandler>
 template<typename Solver>
-	MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b_iter(const MatrixXr& b, UInt time_index)
+MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b_iter(const MatrixXr& b, UInt time_index)
 {
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
 	{
 		if (this->getSolver() == 3)
 		{
-			UInt nnodes = N_*M_;
+			UInt nnodes = N_ * M_;
 			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
 			solverobj.setSEblock(tempSE);
 		}
@@ -1382,9 +1359,9 @@ template<typename Solver>
 	if (this->getSolver() == 2)
 		solverobj.set_lambdaS(lambdaS);
 
-	if(!regressionData_.isSpaceTime())
+	if (!regressionData_.isSpaceTime())
 		this->template buildSystemMatrix(lambdaS, &solverobj);
-    else
+	else
 		this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
 
 	if (regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
@@ -1393,20 +1370,20 @@ template<typename Solver>
 		solverobj.compute(matrixNoCov_);
 	}
 
-    this->template system_factorize(&solverobj);
+	this->template system_factorize(&solverobj);
         
 	optimizationData_.set_last_lS_used(lambdaS);
 	optimizationData_.set_last_lT_used(lambdaT);
 
-    return this->template solve_covariates_iter(b, time_index, &solverobj);
+	return this->template solve_covariates_iter(b, time_index, &solverobj);
 }
 
 template<typename InputHandler>
 template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
-	UInt nnodes = N_*M_; // Define nuber of nodes
-	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
+	UInt nnodes = N_ * M_; // Define nuber of nodes
+	const VectorXr* obsp = regressionData_.getObservations(); // Get observations
 
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
@@ -1461,17 +1438,17 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 
 			if (this->getSolver() == 2)
 				solverobj.set_lambdaS(lambdaS);
-		 		
+
 			_rightHandSide = rhs;
 
 			if(isGAMData || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used() ||
 				optimizationData_.get_current_lambdaT()!=optimizationData_.get_last_lT_used())
 			{
-				if(!regressionData_.isSpaceTime())
+				if (!regressionData_.isSpaceTime())
 				{
 					this->template buildSystemMatrix(lambdaS, &solverobj);
 				}
-                        	else
+				else
 				{
 					this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
 				}
@@ -1493,7 +1470,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			}
 
 			// Applying boundary conditions if necessary
-			if (regressionData_.getDirichletIndices()->size() != 0)  // if areal data NO BOUNDARY CONDITIONS
+			if(regressionData_.getDirichletIndices()->size() != 0)  // if areal data NO BOUNDARY CONDITIONS
 			{
 				addDirichletBC();
 				solverobj.compute(matrixNoCov_);
@@ -1508,7 +1485,8 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			}
 
 			// system solution
-			_solution(s,t) = this->template system_solve(this->_rightHandSide, &solverobj);
+			_solution(s, t) = this->template system_solve(this->_rightHandSide, &solverobj);
+
 			
 			if(optimizationData_.get_loss_function()!="GCV" || isGAMData)
 			{
@@ -1554,10 +1532,10 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 template<typename InputHandler>
 template<typename Solver>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
-    UInt nnodes = N_ * M_; // Define number of space-times nodes
-    Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
-    const VectorXr *obsp = regressionData_.getObservations(); // Get observations
-    UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
+	UInt nnodes = N_ * M_; // Define number of space-times nodes
+	Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
+	const VectorXr* obsp = regressionData_.getObservations(); // Get observations
+	UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
 
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
@@ -1634,343 +1612,310 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
             SpMat psi_temp_mini=psi_mini;
             // (i=0) Solution Initialization: f^{k,0} (Solving a only space problem)
             // Debugging purpose
-            initialize_f(lambdaS, s,t, &solverobj);
+			initialize_f(lambdaS, s, t, &solverobj);
 
             _solution_f_old_ = _solution(s, t).topRows(nnodes);
 
             if (regressionData_.getObservationsNA()->size() == 0) {
-                this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
-                // Applying boundary conditions if necessary
+				this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
+				// Applying boundary conditions if necessary
 				if (regressionData_.getDirichletIndices()->size() != 0)
 				{
 					addDirichletBC();
 					solverobj.compute(matrixNoCov_);
 				}
-                this->template system_factorize(&solverobj);
-            }
-
-            initialize_g(lambdaS,lambdaT, s, t);
-
-            if (regressionData_.getCovariates()->rows() != 0) {
-                MatrixXr W(*(this->regressionData_.getCovariates()));
-                VectorXr beta_rhs;
-                beta_rhs = W.transpose() * (*obsp - psi_ * _solution(s, t).topRows(psi_.cols()));
-                _beta(s, t) = WTW_.solve(beta_rhs);
-            }
-            psi_mini = psi_temp_mini;
-            J = compute_J(s,t);
-
-            //corrrezione rhs
-            _rightHandSide.bottomRows(nnodes) *= lambdaS;
-
-            UInt i = 1;
-            while (stopping_criterion(i, J, J_old))
-            {
-                for (UInt k = 0; k < M_; ++k) {
-
-                    if (regressionData_.getObservationsNA()->size()!= 0)
-                    //modifying psi_mini to take care of missing values
-                    {
-                        psi_mini = psi_.block(k * nlocations, k* N_, nlocations, N_);
-                        DMat_ = psi_mini.transpose()* psi_mini;
-                        this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
-						if (regressionData_.getDirichletIndices()->size() != 0)
-						{
-							addDirichletBC();
-							solverobj.compute(matrixNoCov_);
-						}
-                        this->template system_factorize(&solverobj);
-                    }
+				this->template system_factorize(&solverobj);
+			}
 
 
-                    // updating of the right hand side
-                    update_rhs(k, lambdaS, lambdaT, s, t);
+			// updating of the right hand side
+			update_rhs(k, lambdaS, lambdaT, s, t);
 
-                    if (regressionData_.getCovariates()->rows() == 0)
-                        _solution_k_ = this->template system_solve(_rightHandSide_k_, &solverobj);
-                    else
-                        _solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_,k, &solverobj);
+			if (regressionData_.getCovariates()->rows() == 0)
+				_solution_k_ = this->template system_solve(_rightHandSide_k_, &solverobj);
+			else
+				_solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_, k, &solverobj);
 
-                    //Store the solution fˆ{k,i}, gˆ{k,i} in _solution(s,t)
-                    _solution(s, t).segment(k * N_, N_) = _solution_k_.topRows(N_);
-                    _solution(s, t).segment(nnodes + k * N_, N_) = _solution_k_.bottomRows(N_);
-                }
+			//Store the solution fˆ{k,i}, gˆ{k,i} in _solution(s,t)
+			_solution(s, t).segment(k * N_, N_) = _solution_k_.topRows(N_);
+			_solution(s, t).segment(nnodes + k * N_, N_) = _solution_k_.bottomRows(N_);
+		}
 
-                _solution_f_old_ = _solution(s, t).topRows(nnodes);  // store f to update the rhs during the iterations
+		_solution_f_old_ = _solution(s, t).topRows(nnodes);  // store f to update the rhs during the iterations
 
-                // covariates computation
-                if (regressionData_.getCovariates()->rows() != 0) {
-                    MatrixXr W(*(this->regressionData_.getCovariates()));
-                    VectorXr beta_rhs;
-                    beta_rhs = W.transpose() * (*obsp - psi_ * _solution(s, t).topRows(psi_.cols()));
-                    _beta(s, t) = WTW_.solve(beta_rhs);
-                }
+		// covariates computation
+		if (regressionData_.getCovariates()->rows() != 0) {
+			MatrixXr W(*(this->regressionData_.getCovariates()));
+			VectorXr beta_rhs;
+			beta_rhs = W.transpose() * (*obsp - psi_ * _solution(s, t).topRows(psi_.cols()));
+			_beta(s, t) = WTW_.solve(beta_rhs);
+		}
 
-                J_old = J;
-                psi_mini = psi_temp_mini;
-                J = compute_J(s,t) ;
-                i++;
-            }
+		J_old = J;
+		psi_mini = psi_temp_mini;
+		J = compute_J(s, t);
+		i++;
+	}
 
-            Rprintf("Solution found after %d iterations (max number of iterations: %d)\n", i, (regressionData_.get_maxiter()+1));
+	Rprintf("Solution found after %d iterations (max number of iterations: %d)\n", i, (regressionData_.get_maxiter() + 1));
 
-            if(optimizationData_.get_loss_function()!="GCV" || isGAMData)
-            {
-                _dof(s,t) = -1;
-                _GCV(s,t) = -1;
-            }
-            if (regressionData_.getCovariates()->rows() != 0)
-                isUVComputed = false;
-        }
-    }
-    
-    if(!isGAMData &&
-	(optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used() ||
-	optimizationData_.get_current_lambdaT()!=optimizationData_.get_last_lT_used()))
+	if (optimizationData_.get_loss_function() != "GCV" || isGAMData)
+	{
+		_dof(s, t) = -1;
+		_GCV(s, t) = -1;
+	}
+	if (regressionData_.getCovariates()->rows() != 0)
+		isUVComputed = false;
+}
+	}
+
+	if (!isGAMData &&
+		(optimizationData_.get_current_lambdaS() != optimizationData_.get_last_lS_used() ||
+			optimizationData_.get_current_lambdaT() != optimizationData_.get_last_lT_used()))
 	{
 		optimizationData_.set_last_lS_used(optimizationData_.get_current_lambdaS());
 		optimizationData_.set_last_lT_used(optimizationData_.get_current_lambdaT());
 	}
-	
-    _rightHandSide = rhs;
 
-    return this->_solution;
+	_rightHandSide = rhs;
+
+	return this->_solution;
 }
 
 //---- ITERATIVE METHOD PART------
 template<typename InputHandler>
 template<typename Solver>
 void MixedFERegressionBase<InputHandler>::initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index, Solver* solverobj) {
-    UInt nnodes = N_ * M_; // Define number of space-times nodes
-    UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
-    if (regressionData_.getObservationsNA()->size() == 0) {
-        this->template buildSystemMatrix(lambdaS, solverobj);
-        // Applying boundary conditions if necessary
+	UInt nnodes = N_ * M_; // Define number of space-times nodes
+	UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
+	if (regressionData_.getObservationsNA()->size() == 0) {
+		this->template buildSystemMatrix(lambdaS, solverobj);
+		// Applying boundary conditions if necessary
 		if (regressionData_.getDirichletIndices()->size() != 0)
 		{
 			addDirichletBC();
 			solverobj->compute(matrixNoCov_);
 		}
-        this->template system_factorize(solverobj);
-    }
+		this->template system_factorize(solverobj);
+	}
 
-    for (UInt k = 0; k < M_; ++k) { //loop over time istants
+	for (UInt k = 0; k < M_; ++k) { //loop over time istants
 
-        if (regressionData_.getObservationsNA()->size()!= 0)
-            //modifying psi_mini to take care of missing values
-        {
-            psi_mini = psi_.block(k * nlocations, k* N_, nlocations, N_);
-            DMat_ = psi_mini.transpose()* psi_mini;
-            this->template buildSystemMatrix(lambdaS, solverobj);
+		if (regressionData_.getObservationsNA()->size() != 0)
+			//modifying psi_mini to take care of missing values
+		{
+			psi_mini = psi_.block(k * nlocations, k * N_, nlocations, N_);
+			DMat_ = psi_mini.transpose() * psi_mini;
+			this->template buildSystemMatrix(lambdaS, solverobj);
 			if (regressionData_.getDirichletIndices()->size() != 0)
 			{
 				addDirichletBC();
 				solverobj->compute(matrixNoCov_);
 			}
-            this->template system_factorize(solverobj);
-        }
+			this->template system_factorize(solverobj);
+		}
 
-        _rightHandSide_k_.topRows(N_) = _rightHandSide.segment(k * N_,
-                                                               N_);  //setting the right hand side of the system
-        _rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (k * N_), N_);
-        if (regressionData_.getCovariates()->rows() == 0)
-            _solution_k_ = this->template system_solve(_rightHandSide_k_, solverobj);
-        else
-            _solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_,k, solverobj);
-        _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_) = _solution_k_.topRows(N_); // saving f^{k,0}
-    }
+		_rightHandSide_k_.topRows(N_) = _rightHandSide.segment(k * N_,
+			N_);  //setting the right hand side of the system
+		_rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (k * N_), N_);
+		if (regressionData_.getCovariates()->rows() == 0)
+			_solution_k_ = this->template system_solve(_rightHandSide_k_, solverobj);
+		else
+			_solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_, k, solverobj);
+		_solution(lambdaS_index, lambdaT_index).segment(k * N_, N_) = _solution_k_.topRows(N_); // saving f^{k,0}
+	}
 }
 
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::initialize_g(Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index) {
-    // (backward in time)
-    UInt nnodes = N_ * M_; // Define number of space-times nodes
-    Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
-    Eigen::SparseLU<SpMat> Matdec_;
-    UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
+	// (backward in time)
+	UInt nnodes = N_ * M_; // Define number of space-times nodes
+	Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
+	Eigen::SparseLU<SpMat> Matdec_;
+	UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
 
-    VectorXr rhs_k = VectorXr::Zero(N_);
-    this->R1_lambda = (lambdaS) * R1_ + (lambdaT * lambdaS / delta) * R0_;
-    Matdec_.compute(R1_lambda);
-    for (UInt k = M_; k > 0; --k) {
-        if (regressionData_.getObservationsNA()->size()!= 0)
-            //modifying psi_mini to take care of missing values
-        {
-            psi_mini = psi_.block((k - 1) * nlocations, (k - 1) * N_, nlocations, N_);
-            DMat_ = psi_mini.transpose()* psi_mini;
-        }
+	VectorXr rhs_k = VectorXr::Zero(N_);
+	this->R1_lambda = (lambdaS)*R1_ + (lambdaT * lambdaS / delta) * R0_;
+	Matdec_.compute(R1_lambda);
+	for (UInt k = M_; k > 0; --k) {
+		if (regressionData_.getObservationsNA()->size() != 0)
+			//modifying psi_mini to take care of missing values
+		{
+			psi_mini = psi_.block((k - 1) * nlocations, (k - 1) * N_, nlocations, N_);
+			DMat_ = psi_mini.transpose() * psi_mini;
+		}
 
-        if (regressionData_.getCovariates()->rows() != 0) {
-            MatrixXr H_k_;
-            H_k_ = H_.block((k-1) * nlocations, (k-1) * nlocations, nlocations, nlocations);
-            MatrixXr Cov_block = psi_mini.transpose() * (H_k_) * psi_mini;
-            SpMat spCov_block;
-            spCov_block = Cov_block.sparseView();
-            if (k == M_)
-                rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
-                        (DMat_ - spCov_block)  * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_);
-            else
-                rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
-                        (DMat_- spCov_block) * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_) +
-                        (lambdaT / delta) * R0_lambda * _solution(lambdaS_index, lambdaT_index).segment(nnodes + (k * N_), N_);
-        }
+		if (regressionData_.getCovariates()->rows() != 0) {
+			MatrixXr H_k_;
+			H_k_ = H_.block((k - 1) * nlocations, (k - 1) * nlocations, nlocations, nlocations);
+			MatrixXr Cov_block = psi_mini.transpose() * (H_k_)*psi_mini;
+			SpMat spCov_block;
+			spCov_block = Cov_block.sparseView();
+			if (k == M_)
+				rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
+				(DMat_ - spCov_block) * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_);
+			else
+				rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
+				(DMat_ - spCov_block) * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_) +
+				(lambdaT / delta) * R0_lambda * _solution(lambdaS_index, lambdaT_index).segment(nnodes + (k * N_), N_);
+		}
 
-        else{
-            if (k == M_)
-                rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
-                        DMat_ * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_);
-            else
-                rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
-                        DMat_ * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_) +
-                        (lambdaT / delta) * R0_lambda * _solution(lambdaS_index, lambdaT_index).segment(nnodes + (k * N_), N_);
-        }
-        _solution(lambdaS_index, lambdaT_index).segment(nnodes + (k - 1) * N_, N_) = Matdec_.solve(rhs_k);
-    }
+		else {
+			if (k == M_)
+				rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
+				DMat_ * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_);
+			else
+				rhs_k = _rightHandSide.segment((k - 1) * N_, N_) -
+				DMat_ * _solution(lambdaS_index, lambdaT_index).segment((k - 1) * N_, N_) +
+				(lambdaT / delta) * R0_lambda * _solution(lambdaS_index, lambdaT_index).segment(nnodes + (k * N_), N_);
+		}
+		_solution(lambdaS_index, lambdaT_index).segment(nnodes + (k - 1) * N_, N_) = Matdec_.solve(rhs_k);
+	}
 
 }
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::update_rhs(UInt& time_index, Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index){
+void MixedFERegressionBase<InputHandler>::update_rhs(UInt& time_index, Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index) {
 
-    UInt nnodes = N_ * M_; // Define number of space-times nodes
-    Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
+	UInt nnodes = N_ * M_; // Define number of space-times nodes
+	Real delta = mesh_time_[1] - mesh_time_[0]; // Time interval
 
-    if (time_index == (M_ - 1))
-        _rightHandSide_k_.topRows(N_) = _rightHandSide.segment(time_index * N_, N_);
-    else
-        _rightHandSide_k_.topRows(N_) = _rightHandSide.segment(time_index * N_, N_) +
-                                        (lambdaT / delta) * R0_lambda *
-                                        _solution(lambdaS_index, lambdaT_index).segment(nnodes + (time_index + 1) * N_, N_);
+	if (time_index == (M_ - 1))
+		_rightHandSide_k_.topRows(N_) = _rightHandSide.segment(time_index * N_, N_);
+	else
+		_rightHandSide_k_.topRows(N_) = _rightHandSide.segment(time_index * N_, N_) +
+		(lambdaT / delta) * R0_lambda *
+		_solution(lambdaS_index, lambdaT_index).segment(nnodes + (time_index + 1) * N_, N_);
 
-    if (time_index == 0)
-        _rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (time_index * N_), N_);
-    else
-        _rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (time_index * N_), N_) +
-                                           ((lambdaT / delta) * R0_lambda *
-                                            _solution_f_old_.segment((time_index - 1) * N_, N_));
+	if (time_index == 0)
+		_rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (time_index * N_), N_);
+	else
+		_rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (time_index * N_), N_) +
+		((lambdaT / delta) * R0_lambda *
+			_solution_f_old_.segment((time_index - 1) * N_, N_));
 }
 
 template<typename InputHandler>
 bool MixedFERegressionBase<InputHandler>::stopping_criterion(UInt& index, Real J, Real J_old) {
-    // return true if the iterative method has to perform another iteration, false if it has to be stopped
+	// return true if the iterative method has to perform another iteration, false if it has to be stopped
 
-    bool do_stop_by_iteration = false;  // Do I need to stop becouse n_it > n_max?
-    bool do_stop_by_treshold = false; // Do I need to stop becouse |{J(i) - J(i-1)}/J(i)|< treshold?
+	bool do_stop_by_iteration = false;  // Do I need to stop becouse n_it > n_max?
+	bool do_stop_by_treshold = false; // Do I need to stop becouse |{J(i) - J(i-1)}/J(i)|< treshold?
 
-    if(index > regressionData_.get_maxiter()){
-        do_stop_by_iteration = true;
-    }
+	if (index > regressionData_.get_maxiter()) {
+		do_stop_by_iteration = true;
+	}
 
-    if(abs((J - J_old) / J) < regressionData_.get_treshold()){
-            do_stop_by_treshold = true;
-        }
+	if (abs((J - J_old) / J) < regressionData_.get_treshold()) {
+		do_stop_by_treshold = true;
+	}
 
-    return !(do_stop_by_iteration || do_stop_by_treshold );
+	return !(do_stop_by_iteration || do_stop_by_treshold);
 }
 
 template<typename InputHandler>
 Real MixedFERegressionBase<InputHandler>::compute_J(UInt& lambdaS_index, UInt& lambdaT_index) {
-    Real J_MSE = 0;
-    Real J_reg = 0;
-    Real lambdaS = (optimizationData_.get_lambda_S())[lambdaS_index];
-    UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
-    const VectorXr *obsp = regressionData_.getObservations();
+	Real J_MSE = 0;
+	Real J_reg = 0;
+	Real lambdaS = (optimizationData_.get_lambda_S())[lambdaS_index];
+	UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
+	const VectorXr* obsp = regressionData_.getObservations();
 
-    if (regressionData_.getCovariates()->rows() != 0) {
-        MatrixXr W(*(this->regressionData_.getCovariates()));
-        for (UInt k = 0; k < M_; ++k) {
-            psi_mini = psi_.block(k  * nlocations, k * N_, nlocations, N_);
-            MatrixXr W_k_ = W.block(k * nlocations,0,nlocations ,W.cols());
-            J_MSE += ((*obsp).segment(k * nlocations,nlocations) - psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_)-  W_k_ * _beta(lambdaS_index, lambdaT_index)).transpose() *
-                     ((*obsp).segment(k * nlocations,nlocations) - psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_)- W_k_ * _beta(lambdaS_index, lambdaT_index));
-            J_reg += lambdaS * (_solution(lambdaS_index, lambdaT_index).segment(N_*M_ + k  * N_, N_)).transpose() * ( _solution(lambdaS_index, lambdaT_index).segment(N_*M_ + k * N_, N_));
-        }
-    }
-    else {
-        for (UInt k = 0; k < M_; ++k) {
-            psi_mini = psi_.block(k * nlocations, k * N_, N_, N_);
-            J_MSE += ((*obsp).segment(k * nlocations,nlocations) -
-                    psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_)).transpose() *
-                     ((*obsp).segment(k * nlocations,nlocations) - psi_mini *  _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_));
-            J_reg += lambdaS * (_solution(lambdaS_index, lambdaT_index).segment(N_ * M_ + k * N_, N_)).transpose() *
-                     (_solution(lambdaS_index, lambdaT_index).segment(N_ * M_ + k * N_, N_));
+	if (regressionData_.getCovariates()->rows() != 0) {
+		MatrixXr W(*(this->regressionData_.getCovariates()));
+		for (UInt k = 0; k < M_; ++k) {
+			psi_mini = psi_.block(k * nlocations, k * N_, nlocations, N_);
+			MatrixXr W_k_ = W.block(k * nlocations, 0, nlocations, W.cols());
+			J_MSE += ((*obsp).segment(k * nlocations, nlocations) - psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_) - W_k_ * _beta(lambdaS_index, lambdaT_index)).transpose() *
+				((*obsp).segment(k * nlocations, nlocations) - psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_) - W_k_ * _beta(lambdaS_index, lambdaT_index));
+			J_reg += lambdaS * (_solution(lambdaS_index, lambdaT_index).segment(N_ * M_ + k * N_, N_)).transpose() * (_solution(lambdaS_index, lambdaT_index).segment(N_ * M_ + k * N_, N_));
+		}
+	}
+	else {
+		for (UInt k = 0; k < M_; ++k) {
+			psi_mini = psi_.block(k * nlocations, k * N_, N_, N_);
+			J_MSE += ((*obsp).segment(k * nlocations, nlocations) -
+				psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_)).transpose() *
+				((*obsp).segment(k * nlocations, nlocations) - psi_mini * _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_));
+			J_reg += lambdaS * (_solution(lambdaS_index, lambdaT_index).segment(N_ * M_ + k * N_, N_)).transpose() *
+				(_solution(lambdaS_index, lambdaT_index).segment(N_ * M_ + k * N_, N_));
 
 
-        }
-    }
-    return (J_MSE + J_reg);
+		}
+	}
+	return (J_MSE + J_reg);
 }
 
 //----------------------------------------------------------------------------//
 
 template<>
-class MixedFERegression<RegressionData>: public MixedFERegressionBase<RegressionData>
+class MixedFERegression<RegressionData> : public MixedFERegressionBase<RegressionData>
 {
-	public:
-		MixedFERegression(const RegressionData & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionData>(regressionData, optimizationData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionData & regressionData, OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionData>(mesh_time, regressionData, optimizationData, nnodes_) {};
+public:
+	MixedFERegression(const RegressionData& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionData>(regressionData, optimizationData, nnodes_) {};
+	MixedFERegression(const std::vector<Real>& mesh_time, const RegressionData& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionData>(mesh_time, regressionData, optimizationData, nnodes_) {};
 
-		template<UInt ORDER, UInt mydim, UInt ndim>
-		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
-		{
-			typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-		    MixedFERegressionBase<RegressionData>::preapply(stiff, ForcingTerm(), mesh);
-		}
+	template<UInt ORDER, UInt mydim, UInt ndim>
+	void preapply(const MeshHandler<ORDER, mydim, ndim>& mesh)
+	{
+		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		MixedFERegressionBase<RegressionData>::preapply(stiff, ForcingTerm(), mesh);
+	}
 };
 
 template<>
-class MixedFERegression<RegressionDataElliptic>: public MixedFERegressionBase<RegressionDataElliptic>
+class MixedFERegression<RegressionDataElliptic> : public MixedFERegressionBase<RegressionDataElliptic>
 {
-	public:
-		MixedFERegression(const RegressionDataElliptic & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionDataElliptic & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_) {};
+public:
+	MixedFERegression(const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
+	MixedFERegression(const std::vector<Real>& mesh_time, const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_) {};
 
-		template<UInt ORDER, UInt mydim, UInt ndim>
-		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
-		{
-			typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
-			typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-			typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
+	template<UInt ORDER, UInt mydim, UInt ndim>
+	void preapply(const MeshHandler<ORDER, mydim, ndim>& mesh)
+	{
+		typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
+		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
 
-	  		const Real& c = this->regressionData_.getC();
-	  		const Diffusion<PDEParameterOptions::Constant>& K = this->regressionData_.getK();
-	  		const Advection<PDEParameterOptions::Constant>& b = this->regressionData_.getBeta();
+		const Real& c = this->regressionData_.getC();
+		const Diffusion<PDEParameterOptions::Constant>& K = this->regressionData_.getK();
+		const Advection<PDEParameterOptions::Constant>& b = this->regressionData_.getBeta();
 
-			MixedFERegressionBase<RegressionDataElliptic>::preapply(c*mass+stiff[K]+b.dot(grad), ForcingTerm(), mesh);
+		MixedFERegressionBase<RegressionDataElliptic>::preapply(c * mass + stiff[K] + b.dot(grad), ForcingTerm(), mesh);
 
-		}
+	}
 };
 
 template<>
 class MixedFERegression<RegressionDataEllipticSpaceVarying> : public MixedFERegressionBase<RegressionDataEllipticSpaceVarying>
 {
-	public:
-		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(regressionData, optimizationData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionDataEllipticSpaceVarying & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_) {};
+public:
+	MixedFERegression(const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(regressionData, optimizationData, nnodes_) {};
+	MixedFERegression(const std::vector<Real>& mesh_time, const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_) {};
 
 
-		template< UInt ORDER, UInt mydim, UInt ndim>
-		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
-		{
-			typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
-			typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-			typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
+	template< UInt ORDER, UInt mydim, UInt ndim>
+	void preapply(const MeshHandler<ORDER, mydim, ndim>& mesh)
+	{
+		typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
+		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
 
-			const Reaction& c = this->regressionData_.getC();
-			const Diffusion<PDEParameterOptions::SpaceVarying>& K = this->regressionData_.getK();
-			const Advection<PDEParameterOptions::SpaceVarying>& b = this->regressionData_.getBeta();
-			const ForcingTerm& u= this->regressionData_.getU();
+		const Reaction& c = this->regressionData_.getC();
+		const Diffusion<PDEParameterOptions::SpaceVarying>& K = this->regressionData_.getK();
+		const Advection<PDEParameterOptions::SpaceVarying>& b = this->regressionData_.getBeta();
+		const ForcingTerm& u = this->regressionData_.getU();
 
-			this->isSpaceVarying = TRUE;
+		this->isSpaceVarying = TRUE;
 
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>::preapply(c*mass+stiff[K]+b.dot(grad), u, mesh);
+		MixedFERegressionBase<RegressionDataEllipticSpaceVarying>::preapply(c * mass + stiff[K] + b.dot(grad), u, mesh);
 
-		}
+	}
 };
 
 // -- TEMPORAL PART --
@@ -1979,20 +1924,20 @@ void MixedSplineRegression<InputHandler>::setPhi(void)
 {
 
 	Spline<SPLINE_DEGREE, ORDER_DERIVATIVE> spline(mesh_time_);
-	UInt M = spline.num_knots()-SPLINE_DEGREE-1;
+	UInt M = spline.num_knots() - SPLINE_DEGREE - 1;
 	UInt m = regressionData_.getNumberofTimeObservations();
 
 	phi_.resize(m, M);
 	Real value;
 
-	for(UInt i=0; i<m; ++i)
+	for (UInt i = 0; i < m; ++i)
 	{
-		for(UInt j=0; j<M; ++j)
+		for (UInt j = 0; j < M; ++j)
 		{
 			value = spline.BasisFunction(j, this->regressionData_.getTimeLocations()[i]);
-			if(value!=0)
+			if (value != 0)
 			{
-				phi_.coeffRef(i,j) = value;
+				phi_.coeffRef(i, j) = value;
 			}
 		}
 	}
@@ -2002,15 +1947,15 @@ void MixedSplineRegression<InputHandler>::setPhi(void)
 template<typename InputHandler>
 void MixedSplineRegression<InputHandler>::setTimeMass(void)
 {
-    Spline<SPLINE_DEGREE, 0> spline(mesh_time_);
-    Assembler::operKernel(spline, timeMass_);
+	Spline<SPLINE_DEGREE, 0> spline(mesh_time_);
+	Assembler::operKernel(spline, timeMass_);
 }
 
 template<typename InputHandler>
 void MixedSplineRegression<InputHandler>::smoothSecondDerivative(void)
 {
-    Spline<SPLINE_DEGREE, ORDER_DERIVATIVE> spline(mesh_time_);
-    Assembler::operKernel(spline, Pt_);
+	Spline<SPLINE_DEGREE, ORDER_DERIVATIVE> spline(mesh_time_);
+	Assembler::operKernel(spline, Pt_);
 }
 
 // Parabolic
@@ -2018,22 +1963,22 @@ template<typename InputHandler>
 void MixedFDRegression<InputHandler>::setDerOperator(void)
 {
 	// Build the matrix of finite differences [1/dt1 0 .......... 0]																	 [0 ....0 -1/dtM 1/dtM]
-	UInt M = mesh_time_.size()-1;
+	UInt M = mesh_time_.size() - 1;
 	derOpL_.resize(M, M);
 
 	// Set the first and the last rows
 	Real delta = mesh_time_[1] - mesh_time_[0];
-	derOpL_.coeffRef(0,0) = 1/delta;
+	derOpL_.coeffRef(0, 0) = 1 / delta;
 
-	delta = mesh_time_[M-1] - mesh_time_[M-2];
-	derOpL_.coeffRef(M-1,M-1) = 1/delta;
-	derOpL_.coeffRef(M-1,M-2) = -1/delta;
+	delta = mesh_time_[M - 1] - mesh_time_[M - 2];
+	derOpL_.coeffRef(M - 1, M - 1) = 1 / delta;
+	derOpL_.coeffRef(M - 1, M - 2) = -1 / delta;
 
-	for(UInt i=1; i<M-1; ++i)
+	for (UInt i = 1; i < M - 1; ++i)
 	{
-		delta = mesh_time_[i] - mesh_time_[i-1];
-		derOpL_.coeffRef(i,i-1) = -1/delta;
-		derOpL_.coeffRef(i,i) 	= 1/delta;
+		delta = mesh_time_[i] - mesh_time_[i - 1];
+		derOpL_.coeffRef(i, i - 1) = -1 / delta;
+		derOpL_.coeffRef(i, i) = 1 / delta;
 	}
 
 	derOpL_.makeCompressed();
@@ -2041,79 +1986,79 @@ void MixedFDRegression<InputHandler>::setDerOperator(void)
 
 // -- GAM PART --
 template<>
-class MixedFERegression<GAMDataLaplace>: public MixedFERegressionBase<RegressionData>
+class MixedFERegression<GAMDataLaplace> : public MixedFERegressionBase<RegressionData>
 {
-	public:
-		MixedFERegression(const RegressionData & regressionData, OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionData>(regressionData, optimizationData, nnodes_) {};
-		
-		MixedFERegression(const std::vector<Real>& mesh_time, 
-			const RegressionData& regressionData, OptimizationData& optimizationData, UInt nnodes_): 
-				MixedFERegressionBase<RegressionData>(mesh_time, regressionData, optimizationData, nnodes_){};
+public:
+	MixedFERegression(const RegressionData& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionData>(regressionData, optimizationData, nnodes_) {};
 
-		template<UInt ORDER, UInt mydim, UInt ndim>
-		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
-		{
-			typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-			MixedFERegressionBase<RegressionData>::preapply(stiff, ForcingTerm(), mesh);
-		}
+	MixedFERegression(const std::vector<Real>& mesh_time,
+		const RegressionData& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionData>(mesh_time, regressionData, optimizationData, nnodes_) {};
+
+	template<UInt ORDER, UInt mydim, UInt ndim>
+	void preapply(const MeshHandler<ORDER, mydim, ndim>& mesh)
+	{
+		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		MixedFERegressionBase<RegressionData>::preapply(stiff, ForcingTerm(), mesh);
+	}
 };
 
 template<>
-class MixedFERegression<GAMDataElliptic>: public MixedFERegressionBase<RegressionDataElliptic>
+class MixedFERegression<GAMDataElliptic> : public MixedFERegressionBase<RegressionDataElliptic>
 {
-	public:
-		MixedFERegression(const RegressionDataElliptic & regressionData, OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
-		
-		MixedFERegression(const std::vector<Real>& mesh_time,
-                      const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_): 
-                		MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_){};
+public:
+	MixedFERegression(const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
 
-		template< UInt ORDER, UInt mydim, UInt ndim>
-		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
-		{
-			typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
-			typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-			typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
+	MixedFERegression(const std::vector<Real>& mesh_time,
+		const RegressionDataElliptic& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_) {};
 
-	  		const Real& c = this->regressionData_.getC();
-	  		const Diffusion<PDEParameterOptions::Constant>& K = this->regressionData_.getK();
-	  		const Advection<PDEParameterOptions::Constant>& b = this->regressionData_.getBeta();
+	template< UInt ORDER, UInt mydim, UInt ndim>
+	void preapply(const MeshHandler<ORDER, mydim, ndim>& mesh)
+	{
+		typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
+		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
 
-			MixedFERegressionBase<RegressionDataElliptic>::preapply(c*mass+stiff[K]+b.dot(grad), ForcingTerm(), mesh);
+		const Real& c = this->regressionData_.getC();
+		const Diffusion<PDEParameterOptions::Constant>& K = this->regressionData_.getK();
+		const Advection<PDEParameterOptions::Constant>& b = this->regressionData_.getBeta();
 
-		}
+		MixedFERegressionBase<RegressionDataElliptic>::preapply(c * mass + stiff[K] + b.dot(grad), ForcingTerm(), mesh);
+
+	}
 };
 
 template<>
-class MixedFERegression<GAMDataEllipticSpaceVarying>: public MixedFERegressionBase<RegressionDataEllipticSpaceVarying>
+class MixedFERegression<GAMDataEllipticSpaceVarying> : public MixedFERegressionBase<RegressionDataEllipticSpaceVarying>
 {
-	public:
-		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData, OptimizationData & optimizationData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>( regressionData, optimizationData, nnodes_) {};
-		
-		MixedFERegression(const std::vector<Real>& mesh_time, 
-			const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_): 		
-				MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_){};
+public:
+	MixedFERegression(const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(regressionData, optimizationData, nnodes_) {};
 
-		template<UInt ORDER, UInt mydim, UInt ndim>
-		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
-		{
-			typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
-			typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-			typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
+	MixedFERegression(const std::vector<Real>& mesh_time,
+		const RegressionDataEllipticSpaceVarying& regressionData, OptimizationData& optimizationData, UInt nnodes_) :
+		MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_) {};
 
-			const Reaction& c = this->regressionData_.getC();
-			const Diffusion<PDEParameterOptions::SpaceVarying>& K = this->regressionData_.getK();
-			const Advection<PDEParameterOptions::SpaceVarying>& b = this->regressionData_.getBeta();
-			const ForcingTerm& u= this->regressionData_.getU();
+	template<UInt ORDER, UInt mydim, UInt ndim>
+	void preapply(const MeshHandler<ORDER, mydim, ndim>& mesh)
+	{
+		typedef EOExpr<Mass>  ETMass;  Mass EMass;   ETMass mass(EMass);
+		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		typedef EOExpr<Grad>  ETGrad;  Grad EGrad;   ETGrad grad(EGrad);
 
-			this->isSpaceVarying = TRUE;
+		const Reaction& c = this->regressionData_.getC();
+		const Diffusion<PDEParameterOptions::SpaceVarying>& K = this->regressionData_.getK();
+		const Advection<PDEParameterOptions::SpaceVarying>& b = this->regressionData_.getBeta();
+		const ForcingTerm& u = this->regressionData_.getU();
 
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>::preapply(c*mass+stiff[K]+b.dot(grad), u, mesh);
+		this->isSpaceVarying = TRUE;
 
-		}
+		MixedFERegressionBase<RegressionDataEllipticSpaceVarying>::preapply(c * mass + stiff[K] + b.dot(grad), u, mesh);
+
+	}
 };
 
 #endif

@@ -27,7 +27,7 @@ SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMa
 {
 
 	UInt nnodes = NW.outerSize();
-		nnodes *= M_;
+	//	nnodes *= M_;
 
 	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
 	std::vector<coeff> tripletAll;
