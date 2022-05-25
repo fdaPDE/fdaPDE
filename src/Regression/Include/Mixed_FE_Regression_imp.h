@@ -1627,6 +1627,40 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
 				this->template system_factorize(&solverobj);
 			}
 
+			initialize_g(lambdaS, lambdaT, s, t);
+
+			if (regressionData_.getCovariates()->rows() != 0) {
+				MatrixXr W(*(this->regressionData_.getCovariates()));
+				VectorXr beta_rhs;
+				beta_rhs = W.transpose() * (*obsp - psi_ * _solution(s, t).topRows(psi_.cols()));
+				_beta(s, t) = WTW_.solve(beta_rhs);
+			}
+			psi_mini = psi_temp_mini;
+			J = compute_J(s, t);
+
+			//corrrezione rhs
+			_rightHandSide.bottomRows(nnodes) *= lambdaS;
+
+			UInt i = 1;
+			while (stopping_criterion(i, J, J_old))
+			{
+				for (UInt k = 0; k < M_; ++k) {
+
+					if (regressionData_.getObservationsNA()->size() != 0)
+						//modifying psi_mini to take care of missing values
+					{
+						psi_mini = psi_.block(k * nlocations, k * N_, nlocations, N_);
+						DMat_ = psi_mini.transpose() * psi_mini;
+						this->template buildSystemMatrix(lambdaS, lambdaT, &solverobj);
+						// Applying boundary conditions if necessary
+						if (regressionData_.getDirichletIndices()->size() != 0)
+						{
+							addDirichletBC();
+							solverobj.compute(matrixNoCov_);
+						}
+						this->template system_factorize(&solverobj);
+					}
+
 
 			// updating of the right hand side
 			update_rhs(k, lambdaS, lambdaT, s, t);
