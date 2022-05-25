@@ -257,7 +257,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix,
                   GCV.inflation.factor, lambda.optimization.tolerance,
                   test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,locs_are_nodes_Inference,coeff_Inference,beta_0,
-                  f_0_eval,inference_Quantile,inference_Alpha,inference_N_Flip, inference_Tol_Fspai, inference_Defined,
+                  f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip, inference_Tol_Fspai, inference_Defined,
                   PACKAGE = "fdaPDE")
   return(bigsol)
 }
