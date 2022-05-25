@@ -525,16 +525,22 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	  NearestIndices[k] = neighbors;
 	}
 
+        // vector that converts global indices into local indices
+        VectorXi rel_nodes = VectorXi::Constant(inf_car_.getPsip()->cols(), -1);
+        for(UInt i=0; i < locations_index.size(); ++i){
+	  rel_nodes(locations_index[i]) = i;
+        }
+
 	// compute the group matrix
 	for(UInt i=0; i < locations_index.size(); ++i){
 	  for(UInt j : NearestIndices[locations_index[i]]){
-            if(rel_rows(j)>=0) // only if it belongs to the selected locations
-	      Group_locs(locations_index[i], rel_rows(j)) = 1;
+            if(rel_nodes(j)>=0) // only if it belongs to the selected locations
+	      Group_locs(locations_index[i], rel_nodes(j)) = 1;
           }
 	}
     
 	// set it into inference carrier 
-	inf_car_.setGroup_loc(Group_locs);
+	     inf_car_.setGroup_loc(Group_locs);
        
       }
     }
