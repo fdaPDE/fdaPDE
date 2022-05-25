@@ -527,8 +527,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   if(!is.null(locations))
     inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates),locations,FEMbasis$mesh$nodes) #checking inference data consistency, constructing default object in NULL case
   else
-    inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates),FEMbasis$mesh$nodes,FEMbasis$mesh$nodes)
-  
+    inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates),FEMbasis$mesh$nodes[1:length(observations),],FEMbasis$mesh$nodes)
   # Check that GCV is set for inference
   if(inference.data.object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
     warning("Inference is not defined when lambda grid is provided without GCV")
