@@ -29,7 +29,7 @@ if 2 simultaneous confidence intervals are computed, if 3 Bonferroni confidence 
 \item{\code{exact}}{An integer taking value 1 or 2. If 1 an exact computation of the test statistics will be performed,
 whereas if 2 an approximated computation will be carried out (not implemented in this version).}
 
-\item{\code{dim}}{Dimension of the problem, it is equal to 2 in the 2D case and equal to 3 in the 2.5D and 3D cases.}
+\item{\code{dim}}{Dimension of the problem, it is equal to 2 in the 1.5D and 2D cases and equal to 3 in the 2.5D and 3D cases.}
 
 \item{\code{n_cov}}{Number of covariates taken into account in the linear part of the regression problem.}
 

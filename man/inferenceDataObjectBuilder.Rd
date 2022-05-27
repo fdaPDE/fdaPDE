@@ -48,7 +48,7 @@ n_flip = 1000)
 
 \item{component}{A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.}
 
-\item{dim}{Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 2D or 2.5D/3D problems (Must be set by the user)}
+\item{dim}{Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 1.5D/2D or 2.5D/3D problems (Must be set by the user)}
 
 \item{n_cov}{Number of the covariates, defaulted to NULL. (Must be set by the user)}
 
