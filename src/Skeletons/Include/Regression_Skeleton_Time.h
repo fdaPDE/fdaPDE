@@ -19,7 +19,7 @@
 #include "../../Inference/Include/Speckman.h"
 #include "../../Inference/Include/Eigen_Sign_Flip.h"
 #include "../../Inference/Include/Inference_Factory.h"
-#include <memory
+#include <memory>
 
 template<typename CarrierType>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Temporal, CarrierType>::value>, t_type>::value,
@@ -36,7 +36,7 @@ template<typename InputHandler>
 void lambda_inference_selection(const OptimizationData & optimizationData, const  output_Data<2> & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference_S, Real & lambda_inference_T);
 
 template<typename InputHandler>
-void inference_wrapper_time(const OptimizationData & opt_data, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
+void inference_wrapper_time(const OptimizationData & opt_data, const output_Data<2> & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh, SEXP Rmesh_time)
@@ -107,7 +107,7 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 
 		//!Only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second,  &inferenceData, lambda_inference_S, lambda_inference_T); //Carrier for inference
-		inference_wrapper_time(optimizationData, inf_car, inference_Output);    
+		inference_wrapper_time(optimizationData, solution_bricks.second, inf_car, inference_Output);    
         }
 	
 	//Se si riesce, usare plain anche nel caso temporal

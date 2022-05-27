@@ -100,7 +100,7 @@ class Inference_Carrier{
 		// CONSTUCTORS
 		Inference_Carrier()=default;			//The default constructor is just used to initialize the object. All the pointer are set to nullptr, Real values are set 0
 		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data<1> * out_regression_, const InferenceData * inf_data_, Real lambda_S_); 			//Main constructor of the class in spatial case
-		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data<1> * out_regression_, const InferenceData * inf_data_, Real lambda_S_, Real lambda_T_); 	//Main constructor of the class in temporal case
+		Inference_Carrier(const InputHandler * Regression_Data_, const MixedFERegressionBase<InputHandler> * model_, const output_Data<2> * out_regression_, const InferenceData * inf_data_, Real lambda_S_, Real lambda_T_); 	//Main constructor of the class in temporal case
 
 		// GETTERS
 		inline const InputHandler * getRegData (void) const {return reg_data;}  			        //!< Getter of reg_data \return reg_data

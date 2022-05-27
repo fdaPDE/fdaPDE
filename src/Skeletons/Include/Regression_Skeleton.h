@@ -379,46 +379,37 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
     UInt nlocations = (inferenceData_.get_locs_inference()).rows();
     psi.resize(nlocations, nnodes);
 		
-    constexpr UInt Nodes = mydim==2 ? 3*ORDER : 6*ORDER-2;
-    Element<Nodes, mydim, ndim> tri_activated;	// Dummy for element search
-    Eigen::Matrix<Real,Nodes,1> coefficients;	// Dummy for point evaluation
-    Real evaluator;				// Dummy for evaluation storage
+    constexpr UInt EL_NNODES = how_many_nodes(ORDER,mydim);
+    Eigen::Matrix<Real,EL_NNODES,1> coefficients;    // Dummy for point evaluation
+    Real evaluator;                // Dummy for evaluation storage
 
-    for(UInt i=0; i<nlocations;++i)
+    for(UInt i=0; i<nlocations;i++)
       { // Update psi looping on all locations
 	// [[GM missing a defaulted else, raising a WARNING!]]
 	VectorXr coords = (inferenceData_.get_locs_inference()).row(i);
-	if(regressionData_.getSearch() == 1)
-	  { // Use Naive search
-	    tri_activated = mesh_.findLocationNaive(Point<ndim>(i, coords));
-	  }
-	else if(regressionData_.getSearch() == 2)
-	  { // Use Tree search (default)
-	    tri_activated = mesh_.findLocationTree(Point<ndim>(i, coords));
-	  }
+	Element<EL_NNODES, mydim, ndim> tri_activated = mesh_.findLocation(Point<ndim>(i, coords));
 
 	// Search the element containing the point
 	if(tri_activated.getId() == Identifier::NVAL)
 	  { // If not found
-	    Rprintf("ERROR: Point %d is not in the domain, remove point and re-perform inference\n", i+1);
+	    Rprintf("ERROR: Point %d is not in the domain, remove point and re-perform smoothing\n", i+1);
 	  }
 	else
-	  { // tri_activated.getId() found, it's action might be felt a priori by all the psi of the element, one for each node
-				
-	    for(UInt node=0; node<Nodes ; ++node)
+	  {
+	    for(UInt node=0; node<EL_NNODES ; ++node)
 	      {// Loop on all the nodes of the found element and update the related entries of Psi
 		// Define vector of all zeros but "node" component (necessary for function evaluate_point)
-		coefficients = Eigen::Matrix<Real,Nodes,1>::Zero();
+		coefficients = Eigen::Matrix<Real,EL_NNODES,1>::Zero();
 		coefficients(node) = 1; //Activates only current base-node
-					// Evaluate psi in the node
+		// Evaluate psi in the node
 		evaluator = tri_activated.evaluate_point(Point<ndim>(i, coords), coefficients);
 		// Insert the value in the column given by the GLOBAL indexing of the evaluated NODE
 		psi.insert(i, tri_activated[node].getId()) = evaluator;
 	      }
 	  }
       } // End of for loop
-		
-    psi.makeCompressed();  
+        
+    psi.makeCompressed();   
            
     // update the inference carrier
     inf_car_.setPsi_loc(psi);
