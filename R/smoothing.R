@@ -190,7 +190,7 @@
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 #' 
 #' #Inferential tests and confidence intervals
-#' inference.data.object = inferenceDataObjectBuilder(test = c('one-at-the-time','simultaneous','one-at-the-time'), interval = c('simultaneous','one-at-the-time','none'), exact = TRUE, type = c('wald','speckman','eigen-sign-flip'), dim = 1)
+#' inference.data.object = inferenceDataObjectBuilder(test = c('oat','sim', 'oat'), interval = c('sim','oat','none'), type = c('w','s','esf'), dim = 2, n_cov = 1)
 #'
 #' solution = smooth.FEM(observations = data, covariates = covariate, 
 #'                       FEMbasis = FEMbasis, lambda = lambda,
@@ -199,9 +199,9 @@
 #' # beta estimate:
 #' solution$solution$beta
 #' # tests over beta estimates p-values:
-#' solution$inference$p_values
+#' solution$inference$beta$p_values
 #' # confidence intervals for beta estimates:
-#' solution$inference$CI
+#' solution$inference$beta$CI
 #' # non-parametric estimate:
 #' plot(solution$fit.FEM)
 #'
