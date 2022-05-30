@@ -12,7 +12,8 @@ smooth.FEM(locations = NULL, observations, FEMbasis,
  max.steps.FPIRLS = 15, lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
- lambda.optimization.tolerance = 0.05)
+ lambda.optimization.tolerance = 0.05,
+ inference.data.object=NULL)
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -132,47 +133,21 @@ It is advised to set \code{GCV.inflation.factor} larger than 1 to avoid overfitt
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{inference.data.object}{An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.}
 }
 \value{
-A list with the following variables:
-\itemize{
-   \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
-   \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-   \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction=NULL}.
-         In all the other cases, only the column related to the best smoothing parameter is returned.
-         \item{\code{f}}{Matrix, estimate of function f, first half of solution vector.}
-         \item{\code{g}}{Matrix, second half of solution vector.}
-         \item{\code{z_hat}}{Matrix, prediction of the output in the locations.}
-         \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate.}
-         \item{\code{rmse}}{Estimate of the root mean square error in the locations.}
-         \item{\code{estimated_sd}}{Estimate of the standard deviation of the error.}
-         }
-   \item{\code{optimization}}{A detailed list of optimization related data:
-         \item{\code{lambda_solution}}{numerical value of best lambda according to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
-         \item{\code{lambda_position}}{integer, position in \code{lambda_vector} of best lambda according to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
-         \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum.}
-         \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations.}
-         \item{\code{dof}}{vector of positive numbers, DOFs for all the lambdas in \code{lambda_vector}, empty or invalid if not computed.}
-         \item{\code{lambda_vector}}{vector of positive numbers: penalizations either passed by the user or found in the iterations of the optimization method.}
-         \item{\code{GCV_vector}}{vector of positive numbers, GCV values for all the lambdas in \code{lambda_vector}}
-         }
-   \item{\code{time}}{Duration of the entire optimization computation.}
-   \item{\code{bary.locations}}{Barycenter information of the given locations, if the locations are not mesh nodes.}
-   \item{\code{GAM_output}}{A list of GAM related data:
-         \item{\code{fn_hat}}{A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contains the evaluaton of the spatial field in the location points.}
-         \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
-         \item{\code{variance.est}}{A vector which returns the variance estimates for the Generative Additive Models.}
-        }
-}
+
 }
 \description{
 This function implements a spatial regression model with differential regularization.
  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
  Laplacian of the spatial field, that induces an isotropic smoothing. When prior information about the anisotropy or
  non-stationarity is available the PDE involves a general second order linear differential operator with possibly
- space-varying coefficients.
+ space-varying coefficients. 
  The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions
- can be imposed at the domain boundaries.
+ can be imposed at the domain boundaries
 }
 \examples{
 library(fdaPDE)
@@ -196,11 +171,19 @@ plot(solution$fit.FEM)
 covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 
+#Inferential tests and confidence intervals
+inference.data.object = inferenceDataObjectBuilder(test = c('oat','sim','oat'), interval = c('sim','oat','none'), exact = T, type = c('w','s','esf'), dim = 2, n_cov = 1)
+
 solution = smooth.FEM(observations = data, covariates = covariate, 
-                      FEMbasis = FEMbasis, lambda = lambda)
-                      
+                      FEMbasis = FEMbasis, lambda = lambda,
+                      inference.data.object=inference.data.object)
+
 # beta estimate:
 solution$solution$beta
+# tests over beta estimates p-values:
+solution$inference$beta$p_values
+# confidence intervals for beta estimates:
+solution$inference$beta$CI
 # non-parametric estimate:
 plot(solution$fit.FEM)
 
@@ -221,7 +204,7 @@ bestLambda = solution$optimization$lambda_solution
 
 
 #### Smoothing with prior information about anysotropy/non-stationarity and boundary conditions ####
-# See Azzimonti et al. for reference to the current exemple
+# See Azzimonti et al. for reference to the current example
 data(quasicircle2D)
 boundary_nodes = quasicircle2D$boundary_nodes
 boundary_segments = quasicircle2D$boundary_segments
@@ -367,5 +350,7 @@ Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75
 via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization. 
  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
+   \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
+   with differential regularization. Journal of Multivariate Analysis, to appear}
 }
 }

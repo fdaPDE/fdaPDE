@@ -1,3 +1,10 @@
+# fdaPDE 1.1-5
+
+## New features
+
+1) Inference in space and space-time model (Gaussian family, no forcing terms):
+   In space model inference is available for both parametric and nonparametric components;
+   In space-time model inference only on the parametric component has been implemented.
 
 # fdaPDE 1.1-4
 
@@ -85,3 +92,4 @@ Compilation errors with clang fixed.
 
 ## Bug fixes
 A bug in R/C++ indexes conversion in the space-varying regression has been fixed.
+

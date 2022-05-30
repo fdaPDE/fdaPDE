@@ -1,5 +1,5 @@
 Package: fdaPDE
-Version: 1.1-4
+Version: 1.1-5
 Date: 2020-04-05
 Title: Functional Data Analysis and Partial Differential Equations (PDE); Statistical Analysis of Functional and Spatial Data, Based on Regression with PDE Regularization
 Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
@@ -15,6 +15,7 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 	     person("Carlo", "de Falco", role = "aut",
 		     email = " carlo.defalco@polimi.it"),
 		    person("Giovanni", "Ardenghi", role = "ctb"),
+                    person("Michele", "Cavazzutti", role = "ctb"),
 		    person("Aldo", "Clemente", role = "ctb"),
 		    person("Alessandra", "Colli", role = "ctb"),
 		    person("Alberto", "Colombo", role = "ctb"),
@@ -22,6 +23,7 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		    person("Enrico", "Dall'Acqua", role = "ctb"),
 	            person("Giulia", "Ferla", role = "ctb"),
 		    person("Lorenzo", "Ghilotti", role = "ctb"),
+                    person("Cristina", "Galimberti", role = "ctb"),
 		    person("Jiyoung", "Kim", role = "ctb"),
 		    person("Martina", "Massardi", role = "ctb"),
 		    person("Giorgio", "Meretti", role = "ctb"),
@@ -38,7 +40,7 @@ Depends:
     stats, grDevices, graphics, geometry,
     rgl, Matrix, plot3D, plot3Drgl, methods
 LinkingTo: 
-	RcppEigen
+	RcppEigen, BH
 Suggests: 
     MASS,
     testthat

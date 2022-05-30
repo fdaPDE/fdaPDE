@@ -15,7 +15,8 @@ threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
 lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05
+inference.data.object=NULL)
 }
 \arguments{
 \item{locations}{A matrix where each row specifies the spatial coordinates \code{x} and \code{y} (and \code{z} if ndim=3) of the corresponding observations in the vector \code{observations}.
@@ -134,9 +135,13 @@ It is advised to set it grather than 1 to avoid overfitting.}
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{inference.data.object}{An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.}
 }
 \value{
 A list with the following variables:
+\itemize{
 \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
 \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
@@ -147,6 +152,18 @@ the smoothing parameter is equal to \code{lambda[j]}.}
 \item{\code{bestlambda}}{If GCV is \code{TRUE}, a 2-elements vector with the indices of smoothing parameters returnig the lowest GCV}
 \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+\item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
+         \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+              \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              }
+        \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+              \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+              \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+             }
+        }
+}
 }
 \description{
 Space-time regression  with differential regularization. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
@@ -176,6 +193,32 @@ data = matrix(data, nrow = nrow(mesh$nodes), ncol = length(time_locations), byro
 solution = smooth.FEM.time(observations = data, time_locations = time_locations,
                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 plot(solution$fit.FEM)
+
+# with covariates
+set.seed(509875)
+cov1 = rnorm(ndata, mean = 1, sd = 2)
+# Add error to simulate data
+set.seed(7893475)
+data = sol_exact + 2*cov1 
+data = data + rnorm(length(sol_exact), mean = 0, sd =  0.05*diff(range(sol_exact)))
+observations = matrix(data,nrow(locations),NumTimeInstants)
+
+
+#Inferential tests and confidence intervals
+inf_obj <- inferenceDataObjectBuilder(test = "oat", interval = "sim", type = "w", dim = 2, n_cov = 1, exact = T)
+
+solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                        observations=observations, 
+                        covariates = cov1,
+                        FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
+                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
+
+# beta estimate:
+solution$solution$beta
+# tests over beta estimates p-values:
+solution$inference$beta$p_values
+# confidence intervals for beta estimates:
+solution$inference$beta$CI
 }
 \references{
 #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
@@ -185,4 +228,6 @@ Bernardi, M. S., Sangalli, L. M., Mazza, G., & Ramsay, J. O. (2017). A penalized
 regression model for spatial functional data with application to the analysis of the 
 production of waste in Venice province. 
 Stochastic Environmental Research and Risk Assessment, 31(1), 23-38.
+Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
+   with differential regularization. Journal of Multivariate Analysis, to appear
 }
