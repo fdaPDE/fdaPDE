@@ -199,10 +199,10 @@ class MixedFERegressionBase
 		//! A method computing the dofs
 		void computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method that set WTW flag to false, in order to recompute the matrix WTW.
-		inline void recomputeWTW(void){ this->isWTWfactorized_ = false;}
+		void recomputeWTW(void){ this->isWTWfactorized_ = false;}
 		//! A method used to reset the system matrix to the value obtained for a given lambda (used for inference)
-		inline void build_regression_inference(Real lambda_inference_) {this->buildSystemMatrix(lambda_inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
-		inline void build_regression_inference(Real lambda_S_Inference_, Real lambda_T_Inference_) {this->buildSystemMatrix(lambda_S_Inference_,lambda_T_Inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
+		void build_regression_inference(Real lambda_inference_) {this->buildSystemMatrix(lambda_inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
+		void build_regression_inference(Real lambda_S_Inference_, Real lambda_T_Inference_) {this->buildSystemMatrix(lambda_S_Inference_,lambda_T_Inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
 
 		// -- GETTERS --
 		//! A function returning the computed barycenters of the locationss
@@ -222,27 +222,27 @@ class MixedFERegressionBase
 		//! A method returning the psi matrix
 		const SpMat * getpsi_(void) const {return &this->psi_;}
 		//! A method returning the psi matrix transposed
-		inline const SpMat * getpsi_t_(void) const {return &this->psi_t_;}
+		const SpMat * getpsi_t_(void) const {return &this->psi_t_;}
 		//! A method returning the R0 matrix
 		const SpMat * getR0_(void) const {return &this->R0_;}
 		//! A method returning the R1 matrix
 		const SpMat * getR1_(void) const {return &this->R1_;}
 		//! A method returning the DMat matrix, da implementare la DMat
-		inline const SpMat * getDMat_(void) const {return &this->DMat_;}
+		const SpMat * getDMat_(void) const {return &this->DMat_;}
 		//! A method returning the matrixNoCov, da implementare la DMat
-		inline const SpMat * getmatrixNoCov_(void) const {return &this->matrixNoCov_;}
+		const SpMat * getmatrixNoCov_(void) const {return &this->matrixNoCov_;}
 		//! A method returning the Q_ matrix -> da impementare la Q
 		const MatrixXr *	getQ_(void) const {return &this->Q_;}
 		//! A method returning the H_ matrix da implementare la H
 		const MatrixXr *	getH_(void) const {return &this->H_;}
 		//! A method returning the A_ matrix
-		inline const VectorXr *	getA_(void) const {return &this->A_;}
+		const VectorXr *	getA_(void) const {return &this->A_;}
 		//! A method returning the R_ matrix
-		inline const MatrixXr *	getR_(void) const {return &this->R_;}
+		const MatrixXr *	getR_(void) const {return &this->R_;}
 		//! A method returning the U_ matrix
-		inline const MatrixXr *	getU_(void) const {return &this->U_;}
+		const MatrixXr *	getU_(void) const {return &this->U_;}
 		//! A method returning the V_ matrix
-		inline const MatrixXr *	getV_(void) const {return &this->V_;}
+		const MatrixXr *	getV_(void) const {return &this->V_;}
 		//! A method returning the rhs
 		const VectorXr *	getrhs_(void) const {return &this->_rightHandSide;}
 		//! A method returning the forcing term
@@ -265,11 +265,11 @@ class MixedFERegressionBase
 		//! A function that given a vector u, performs Q*u efficiently
 		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
 		//! A method returning the WTW_ factorization
-		inline const Eigen::PartialPivLU<MatrixXr> * getWTW_(void) const {return &this->WTW_;}
+		const Eigen::PartialPivLU<MatrixXr> * getWTW_(void) const {return &this->WTW_;}
 		//! A method returning the matrixNoCov_ factorization
-		inline const Eigen::SparseLU<SpMat> * getmatrixNoCovdec_(void) const {return &this->matrixNoCovdec_;}
+		const Eigen::SparseLU<SpMat> * getmatrixNoCovdec_(void) const {return &this->matrixNoCovdec_;}
 		//! A method returning the Gdec_ factorization
-		inline const Eigen::PartialPivLU<MatrixXr> * getGdec_(void) const {return &this->Gdec_;}
+		const Eigen::PartialPivLU<MatrixXr> * getGdec_(void) const {return &this->Gdec_;}
 
 		// -- APPLY --
 		//! The function solving the system, used by the children classes. Saves the result in _solution
