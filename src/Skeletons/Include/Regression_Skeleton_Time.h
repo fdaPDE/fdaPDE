@@ -406,6 +406,7 @@ optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 /*
   \tparam InputHandler the type of regression problem
   \param opt_data the object containing optimization data
+  \param output the output_Data object containing the solution to be returned
   \param inf_car the object wrapping all the objects needed to make inference
   \param inference_output the object to be filled with inference output 
   \return void
@@ -446,7 +447,7 @@ void inference_wrapper_time(const OptimizationData & opt_data, output_Data<2> & 
 /*
   \tparam InputHandler the type of regression problem
   \param optimization_data the object containing optimization data
-  \param output_Data the object containing the solution of the optimization problem
+  \param output the output_Data object containing the solution of the optimization problem
   \param inferenceData the object containing the data needed for inference
   \param regression the object containing the model of the problem
   \param lambda_inference_S the spatial smoothing parameter that will be used to compute the optimal model and the right inferential solutions

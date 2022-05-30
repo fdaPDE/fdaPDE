@@ -205,7 +205,7 @@ observations = matrix(data,nrow(locations),NumTimeInstants)
 
 
 #Inferential tests and confidence intervals
-inf_obj <- inferenceDataObjectBuilder(test = "one-at-the-time", interval = "simultaneous", type = "wald", dim = 1, exact = T, f_var = T)
+inf_obj <- inferenceDataObjectBuilder(test = "oat", interval = "sim", type = "w", dim = 2, n_cov = 1)
 
 solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                         observations=observations, 
@@ -216,9 +216,9 @@ solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints,
 # beta estimate:
 solution$solution$beta
 # tests over beta estimates p-values:
-solution$inference$p_values
+solution$inference$beta$p_values
 # confidence intervals for beta estimates:
-solution$inference$CI
+solution$inference$beta$CI
 }
 \references{
 #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 

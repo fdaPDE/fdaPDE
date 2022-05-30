@@ -334,7 +334,7 @@ void inference_wrapper_space(const OptimizationData & opt_data, output_Data<1> &
 /*
   \tparam InputHandler the type of regression problem
   \param optimization_data the object containing optimization data
-  \param output_Data the object containing the solution of the optimization problem
+  \param output the object containing the solution of the optimization problem
   \param inferenceData the object containing the data needed for inference
   \param regression the object containing the model of the problem
   \param lambda_inference the smoothing parameter that will be used to compute the optimal model and the right inferential solutions
