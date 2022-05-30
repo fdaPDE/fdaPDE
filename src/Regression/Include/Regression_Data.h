@@ -51,10 +51,10 @@ class  RegressionData
 		// Areal data
 		MatrixXi incidenceMatrix_;
 
-		bool flag_mass_;				//!< Mass penalization, only for separable version (flag_parabolic_==FALSE)
-		bool flag_parabolic_;
-		bool flag_iterative_;     //!<True if iterative-method for space time smoothing is selected
-		bool flag_SpaceTime_; // TRUE if space time smoothing
+		bool flag_mass_{};				//!< Mass penalization, only for separable version (flag_parabolic_==FALSE)
+		bool flag_parabolic_{};
+		bool flag_iterative_{};     //!<True if iterative-method for space time smoothing is selected
+		bool flag_SpaceTime_{}; // TRUE if space time smoothing
 		UInt search_; // search algorith type
 
         // Iterative method
