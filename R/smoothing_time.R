@@ -517,7 +517,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   dim_2 = ifelse(optim[1]==0 & is.null(DOF.matrix) & optim[3]==0, length(lambdaT), 1)
   
   if(is.null(IC) && FLAG_PARABOLIC)
-    IC = bigsol[[24]]$coeff
+    IC = bigsol[[27]]$coeff
   if(FLAG_PARABOLIC)
   {
     f = array(dim=c(length(IC)+M*N,dim_1,dim_2))
@@ -547,10 +547,10 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   else
     beta = NULL
 
-  if(all(is.na(bigsol[[24]])))
+  if(all(is.na(bigsol[[27]])))
     ICestimated = NULL
   else
-    ICestimated = list(IC.FEM=bigsol[[24]],bestlambdaindex=bigsol[[25]],bestlambda=bigsol[[26]],beta=bigsol[[27]])
+    ICestimated = list(IC.FEM=bigsol[[27]],bestlambdaindex=bigsol[[28]],bestlambda=bigsol[[29]],beta=bigsol[[30]])
     
   bestlambda = bigsol[[4]]+1
   if(optim[1]!=0) # newton or newton_fd 
@@ -730,7 +730,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     }
     
     if(inference.data.object@f_var==1){
-      f_variances = matrix(data = bigsol[[26]], nrow = N*M, ncol = 1)
+      f_variances = matrix(data = bigsol[[26]], nrow = dim(observations)[1], ncol = 1)
       inference$f_var = f_variances
     }  
     
