@@ -73,7 +73,7 @@ class GCV_Family: Lambda_optimizer<InputCarrier, size>
                 Real            SS_res = 0.0;           //!< Model predicted sum of squares of the residuals
                 Real            rmse = 0.0;             //!< Model root mean squared error
                 Real            sigma_hat_sq = 0.0;     //!< Model estimated variance of error
-                UInt            s;                      //!< Model number of observations (i.e. #locations)
+                UInt            s = 0;                  //!< Model number of observations (i.e. #locations)
                 output_Data<size>     output;		//!< Output, needed to be user-available, necessarily public
 
                 // Degrees of freedom
@@ -175,7 +175,7 @@ class GCV_Exact<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
                 Real      trdS_ = 0.0;  //!< stores the value of the trace of dS
                 MatrixXr  ddS_;         //!< stores the second derivative of S w.r.t. lambda [size s x s]
                 Real      trddS_ = 0.0; //!< stores the value of the trace of ddS
-                Real      lambdaT = -1; //!< stores the lambdaT for parabolic case
+                Real      lambdaT = -1.; //!< stores the lambdaT for parabolic case
 
                 //! Additional utility matrices [just the ones for the specific carrier that is proper of the problem]
                 AuxiliaryData<InputCarrier> adt;
@@ -367,7 +367,7 @@ class GCV_Stochastic: public GCV_Family<InputCarrier, size>
                 // SETTERS
                 void set_US_(void);
                 
-                Real lambdaT;
+                Real lambdaT = 0.;
 
         public:
                 // CONSTRUCTORS
