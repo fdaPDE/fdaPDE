@@ -730,7 +730,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     }
     
     if(inference.data.object@f_var==1){
-      f_variances = matrix(data = bigsol[[26]], nrow = length(observations), ncol = 1)
+      f_variances = matrix(data = bigsol[[26]], nrow = length(solution$z_hat), ncol = 1)
       inference$f_var = f_variances
     }  
     
