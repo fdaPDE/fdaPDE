@@ -16,8 +16,8 @@
 class Checker
 {
         private:
-                bool reached_max_iter;          //!< Boolean for maximum number ot iterations reached
-                bool reached_tolerance;         //!< Boolean for tolerance reached
+                bool reached_max_iter{};          //!< Boolean for maximum number ot iterations reached
+                bool reached_tolerance{};         //!< Boolean for tolerance reached
 
         public:
                 //! Basic Constructor: everything set as false
