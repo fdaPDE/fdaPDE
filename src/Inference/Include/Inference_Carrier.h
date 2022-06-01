@@ -43,6 +43,7 @@ class Inference_Carrier{
 		const MatrixXr * Hp = nullptr;						//!< Pointer to the hat matrix [size n_covariates x n_covariates]
 		const MatrixXr * Up = nullptr; 						//!< Pointer to the U matrix of the Woodbury decomposition of the system
 		const MatrixXr * Vp = nullptr; 						//!< Pointer to the V matrix of the Woodbury decomposition of the system
+ 		const VectorXr * Ap = nullptr; 						//!< Pointer to the A vector corresponding to the diagonal of the areal matrix (asDiagional)
 		const SpMat * Ep = nullptr; 						//!< Pointer to the no-cov-matrix of the Woodbury decomposition of the system
 		const Eigen::SparseLU<SpMat> * E_decp = nullptr;			//!< Pointer to the sparse LU decomposition for the no-cov-matrix of the Woodbury decomposition of the system
 		const Eigen::PartialPivLU<MatrixXr> * G_decp = nullptr;			//!< Pointer to the LU decomposition of the G matrix of the Woodbury decomposition of the system
@@ -82,6 +83,7 @@ class Inference_Carrier{
 		inline void setHp (const MatrixXr * Hp_){Hp = Hp_;}							//!< Setter of Hp \param Hp_ new Hp
 		inline void setUp (const MatrixXr * Up_){Up = Up_;}							//!< Setter of Up \param Up_ new Up
 		inline void setVp (const MatrixXr * Vp_){Vp = Vp_;}							//!< Setter of Vp \param Vp_ new Vp
+		inline void setAp (const VectorXr * Ap_){Ap = Ap_;}							//!< Setter of Ap \param Ap_ new Ap
 		inline void setEp (const SpMat * Ep_){Ep = Ep_;}							//!< Setter of Ep \param Ep_ new Ep
 		inline void setE_decp (const Eigen::SparseLU<SpMat> * E_decp_){E_decp = E_decp_;}			//!< Setter of E_decp \param E_decp_ new E_decp
 		inline void setG_decp (const Eigen::PartialPivLU<MatrixXr> * G_decp_){G_decp = G_decp_;}		//!< Setter of G_decp \param G_decp_ new G_decp
@@ -124,6 +126,7 @@ class Inference_Carrier{
 		inline const MatrixXr * getHp (void) const {return Hp;} 						//!< Getter of Hp \return Hp
 		inline const MatrixXr * getUp (void) const {return Up;} 						//!< Getter of Up \return Up
 		inline const MatrixXr * getVp (void) const {return Vp;} 						//!< Getter of Vp \return Vp
+		inline const VectorXr * getAp (void) const {return Ap;} 					        //!< Getter of Ap \return Ap
 		inline const SpMat * getEp (void) const {return Ep;} 						        //!< Getter of Ep \return Ep
 		inline const Eigen::SparseLU<SpMat> * getE_decp (void) const {return E_decp;} 				//!< Getter of E_decp \return E_decp
 		inline const Eigen::PartialPivLU<MatrixXr> * getG_decp (void) const {return G_decp;} 			//!< Getter of G_decp \return G_decp

@@ -432,6 +432,7 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
   const MatrixXr * U = this->inf_car.getUp();
   const MatrixXr * V = this->inf_car.getVp();
   const Eigen::PartialPivLU<MatrixXr> * G_decp = this->inf_car.getG_decp();
+  const VectorXr * A = this->inf_car.getAp();
   
   M_inv = *E_inv - (*E_inv)*(*U)*((*G_decp).solve((*V)*(*E_inv)));
   
@@ -451,7 +452,7 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
     this->Partial_S(0) = 0;
   }
   
-  this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
+  this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*(A->asDiagonal())*Q);
   
   this->is_S_computed = true;
   
@@ -481,6 +482,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   const MatrixXr V_tilde = this->inf_car.getVp()->leftCols(n_nodes);
   const MatrixXr C_tilde = -this->inf_car.getWtW_decp()->solve(MatrixXr::Identity(q, q));
   const MatrixXr G_tilde = C_tilde + V_tilde*(*E_tilde_inv)*U_tilde;
+  const VectorXr * A = this->inf_car.getAp();
   
   Eigen::PartialPivLU<MatrixXr> G_tilde_decp; 
   G_tilde_decp.compute(G_tilde);
@@ -502,7 +504,7 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
   }
   
   
-  this->S = (*Psi)*M_tilde_inv*((*Psi_t)*Q);
+  this->S = (*Psi)*M_tilde_inv*((*Psi_t)*(A->asDiagonal())*Q);
   
   this->is_S_computed = true;
   
