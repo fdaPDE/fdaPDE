@@ -231,6 +231,8 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
   const MatrixType * E_inv = this->inverter->getInv();
+  // extract areal matrix (VectorXr)
+  const VectorXr * A = this->inf_car.getAp();
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
@@ -239,7 +241,7 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
   this->Lambda2.resize(n_obs, n_obs);
-  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())));
   this->is_Lambda2_computed = true;
   
   return; 

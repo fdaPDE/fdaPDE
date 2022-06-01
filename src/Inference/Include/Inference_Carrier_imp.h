@@ -27,6 +27,7 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   setHp(model_->getH_());
   setUp(model_->getU_());
   setVp(model_->getV_());
+  setAp(model_->getA_());
   setEp(model_->getmatrixNoCov_());
   setE_decp(model_->getmatrixNoCovdec_());
   setG_decp(model_->getGdec_());
@@ -73,6 +74,7 @@ Inference_Carrier<InputHandler>::Inference_Carrier(const InputHandler * Regressi
   setHp(model_->getH_());
   setUp(model_->getU_());
   setVp(model_->getV_());
+  setAp(model_->getA_());
   setEp(model_->getmatrixNoCov_());
   setE_decp(model_->getmatrixNoCovdec_());
   setG_decp(model_->getGdec_());

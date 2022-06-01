@@ -1180,6 +1180,8 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
   const MatrixType * E_inv = this->inverter->getInv();
+  // extract areal matrix (VectorXr)
+  const VectorXr * A = this->inf_car.getAp();
   
   UInt n_obs = this->inf_car.getN_obs();
   UInt n_nodes = this->inf_car.getN_nodes();
@@ -1188,7 +1190,7 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   UInt q = this->inf_car.getq(); 
   
   this->Lambda.resize(n_obs,n_obs);
-  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t))); // I - Psi(Psi^T Psi + P)^-1 Psi^T
+  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal()))); // I - Psi(Psi^T Psi + P)^-1 Psi^T
   this->is_Lambda_computed = true;
   
   return; 

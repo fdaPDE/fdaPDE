@@ -429,6 +429,7 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
   M_inv.resize(this->inverter->getInv()->rows(), this->inverter->getInv()->cols());
 
   const MatrixType * E_inv = this->inverter->getInv();
+  const VectorXr * A = this->inf_car.getAp();
   const MatrixXr * U = this->inf_car.getUp();
   const MatrixXr * V = this->inf_car.getVp();
   const Eigen::PartialPivLU<MatrixXr> * G_decp = this->inf_car.getG_decp();
@@ -451,7 +452,7 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
     this->Partial_S(0) = 0;
   }
   
-  this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
+  this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*(A->asDiagonal())*Q);
   
   this->is_S_computed = true;
   
