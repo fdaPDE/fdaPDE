@@ -363,6 +363,13 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                 coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha=0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
   
+  # Check that monolitic method is selected when inference is required
+  if(inference.data.object@definition==1 && FLAG_ITERATIVE==T){
+    warning("Inference is not provided when iterative method is selected")
+    inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
+                              coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha=0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+  }
+  
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying==FALSE)
   {
