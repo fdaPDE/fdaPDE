@@ -10,7 +10,7 @@ checkParametersDE_init <- function(data, FEMbasis, lambda, heatStep, heatIter, i
   
   if (is.null(FEMbasis)) 
     stop("'FEMbasis' required;  is NULL.")
-  if(class(FEMbasis)!= "FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("'FEMbasis' is not class 'FEMbasis'.")
   
   if(init=="Heat"){

@@ -297,7 +297,7 @@ create.mesh.2D <- function(nodes, nodesattributes = NA, segments = NA, holes = N
 
 refine.mesh.2D<-function(mesh, minimum_angle = NA, maximum_area = NA, delaunay = FALSE, verbosity = 0)
 {
-  if(class(mesh) !="mesh.2D")
+  if(!is(mesh, "mesh.2D"))
     stop("Sorry, this function is implemented just for mesh.2D class ")
 
   flags="rpven"
@@ -541,7 +541,7 @@ create.mesh.2.5D<- function(nodes, triangles = NULL, order = 1, nodesattributes 
 #' loc = projection.points.2.5D(mesh, locations)
 
 projection.points.2.5D<-function(mesh, locations) {
-  if(class(mesh) !="mesh.2.5D")
+  if(!is(mesh, "mesh.2.5D"))
   stop("Data projection is only available for 2.5D mesh ")
 
   mesh$triangles = mesh$triangles - 1
@@ -725,7 +725,7 @@ create.mesh.3D<- function(nodes, tetrahedrons, order = 1, nodesattributes = NULL
 refine.by.splitting.mesh.2D <- function (mesh=NULL){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.2D')
+  if(!is(mesh, "mesh.2D"))
     stop("Wrong mesh class! Should be mesh.2D")
 
   # Indexes in C++ starts from 0, in R from 1, needed transformations!
@@ -756,7 +756,7 @@ refine.by.splitting.mesh.2D <- function (mesh=NULL){
 refine.by.splitting.mesh.2.5D <- function (mesh=NULL){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.2.5D')
+  if(!is(mesh, "mesh.2.5D"))
     stop("Wrong mesh class! Should be mesh.2.5D")
 
   
@@ -788,7 +788,7 @@ refine.by.splitting.mesh.2.5D <- function (mesh=NULL){
 refine.by.splitting.mesh.3D <- function (mesh=NULL){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.3D')
+  if(!is(mesh, "mesh.3D"))
     stop("Wrong mesh class! Should be mesh.3D")
 
   # Indexes in C++ starts from 0, in R from 1, needed transformations!
@@ -940,8 +940,8 @@ create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = N
 #' loc = projection.points.1.5D(mesh_, locations)
 
 projection.points.1.5D<-function(mesh, locations) {
-  if(class(mesh) !="mesh.1.5D")
-    stop("Data projection is only available for 1D mesh ")
+  if(!is(mesh, "mesh.1.5D"))
+    stop("Data projection is only available for 1.5D mesh ")
   
   mesh$edges = mesh$edges - 1
   mydim=1
@@ -962,7 +962,7 @@ projection.points.1.5D<-function(mesh, locations) {
   return(evalmat)
 }
 
-#' Refine 1D mesh
+#' Refine 1.5D mesh
 #'
 #' @param mesh a \code{mesh.1.5D} object to refine
 #' @param delta the maximum allowed length
@@ -972,7 +972,7 @@ projection.points.1.5D<-function(mesh, locations) {
 refine.mesh.1.5D <-function(mesh,delta){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.1.5D')
+  if(!is(mesh, "mesh.1.5D"))
     stop("Wrong mesh class! Should be mesh.1.5D")
   if( delta <= 0)
     stop("Wrong delta value! Should be a positive number")
@@ -1005,7 +1005,7 @@ refine.mesh.1.5D <-function(mesh,delta){
 refine.by.splitting.mesh.1.5D <- function (mesh=NULL){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(class(mesh)!='mesh.1.5D')
+  if(!is(mesh, "mesh.1.5D"))
     stop("Wrong mesh class! Should be mesh.1.5D")
   
   # Indexes in C++ starts from 0, in R from 1, needed transformations!
