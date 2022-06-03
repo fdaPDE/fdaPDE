@@ -445,6 +445,77 @@ image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
+#### Test 2.7: PDE with isotropic ???
+# NB: these tests must give the same output 2.1, 2.2, 2.3, 2.4, 2.5, 2.6 respectively !
+PDE_parameters = list(K = matrix(c(1,0,0,1), nrow = 2), b = c(0,0), c = 0)
+
+#### Test 2.7.1: Without GCV
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       PDE_parameters = PDE_parameters)
+
+#### Test 2.7.2: grid with exact GCV
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact',
+                       lambda.selection.lossfunction='GCV',
+                       PDE_parameters = PDE_parameters)
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+
+#### Test 2.7.3: grid with stochastic GCV
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic',
+                       lambda.selection.lossfunction='GCV',
+                       PDE_parameters = PDE_parameters)
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+
+### Test 2.7.4: Newton exact method with exact  GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact',
+                       lambda.selection.lossfunction='GCV',
+                       PDE_parameters = PDE_parameters)
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+### Test 2.7.5: Newton_fd method with exact GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='exact',
+                       lambda.selection.lossfunction='GCV',
+                       PDE_parameters = PDE_parameters)
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+### Test 2.7.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic',
+                       lambda.selection.lossfunction='GCV',
+                       PDE_parameters = PDE_parameters)
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
 
 
 
