@@ -220,9 +220,9 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
 
   //char flags[200];
   //strcpy(flags, inputflags);
-
-
-  triangulate(strdup(flags), &in, &mid, &vorout);
+  
+  char* flags_ptr = strdup(flags);
+  triangulate(flags_ptr, &in, &mid, &vorout);
 
 //printf("Initial triangulation:\n\n");
       //report(&mid, 1, 1, 1, 1, 1, 0);
@@ -374,6 +374,8 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
   UNPROTECT(15);
 
   /* Free all allocated arrays, including those allocated by Triangle. */
+  free(flags_ptr);
+  
   Free(mid.pointlist);
   Free(mid.pointattributelist);
   Free(mid.pointmarkerlist);
