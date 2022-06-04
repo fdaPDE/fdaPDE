@@ -486,5 +486,7 @@ void Wald_Exact<InputHandler, MatrixType>::compute_B(void){
     this->Partial_S = (*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*Q;
   }
 
+  this->is_B_computed = true;
+
   return; 
 };
