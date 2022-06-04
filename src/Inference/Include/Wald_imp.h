@@ -86,15 +86,9 @@ void Wald_Base<InputHandler, MatrixType>::compute_V_f(void){
   if(is_sigma_hat_sq_computed==false){
     compute_sigma_hat_sq();
   }
-
-  UInt n = this->inf_car.getN_obs(); 
-  MatrixXr Q = MatrixXr::Identity(n, n); // if there are no covariates Q is just an identity 
-						       if(this->inf_car.getRegData()->getCovariates()->rows()!=0){
-							 Q = Q - *(this->inf_car.getHp());
-						       }
   
-  // compute variance-covariance matrix of f_hat
-  this->V_f = this->sigma_hat_sq * (this->Partial_S) * Q * (this->Partial_S.transpose());
+  // compute variance-covariance matrix of f_hat 
+       this->V_f = this->sigma_hat_sq * (this->Partial_S) * (this->Partial_S.transpose());
   this->is_V_f_computed = true;
 
   return;
@@ -445,14 +439,20 @@ void Wald_Exact<InputHandler, MatrixType>::compute_S(void){
 
   if(this->inf_car.getInfData()->get_f_var() || (this->inf_car.getInfData()->get_component_type())[this->pos_impl]!="parametric"){
     this->Partial_S.resize(n_nodes, n_obs);
-    this->Partial_S = M_inv.block(0,0, n_nodes, n_nodes)*(*Psi_t);
+    if(this->inf_car.getRegData()->getNumberOfRegions()>0)
+      this->Partial_S = M_inv.block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())*Q;
+    else 
+      this->Partial_S = M_inv.block(0,0, n_nodes, n_nodes)*(*Psi_t)*Q;
   }
   else{
     this->Partial_S.resize(1,1);
     this->Partial_S(0) = 0;
   }
   
-  this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*(A->asDiagonal())*Q);
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0)
+    this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*(A->asDiagonal())*Q);
+  else
+    this->S = (*Psi)*M_inv.block(0,0, n_nodes, n_nodes)*((*Psi_t)*Q);
   
   this->is_S_computed = true;
   
@@ -496,15 +496,20 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_S(void){
 
   if(this->inf_car.getInfData()->get_f_var() || (this->inf_car.getInfData()->get_component_type())[this->pos_impl]!="parametric"){
     this->Partial_S.resize(n_nodes, n_obs);
-    this->Partial_S = M_tilde_inv*(*Psi_t);
+    if(this->inf_car.getRegData()->getNumberOfRegions()>0)
+      this->Partial_S = M_tilde_inv*(*Psi_t)*(A->asDiagonal())*Q;
+    else 
+      this->Partial_S = M_tilde_inv*(*Psi_t)*Q;
   }
   else{
     this->Partial_S.resize(1,1);
     this->Partial_S(0) = 0;
   }
   
-  
-  this->S = (*Psi)*M_tilde_inv*((*Psi_t)*(A->asDiagonal())*Q);
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0)
+    this->S = (*Psi)*M_tilde_inv*((*Psi_t)*(A->asDiagonal())*Q);
+  else 
+    this->S = (*Psi)*M_tilde_inv*((*Psi_t)*Q);
   
   this->is_S_computed = true;
   
@@ -522,15 +527,22 @@ void Wald_Exact<InputHandler, MatrixType>::compute_B(void){
   UInt n_nodes = this->inf_car.getN_nodes();
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  const VectorXr * A = this->inf_car.getAp();
+  MatrixXr Q = MatrixXr::Identity(n_obs, n_obs) - *(this->inf_car.getHp()); 
   
   this->B.resize(n_obs,n_obs);
-  this->B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
-  this->is_B_computed = true;
-
-  // compute also Partial_S
   this->Partial_S.resize(n_nodes, n_obs);
-  this->Partial_S = (*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t);
-  
+
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0){
+    this->B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal()));
+    this->Partial_S = (*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())*Q;
+  }      
+  else{ 
+    this->B = (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t));
+    this->Partial_S = (*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*Q;
+  }
+  this->is_B_computed = true;
+    
   return; 
 };
 
@@ -550,15 +562,21 @@ void Wald_Non_Exact<InputHandler, MatrixType>::compute_B(void){
   UInt n_nodes = this->inf_car.getN_nodes();
   const SpMat * Psi = this->inf_car.getPsip();
   const SpMat * Psi_t = this->inf_car.getPsi_tp();
+  const VectorXr * A = this->inf_car.getAp();
+  MatrixXr Q = MatrixXr::Identity(n_obs, n_obs) - *(this->inf_car.getHp()); 
     
   this->B.resize(n_obs,n_obs);
- 
-  this->B = (*Psi)*((*E_tilde_inv)*(*Psi_t));
-  this->is_B_computed = true;
-
-  // compute also Partial_S
   this->Partial_S.resize(n_nodes, n_obs);
-  this->Partial_S = (*E_tilde_inv)*(*Psi_t);
+ 
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0){
+    this->B = (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal()));
+    this->Partial_S = (*E_tilde_inv)*(*Psi_t)*(A->asDiagonal())*Q;
+  }
+  else{ 
+    this->B = (*Psi)*((*E_tilde_inv)*(*Psi_t));
+    this->Partial_S = (*E_tilde_inv)*(*Psi_t)*Q;
+  }
+  this->is_B_computed = true;
   
   return; 
 };

@@ -18,7 +18,7 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
   const MatrixXr W_t = W->transpose();
   
   // Decomposition of [W^t * Lambda^2 * W] 
-  Eigen::PartialPivLU<MatrixXr> WLW_dec; 
+       Eigen::PartialPivLU<MatrixXr> WLW_dec; 
   WLW_dec.compute((W_t)*((this->Lambda)*(this->Lambda))*(*W));
   
   // get the residuals needed
@@ -40,7 +40,7 @@ void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_speckman_aux(void){
   Real quant = this->inf_car.getInfData()->get_inference_quantile()[this->pos_impl];
 
   // extract matrix C 
-  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+       MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   UInt p = C.rows(); 
   
   Speckman_aux_ranges.resize(p);
@@ -66,25 +66,25 @@ template<typename InputHandler, typename MatrixType>
 void Eigen_Sign_Flip_Base<InputHandler, MatrixType>::Compute_wald_aux(void){
 
   // create or get an already existing Wald inference object 
-  std::shared_ptr<Inference_Base<InputHandler,MatrixType>> wald_obj = Inference_Factory<InputHandler,MatrixType>::create_inference_method("wald", this->inverter, this->inf_car, this->pos_impl);
+    std::shared_ptr<Inference_Base<InputHandler,MatrixType>> wald_obj = Inference_Factory<InputHandler,MatrixType>::create_inference_method("wald", this->inverter, this->inf_car, this->pos_impl);
   MatrixXv wald_output = wald_obj->compute_inference_output(); 
   // extract the confidence intervals 
-  UInt n_loc = this->inf_car.getN_loc(); 
+       UInt n_loc = this->inf_car.getN_loc(); 
   UInt p = this->inf_car.getInfData()->get_coeff_inference().rows();
   UInt result_dim = (p > n_loc) ? p : n_loc; 
   // this matrix contains the overall CI, also the ones for beta if they were originally required as retrieved by pos_impl from inferenceData 
-  MatrixXv wald_CI = wald_output.rightCols(result_dim);
+									   MatrixXv wald_CI = wald_output.rightCols(result_dim);
   // extract the confidence intervals for f
   MatrixXv wald_f_CI = (wald_CI.row(1)).leftCols(n_loc);
   
   Wald_aux_ranges.resize(n_loc);
   // for each location point 
-  for(UInt i=0; i<n_loc; ++i){
-    // get the half range 
-    Real half_range = wald_f_CI(i)(2) - wald_f_CI(i)(1);
-    // save the half range
-    Wald_aux_ranges(i) = half_range; 
-  }
+		for(UInt i=0; i<n_loc; ++i){
+		  // get the half range 
+		    Real half_range = wald_f_CI(i)(2) - wald_f_CI(i)(1);
+		  // save the half range
+		  Wald_aux_ranges(i) = half_range; 
+		}
   
   this->is_wald_aux_computed = true;
 
@@ -98,7 +98,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
   Real result;
     
   // compute the vectors needed for the statistic 
-  VectorXr Tilder = Tilder_star * partial_res_H0_CI;
+					  VectorXr Tilder = Tilder_star * partial_res_H0_CI;
 
   // Initialize observed statistic and sign_flipped statistic
   MatrixXr stat_temp = TildeX*Tilder;
@@ -152,7 +152,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_CI_aux_beta_pvalue(
 
   result = std::min(pval_Up, pval_Down); // Selecting the correct unilateral p_value 
 
-  return result;
+					      return result;
   
 };
 
@@ -292,8 +292,8 @@ template<typename InputHandler, typename MatrixType>
 VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
   
   // extract matrix C 
-  // (in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
-  MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
+    // (in the eigen-sign-flip case we cannot have linear combinations, but we can have at most one 1 for each column of C) 
+    MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   UInt p = C.rows(); 
   
   // declare the vector that will store the p-values
@@ -386,7 +386,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
       stat_flip=TildeX*Tilder_perm; // Flipped statistic
       if(is_Unilaterally_Greater(stat_flip,stat)){ ++count_Up;}else{ //Here we use the custom-operator defined in Eigen_Sign_Flip.h
 	if(is_Unilaterally_Smaller(stat_flip,stat)){ ++count_Down;} //Here we use the custom-operator defined in Eigen_Sign_Flip.h 
-      }
+									}
     }
     
     Real pval_Up = count_Up/n_flip;
@@ -401,7 +401,7 @@ VectorXr Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_pvalue(voi
   else{
     
     // one-at-the-time tests    
-    Partial_res_H0.resize(Lambda.cols(), p);
+      Partial_res_H0.resize(Lambda.cols(), p);
     for(UInt i=0; i<p; ++i){
       // Extract the current beta in test
       beta_hat_mod = beta_hat;
@@ -535,7 +535,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     VectorXr T_perm = T;
 
     // observed final statistic (for simultaneous test) 
-    Real T_comb;
+	 Real T_comb;
     
     VectorXr T_sq = T.array() * T.array();
     T_comb = T_sq.sum();
@@ -581,7 +581,7 @@ Real Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
     VectorXr T_perm = T;
 
     // observed final statistic (for simultaneous test) 
-    Real T_comb;
+	 Real T_comb;
     
     VectorXr T_sq = T.array() * T.array();
     T_comb = T_sq.sum();
@@ -622,8 +622,8 @@ template<typename InputHandler, typename MatrixType>
 MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   // This function will be called only when the chosen locations are a subset of the mesh nodes  
   
-  // compute/get all the needed objects from the inference carrier 
-  const MatrixXr W_loc = this->inf_car.getW_loc();
+    // compute/get all the needed objects from the inference carrier 
+    const MatrixXr W_loc = this->inf_car.getW_loc();
   const SpMat Psi_loc = this->inf_car.getPsi_loc();
   const VectorXr Z_loc = this->inf_car.getZ_loc(); 
   const UInt n_loc = this->inf_car.getN_loc(); 
@@ -645,19 +645,19 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   MatrixXr Group_res = this->inf_car.getGroup_loc();
 
   // get the estimator for f in the selected locations 
-  UInt nnodes = this->inf_car.getN_nodes();
+			       UInt nnodes = this->inf_car.getN_nodes();
   const VectorXr f_hat = this->inf_car.getSolutionp()->topRows(nnodes);
   const VectorXr f_hat_loc = Psi_loc * f_hat; 
 
   // 2) declare the matrix that will store the confidence intervals 
-  MatrixXv result; 
+	  MatrixXv result; 
   result.resize(1, n_loc);
 
   // 3) initialization steps
   // compute initial ranges from Wald confidence intervals (initial guess) 
-  if(!is_wald_aux_computed){
-    this->Compute_wald_aux(); 
-  }
+       if(!is_wald_aux_computed){
+	 this->Compute_wald_aux(); 
+       }
   
   // this vector will store the tolerance for each interval upper/lower limit
   VectorXr bisection_tolerances = 0.2*Wald_aux_ranges; 
@@ -739,7 +739,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
   // extract the CI significance (1-confidence)
   Real alpha=0;
   // only one-at-the-time CI are available for f 
-  alpha=0.5*(this->inf_car.getInfData()->get_inference_alpha()(this->pos_impl));
+       alpha=0.5*(this->inf_car.getInfData()->get_inference_alpha()(this->pos_impl));
  
   UInt Max_Iter=50;
   UInt Count_Iter=0;
@@ -1190,7 +1190,13 @@ void Eigen_Sign_Flip_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   UInt q = this->inf_car.getq(); 
   
   this->Lambda.resize(n_obs,n_obs);
-  this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal()))); // I - Psi(Psi^T Psi + P)^-1 Psi^T
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0){
+    this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal()))); // I - Psi(Psi^T Psi + P)^-1 Psi^T A
+  }
+  else{
+    this->Lambda = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t))); // I - Psi(Psi^T Psi + P)^-1 Psi^T
+  }
+
   this->is_Lambda_computed = true;
   
   return; 
@@ -1219,7 +1225,12 @@ void Eigen_Sign_Flip_Non_Exact<InputHandler, MatrixType>::compute_Lambda(void){
   this->Lambda.resize(n_obs,n_obs);
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
-  this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal()))); // I - Psi( Psi^T Psi + P)^-1 Psi^T
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0){
+    this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal()))); // I - Psi( Psi^T Psi + P)^-1 Psi^T A
+  }
+  else{
+    this->Lambda = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t))); // I - Psi( Psi^T Psi + P)^-1 Psi^T A
+  }
   this->is_Lambda_computed = true;
   
   return; 

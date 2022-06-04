@@ -128,7 +128,7 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
     // get the value of the parameters under the null hypothesis
     VectorXr beta_0 = this->inf_car.getInfData()->get_beta_0();
     // get the estimates of the parameters
-     if(!is_beta_hat_computed){
+    if(!is_beta_hat_computed){
       compute_beta_hat();
     }  
     // for each row of C matrix
@@ -150,17 +150,17 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
 
 template<typename InputHandler, typename MatrixType> 
 Real Speckman_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
-// not implemented
-return 0; 
+  // not implemented
+  return 0; 
 };
 
 template<typename InputHandler, typename MatrixType> 
 MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_f_CI(void){
-// not implemented
-MatrixXv null_mat; 
-null_mat.resize(1,1);
-null_mat(0) = VectorXr::Constant(3,0);
-return null_mat;
+  // not implemented
+  MatrixXv null_mat; 
+  null_mat.resize(1,1);
+  null_mat(0) = VectorXr::Constant(3,0);
+  return null_mat;
 };
 
 template<typename InputHandler, typename MatrixType> 
@@ -195,9 +195,9 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
   
   // get the estimates of the parameters
-   if(!is_beta_hat_computed){
-      compute_beta_hat();
-    }
+  if(!is_beta_hat_computed){
+    compute_beta_hat();
+  }
   // declare the matrix that will store the p-values
   UInt p=C.rows();
   MatrixXv result;
@@ -241,7 +241,13 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   const SpMat * Psi_t = this->inf_car.getPsi_tp(); 
   
   this->Lambda2.resize(n_obs, n_obs);
-  this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())));
+
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0){
+    this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)*(A->asDiagonal())));
+  }
+  else{
+    this->Lambda2 = (MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)))*(MatrixXr::Identity(n_obs,n_obs) - (*Psi)*((*E_inv).block(0,0, n_nodes, n_nodes)*(*Psi_t)));
+  }
   this->is_Lambda2_computed = true;
   
   return; 
@@ -270,7 +276,12 @@ void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->Lambda2.resize(n_obs, n_obs);
   SpMat Identity(n_obs, n_obs);
   Identity.setIdentity();
-  this->Lambda2 = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal())))*(Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal())));
+  if(this->inf_car.getRegData()->getNumberOfRegions()>0){
+    this->Lambda2 = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal())))*(Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)*(A->asDiagonal())));
+  }
+  else{
+    this->Lambda2 = (Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)))*(Identity - (*Psi)*((*E_tilde_inv)*(*Psi_t)));
+  }
   this->is_Lambda2_computed = true;
   
   return; 
