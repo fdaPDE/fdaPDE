@@ -17,12 +17,12 @@
 //! Hypothesis testing and confidence intervals using eigen-sign-flip implementation
 /*!
   This template class is an abstract base class to perform hypothesis testing and computing confidence intervals using an eigen-sign-flip approach. Beyond all the objects and methods inherited from the abstract base inference class, it stores the matrix Lambda, whose type is given by the template parameter MatrixType which can be either a dense or a sparse matrix depending on the inversion exactness of the MatrixNoCov; it stores the partial residuals under the null hypothesis and a boolean indicating if the matrix Lambda has been computed. It overrides the methods that specify how to compute the p-values and the confidence intervals, according to the eigen-sign-flip apporach. It has a pure virtual method for the computation of Lambda, since it relies on the inversion of MatrixNoCov in an exact or non-exact way.
-\tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type in Inference_Carrier<InputHandler>
-\tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoothers S and Lambda. SpMat type is related to approximated inference computation.
+  \tparam InputHandler the type of regression problem needed to determine the MixedFERegressionBase object type in Inference_Carrier<InputHandler>
+  \tparam MatrixType the type of matrix (MatrixXr or SpMat) used to store diffferent objects related to the smoothers S and Lambda. SpMat type is related to approximated inference computation.
 */
 template<typename InputHandler, typename MatrixType>
-class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
-protected:
+  class Eigen_Sign_Flip_Base:public Inference_Base<InputHandler, MatrixType>{
+ protected:
   MatrixXr Partial_res_H0; 				//!< Contains: z - W^t * beta_0
   VectorXr Partial_f_res_H0;                            //!< Contains: Q_loc*(z_loc - f_0)
   MatrixType Lambda;   					//!< I - Psi*(Psi^t * Psi + lambda*R)^-1*Psi^t
@@ -45,10 +45,10 @@ protected:
   Real compute_CI_aux_f_pvalue(const VectorXr &, const UInt current_index) const;  //!< Computes the unilateral p value for a generic value of f in a given point proposed in the research algorithm for CI  
     
   
-public:
+ public:
   // CONSTUCTOR
   Eigen_Sign_Flip_Base()=delete;	//The default constructor is deleted
-  Eigen_Sign_Flip_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; //Main constructor of the class
+ Eigen_Sign_Flip_Base(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Inference_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; //Main constructor of the class
 
   // DESTRUCTOR
   virtual ~ Eigen_Sign_Flip_Base() {};
@@ -64,13 +64,13 @@ public:
   This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an exact inversion of the MatrixNoCov. 
 */
 template<typename InputHandler, typename MatrixType>
-class Eigen_Sign_Flip_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
-private: 
+  class Eigen_Sign_Flip_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
+ private: 
   void compute_Lambda(void) override;
-public:
+ public:
   // CONSTUCTOR
   Eigen_Sign_Flip_Exact()=delete;	//The default constructor is deleted
-  Eigen_Sign_Flip_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
+ Eigen_Sign_Flip_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
 };
 
 // *** Eigen_Sign_Flip_Non_Exact Class ***
@@ -79,13 +79,13 @@ public:
   This template class derives from the Eigen_Sign_Flip_Base class and it overrides the method that manages the computation of the matrix Lambda, relying on an approximated inversion of the MatrixNoCov. 
 */
 template<typename InputHandler, typename MatrixType>
-class Eigen_Sign_Flip_Non_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
-private: 
+  class Eigen_Sign_Flip_Non_Exact:public Eigen_Sign_Flip_Base<InputHandler, MatrixType>{
+ private: 
   void compute_Lambda(void) override;
-public:
+ public:
   // CONSTUCTOR
   Eigen_Sign_Flip_Non_Exact()=delete;	//The default constructor is deleted
-  Eigen_Sign_Flip_Non_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
+ Eigen_Sign_Flip_Non_Exact(std::shared_ptr<Inverse_Base<MatrixType>> inverter_, const Inference_Carrier<InputHandler> & inf_car_, UInt pos_impl_):Eigen_Sign_Flip_Base<InputHandler, MatrixType>(inverter_, inf_car_, pos_impl_){}; 
 };
 
 //We define the naive operator to compare two vectors, namely v > u if and only if 

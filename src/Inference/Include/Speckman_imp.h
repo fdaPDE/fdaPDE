@@ -3,7 +3,7 @@
 #include <type_traits>
 
 template<typename InputHandler, typename MatrixType> 
-void Speckman_Base<InputHandler, MatrixType>::compute_V(){
+  void Speckman_Base<InputHandler, MatrixType>::compute_V(){
   //check if Lambda2 has been computed
   if(!is_Lambda2_computed){
     this->compute_Lambda2();
@@ -34,7 +34,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_V(){
 };
 
 template<typename InputHandler, typename MatrixType>
-void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
+  void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
   //check if Lambda2 has been computed
   if(!is_Lambda2_computed){
     this->compute_Lambda2();
@@ -47,7 +47,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_WLW_dec(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-void Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
+  void Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
   //check if WLW_dec has been computed
   if(!is_WLW_computed){
     compute_WLW_dec();
@@ -62,7 +62,7 @@ void Speckman_Base<InputHandler, MatrixType>::compute_beta_hat(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
+  VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
   // declare the vector that will store the p-values
   VectorXr result;
 
@@ -149,13 +149,13 @@ VectorXr Speckman_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-Real Speckman_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
+  Real Speckman_Base<InputHandler, MatrixType>::compute_f_pvalue(void){
   // not implemented
   return 0; 
 };
 
 template<typename InputHandler, typename MatrixType> 
-MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_f_CI(void){
+  MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_f_CI(void){
   // not implemented
   MatrixXv null_mat; 
   null_mat.resize(1,1);
@@ -164,7 +164,7 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_f_CI(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_beta_CI(void){
+  MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_beta_CI(void){
   
   // compute Lambda2 and V if needed
   if(!is_Lambda2_computed){
@@ -227,7 +227,7 @@ MatrixXv Speckman_Base<InputHandler, MatrixType>::compute_beta_CI(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
+  void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->inverter->Compute_Inv();
   // extract the inverse of E
   const MatrixType * E_inv = this->inverter->getInv();
@@ -254,7 +254,7 @@ void Speckman_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
 };
 
 template<typename InputHandler, typename MatrixType> 
-void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
+  void Speckman_Non_Exact<InputHandler, MatrixType>::compute_Lambda2(void){
   this->inverter->Compute_Inv();
 
   if(this->inverter->get_status_inverse()==false){
