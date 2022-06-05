@@ -18,7 +18,7 @@ SpMat BaseSolver::assembleMatrix(const SpMat& DMat, const SpMat& R0, const SpMat
 
 	//if (timeDependent && !parabolic)
 	//	return buildSystemMatrix(DMat + lambdaT * (*Ptk), R0_lambda, R1_lambda, R1_lambdaT);
-
+	
 	// Build the system matrix from the four blocks
 	return buildSystemMatrix(DMat, R0_lambda, R1_lambda, R1_lambdaT);
 }
@@ -27,7 +27,7 @@ SpMat BaseSolver::buildSystemMatrix(const SpMat& NW, const SpMat& SE, const SpMa
 {
 
 	UInt nnodes = NW.outerSize();
-		nnodes *= M_;
+	//	nnodes *= M_;
 
 	// Vector to be filled with the triplets used to build _coeffmatrix (reserved with the right dimension)
 	std::vector<coeff> tripletAll;
@@ -79,7 +79,6 @@ MatrixXr BaseSolver::system_solve(const MatrixXr& b) const
 		return Mdec.solve(b);
 }
 
-
 //void BaseSolver::addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
 //	{
 //		parabolic = flagParabolic;
@@ -90,6 +89,7 @@ MatrixXr BaseSolver::system_solve(const MatrixXr& b) const
 //		lambdaT = lambda;
 //		timeDependent = true;
 //	}
+
 
 // ---------- Mass lumping methods ----------
 
@@ -273,12 +273,12 @@ MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
 	return res;
 }
 
-void BaseSolver::addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
-	{
-		 If the time constant does not change, no need for recomputing the factorization and blocks
-		if (lambda == lambdaT)
-			recompute = false;
-		else
-			recompute = true;
-		BaseSolver::addTimeCorrection(Mat, lambda, flagParabolic);
-	}
+//void BlockPreconditioner::addTimeCorrection(const std::shared_ptr<SpMat> Mat, Real lambda, bool flagParabolic)
+//	{
+//		// If the time constant does not change, no need for recomputing the factorization and blocks
+//		if (lambda == lambdaT)
+//			recompute = false;
+//		else
+//			recompute = true;
+//		//BaseSolver::addTimeCorrection(Mat, lambda, flagParabolic);
+//	}

@@ -706,7 +706,6 @@ template<typename InputHandler>
 template<typename Solver>
 MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const MatrixXr & b, Solver* solverobj)
 {
-	//solverobj->compute(this->matrixNoCov_);
 	if(isMatrixNoCov_factorized()) {
 	 // Resolution of the system matrixNoCov * x1 = b
 	 MatrixXr x1 = solverobj->system_solve(b);
@@ -1228,10 +1227,10 @@ template<typename InputHandler>
 template<typename Solver>
 void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambda_S, Solver* solverobj)
 {
-	if(!this->isIterative)
-		solverobj->setM(this->M_);
-	else
-		solverobj->setM(1);
+	//if(!this->isIterative)
+	//	solverobj->setM(this->M_);
+	//else
+	//	solverobj->setM(1);
 
 	matrixNoCov_ = solverobj->assembleMatrix(this->DMat_, this->R0_, this->R1_, lambda_S);
 	isMatrixNoCov_computed = true;
