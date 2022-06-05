@@ -466,7 +466,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
     if(std::find(implementation_type.begin(), implementation_type.end(), "sign-flip") != implementation_type.end() ||
        std::find(implementation_type.begin(), implementation_type.end(), "eigen-sign-flip") != implementation_type.end()){
       // reduced vector of observations		
-	VectorXr z_loc; 
+      VectorXr z_loc; 
       z_loc.resize(row_indices.size());
 		
       for(UInt i=0; i < inf_car_.getZp()->size(); ++i){
@@ -508,7 +508,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	      }
 	  }
 	  // set the correct location indices in the inference carrier 
-	       std::vector<UInt> sub_nodes_indices = inferenceData_.get_locs_index_inference();
+	  std::vector<UInt> sub_nodes_indices = inferenceData_.get_locs_index_inference();
 	  for(auto i=0; i < sub_nodes_indices.size(); ++i){
 	    sub_nodes_indices[i] = nodes_indices[inferenceData_.get_locs_index_inference()[i]];
 	  }
@@ -527,16 +527,16 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	  std::set<UInt> neighbors;
  
 	  // loop on the mesh elements 
-	       for(auto i=0; i < mesh_.num_elements(); ++i){
-		 auto elem = mesh_.getElement(i);
-		 // check if the current point is inside the current element
-		 if(elem.isPointInside(mesh_.getPoint(k))){
-		   // loop on all the points in the current element and insert them into the set of neighbors
-		   for(auto it = elem.begin(); it != elem.end(); ++it){
-		     neighbors.insert(it->id());
-		   }
-		 }
-	       }
+	  for(auto i=0; i < mesh_.num_elements(); ++i){
+	    auto elem = mesh_.getElement(i);
+	    // check if the current point is inside the current element
+	    if(elem.isPointInside(mesh_.getPoint(k))){
+	      // loop on all the points in the current element and insert them into the set of neighbors
+	      for(auto it = elem.begin(); it != elem.end(); ++it){
+		neighbors.insert(it->id());
+	      }
+	    }
+	  }
 	  // insert the set of neighbors in the final vector
 	  NearestIndices[k] = neighbors;
 	}
@@ -556,7 +556,7 @@ void compute_nonparametric_inference_matrices(const MeshHandler<ORDER, mydim, nd
 	}
     
 	// set it into inference carrier 
-	     inf_car_.setGroup_loc(Group_locs);
+	inf_car_.setGroup_loc(Group_locs);
        
       }
     }
