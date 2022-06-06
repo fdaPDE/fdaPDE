@@ -445,7 +445,7 @@ image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
-#### Test 2.7: PDE with isotropic ???
+#### Test 2.7: PDE parameters defining the Laplace equation
 # NB: these tests must give the same output 2.1, 2.2, 2.3, 2.4, 2.5, 2.6 respectively !
 PDE_parameters = list(K = matrix(c(1,0,0,1), nrow = 2), b = c(0,0), c = 0)
 
