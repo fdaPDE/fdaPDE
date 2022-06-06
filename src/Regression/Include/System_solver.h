@@ -149,7 +149,7 @@ public:
 
 
 // Base class for a generic SparseLU solver with a block diagonal preconditioner with two blocks
-// Solves the system BMx=Bb, where B is a block diagonal matrix:  B = | NWblock^-1 |     0      |
+// Solves the system BMx=Bb, where B is a block diagonal matrix:  B = |     I      |     0      |
 //																	  |     0      | SEblock^-1 |
 //
 class BlockPreconditioner : public BaseSolver
@@ -171,7 +171,7 @@ public:
 	MatrixXr preconditionRHS(const MatrixXr& b) const;
 	MatrixXr system_solve(const MatrixXr& b) const override;
 	using BaseSolver::compute;
-	void setSEblock(const SpMat& SE) override { SEblock = SE; SEdec.compute(SE); initialized = true; }
+	void setSEblock(const SpMat& SE) override { SEblock = lambda * SE; SEdec.compute(SE); initialized = true; }
 };
 
 #endif
