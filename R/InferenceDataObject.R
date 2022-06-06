@@ -157,7 +157,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     if(class(test)!="character")
       stop("'test'should be a character: choose one between 'oat', 'sim', 'none'")
     if(length(test)==0)
-      stop("'test' is zero dimensional, should be a vector taking values among 'ont-at-the-time', 'sim', 'none'")
+      stop("'test' is zero dimensional, should be a vector taking values among 'oat', 'sim', 'none'")
   }
   
   if(!is.null(interval)){
@@ -351,7 +351,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   else if(is.null(locations_indices)){
     if(sum(type == "esf")==1 || sum(type == "sf")==1)
-      stop("For the esf implementation a vector of location indices is required")
+      stop("for the esf implementation a vector of location indices is required")
     if(ncol(locations)!=dim)
       stop("number of columns of 'locations' and 'dim' do not match")
   }
@@ -375,7 +375,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(!is.null(test)){
     if(length(test) < n_of_implementations){
       if(length(test) > 1)
-        stop("Test vector length is not consistent with the number of implementations provided")
+        stop("test vector length is not consistent with the number of implementations provided")
       else
         test = rep(test, n_of_implementations)
     }
@@ -384,7 +384,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(!is.null(interval)){
     if(length(interval) < n_of_implementations){
       if(length(interval) > 1)
-        stop("Intervals vector length is not consistent with the number of implementations provided")
+        stop("interval vector length is not consistent with the number of implementations provided")
       else
         interval = rep(interval, n_of_implementations)
     }
@@ -393,7 +393,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(!is.null(component)){
     if(length(component) < n_of_implementations){
       if(length(component) > 1)
-        stop("Component vector length is not consistent with the number of implementations provided")
+        stop("component vector length is not consistent with the number of implementations provided")
       else
         component = rep(component, n_of_implementations)
     }
@@ -402,7 +402,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(!is.null(type)){
     if(length(type) < n_of_implementations){
       if(length(type) > 1)
-        stop("Type vector length is not consistent with the number of implementations provided")
+        stop("type vector length is not consistent with the number of implementations provided")
       else
         type = rep(type, n_of_implementations)
     }
@@ -435,7 +435,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
     
     else
-      stop("Level vector length is not consistent with the number of confidence interval implementations requested")
+      stop("level vector length is not consistent with the number of confidence interval implementations requested")
     
     level = level_vec
     
@@ -466,10 +466,10 @@ inferenceDataObjectBuilder<-function(test = NULL,
        stop("sign-flip test is implemented only for the nonparametric component")
     
     if(type[index]=="s" && component[index]!="parametric")
-      stop("s test and confidence intervals are implemented only for the parametric component")
+      stop("speckman test and confidence intervals are implemented only for the parametric component")
     
     if(test[index]=='none' && interval[index]=='none'){
-        stop("At least one between test and interval should be required for each implementation")
+        stop("at least one between test and interval should be required for each implementation")
       }
     
       if(test[index]!="oat" && test[index]!="sim" &&  test[index]!="none"){
@@ -493,22 +493,22 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
     
       if(interval[index]=="sim" && (type[index]=="esf" || type[index] == "enh-esf")){
-        stop("sim confidence intervals are not implemented in the esf cases")
+        stop("simultaneous confidence intervals are not available with eigen-sign-flip implementation")
       }
       
       if((interval[index]=="sim" || interval[index]=="bonf") && component[index]!="parametric")
-        stop("only oat confidence intervals are allowed for the nonparametric component")
+        stop("only one-at-the-time confidence intervals are allowed for the nonparametric component")
       
       if((type[index] == "esf" || type[index] == "enh-esf") && component[index]!="nonparametric"){
         for(i in 1:dim(coeff)[1]){
           count=0
           for(j in 1:dim(coeff)[2]){
             if(coeff[i,j]!= 0 && coeff[i,j]!=1)
-              stop("linear combinations are not allowed in the eigen-sign-flip cases")
+              stop("linear combinations are not allowed with eigen-sign-flip implementation")
             count = count + coeff[i,j]
           }
           if(count != 1)
-            stop("linear combinations are not allowed in the eigen-sign-flip cases")
+            stop("linear combinations are not allowed with eigen-sign-flip implementation")
         }
       }
       
@@ -556,7 +556,7 @@ if(sum(component == "nonparametric")!=length(component)){
     beta0<-rep(0, dim(coeff)[1])
   else{
     if(length(beta0)!=dim(coeff)[1])
-      stop("dimension of 'coeff' and 'beta0' are not consistent")
+      stop("dimensions of 'coeff' and 'beta0' are not consistent")
   }
 }else{
   # inference on beta is not required, just setting it to zero
@@ -584,7 +584,7 @@ if(sum(component == "nonparametric")!=length(component)){
         non_defaulted_args <- non_defaulted_args + 1
     }
     if(non_defaulted_args != dim)
-      stop("Number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
+      stop("number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
     rm(list = c("non_defaulted_args", "i"))
   }
   }
