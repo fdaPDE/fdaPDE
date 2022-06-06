@@ -737,11 +737,9 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_in
 	Solver solverobj(this->matrixNoCov_);
 	if (this->getSolver() == 3)
 	{
-		UInt nnodes = N_ * M_;
-		SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
-		solverobj.setSEblock(tempSE);
+		solverobj.setSEblock(R0_);
 	}
-	if (this->getSolver() == 2)
+	if (this->getSolver() == 2 || this->getSolver() == 3)
 		solverobj.set_lambdaS(lambdaS);
 
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
@@ -1218,7 +1216,6 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	getRightHandData(rightHandData); //updated
 	this->_rightHandSide = VectorXr::Zero(2*nnodes);
 	this->_rightHandSide.topRows(nnodes)=rightHandData;
-
 }
 
 //----------------------------------------------------------------------------//
@@ -1300,9 +1297,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 	{
 		if (this->getSolver() == 3)
 		{
-			UInt nnodes = N_ * M_;
-			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
-			solverobj.setSEblock(tempSE);
+			solverobj.setSEblock(R0_);
 		}
 		solverobj.compute(matrixNoCov_);
 	}
@@ -1312,7 +1307,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 	const Real lambdaS = optimizationData_.get_current_lambdaS();
 	const Real lambdaT = optimizationData_.get_current_lambdaT();
 
-	if (this->getSolver() == 2)
+	if (this->getSolver() == 2 || this->getSolver() == 3)
 		solverobj.set_lambdaS(lambdaS);
 
 	if (lambdaS != last_lambdaS || lambdaT != last_lambdaT)
@@ -1346,9 +1341,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b_iter(const MatrixXr& b,
 	{
 		if (this->getSolver() == 3)
 		{
-			UInt nnodes = N_ * M_;
-			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
-			solverobj.setSEblock(tempSE);
+			solverobj.setSEblock(R0_);
 		}
 		solverobj.compute(matrixNoCov_);
 	}
@@ -1356,7 +1349,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b_iter(const MatrixXr& b,
 	const Real lambdaS = optimizationData_.get_current_lambdaS();
 	const Real lambdaT = optimizationData_.get_current_lambdaT();
 
-	if (this->getSolver() == 2)
+	if (this->getSolver() == 2 || this->getSolver() == 3)
 		solverobj.set_lambdaS(lambdaS);
 
 	if (!regressionData_.isSpaceTime())
@@ -1388,10 +1381,10 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	Solver solverobj;
 	if (isMatrixNoCov_computed)
 	{
+		Rprintf("Mnocov\t");
 		if (this->getSolver() == 3)
 		{
-			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
-			solverobj.setSEblock(tempSE);
+			solverobj.setSEblock(R0_);
 		}
 		solverobj.compute(matrixNoCov_);
 	}
@@ -1436,7 +1429,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				 	lambdaT = (optimizationData_.get_lambda_T())[t];
 		 		}
 
-			if (this->getSolver() == 2)
+			if (this->getSolver() == 2 || this->getSolver() == 3)
 				solverobj.set_lambdaS(lambdaS);
 
 			_rightHandSide = rhs;
@@ -1542,8 +1535,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
 	{
 		if (this->getSolver() == 3)
 		{
-			SpMat tempSE(matrixNoCov_.block(nnodes, nnodes, nnodes, nnodes));
-			solverobj.setSEblock(tempSE);
+			solverobj.setSEblock(R0_);
 		}
 		solverobj.compute(matrixNoCov_);
 	}
@@ -1594,7 +1586,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
                 lambdaT = (optimizationData_.get_lambda_T())[t];
             }
 
-			if (this->getSolver() == 2)
+			if (this->getSolver() == 2 || this->getSolver() == 3)
 				solverobj.set_lambdaS(lambdaS);
 
             _rightHandSide = rhs;

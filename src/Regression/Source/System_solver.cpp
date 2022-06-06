@@ -204,7 +204,7 @@ SpMat BlockPreconditioner::assembleMatrix(const SpMat& DMat, const SpMat& R0, co
 	
 	SEblock = R0_lambda;
 	SEdec.compute(R0);
-	SWblock = SEdec.solve(R1_lambda);
+	SWblock = SEdec.solve(R1);
 	initialized = true;
 
 	R1_lambda = lambdaS * R1_lambda;
@@ -261,7 +261,8 @@ MatrixXr BlockPreconditioner::preconditionRHS(const MatrixXr& b) const
 	UInt nnodes = SEblock.outerSize();
 	MatrixXr rhs(b);
 	if (rhs.bottomRows(nnodes) != MatrixXr::Zero(nnodes, b.cols()))
-		rhs.bottomRows(nnodes) = (SEdec.solve(b.bottomRows(nnodes)))/lambda;
+		rhs.bottomRows(nnodes) = (SEdec.solve(b.bottomRows(nnodes)))/(-lambda);
+	Rpintf("preconditioned\t");
 	return rhs;
 }
 
@@ -270,6 +271,7 @@ MatrixXr BlockPreconditioner::system_solve(const MatrixXr& b) const
 	if (!initialized)
 		Rprintf("Preconditioner not initialized. Using identity");
 	MatrixXr res = BaseSolver::system_solve(preconditionRHS(b));
+	Rprintf("solved\t");
 	return res;
 }
 
