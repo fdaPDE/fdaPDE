@@ -535,7 +535,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                                 f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
   # In the areal case, inference on f is not implemented 
-  if(inference.data.object@definition==1 && any(inference.data.object@component!=1) && areal.data.avg==T){
+  if(inference.data.object@definition==1 && any(inference.data.object@component!=1) && !is.null(incidence_matrix)){
     warning("Inference on f is not implemented for areal data, discarding inference")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                               locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 

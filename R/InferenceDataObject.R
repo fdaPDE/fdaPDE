@@ -329,7 +329,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }else{
     # inference on beta is not required, set n_cov and coeff to a 1x1 matrix
-    if(n_cov >= 0){
+    if(!is.null(n_cov) && n_cov >= 0){
       n_cov = as.integer(n_cov)
     }
     else{
