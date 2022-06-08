@@ -352,10 +352,6 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                   optim = optim, 
                   lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   
-  # Checking inference data
-  # Most of the checks have already been carried out by inferenceDataObjectBuilder function
-  inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
-  
   # Check that GCV is set for inference
   if(inference.data.object@definition==1 && is.null(lambda.selection.lossfunction) && (dim(lambdaS)!=1 || dim(lambdaT)!=1)){
     warning("Inference is not defined when lambda grid is provided without GCV")
@@ -369,6 +365,14 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                               coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha=0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
   }
+  
+  if(inference.data.object@definition==1 && any(inference.data.object@component!=1)){
+    stop("Inference on f is not provided in space-time models")
+  }
+  
+  # Checking inference data
+  # Most of the checks have already been carried out by inferenceDataObjectBuilder function
+  inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates)) #checking inference data consistency, constructing default object in NULL case
   
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying==FALSE)
