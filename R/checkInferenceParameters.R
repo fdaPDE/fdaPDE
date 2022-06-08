@@ -1,4 +1,4 @@
-checkInferenceParameters <- function(inference.data.object,checknumber,locations,nodes){
+checkInferenceParameters <- function(inference.data.object,checknumber,locations=NULL,nodes=NULL){
   
   #if no inference is required, construct a dummy inference object, where all parameters are set to nonsense values on purpose
   if(is.null(inference.data.object) || inference.data.object@definition==0){
