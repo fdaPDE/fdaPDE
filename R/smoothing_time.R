@@ -1,5 +1,5 @@
 #' @useDynLib fdaPDE
-#' @import Matrix plot3D rgl plot3Drgl geometry
+#' @import Matrix plot3D rgl geometry
 #' @importFrom grDevices heat.colors palette
 #' @importFrom graphics plot segments points lines
 #' @importFrom methods is
