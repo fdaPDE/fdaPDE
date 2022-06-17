@@ -2,7 +2,7 @@
 % Please edit documentation in R/mesh.R
 \name{refine.mesh.1.5D}
 \alias{refine.mesh.1.5D}
-\title{Refine 1D mesh}
+\title{Refine 1.5D mesh}
 \usage{
 refine.mesh.1.5D(mesh, delta)
 }
@@ -15,5 +15,5 @@ refine.mesh.1.5D(mesh, delta)
 An object of class mesh.1.5D with refined edges
 }
 \description{
-Refine 1D mesh
+Refine 1.5D mesh
 }
