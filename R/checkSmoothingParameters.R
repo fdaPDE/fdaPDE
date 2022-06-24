@@ -8,7 +8,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   if(!is(FEMbasis, "FEMbasis"))
     stop("'FEMbasis' is not class 'FEMbasis'")
 
-  if(!is(FEMbasis$mesh, "mesh.1.5D") & !is(FEMbasis$mesh, "mesh.2D") & !is(FEMbasis$mesh, "mesh.2.5D") & !is(FEMbasis$mesh, "mesh.2.5D"))
+  if(!is(FEMbasis$mesh, "mesh.1.5D") & !is(FEMbasis$mesh, "mesh.2D") & !is(FEMbasis$mesh, "mesh.2.5D") & !is(FEMbasis$mesh, "mesh.3D"))
     stop('Unknown mesh class')
 
   if(is(FEMbasis$mesh, "mesh.2.5D") & !is.null(PDE_parameters) )
