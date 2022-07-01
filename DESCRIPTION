@@ -1,6 +1,6 @@
 Package: fdaPDE
-Version: 1.1-5
-Date: 2022-05-23
+Version: 1.1-8
+Date: 2022-06-17
 Title: Functional Data Analysis and Partial Differential Equations (PDE); Statistical Analysis of Functional and Spatial Data, Based on Regression with PDE Regularization
 Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		     email = "eleonora.arnone@polimi.it"),
@@ -37,7 +37,7 @@ Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
     stats, grDevices, graphics, geometry,
-    rgl, Matrix, plot3D, plot3Drgl, methods
+    rgl, Matrix, plot3D, methods
 LinkingTo: 
 	RcppEigen, BH
 Suggests: 
@@ -48,5 +48,5 @@ License: CC BY-NC-SA 4.0
 Copyright: See the individual source files for copyrights information
 NeedsCompilation: yes
 SystemRequirements: C++11, GNU make
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Encoding: UTF-8
