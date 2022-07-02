@@ -167,6 +167,19 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
+#### Test 2.7: Inference on f and beta, Wald, Speckman, ESF, Enhanced ESF p_values for beta, Wald, Sign-Flip, ESF p_values for f
+locs_ind <- which(mesh$nodes[,1] > 2 & mesh$nodes[,1] < 5 & mesh$nodes[,3] > 0 & mesh$nodes[,3] < 2)
+
+inf_obj<-inferenceDataObjectBuilder(test=c("sim", "oat", "sim", "sim", "oat"), component=c("both", "parametric", "nonparametric", "both", "parametric"), 
+                                    type=c("w","s","sf","esf","enh-esf"), dim = 3, n_cov = 2, locations_indices = locs_ind, locations_by_nodes = T)
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV', inference.data.object=inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$f$p_values
+
 
 ### Second order FEM in 3D ################################
 # Compare the accuracy and robustness of first 

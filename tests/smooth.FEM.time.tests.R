@@ -213,6 +213,36 @@ plot(FEM.time(output_CPP$fit.FEM$coeff[,1,1],FEMbasis = FEMbasis, time_mesh = Ti
 
 output_CPP$beta
 
+### Inference
+# Inference obj:
+inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
+
+#### Test 2.4: overall inference on beta parameters, separable case
+lambdaS = 10^(-1:1)
+lambdaT = 10^(-6:-4)
+output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                            observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+
+#### Test 2.5: overall inference on beta parameters, parabolic case
+lambdaS = 1 #10^(-1:1)
+lambdaT = 1e-6 #10^(-6:-4)
+output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                            observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            FLAG_PARABOLIC = TRUE,
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
 
 
 #### Test 3: square domain ####
@@ -291,6 +321,47 @@ output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations,
                             PDE_parameters=PDE_parameters,
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
+#### Inference: adding cov, PDE, separable case
+
+# Create covariates
+set.seed(509875)
+cov1 = rnorm(length(sol_exact), mean = 2, sd = 1)
+
+sol_exact=f(SpaceTimePoints[,1],SpaceTimePoints[,2],SpaceTimePoints[,3])
+
+# Add error to simulate data
+set.seed(7893475)
+data = sol_exact + 3*cov1 
+data = data + rnorm(length(data), mean = 0, sd =  0.05*diff(range(sol_exact)))
+observations = matrix(data,nrow(locations),NumTimePoints)
+
+# Inference obj: inference test, adding cov, PDE, separable case
+inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0=3, component='parametric', n_flip=1000, f_var=T)
+
+#### Test 3.4: overall inference on beta parameters, parabolic case 
+lambdaS = 10^-4 #10^(-5:-3)
+lambdaT = 10^-4 #10^(-5:-3)
+output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            PDE_parameters=PDE_parameters,
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+
+#### Test 3.5: overall inference on beta parameters, parabolic case
+lambdaS = 10^-4 #10^(-5:-3)
+lambdaT = 10^-4 #10^(-5:-3)
+output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations, 
+                                covariates = cov1,
+                                FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                                PDE_parameters=PDE_parameters,
+                                FLAG_PARABOLIC=T,
+                                inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
 
 #### Test 4: quasicircular domain ####
 #            areal observations
@@ -572,6 +643,52 @@ output_CPP<-smooth.FEM.time(observations=observations,
                             FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE,
                             lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
+### Inference
+
+# Create covariates
+set.seed(509875)
+cov1 = rnorm(length(DatiEsatti), mean = 2, sd = 1)
+
+# Add error to simulate data
+set.seed(5839745)
+data = DatiEsatti + 3*cov1 
+data = data + rnorm(length(DatiEsatti), sd = 0.1)
+observations=matrix(data,nrow(incidence_matrix),length(time_mesh))
+
+# Inference obj: inference test, adding cov, PDE, separable case
+inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), component='parametric', n_flip=10000, f_var=T)
+
+#### Test 4.4.1: overall inference on beta, forcing term = 0 exact  GCV,  monolitic method
+output_CPP<-smooth.FEM.time(observations=observations,
+                            covariates = cov1,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+
+#### iterative method
+output_CPP<-smooth.FEM.time(observations=observations,
+                            covariates = cov1,
+                            incidence_matrix = incidence_matrix, areal.data.avg = TRUE,
+                            FEMbasis = FEMbasis, time_mesh = time_mesh,
+                            lambdaS = lambdaS, lambdaT = lambdaT,
+                            BC = BC,
+                            PDE_parameters = PDE_parameters,
+                            FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = T,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+
+
 ####### 2.5D ########
 
 #### hub pointwise (examples with and without covariates) ####
@@ -679,6 +796,38 @@ sol_exact = func(eval_locations)
 RMSE<-function(f,g) sqrt(mean((f-g)^2))
 RMSE(sol_eval,sol_exact)
 
+### Inference test: 
+inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
+
+#### Test 1.1: overall inference on beta, serparable case
+Out_1_1 = smooth.FEM.time(observations=datacov, covariates = W,
+                          FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                          lambdaS = lambdaS, lambdaT = lambdaT,
+                          lambda.selection.lossfunction = 'GCV', lambda.selection.criterion = 'grid', DOF.evaluation = 'stochastic',
+                          FLAG_PARABOLIC = FALSE,
+                          inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+
+#### Test 1.2: overall inference on beta, parabolic case
+Out_1_2 = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
+                          FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                          lambdaS = lambdaS, lambdaT = lambdaT,
+                          IC=func_evaluation[1:nrow(mesh$nodes)],
+                          FLAG_PARABOLIC = TRUE, 
+                          inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+
+#### Test 1.3: this test should check no inference is available for iterative solution of the system
+Out_1_3 = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
+                          FEMbasis = FEMbasis, time_mesh = TimeNodes,
+                          lambdaS = lambdaS, lambdaT = lambdaT,
+                          IC=func_evaluation[1:nrow(mesh$nodes)],
+                          FLAG_PARABOLIC = TRUE , FLAG_ITERATIVE = TRUE,
+                          inference.data.object = inf_obj)
 
 #### hub areal (examples with and without covariates) ####
 library(fdaPDE)
