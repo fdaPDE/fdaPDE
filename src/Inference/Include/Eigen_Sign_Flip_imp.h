@@ -309,7 +309,7 @@ template<typename InputHandler, typename MatrixType>
   if(!is_Lambda_computed){
     this->compute_Lambda();
     if(!is_Lambda_computed){
-      Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference");
+      Rprintf("Error: failed FSPAI inversion in p_values computation, discarding inference\n");
       result.resize(p);
     
       for(UInt k=0;k<p;k++){
@@ -879,7 +879,7 @@ template<typename InputHandler, typename MatrixType>
 
   // give a warning in R if at least one interval did not converge
   if(!all_f_converged)
-    Rprintf("warning: some sign-flip confidence intervals for the nonparametric component did not converge");
+    Rprintf("Warning: some sign-flip confidence intervals for the nonparametric component did not converge\n");
    
   // for each point
   for(UInt i=0; i<n_loc; ++i){
@@ -914,7 +914,7 @@ template<typename InputHandler, typename MatrixType>
   if(!is_Lambda_computed){
     compute_Lambda();
     if(!is_Lambda_computed){
-      Rprintf("error: failed FSPAI inversion in confidence intervals computation, discarding inference");
+      Rprintf("Error: failed FSPAI inversion in confidence intervals computation, discarding inference\n");
       MatrixXv result;
       MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
       for(UInt i=0; i<C.rows(); ++i){

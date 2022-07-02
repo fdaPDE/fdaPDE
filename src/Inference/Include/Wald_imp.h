@@ -111,7 +111,7 @@ template<typename InputHandler, typename MatrixType>
   if(!is_S_computed){
     compute_S();
     if(!is_S_computed){     // Failed computation of E_tilde_inv/E_inv, returning, unfeasible p_values
-      Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference");
+      Rprintf("Error: failed FSPAI inversion in p_values computation, discarding inference\n");
       MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
       result.resize(C.rows());
     
@@ -193,7 +193,7 @@ template<typename InputHandler, typename MatrixType>
 
   // check that FSPAI inversion went well (if non-exact inference was required)
   if(!is_V_f_computed){
-    Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
+    Rprintf("Error: failed FSPAI inversion in p_values computation, discarding inference\n"); 
     result = 10e20;
     return result; 
   }
@@ -232,7 +232,7 @@ template<typename InputHandler, typename MatrixType>
 
   // check that at least one eigenvalue > threshold is found (this may happen with FSPAI implementation) 
   if(max_it - k + 1 == 0){
-    Rprintf("error: cannot invert variance-covariance matrix in Wald-type inference for f, returning NA");
+    Rprintf("Error: cannot invert variance-covariance matrix in Wald-type inference for f, returning NA\n");
     result = 10e20;
     return result;  
   }
@@ -264,7 +264,7 @@ template<typename InputHandler, typename MatrixType>
   if(!is_S_computed){
     compute_S();
     if(!is_S_computed){   // Failed inversion of E_tilde_inv/E_inv, returning unfeasible CI
-      Rprintf("error: failed FSPAI inversion in confidence intervals computation, discarding inference");
+      Rprintf("Error: failed FSPAI inversion in confidence intervals computation, discarding inference\n");
       MatrixXv result;
       MatrixXr C = this->inf_car.getInfData()->get_coeff_inference();
       result.resize(1,C.rows());
@@ -333,7 +333,7 @@ template<typename InputHandler, typename MatrixType>
 
   // check that FSPAI inversion went well (if non-exact inference was required)
   if(!is_V_f_computed){
-    Rprintf("error: failed FSPAI inversion in p_values computation, discarding inference"); 
+    Rprintf("Error: failed FSPAI inversion in p_values computation, discarding inference\n"); 
     for(UInt i=0; i < n_loc; ++i){
       result(i).resize(3); 
       result(i)(1) = 10e20; 

@@ -122,7 +122,14 @@ output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis,
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
+#### Test 1.5: Inference on f, hypothesis testing and CI, Wald and SF implementations
+inf_obj <- inferenceDataObjectBuilder(test = "sim", interval = "oat", type = c("w", "sf"), component = "nonparametric", dim = 2, n_cov = 0, f0 = AUX, locations_by_nodes = T)
 
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI # it is ok if not all sign-flip confidence intervals converge
 
 #### Test 2: C-shaped domain ####
 #            locations == nodes 
@@ -282,3 +289,17 @@ output_CPP<-smooth.FEM(observations=data, locations = NULL,
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
+
+#### Test 2.7: Inference on beta and f, hypothesis testing and CI, Wald and Enhanced-ESF implementation
+inf_obj <- inferenceDataObjectBuilder(test = c("sim", "oat"), interval = "oat", component = c("both", "parametric"), type = c("w", "enh-esf"), dim = 2, n_cov = 1, beta0 = 1, f0 = f, n_flip = 150000, locations_by_nodes = T)
+
+output_CPP<-smooth.FEM(observations=data, locations = NULL, 
+                       covariates = cov1,
+                       FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
+
+output_CPP$inference$beta$p_values
+output_CPP$inference$beta$CI
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI
+
