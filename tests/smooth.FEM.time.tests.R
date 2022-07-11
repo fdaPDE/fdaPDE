@@ -880,7 +880,7 @@ data = matrix(data,RDD_groups,length(TimeNodes))
 datacov = matrix(datacov,RDD_groups,length(TimeNodes))
 
 ###########################SEPARABLE###########################################
-solSep = smooth.FEM.time(observations = data,incidence_matrix = incidence_matrix, time_locations=TimeNodes,
+solSep = smooth.FEM.time(observations = data, incidence_matrix = incidence_matrix, time_locations=TimeNodes,
                          time_mesh = TimeNodes,FEMbasis = FEMbasis, 
                          lambdaS = lambdaS, lambdaT = lambdaT)
 
@@ -908,12 +908,12 @@ solParIter = smooth.FEM.time(observations = datacov[,2:length(TimeNodes)],time_m
                          IC=func_evaluation[1:nrow(mesh$nodes)])
 ### GCV Exact
 solParIter = smooth.FEM.time(observations=data,
-                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, incidence_matrix = incidence_matrix, time_locations =TimeNodes, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
                              lambda.selection.criterion='grid',DOF.evaluation='exact',lambda.selection.lossfunction='GCV')
 
 ### GCV Stochastic 
 solParIter = smooth.FEM.time(observations=data,
-                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes,
+                             FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations =TimeNodes, incidence_matrix = incidence_matrix,
                              lambdaS = lambdaS_par, lambdaT = lambdaT_par,FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE =TRUE,
                              lambda.selection.criterion='grid',DOF.evaluation='stochastic',lambda.selection.lossfunction='GCV')
 
