@@ -37,10 +37,10 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
-    stats, grDevices, graphics, geometry,
-    rgl, Matrix, plot3D, plot3Drgl, methods
+    stats, grDevices, graphics,
+    rgl, Matrix, plot3D, methods
 LinkingTo: 
-	RcppEigen, BH
+	RcppEigen
 Suggests: 
     MASS,
     testthat
