@@ -8,7 +8,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
 interval = NULL, 
 type = 'w', 
 component = 'parametric',
-exact = FALSE, 
+exact = TRUE, 
 dim = NULL, 
 n_cov = NULL,
 locations = NULL,
@@ -51,7 +51,7 @@ tol_fspai = 0.05)
 \item{component}{A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.}
 
 \item{exact}{A logical used to decide the method used to estimate the statistics variance.
-The possible values are: FALSE (default) and TRUE. In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
+The possible values are: FALSE and TRUE (default). In the first case an approximate method is used, leading to a lower accuracy, but faster computation.
 In the second case the evaluation is exact but computationally expensive.}
 
 \item{dim}{Dimension of the problem, defaulted to NULL. It can take value 2 or 3 corresponding to 2D or 2.5D/3D problems (Must be set by the user)}
@@ -90,7 +90,7 @@ that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.
 }
 \examples{
 obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
-obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, n_cov = 3, location_indices = 1:100);
+obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, exact = F, n_cov = 3, location_indices = 1:100);
 obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
  type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
 }
