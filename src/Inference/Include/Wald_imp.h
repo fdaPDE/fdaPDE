@@ -1,7 +1,6 @@
 #include "Wald.h"
 #include <cmath>
-#include <boost/math/distributions/chi_squared.hpp>
-#include <boost/math/distributions/normal.hpp>
+#include <Rcpp.h>
 
 template<typename InputHandler, typename MatrixType> 
   void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
@@ -221,7 +220,7 @@ template<typename InputHandler, typename MatrixType>
   UInt k = 0; 
   UInt max_it = eig_values.cols();
     
-  Real threshold = 0.01; 
+  Real threshold = 0.0001; 
   bool stop = false;
 
   while(!stop){
@@ -247,12 +246,9 @@ template<typename InputHandler, typename MatrixType>
   
   // compute the test statistics
   Real result_red = (f_loc_hat - f_0).transpose() * V_f_loc_red_inv * (f_loc_hat - f_0);
-  
-  // generate the distribution
-  boost::math::chi_squared dist(max_it - k + 1);
-  
+
   // compute the pvalue
-  result = boost::math::cdf(complement(dist,result_red));
+  result = R::pchisq(result_red, max_it - k + 1, false, false);
   
   return result; 	
 };
@@ -360,12 +356,10 @@ template<typename InputHandler, typename MatrixType>
   Real alpha = this->inf_car.getInfData()->get_inference_alpha()[this->pos_impl];
   Real quant;
   
-  //ont-at-the-time confidence intervals is the only possible implementation here
+  //one-at-the-time confidence intervals is the only possible implementation here
   // generate the distribution
-  boost::math::normal dist; // default is a standard normal
-  quant = boost::math::quantile(complement(dist, alpha/2));
+  quant = R::qnorm(alpha/2, 0.0, 1.0, false, false);
   
-
   for(UInt i=0; i<n_loc; ++i){
     result(i).resize(3);
     // central element

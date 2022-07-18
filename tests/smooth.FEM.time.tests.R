@@ -807,8 +807,8 @@ Out_1_1 = smooth.FEM.time(observations=datacov, covariates = W,
                           FLAG_PARABOLIC = FALSE,
                           inference.data.object = inf_obj)
 
-output_CPP$inference$beta$p_values
-output_CPP$inference$beta$CI
+Out_1_1$inference$beta$p_values
+Out_1_1$inference$beta$CI
 
 #### Test 1.2: overall inference on beta, parabolic case
 Out_1_2 = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
@@ -818,8 +818,8 @@ Out_1_2 = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates
                           FLAG_PARABOLIC = TRUE, 
                           inference.data.object = inf_obj)
 
-output_CPP$inference$beta$p_values
-output_CPP$inference$beta$CI
+Out_1_2$inference$beta$p_values
+Out_1_2$inference$beta$CI
 
 #### Test 1.3: this test should check no inference is available for iterative solution of the system
 Out_1_3 = smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
