@@ -36,7 +36,7 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
-    stats, grDevices, graphics, 
+    stats, methods, grDevices, graphics, 
     rgl, Matrix, plot3D, methods
 LinkingTo: 
 	RcppEigen, Rcpp

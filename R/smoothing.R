@@ -137,7 +137,6 @@
 #'              }
 #'         }
 #' }
-#' }
 #' @description This function implements a spatial regression model with differential regularization.
 #'  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
 #'  Laplacian of the spatial field, that induces an isotropic smoothing. When prior information about the anisotropy or
@@ -190,7 +189,7 @@
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 #' 
 #' #Inferential tests and confidence intervals
-#' inference.data.object = inferenceDataObjectBuilder(test = c('oat','sim', 'oat'), interval = c('sim','oat','none'), type = c('w','s','esf'), dim = 2, n_cov = 1)
+#' inference.data.object = inferenceDataObjectBuilder(test = 'oat', type = c('w','s','esf'), dim = 2, n_cov = 1)
 #'
 #' solution = smooth.FEM(observations = data, covariates = covariate, 
 #'                       FEMbasis = FEMbasis, lambda = lambda,

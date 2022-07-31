@@ -1,3 +1,8 @@
+#' @useDynLib fdaPDE
+#' @importFrom methods new
+#' @importFrom stats pchisq pnorm qchisq qnorm
+NULL
+
 #' Class for inference data
 #'
 #'@slot test A vector of integers taking value 0, 1 or 2; if 0 no test is performed, if 1 one-at-the-time tests are performed, if 2 a simultaneous test is performed.
@@ -91,6 +96,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@param locations A matrix of the locations of interest when testing the nonparametric component f, defaulted to NULL
 #'@param locations_indices A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference, defaulted to NULL.
 #'If a vector of indices is provided, then the slot 'locations' is discarded.
+#'@param locations_by_nodes A logical used to indicate wether the selected locations to perform inference on f are all coinciding with the nodes;  
 #'@param coeff A matrix, with \code{n_cov} number of columns, of numeric coefficients representing the linear combinations of the parametric components of the model.
 #'The default is NULL, corresponding to an identity matrix. If at least one sing-flipping approach is required in \code{type}, needs to be an identity matrix.
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and \code{component} is not 'nonparametric'; its length is the number of rows of matrix \code{coeff} if provided. 
@@ -113,6 +119,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'n_cov = NULL,
 #'locations = NULL,
 #'locations_indices = NULL,
+#'locations_by_nodes = F,
 #'coeff = NULL, 
 #'beta0 = NULL, 
 #'f0 = NULL,
@@ -123,10 +130,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #' 
 #' 
 #' @examples 
-#' obj1<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
-#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, n_cov = 3, location_indices = 1:100);
-#' obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
-#'  type=c('w','s','esf','s'), dim=2, n_cov = 2, level=0.99)
+#' obj<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
+#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3, locations_indices = 1:100);
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
@@ -147,14 +152,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
-    if(class(test)!="character")
+    if(!is(test,"character"))
       stop("'test'should be a character: choose one between 'oat', 'sim', 'none'")
     if(length(test)==0)
       stop("'test' is zero dimensional, should be a vector taking values among 'ont-at-the-time', 'sim', 'none'")
   }
   
   if(!is.null(interval)){
-    if(class(interval)!="character")
+    if(!is(interval,"character"))
       stop("'interval'should be a character: choose one between 'oat' , 'sim', 'bonf', 'none'")
     if(length(interval)==0)
       stop("'interval' is zero dimensional, should be a vector taking values among 'oat', 'sim', 'bonf', 'none'")
@@ -164,7 +169,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     stop("'type' is zero dimensional, should be a vector taking values among 'w', 's', 'sf' or 'esf'")
  
    if(length(type) > 1 || type!="w"){
-    if(class(type)!="character")
+    if(!is(type,"character"))
       stop("'type' should be a vector of characters: choose among 'w', 's', 'sf' or 'esf'" )
   }
   
@@ -173,12 +178,12 @@ inferenceDataObjectBuilder<-function(test = NULL,
     stop("'component' is zero dimensional, should be a vector of characters taking values among 'parametric', 'nonparametric' or 'both'")
   
   if(length(component) > 1 || component!="parametric"){
-    if(class(component)!="character")
+    if(!is(component,"character"))
       stop("'component' should be a vector of characters with values among 'parametric', 'nonparametric' or 'both'" )
   }
   
   if(!is.null(dim)){
-    if(class(dim)!="numeric" && class(dim)!="integer")
+    if((!is(dim,"numeric")) && (!is(dim,"integer")))
       stop("'dim' should be an integer or convertible to integer type")
     else if(dim!=2 && dim!=3)
       stop("'dim' should be either 2 or 3")
@@ -187,18 +192,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(!is.null(n_cov)){
-    if(class(n_cov)!="numeric" && class(n_cov)!="integer")
+    if((!is(n_cov,"numeric")) && (!is(n_cov,"integer")))
       stop("'n_cov' should be an integer or convertible to integer type")
     n_cov=as.integer(n_cov)
   }
   
   if(!is.null(locations)){
-    if(class(locations)[1]!="matrix")
+    if(!is(locations,"matrix"))
       stop("'locations' should be of class matrix")
   }
   
   if(!is.null(locations_indices)){
-    if(class(locations_indices)!="numeric" && class(locations_indices)!="integer")
+    if((!is(locations_indices,"numeric")) && (!is(locations_indices,"integer")))
       stop("'locations_indices' should be of class numeric or convertible to integer")
     else{
       for(i in 1:length(locations_indices)){
@@ -211,7 +216,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(locations_by_nodes != F){
-    if(class(locations_by_nodes)!="logical")
+    if(!is(locations_by_nodes,"logical"))
       stop("'locations_by_nodes' should be either TRUE or FALSE ")
     if(length(locations_by_nodes)==0)
       stop("'locations_by_nodes' is zero dimensional, should be either TRUE or FALSE")
@@ -223,26 +228,26 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(!is.null(coeff)){
-    if(class(coeff)[1]!="matrix")
+    if(!is(coeff,"matrix"))
       stop("'coeff' should be of class matrix")
   }
   
   if(!is.null(beta0)){
-    if(class(beta0)!="numeric")
+    if(!is(beta0,"numeric"))
       stop("'beta0' should be numeric")
     if(length(beta0)==0)
       stop("'beta0' is zerodimensional")
   }
   
   if(!is.null(f0)){
-    if(class(f0)!="function")
+    if(!is(f0,"function"))
       stop("'f0' should be a function")
     if(length(f0)==0)
       stop("'f0' is zerodimensional")
   }
   
   if(f_var != F){
-    if(class(f_var)!="logical")
+    if(!is(f_var,"logical"))
       stop("'f_var' should be either TRUE or FALSE ")
     if(length(f_var)==0)
       stop("'f_var' is zero dimensional, should be either TRUE or FALSE")
@@ -257,12 +262,12 @@ inferenceDataObjectBuilder<-function(test = NULL,
   if(length(level)==0)
     stop("'level' is zerodimensional, should be a vector of positive numbers between 0 and 1")
   if(length(level) > 1 || level!=0.95){
-    if(class(level)!="numeric")
+    if(!is(level,"numeric"))
       stop("'level' should be numeric")
   }
   
   if(!is.null(n_flip)){
-    if(class(n_flip)!="numeric" && class(n_flip)!="integer")
+    if((!is(n_flip,"numeric")) && (!is(n_flip,"integer")))
       stop("'n_flip' should be an integer or convertible to integer type")
     n_flip=as.integer(n_flip)
   }
@@ -293,7 +298,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("number of covariates and coefficients do not match")
         for (i in 1:dim(coeff)[1]){
           for(j in 1:dim(coeff)[2]){
-          if(class(coeff[i,j])!="numeric")
+          if(!is(coeff[i,j],"numeric"))
             stop("'coeff' should be composed by numeric values")
           }
         }

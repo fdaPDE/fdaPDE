@@ -178,13 +178,14 @@ NULL
 #'
 #' 
 #' #Inferential tests and confidence intervals
-#' inf_obj <- inferenceDataObjectBuilder(test = "oat", interval = "sim", type = "w", dim = 2, n_cov = 1)
+#' inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'sim', type = 'w', dim = 2, n_cov = 1)
 #'
 #' solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
 #'                         observations=observations, 
 #'                         covariates = cov1,
 #'                         FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
-#'                         lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
+#'                         lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+#'                         inference.data.object = inf_obj)
 #'
 #' # beta estimate:
 #' solution$solution$beta

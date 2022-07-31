@@ -743,7 +743,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_f_CI(void){
  
   UInt Max_Iter=50;
   UInt Count_Iter=0;
-  while(!all_f_converged && Count_Iter<Max_Iter){
+  while((!all_f_converged) && (Count_Iter<Max_Iter)){
   
     // Compute all p_values (only those needed)
     for (UInt i=0; i<n_loc; i++){
@@ -1047,7 +1047,7 @@ MatrixXv Eigen_Sign_Flip_Base<InputHandler, MatrixType>::compute_beta_CI(void){
     
   UInt Max_Iter=50;
   UInt Count_Iter=0;
-  while(!all_betas_converged & Count_Iter<Max_Iter){
+  while((!all_betas_converged) & (Count_Iter<Max_Iter)){
   
     // Compute all p_values (only those needed)
     for (UInt i=0; i<p; i++){
