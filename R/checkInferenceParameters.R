@@ -8,7 +8,7 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
           f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0)))
   }#define a shadow inferenceDataObject in order tell the cpp code not to perform any inferential analysis.
     
-  if(!is.null(inference.data.object) && is.null(checknumber) && sum(inference.data.object@component!=2)!=0){
+  if(!is.null(inference.data.object) & is.null(checknumber) & sum(inference.data.object@component!=2)!=0){
     warning("Covariates are not defined, inference data are discarded")
     return(
       new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
@@ -17,7 +17,7 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
   }
   
   #check consistency with covariates dimension (if inference on the linear component is required)
-  if(!is.null(checknumber) && checknumber!=inference.data.object@n_cov || is.null(checknumber) && inference.data.object@n_cov!=0){
+  if(!is.null(checknumber) & checknumber!=inference.data.object@n_cov || is.null(checknumber) & inference.data.object@n_cov!=0){
     stop("Inference data dimension and covariates dimension are not consistent")
   }
   
@@ -69,11 +69,11 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
     # check if the selected locations coincide with nodes
     end_loop = FALSE
     j=1
-    while(!end_loop && j <= dim(inference.data.object@locations)[1]){
+    while(!end_loop & j <= dim(inference.data.object@locations)[1]){
       node_found = FALSE
       l = 1
-      while(!node_found && l <= dim(nodes)[1]){
-        if(inference.data.object@locations[j,1]==nodes[l,1] && inference.data.object@locations[j,2]==nodes[l,2]){
+      while(!node_found & l <= dim(nodes)[1]){
+        if(inference.data.object@locations[j,1]==nodes[l,1] & inference.data.object@locations[j,2]==nodes[l,2]){
           node_found = TRUE
         }
         l = l+1 
@@ -85,14 +85,14 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
       j = j+1
     }
     
-    if(!locs_are_nodes_before_check && inference.data.object@locations_are_nodes!=2 && sum(inference.data.object@type==1)!=length(inference.data.object@type))
+    if(!locs_are_nodes_before_check & inference.data.object@locations_are_nodes!=2 & sum(inference.data.object@type==1)!=length(inference.data.object@type))
       warning("All the locations selected for inference on the nonparametric component coincide with the nodes. 
               Sign-Flip and Eigen-Sign-Flip tests are performed by area, combining neighborhoods of locations according to the distance induced by the mesh")
     
     if(inference.data.object@locations_are_nodes!=1){
       # intervals with sign-flip or eigen-sign-flip implementation are not allowed
       for(k in 1:length(inference.data.object@type)){
-        if((inference.data.object@type[k]==3 || inference.data.object@type[k]==5) && inference.data.object@interval[k]!=0 && inference.data.object@component[k]!=1)
+        if((inference.data.object@type[k]==3 || inference.data.object@type[k]==5) & inference.data.object@interval[k]!=0 & inference.data.object@component[k]!=1)
           stop("Sign-Flip and Eigen-Sign-Flip confidence intervals on f are implemented only if the selected locations are a subset of the mesh nodes")
       }
     }
@@ -103,7 +103,7 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
     
     if(dim == 2){
       for(i in 1:dim(locs)[1])
-        inference.data.object@f0_eval <- c(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2])) 
+        inference.data.object@f0_eval <- c(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2],0)) 
     }
     else{
       for(i in 1:dim(locs)[1])

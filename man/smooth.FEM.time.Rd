@@ -15,7 +15,7 @@ threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
 lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05
+DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
 inference.data.object=NULL)
 }
 \arguments{
@@ -205,13 +205,14 @@ observations = matrix(data,nrow(locations),NumTimeInstants)
 
 
 #Inferential tests and confidence intervals
-inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'sim', type = 'w', dim = 2, n_cov = 1)
+inf_obj <- inferenceDataObjectBuilder(test = 'oat', type = 'w', dim = 2, n_cov = 1)
 
 solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                         observations=observations, 
                         covariates = cov1,
                         FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
-                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                        lambda.selection.criterion='grid',
+                        DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
                         inference.data.object = inf_obj)
 
 # beta estimate:

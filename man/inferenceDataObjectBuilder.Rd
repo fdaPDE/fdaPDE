@@ -4,7 +4,7 @@
 \alias{inferenceDataObjectBuilder}
 \title{Constructor for inferenceDataObject class}
 \usage{
-inferenceDataObjectBuilder<-function(test = NULL, 
+inferenceDataObjectBuilder(test = NULL, 
 interval = NULL, 
 type = 'w', 
 component = 'parametric',
@@ -16,7 +16,7 @@ locations_by_nodes = F,
 coeff = NULL, 
 beta0 = NULL, 
 f0 = NULL,
-f_var = FALSE,
+f_var = F,
 level = 0.95,
 n_flip = 1000)
 }
@@ -85,5 +85,5 @@ that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.
 }
 \examples{
 obj<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
-obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3, locations_indices = 1:100);
+obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3);
 }

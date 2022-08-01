@@ -110,8 +110,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@return The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
 #'@description A function that build an \code{\link{inferenceDataObject}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
-#'
-#'@usage inferenceDataObjectBuilder<-function(test = NULL, 
+#'@usage inferenceDataObjectBuilder(test = NULL, 
 #'interval = NULL, 
 #'type = 'w', 
 #'component = 'parametric',
@@ -123,15 +122,13 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'coeff = NULL, 
 #'beta0 = NULL, 
 #'f0 = NULL,
-#'f_var = FALSE,
+#'f_var = F,
 #'level = 0.95,
 #'n_flip = 1000)
 #' @export
-#' 
-#' 
 #' @examples 
 #' obj<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
-#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3, locations_indices = 1:100);
+#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3);
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
@@ -147,8 +144,8 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 f0 = NULL,
                                 f_var = F,
                                 level = 0.95,
-                                n_flip = 1000
-                                ){
+                                n_flip = 1000)
+{
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -183,16 +180,16 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(!is.null(dim)){
-    if((!is(dim,"numeric")) && (!is(dim,"integer")))
+    if((!is(dim,"numeric")) & (!is(dim,"integer")))
       stop("'dim' should be an integer or convertible to integer type")
-    else if(dim!=2 && dim!=3)
+    else if(dim!=2 & dim!=3)
       stop("'dim' should be either 2 or 3")
     
     dim=as.integer(dim)
   }
   
   if(!is.null(n_cov)){
-    if((!is(n_cov,"numeric")) && (!is(n_cov,"integer")))
+    if((!is(n_cov,"numeric")) & (!is(n_cov,"integer")))
       stop("'n_cov' should be an integer or convertible to integer type")
     n_cov=as.integer(n_cov)
   }
@@ -203,7 +200,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(!is.null(locations_indices)){
-    if((!is(locations_indices,"numeric")) && (!is(locations_indices,"integer")))
+    if((!is(locations_indices,"numeric")) & (!is(locations_indices,"integer")))
       stop("'locations_indices' should be of class numeric or convertible to integer")
     else{
       for(i in 1:length(locations_indices)){
@@ -267,14 +264,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(!is.null(n_flip)){
-    if((!is(n_flip,"numeric")) && (!is(n_flip,"integer")))
+    if((!is(n_flip,"numeric")) & (!is(n_flip,"integer")))
       stop("'n_flip' should be an integer or convertible to integer type")
     n_flip=as.integer(n_flip)
   }
   
   # Check of consistency of parameters. Translation into numeric representation. The checks are repeated for each element of the vectors test, interval and type
   
-  if(is.null(test) && is.null(interval))                                        # However, they can be both set
+  if(is.null(test) & is.null(interval))                                        # However, they can be both set
     stop("at least one between 'test' and 'interval' should be not NULL")
   
   if(sum(component == "parametric")!=length(component)){
@@ -308,7 +305,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     }
   }else{
     # inference on beta is not required, set n_cov and coeff to a 1x1 matrix
-    if(!is.null(n_cov) && n_cov >= 0){
+    if(!is.null(n_cov) & n_cov >= 0){
       n_cov = as.integer(n_cov)
     }
     else{
@@ -324,7 +321,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     locations = matrix(data = 1, nrow = 1, ncol = 1)
   }
   else{
-  if(is.null(locations) && is.null(locations_indices)){
+  if(is.null(locations) & is.null(locations_indices)){
     # default case: all observed locations are considered 
     locations <- matrix(data=1, nrow=1, ncol=1)                                 # Just for convenience, the actual default will be set inside checkInferenceParameters
   }
@@ -425,7 +422,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   for (index in 1:n_of_implementations){
     
-      if(type[index]!="w" && type[index]!="s" && type[index]!="esf" && type[index]!="enh-esf" && type[index]!="sf"){
+      if(type[index]!="w" & type[index]!="s" & type[index]!="esf" & type[index]!="enh-esf" & type[index]!="sf"){
         stop("type should be chosen between 'w', 's' 'sf', 'esf' or 'enh-esf'")}else{
           if(type[index]=="w") type_numeric[index]=as.integer(1)
           if(type[index]=="s") type_numeric[index]=as.integer(2)
@@ -434,24 +431,24 @@ inferenceDataObjectBuilder<-function(test = NULL,
           if(type[index]=="sf") type_numeric[index]=as.integer(5)
         }
     
-    if(component[index]!="parametric" && component[index]!="nonparametric" && component[index]!="both"){
+    if(component[index]!="parametric" & component[index]!="nonparametric" & component[index]!="both"){
       stop("component should be chosen between 'parametric', 'nonparametric' and 'both'")}else{
         if(component[index]=="parametric") component_numeric[index]=as.integer(1)
         if(component[index]=="nonparametric") component_numeric[index]=as.integer(2)
         if(component[index]=="both") component_numeric[index]=as.integer(3)
       }
       
-    if(type[index]=="sf" && component[index]!="nonparametric")
+    if(type[index]=="sf" & component[index]!="nonparametric")
        stop("sign-flip test is implemented only for the nonparametric component")
     
-    if(type[index]=="s" && component[index]!="parametric")
+    if(type[index]=="s" & component[index]!="parametric")
       stop("speckman test and confidence intervals are implemented only for the parametric component")
     
-    if(test[index]=='none' && interval[index]=='none'){
+    if(test[index]=='none' & interval[index]=='none'){
         stop("at least one between test and interval should be required for each implementation")
       }
     
-      if(test[index]!="oat" && test[index]!="sim" &&  test[index]!="none"){
+      if(test[index]!="oat" & test[index]!="sim" &  test[index]!="none"){
         stop("test should be either 'oat', 'sim' or 'none'")}else{
           if(test[index]=="none") test_numeric[index]=as.integer(0)
           if(test[index]=="oat") test_numeric[index]=as.integer(1)
@@ -459,7 +456,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
        }
       
       if(interval[index]!="none"){
-        if(interval[index]!="oat" && interval[index]!="sim" && interval[index]!="bonf" && interval[index]!="none"){
+        if(interval[index]!="oat" & interval[index]!="sim" & interval[index]!="bonf" & interval[index]!="none"){
           stop("interval should be either 'oat' 'sim', 'bonf' or 'none'")}else{
             if(interval[index]=="none") interval_numeric[index]=as.integer(0)
             if(interval[index]=="oat") interval_numeric[index]=as.integer(1)
@@ -471,18 +468,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
           stop("level should be a positive value smaller or equal to 1")
       }
     
-      if(interval[index]=="sim" && (type[index]=="esf" || type[index] == "enh-esf")){
+      if(interval[index]=="sim" & (type[index]=="esf" || type[index] == "enh-esf")){
         stop("simultaneous confidence intervals are not implemented with eigen-sign-flip implementation")
       }
       
-      if((interval[index]=="sim" || interval[index]=="bonf") && component[index]!="parametric")
+      if((interval[index]=="sim" || interval[index]=="bonf") & component[index]!="parametric")
         stop("only one-at-the-time confidence intervals are allowed for the nonparametric component")
       
-      if((type[index] == "esf" || type[index] == "enh-esf") && component[index]!="nonparametric"){
+      if((type[index] == "esf" || type[index] == "enh-esf") & component[index]!="nonparametric"){
         for(i in 1:dim(coeff)[1]){
           count=0
           for(j in 1:dim(coeff)[2]){
-            if(coeff[i,j]!= 0 && coeff[i,j]!=1)
+            if(coeff[i,j]!= 0 & coeff[i,j]!=1)
               stop("linear combinations are not allowed in the eigen-sign-flip cases")
             count = count + coeff[i,j]
           }
@@ -492,19 +489,19 @@ inferenceDataObjectBuilder<-function(test = NULL,
       }
       
       # Well posedness check for coeff in simultaneous case;
-      if(test[index]=="sim" && component[index]!="nonparametric"){
+      if(test[index]=="sim" & component[index]!="nonparametric"){
         if(det(coeff %*% t(coeff)) < 0.001){
           stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
         }
       }
         
-      if(interval[index]=="sim" && component[index]!="nonparametric"){
+      if(interval[index]=="sim" & component[index]!="nonparametric"){
         if(det(coeff %*% t(coeff)) < 0.001){
           stop("coeff is not full rank, variance-covariance matrix of the linear combination not invertible")
         }
       }
     
-      if((test[index]=="oat") && component[index] != "parametric"){
+      if((test[index]=="oat") & component[index] != "parametric"){
         warning("only simultaneous tests are available for the nonparametric component, proceeding with simultaneous inference")
         test_numeric[index] = as.integer(2)
       }
@@ -543,33 +540,29 @@ if(sum(component == "nonparametric")!=length(component)){
 }
 
   if(sum(component == "parametric")!=length(component)){
-  if(is.null(f0)){                  # If left to NULL, f0 is set to a null function.
-    if(dim==2){
-      f0 <- function(x,y){
-        return(0)
+    if(is.null(f0)){                  # If left to NULL, f0 is set to a null function.
+      f0_3D <- function (x,y,z){return(0)}
+    }
+    else{
+      args<-formals(f0)
+      non_defaulted_args = 0
+      for(i in 1:length(args)){
+        if(is.name(args[[i]]))
+          non_defaulted_args <- non_defaulted_args + 1
+      }
+      if(non_defaulted_args != dim)
+        stop("number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
+      rm(list = c("non_defaulted_args", "i"))
+      if(dim==2){ # We need to upgrade the function to 3D definition for documentation
+        f0_3D <- function(x,y,z){return(f0(x,y))}
+      }else{ # We are already in 3D case
+        f0_3D <- f0
       }
     }
-    else if(dim==3){
-      f0 <- function(x,y,z){
-        return(0)
-      }
-    }
-  }
-  else{
-    args<-formals(f0)
-    non_defaulted_args = 0
-    for(i in 1:length(args)){
-      if(is.name(args[[i]]))
-        non_defaulted_args <- non_defaulted_args + 1
-    }
-    if(non_defaulted_args != dim)
-      stop("number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
-    rm(list = c("non_defaulted_args", "i"))
-  }
   }
   else{
     # inference on the nonparametric component is not required, just setting f0 to a zero function
-    f0 <- function(){return(0)}
+    f0_3D <- function(x,y,z){return(0)}
   }
   
   if(!is.null(n_flip)){
@@ -584,10 +577,10 @@ if(sum(component == "nonparametric")!=length(component)){
   # Building the output object, returning it
   if(!is.null(locations_indices))
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = as.integer(1), dim = dim, n_cov = n_cov,
-              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = 0.05, definition=definition)
+              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = 0.05, definition=definition)
   else
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = as.integer(1), dim = dim, n_cov = n_cov,
-                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = 0.05, definition=definition)
+                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = 0.05, definition=definition)
     
   
   return(result)

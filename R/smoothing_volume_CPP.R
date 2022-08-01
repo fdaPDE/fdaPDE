@@ -316,7 +316,7 @@ CPP_smooth.volume.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, 
   PDE_param_eval$c = (PDE_parameters$c)(points_eval)
   PDE_param_eval$u = (PDE_parameters$u)(points_eval)
   
-  if(inference.data.object@definition==1 && mean(PDE_param_eval$u != rep(0, nrow(points_eval)))!=0){
+  if(inference.data.object@definition==1 & mean(PDE_param_eval$u != rep(0, nrow(points_eval)))!=0){
     warning("Inference for linear estimators is implemented only if reaction term is zero, \nInference Data are ignored")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval = as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0),
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
