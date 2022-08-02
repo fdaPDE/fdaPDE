@@ -529,7 +529,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates),FEMbasis$mesh$nodes[1:length(observations),],FEMbasis$mesh$nodes)
   
   # Check that GCV is set for inference
-  if((inference.data.object@definition==1) & (is.null(lambda.selection.lossfunction)) & (!is.null(lambda)) & (ncol(lambda)!=1 || nrow(lambda)!=1)){
+  if((inference.data.object@definition==1) && (is.null(lambda.selection.lossfunction)) && (!is.null(lambda)) && (ncol(lambda)!=1 || nrow(lambda)!=1)){
     warning("Inference is not defined when lambda grid is provided without GCV, discarding inference")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
@@ -537,7 +537,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   }
   
   # Inference on f not implemented in the areal case
-  if((inference.data.object@definition==1) & (any(inference.data.object@component!=1)) & (!is.null(incidence_matrix))){
+  if((inference.data.object@definition==1) && (any(inference.data.object@component!=1)) && (!is.null(incidence_matrix))){
     warning("Inference on f is not implemented for areal data, discarding inference")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                               locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
@@ -585,7 +585,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
 
-  if(inference.data.object@definition==1 & (family!= "gaussian"))
+  if(inference.data.object@definition==1 && (family!= "gaussian"))
   {
     warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
