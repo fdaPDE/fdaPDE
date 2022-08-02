@@ -129,7 +129,7 @@ NULL
 #' lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 #' lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 #' DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05
+#' DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
 #' inference.data.object=NULL)
 #' @export
 #' @references #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 
@@ -166,33 +166,6 @@ NULL
 #' solution = smooth.FEM.time(observations = data, time_locations = time_locations,
 #'                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 #' plot(solution$fit.FEM)
-#' 
-#' # with covariates
-#' set.seed(509875)
-#' cov1 = rnorm(ndata, mean = 1, sd = 2)
-#' # Add error to simulate data
-#' set.seed(7893475)
-#' data = sol_exact + 2*cov1 
-#' data = data + rnorm(length(sol_exact), mean = 0, sd =  0.05*diff(range(sol_exact)))
-#' observations = matrix(data,nrow(locations),NumTimeInstants)
-#'
-#' 
-#' #Inferential tests and confidence intervals
-#' inf_obj <- inferenceDataObjectBuilder(test = "oat", interval = "sim", type = "w", dim = 2, n_cov = 1, exact = T)
-#'
-#' solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
-#'                         observations=observations, 
-#'                         covariates = cov1,
-#'                         FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
-#'                         lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
-#'
-#' # beta estimate:
-#' solution$solution$beta
-#' # tests over beta estimates p-values:
-#' solution$inference$beta$p_values
-#' # confidence intervals for beta estimates:
-#' solution$inference$beta$CI
-
 smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
                           covariates = NULL, PDE_parameters = NULL,  BC = NULL,
                           incidence_matrix = NULL, areal.data.avg = TRUE,
@@ -355,7 +328,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Only if inference is required
   if(!is.null(inference.data.object)){
   # Check that GCV is set for inference
-    if(inference.data.object@definition==1 && is.null(lambda.selection.lossfunction) && (dim(lambdaS)!=1 || dim(lambdaT)!=1)){
+    if(inference.data.object@definition==1 & is.null(lambda.selection.lossfunction) &(!is.numeric(lambdaS)&!is.null(lambdaT))& (nrow(lambdaS)!=1 || ncol(lambdaS)!=1 || nrow(lambdaT)!=1 || ncol(lambdaT)!=1)){
       warning("Inference is not defined when lambda grid is provided without GCV")
       inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                   coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f_var = as.integer(0), quantile = -1, alpha=0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))

@@ -4,7 +4,7 @@
 \alias{inferenceDataObjectBuilder}
 \title{Constructor for inferenceDataObject class}
 \usage{
-inferenceDataObjectBuilder<-function(test = NULL, 
+inferenceDataObjectBuilder(test = NULL, 
 interval = NULL, 
 type = 'w', 
 component = 'parametric',
@@ -63,6 +63,8 @@ In the second case the evaluation is exact but computationally expensive.}
 \item{locations_indices}{A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference, defaulted to NULL.
 If a vector of indices is provided, then the slot 'locations' is discarded.}
 
+\item{locations_by_nodes}{A logical used to indicate wether the selected locations to perform inference on f are all coinciding with the nodes;}
+
 \item{coeff}{A matrix, with \code{n_cov} number of columns, of numeric coefficients representing the linear combinations of the parametric components of the model.
 The default is NULL, corresponding to an identity matrix. If at least one sing-flipping approach is required in \code{type}, needs to be an identity matrix.}
 
@@ -89,8 +91,6 @@ A function that build an \code{\link{inferenceDataObject}}. In the process of co
 that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
 }
 \examples{
-obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
-obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, exact = F, n_cov = 3, location_indices = 1:100);
-obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
- type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
+obj<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
+obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3);
 }

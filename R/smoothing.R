@@ -137,7 +137,6 @@
 #'              }
 #'         }
 #' }
-#' }
 #' @description This function implements a spatial regression model with differential regularization.
 #'  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
 #'  Laplacian of the spatial field, that induces an isotropic smoothing. When prior information about the anisotropy or
@@ -190,8 +189,8 @@
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 #' 
 #' #Inferential tests and confidence intervals
-#' inference.data.object = inferenceDataObjectBuilder(test = c('oat','sim','oat'), interval = c('sim','oat','none'), exact = T, type = c('w','s','esf'), dim = 2, n_cov = 1)
-#'
+#' inference.data.object = inferenceDataObjectBuilder(test = 'oat', type = 'w', dim = 2, n_cov = 1)
+#' 
 #' solution = smooth.FEM(observations = data, covariates = covariate, 
 #'                       FEMbasis = FEMbasis, lambda = lambda,
 #'                       inference.data.object=inference.data.object)
@@ -528,7 +527,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   else
     inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates),FEMbasis$mesh$nodes[1:length(observations),],FEMbasis$mesh$nodes)
   # Check that GCV is set for inference
-  if(inference.data.object@definition==1 && is.null(lambda.selection.lossfunction)&& dim(lambda)!=1){
+  if((inference.data.object@definition==1) & (is.null(lambda.selection.lossfunction)) & (!is.null(lambda)) & (ncol(lambda)!=1 || nrow(lambda)!=1)){
     warning("Inference is not defined when lambda grid is provided without GCV, discarding inference")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 

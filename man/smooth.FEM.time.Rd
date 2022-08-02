@@ -15,7 +15,7 @@ threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
 lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
 lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, 
 DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, 
-DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05
+DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05,
 inference.data.object=NULL)
 }
 \arguments{
@@ -193,32 +193,6 @@ data = matrix(data, nrow = nrow(mesh$nodes), ncol = length(time_locations), byro
 solution = smooth.FEM.time(observations = data, time_locations = time_locations,
                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 plot(solution$fit.FEM)
-
-# with covariates
-set.seed(509875)
-cov1 = rnorm(ndata, mean = 1, sd = 2)
-# Add error to simulate data
-set.seed(7893475)
-data = sol_exact + 2*cov1 
-data = data + rnorm(length(sol_exact), mean = 0, sd =  0.05*diff(range(sol_exact)))
-observations = matrix(data,nrow(locations),NumTimeInstants)
-
-
-#Inferential tests and confidence intervals
-inf_obj <- inferenceDataObjectBuilder(test = "oat", interval = "sim", type = "w", dim = 2, n_cov = 1, exact = T)
-
-solution<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
-                        observations=observations, 
-                        covariates = cov1,
-                        FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT, 
-                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)
-
-# beta estimate:
-solution$solution$beta
-# tests over beta estimates p-values:
-solution$inference$beta$p_values
-# confidence intervals for beta estimates:
-solution$inference$beta$CI
 }
 \references{
 #' @references Arnone, E., Azzimonti, L., Nobile, F., & Sangalli, L. M. (2019). Modeling 

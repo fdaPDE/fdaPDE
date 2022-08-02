@@ -105,7 +105,7 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
     
     if(dim == 2){
       for(i in 1:dim(locs)[1])
-        inference.data.object@f0_eval <- c(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2])) 
+        inference.data.object@f0_eval <- c(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2]),0) 
     }
     else{
       for(i in 1:dim(locs)[1])

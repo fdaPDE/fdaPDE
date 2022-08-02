@@ -1,3 +1,8 @@
+#' @useDynLib fdaPDE
+#' @importFrom methods new
+#' @importFrom stats pchisq pnorm qchisq qnorm
+NULL
+
 #' Class for inference data
 #'
 #'@slot test A vector of integers taking value 0, 1 or 2; if 0 no test is performed, if 1 one-at-the-time tests are performed, if 2 a simultaneous test is performed.
@@ -94,6 +99,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@param locations A matrix of the locations of interest when testing the nonparametric component f, defaulted to NULL
 #'@param locations_indices A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference, defaulted to NULL.
 #'If a vector of indices is provided, then the slot 'locations' is discarded.
+#'@param locations_by_nodes A logical used to indicate wether the selected locations to perform inference on f are all coinciding with the nodes;  
 #'@param coeff A matrix, with \code{n_cov} number of columns, of numeric coefficients representing the linear combinations of the parametric components of the model.
 #'The default is NULL, corresponding to an identity matrix. If at least one sing-flipping approach is required in \code{type}, needs to be an identity matrix.
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and \code{component} is not 'nonparametric'; its length is the number of rows of matrix \code{coeff} if provided. 
@@ -108,8 +114,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'@return The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
 #'@description A function that build an \code{\link{inferenceDataObject}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
-#'
-#'@usage inferenceDataObjectBuilder<-function(test = NULL, 
+#'@usage inferenceDataObjectBuilder(test = NULL, 
 #'interval = NULL, 
 #'type = 'w', 
 #'component = 'parametric',
@@ -126,13 +131,9 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'n_flip = 1000,
 #'tol_fspai = 0.05)
 #' @export
-#' 
-#' 
 #' @examples 
-#' obj1<-inferenceDataObjectBuilder(test = 'oat', exact = T, dim = 2, beta0 = rep(1,4), n_cov = 4);
-#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, exact = F, n_cov = 3, location_indices = 1:100);
-#' obj3<-inferenceDataObjectBuilder(test=c('sim', 'oat', 'sim', 'oat'), interval=c('oat','bonf','none','sim'), component =c('both', 'parametric', 'both', 'parametric'),
-#'  type=c('w','s','esf','s'),exact=TRUE, dim=2, n_cov = 2, level=0.99)
+#' obj<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
+#' obj2<-inferenceDataObjectBuilder(test = 'sim', dim = 3, component = 'nonparametric', n_cov = 3);
 
 inferenceDataObjectBuilder<-function(test = NULL, 
                                 interval = NULL, 
@@ -564,33 +565,29 @@ if(sum(component == "nonparametric")!=length(component)){
 }
 
   if(sum(component == "parametric")!=length(component)){
-  if(is.null(f0)){                  # If left to NULL, f0 is set to a null function.
-    if(dim==2){
-      f0 <- function(x,y){
-        return(0)
+    if(is.null(f0)){                  # If left to NULL, f0 is set to a null function.
+      f0_3D <- function (x,y,z){return(0)}
+    }
+    else{
+      args<-formals(f0)
+      non_defaulted_args = 0
+      for(i in 1:length(args)){
+        if(is.name(args[[i]]))
+          non_defaulted_args <- non_defaulted_args + 1
+      }
+      if(non_defaulted_args != dim)
+        stop("number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
+      rm(list = c("non_defaulted_args", "i"))
+      if(dim==2){ # We need to upgrade the function to 3D definition for documentation
+        f0_3D <- function(x,y,z){return(f0(x,y))}
+      }else{ # We are already in 3D case
+        f0_3D <- f0
       }
     }
-    else if(dim==3){
-      f0 <- function(x,y,z){
-        return(0)
-      }
-    }
-  }
-  else{
-    args<-formals(f0)
-    non_defaulted_args = 0
-    for(i in 1:length(args)){
-      if(is.name(args[[i]]))
-        non_defaulted_args <- non_defaulted_args + 1
-    }
-    if(non_defaulted_args != dim)
-      stop("number of f0 coordinate arguments is not consistent with the problem dimension 'dim'")
-    rm(list = c("non_defaulted_args", "i"))
-  }
   }
   else{
     # inference on the nonparametric component is not required, just setting f0 to a zero function
-    f0 <- function(){return(0)}
+    f0_3D <- function(x,y,z){return(0)}
   }
   
   if(!is.null(n_flip)){
@@ -611,10 +608,10 @@ if(sum(component == "nonparametric")!=length(component)){
   # Building the output object, returning it
   if(!is.null(locations_indices))
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
-              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   else
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
-                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
     
   
   return(result)
