@@ -43,7 +43,7 @@ LinkingTo:
 Suggests: 
     MASS,
     testthat
-Description: An implementation of regression models with partial differential regularizations, making use of the Finite Element Method. The models efficiently handle data distributed over irregularly shaped domains and can comply with various conditions at the boundaries of the domain. A priori information about the spatial structure of the phenomenon under study can be incorporated in the model via the differential regularization. See Sangalli, L. M. (2021). Spatial Regression With Partial Differential Equation Regularisation. International Statistical Review, 89(3), 505-531. for an overview. 
+Description: An implementation of regression models with partial differential regularizations, making use of the Finite Element Method. The models efficiently handle data distributed over irregularly shaped domains and can comply with various conditions at the boundaries of the domain. A priori information about the spatial structure of the phenomenon under study can be incorporated in the model via the differential regularization. See Sangalli, L. M. (2021). Spatial Regression With Partial Differential Equation Regularisation. International Statistical Review, 89(3), 505-531. for an overview. The release 1.1-9 requires R (>= 4.2.0) to be installed on windows machines.
 License: CC BY-NC-SA 4.0
 Copyright: See the individual source files for copyrights information
 NeedsCompilation: yes
