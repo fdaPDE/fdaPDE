@@ -1,4 +1,4 @@
-# fdaPDE 1.1-5
+# fdaPDE 1.1-9
 
 ## New features
 
