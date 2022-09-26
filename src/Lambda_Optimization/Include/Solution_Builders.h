@@ -9,6 +9,8 @@
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Regression/Include/Regression_Data.h"
 #include "../../Global_Utilities/Include/Lambda.h"
+#include "../../Inference/Include/Inference_Data.h"
+
 
 //! Output struct to be used to return values in R
 template<UInt num_params>
@@ -46,13 +48,15 @@ namespace Solution_Builders
          \param output output_Data struct coming from a Lambda_Optimizer type class
          \param mesh to be returned to the user
          \param regressionData the original data passed by the user
+         \param inference_Output the matrix collecting the inference output 
+         \param inf_Data the object containing the inference data passed by the user
          \return SEXP containg all the data that will be managed by R code
         */
         template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-        static SEXP build_solution_plain_regression(const MatrixXr & solution, const output_Data<1> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression);
+        static SEXP build_solution_plain_regression(const MatrixXr & solution, const output_Data<1> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression, const MatrixXv & inference_Output, const InferenceData & inf_Data);
         
         template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-        static SEXP build_solution_temporal_regression(const MatrixXr & solution, const output_Data<2> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression);
+        static SEXP build_solution_temporal_regression(const MatrixXr & solution, const output_Data<2> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression, const MatrixXv & inference_Output, const InferenceData & inf_Data);
 };
 
 #include "Solution_Builders_imp.h"

@@ -12,7 +12,8 @@ smooth.FEM(locations = NULL, observations, FEMbasis,
  max.steps.FPIRLS = 15, lambda.selection.criterion = "grid", DOF.evaluation = NULL, 
  lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100,
  DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, 
- lambda.optimization.tolerance = 0.05)
+ lambda.optimization.tolerance = 0.05,
+ inference.data.object=NULL)
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -132,6 +133,9 @@ It is advised to set \code{GCV.inflation.factor} larger than 1 to avoid overfitt
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 Default value \code{lambda.optimization.tolerance=0.05}.}
+
+\item{inference.data.object}{An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.}
 }
 \value{
 A list with the following variables:
@@ -163,6 +167,17 @@ A list with the following variables:
          \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
          \item{\code{variance.est}}{A vector which returns the variance estimates for the Generative Additive Models.}
         }
+   \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
+         \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+              \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
+              }
+        \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+              \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+              \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
+             }
+        }
 }
 }
 \description{
@@ -170,9 +185,9 @@ This function implements a spatial regression model with differential regulariza
  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
  Laplacian of the spatial field, that induces an isotropic smoothing. When prior information about the anisotropy or
  non-stationarity is available the PDE involves a general second order linear differential operator with possibly
- space-varying coefficients.
+ space-varying coefficients. 
  The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions
- can be imposed at the domain boundaries.
+ can be imposed at the domain boundaries
 }
 \examples{
 library(fdaPDE)
@@ -196,11 +211,19 @@ plot(solution$fit.FEM)
 covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 
+#Inferential tests and confidence intervals
+inference.data.object = inferenceDataObjectBuilder(test = 'oat', type = 'w', dim = 2, n_cov = 1)
+
 solution = smooth.FEM(observations = data, covariates = covariate, 
-                      FEMbasis = FEMbasis, lambda = lambda)
-                      
+                      FEMbasis = FEMbasis, lambda = lambda,
+                      inference.data.object=inference.data.object)
+
 # beta estimate:
 solution$solution$beta
+# tests over beta estimates p-values:
+solution$inference$beta$p_values
+# confidence intervals for beta estimates:
+solution$inference$beta$CI
 # non-parametric estimate:
 plot(solution$fit.FEM)
 
@@ -221,7 +244,7 @@ bestLambda = solution$optimization$lambda_solution
 
 
 #### Smoothing with prior information about anysotropy/non-stationarity and boundary conditions ####
-# See Azzimonti et al. for reference to the current exemple
+# See Azzimonti et al. for reference to the current example
 data(quasicircle2D)
 boundary_nodes = quasicircle2D$boundary_nodes
 boundary_segments = quasicircle2D$boundary_segments
@@ -367,5 +390,7 @@ Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75
 via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization. 
  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
+   \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
+   with differential regularization. Journal of Multivariate Analysis, to appear}
 }
 }

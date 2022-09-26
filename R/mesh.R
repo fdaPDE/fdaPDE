@@ -971,7 +971,7 @@ projection.points.1.5D<-function(mesh, locations) {
 refine.mesh.1.5D <-function(mesh,delta){
   if(is.null(mesh))
     stop("No mesh passed as input!")
-  if(!is(mesh, "mesh.1.5D")
+  if(!is(mesh, "mesh.1.5D"))
     stop("Wrong mesh class! Should be mesh.1.5D")
   if( delta <= 0)
     stop("Wrong delta value! Should be a positive number")

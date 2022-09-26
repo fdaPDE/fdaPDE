@@ -69,7 +69,6 @@ output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda.selection.cr
 ### Test 1.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
-
 #### Test 2: c-shaped domain ####
 #            locations != nodes
 #            laplacian
@@ -170,8 +169,68 @@ image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
+### Test 2.7: Inference on beta, hypothesis testing, Wald, Speckman, ESF, and enhanced ESF p_values
+inf_obj<-inferenceDataObjectBuilder(test = c("sim", rep("oat",3)), dim = 2, n_cov = 2, type = c("w", "s", "esf", "enh-esf"), beta0 = c(2,-1))
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
+                       inference.data.object=inf_obj)
 
+output_CPP$inference$beta$p_values
 
+### Test 2.8: Inference on beta, hypothesis testing and confidence intervals of linear combinations, Wald and Speckman p_values  
+inf_obj<-inferenceDataObjectBuilder(test = "oat", interval = "oat", dim = 2, n_cov = 2, type = c("w", "s"), coeff = matrix(data = c(1,1,1,-1), nrow = 2, byrow = T))
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$beta$p_values
+
+### Test 2.9: Inference on f, hypothesis testing, equality to f0, Wald, Sign-flip and ESF p_values
+inf_obj<-inferenceDataObjectBuilder(test = "sim", dim = 2, n_cov = 2, type = c("w","sf","esf"), component = "nonparametric", f0 = fs.test)
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$f$p_values
+
+### Test 2.10: Inference on f, hypothesis testing and confidence intervals, Wald with new locations  
+mesh_loc = create.mesh.2D(nodes=horseshoe2D$boundary_nodes, segments = horseshoe2D$boundary_segments)
+mesh_loc_ref<-refine.mesh.2D(mesh_loc, maximum_area = 0.05)
+
+new_locs <- mesh_loc_ref$nodes[which(mesh_loc_ref$nodesmarkers!=1),]
+new_locs[,1] <- new_locs[,1] + 0.2
+
+inf_obj<-inferenceDataObjectBuilder(test = "sim", interval = "oat", dim = 2, n_cov = 2, type = "w", component = "nonparametric", locations = new_locs)
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI
+
+### Test 2.11: Inference on both beta and f, hypothesis testing: all implementations p_values 
+inf_obj<-inferenceDataObjectBuilder(test = c("sim", "oat", "sim", "sim", "oat"), dim = 2, n_cov = 2, type = c("w","s","sf","esf","enh-esf"), 
+                                    component = c("both", "parametric", "nonparametric", "both", "parametric"), f0 = fs.test, beta0 = c(2,-1))
+
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$beta$p_values
 
 
 #### Test 3: square domain ####
@@ -266,10 +325,27 @@ output_CPP<-smooth.FEM(observations=data,
 
 image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
+### Test 3.7: Test on inference: generating covariates in order to perform inference
+set.seed(509875)
+cov1 = rnorm(ndati, mean = 1, sd = 2)
+cov2 = sin(locations[,1])
 
+DatiEsatti = DatiEsatti + 2.5*cov1+1.5*cov2
 
+set.seed(7893475)
+ran=range(DatiEsatti)
+data = DatiEsatti + rnorm(ndati, mean=0, sd=0.05*abs(ran[2]-ran[1]))
 
-
+### Wald and Speckman CI and p_values for beta; Wald, Sign-flip and ESF p_values for f
+inf_obj<-inferenceDataObjectBuilder(test = c(rep('oat',3),rep('sim',3)), interval = c('sim','oat','bonf',rep('none',3)),
+                                    component=c(rep('parametric',3), rep('nonparametric',3)),
+                                    dim = 2, n_cov = 2, type = c("w","w","s","w","sf","esf"),f0 = fs.test, beta0 = c(2.5,1.5))
+output_CPP<-smooth.FEM(observations=data,
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       PDE_parameters=PDE_parameters,
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', lambda = lambda,
+                       inference.data.object = inf_obj)
 
 #### Test 4: quasicircular domain ####
 #            areal observations
@@ -601,3 +677,38 @@ output_CPP<-smooth.FEM(observations=data,
 data=data_backup #restore original data for next tests
 plot(output_CPP$fit.FEM)
 
+#### Test on inference: creating covariates and special setting
+# Create covariates
+set.seed(509875)
+cov1 = rnorm(length(DatiEsatti), mean = 2, sd = 1)
+
+# Add error to simulate data
+set.seed(5839745)
+data = DatiEsatti + 3*cov1 
+data = data + rnorm(length(DatiEsatti), sd = 0.1)
+observations=data
+
+# Inference obj: separate tests for beta and f. Wald, Speckman, ESF, Enhanced ESF p_values for beta; Wald, Sign-Flip and ESF p_values for f
+inf_beta <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 3, component='parametric', n_flip=1000, f_var=T)
+inf_f <- inferenceDataObjectBuilder(test = 'sim', type=c('w', 'sf', 'esf'), component = 'nonparametric', dim=2, n_cov=1)
+
+#### Test 4.4: Forcing term = 0  grid with exact  GCV 
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cov1,
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       inference.data.object = inf_beta)
+
+output_CPP<-smooth.FEM(observations=data, 
+                       covariates = cov1,
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                       inference.data.object = inf_f)

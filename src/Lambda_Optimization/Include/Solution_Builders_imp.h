@@ -2,10 +2,10 @@
 #define __SOLUTION_BUILDERS_IMP_H__
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data<1> & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression)
+	SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data<1> & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression, const MatrixXv & inference_Output, const InferenceData & inf_Data)
 {
         // ---- Preparation ----
-        // Prepare regresion coefficients space
+        // Prepare regression coefficients space
         MatrixXv beta;
         if(regressionData.getCovariates()->rows()==0)
         {
@@ -18,6 +18,55 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                 beta = output.betas;
         }
 
+	// Prepare the inference output space
+        UInt n_inf_implementations = inf_Data.get_test_type().size();
+	UInt p_inf = inf_Data.get_coeff_inference().rows();
+        UInt n_loc_inf = inf_Data.get_locs_inference().rows();
+        UInt inf_out_size = (p_inf > n_loc_inf) ? p_inf : n_loc_inf; 
+        MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
+	MatrixXv p_values;
+	MatrixXv intervals;
+	
+	if (inf_Data.get_definition()==false){
+	  intervals.resize(1,1);
+	  intervals(0,0).resize(3);
+	  intervals(0,0)(0) = 10e20;
+          intervals(0,0)(1) = 10e20; 
+          intervals(0,0)(2) = 10e20;
+	  
+	  p_values.resize(2,1);
+	  p_values(0,0).resize(1);
+	  p_values(0,0)(0)= 10e20;
+          p_values(1,0).resize(1);
+	  p_values(1,0)(0)= 10e20;
+	}else{
+	  
+	  p_values.resize(2, n_inf_implementations);
+	  intervals.resize(2*n_inf_implementations, inf_out_size);
+	  
+          for(UInt i=0; i < n_inf_implementations; ++i){
+	    p_values.row(0)(i) = inf_Output.col(0)(2*i);
+            p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
+          }
+
+          intervals=inf_Output.rightCols(inf_out_size);
+	}
+
+        // Prepare the local f variance output space
+        MatrixXv f_var;
+        UInt f_size = regressionData.getNumberofObservations();
+        f_var.resize(1,1);
+        f_var(0,0).resize(f_size);
+
+        if(inf_Data.get_f_var()){
+           f_var(0,0) = inference_Output(2*n_inf_implementations,0);
+        }
+	else{
+           for(long int i=0; i<f_size; ++i){
+              f_var(0,0)(i) = 10e20;
+           }
+        }
+	
         // Define string for optimzation method
         UInt code_string;
         if(output.content == "full_optimization")
@@ -38,7 +87,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
         // ---- Copy results in R memory ----
         SEXP result = NILSXP;  // Define emty term --> never pass to R empty or is "R session aborted"
-        result = PROTECT(Rf_allocVector(VECSXP, 22)); // 22 elements to be allocated
+        result = PROTECT(Rf_allocVector(VECSXP, 25)); // 25 elements to be allocated
 
         // Add solution matrix in position 0
         SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
@@ -196,6 +245,36 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                         rans11[i + barycenters.rows()*j] = barycenters(i,j);
         }
 
+	// We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
+	SET_VECTOR_ELT(result,22,Rf_allocMatrix(REALSXP,p_values(0).size()+1,p_values.cols())); // P_values info (inference)
+	Real *rans12=REAL(VECTOR_ELT(result,22));
+	for(UInt j = 0; j<p_values.cols(); j++){
+	  for(UInt i = 0; i<p_values(0).size(); i++){
+	    rans12[i+(p_values(0).size()+1)*j]=p_values(0,j)(i);
+	  }
+            rans12[p_values(0).size()+(p_values(0).size()+1)*j] = p_values(1,j)(0);
+	}
+	
+	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (inference)
+	Real *rans13 = REAL(VECTOR_ELT(result,23));
+	for(UInt j = 0; j<intervals.cols(); j++){
+	  for(UInt k = 0; k<intervals.rows(); k++){
+	    for(UInt i = 0; i<3 ; i++){
+	      rans13[k*3+i+intervals.rows()*3*j]=intervals(k,j)(i);
+	    } 
+	  }
+	}
+
+        // local f variance
+        UInt f_vec_size = f_var(0).size();
+        SET_VECTOR_ELT(result, 24, Rf_allocVector(REALSXP, f_vec_size));
+        Real *rans14 = REAL(VECTOR_ELT(result, 24));
+        for(long int j = 0; j < f_vec_size; j++)
+        {
+               rans14[j] = f_var(0)[j];
+        }
+        
+        
         UNPROTECT(1);
 
         return(result);
@@ -203,7 +282,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr & solution, const output_Data<2> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression)
+static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr & solution, const output_Data<2> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression, const MatrixXv & inference_Output, const InferenceData & inf_Data)
 {
     std::vector<Real> const & dof = output.dof;
     std::vector<Real> const & GCV = output.GCV_evals;
@@ -220,6 +299,54 @@ static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr
     }
     else
          beta = output.betas;
+
+    //!Prepare the inference output space
+    UInt n_inf_implementations = inf_Data.get_test_type().size();
+    UInt p_inf = inf_Data.get_coeff_inference().rows();
+    MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
+    MatrixXv p_values;
+    MatrixXv intervals;
+	
+    if (inf_Data.get_definition()==false){
+      intervals.resize(1,1);
+      intervals(0,0).resize(3);
+      intervals(0,0)(0) = 10e20;
+      intervals(0,0)(1) = 10e20; 
+      intervals(0,0)(2) = 10e20;
+	  
+      p_values.resize(2,1);
+      p_values(0,0).resize(1);
+      p_values(0,0)(0)= 10e20;
+      p_values(1,0).resize(1);
+      p_values(1,0)(0)= 10e20;
+    }else{
+	  
+      p_values.resize(2, n_inf_implementations);
+      intervals.resize(2*n_inf_implementations, p_inf);
+          
+      for(UInt i=0; i < n_inf_implementations; ++i){
+	p_values.row(0)(i) = inf_Output.col(0)(2*i);
+	p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
+      }
+
+      intervals=inf_Output.rightCols(p_inf);
+	
+    }
+
+    //!Prepare the local f variance output space
+    MatrixXv f_var;
+    UInt f_size = regressionData.getNumberofObservations();
+    f_var.resize(1,1);
+    f_var(0,0).resize(f_size);
+
+    if(inf_Data.get_f_var()){
+      f_var(0,0) = inference_Output(2*n_inf_implementations,0);
+    }
+    else{
+      for(long int i=0; i<f_size; ++i){
+	f_var(0,0)(i) = 10e20;
+      }
+    }
          
     // Define string for optimzation method
     UInt code_string;
@@ -235,7 +362,7 @@ static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr
 
     //!Copy result in R memory
     SEXP result = NILSXP;
-    result = PROTECT(Rf_allocVector(VECSXP, 5+5+2+11));
+    result = PROTECT(Rf_allocVector(VECSXP, 5+5+2+11+3));
     SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
     if(code_string == 0) //Newton
     {
@@ -398,6 +525,38 @@ static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr
     // Add time employed
     Real *rans22 = REAL(VECTOR_ELT(result, 22));
     rans22[0] = output.time_partial;
+
+    // We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
+    SET_VECTOR_ELT(result,23,Rf_allocMatrix(REALSXP,p_values(0).size()+1,p_values.cols())); // P_values info (inference on betas)
+    Real *rans23=REAL(VECTOR_ELT(result,23));
+    for(UInt j = 0; j<p_values.cols(); j++){
+      for(UInt i = 0; i<p_values(0).size(); i++){
+	rans23[i+(p_values(0).size()+1)*j]=p_values(0,j)(i);
+      }
+      rans23[p_values(0).size()+(p_values(0).size()+1)*j] = p_values(1,j)(0);
+    }
+	
+    SET_VECTOR_ELT(result, 24, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (Inference on betas)
+    Real *rans24 = REAL(VECTOR_ELT(result,24));
+    for(UInt j = 0; j<intervals.cols(); j++){
+      for(UInt k = 0; k<intervals.rows(); k++){
+	for(UInt i = 0; i<3 ; i++){
+	  rans24[k*3+i+intervals.rows()*3*j]=intervals(k,j)(i);
+	} 
+      }
+    }
+
+
+    // local f variance
+    // Add the vector of lambdas
+    UInt f_vec_size = f_var(0).size();
+    SET_VECTOR_ELT(result, 25, Rf_allocVector(REALSXP, f_vec_size));
+    Real *rans25 = REAL(VECTOR_ELT(result, 25));
+    for(long int j = 0; j < f_vec_size; j++)
+      {
+	rans25[j] = f_var(0)[j];
+      }
+   
     
     UNPROTECT(1);
     return(result);

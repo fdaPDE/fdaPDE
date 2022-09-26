@@ -1,13 +1,14 @@
 # fdaPDE: iterative method for ST-PDE
 
-
 This repository contains the development version of fdaPDE package. In particular it contains the implementation of an iterative method for ST-PDE models.
+ Moreover, it contains the possibility of performing inference on the parametric and nonparametric components of the SR-PDE and ST-PDE models (gaussian case, no forcing term), in exact and non exact ways.
 
-New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data.
+##New features:
+New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data. Smooth regression for space-time problems. Inference over linear and nonlinear components is also available for space and space-time models.
 
-Bugs corrected in the areal data smoothing.
+FSPAI utility is now available for all the users
 
-smooth.FEM.basis, smooth.PDE.FEM.basis, smooth.FEM.PDE.sv.basis are deprecated, smooth.FEM has to be used in all cases.
+Compiled in Ubuntu using g++ compiler and in macOS: for the precise versions tested, see the report. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE.
 
 Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying regression have been fixed. Issues of point location in 2.5D have been fixed.
 Compiled in Win RStudio, Ubuntu using g++ compiler and in macOS: for the precise versions tested, see the report. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE. If using Windows, it is advisable to install Rtools and then rgl, plot3D, plot3Drgl, geometry and RcppEigen libraries. 
@@ -20,7 +21,7 @@ Compiled in Win RStudio, Ubuntu using g++ compiler and in macOS: for the precise
 /data contains the data to run the tests in /tests.
 
 /tests contains the test to be run: smooth.FEM.2D.tests, smooth.FEM.2.5D.tests.R, smooth.FEM.3D.tests.R.  In particular for the iterative method:   smooth.FEM.time.tests.R
->>>>>>> master
+
 ## Installation:
 Two different methods are proposed in order to install the package in the R environment.  
 Download the `.zip` file from the repository, unzip it, and for the installation choose one of the two following methods:  

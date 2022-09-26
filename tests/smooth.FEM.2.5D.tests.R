@@ -57,7 +57,16 @@ output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis,
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
+#### Test 1.5: Inference on f, Wald, Sign-flip, ESF p_values for a subset of locations
+locs_ind <- which(mesh$nodes[,1] > 4 & mesh$nodes[,1] < 5 & mesh$nodes[,3] > 0 & mesh$nodes[,3] < 2)
 
+inf_obj <- inferenceDataObjectBuilder(test = "sim", type = c("w", "sf", "esf"), n_cov=0,dim = 3, component = "nonparametric", f0 = fs.test.3D, locations_indices = locs_ind, locations_by_nodes = T)
+
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV', 
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$f$p_values
 
 #### Test 2: sphere domain ####
 #            locations != nodes 
@@ -165,3 +174,26 @@ output_CPP<-smooth.FEM(observations=data, locations = projected_locations,
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
+
+#### Test 2.7: Inference on beta, Wald, Speckman, ESF, Enhanced ESF CI and p_values
+inf_obj <- inferenceDataObjectBuilder(test = "oat", interval = "oat", type = c("w", "s", "esf", "enh-esf"), dim = 3, n_cov = 1, beta0 = 1)
+
+output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
+                       covariates = cov1,
+                       FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$beta$p_values
+
+#### Test 2.8: Inference on f, Wald, Sign-flip, ESF p_values for all locations
+inf_obj <- inferenceDataObjectBuilder(test = "sim", component = "nonparametric", type = c("w", "sf", "esf"), dim = 3, n_cov = 1, f0 = f)
+
+output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
+                       covariates = cov1,
+                       FEMbasis=FEMbasis, 
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV',
+                       inference.data.object=inf_obj)
+
+output_CPP$inference$f$p_values
+
