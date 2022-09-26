@@ -31,7 +31,7 @@ class MixedFERegressionBase
 		const UInt M_;			//!< Number of temporal nodes
 
 		const InputHandler & regressionData_;
-        OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
+        	OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
 		// For only space problems
 		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
 		//	                |     R1        | R0	      |      |         O             |  O |
@@ -52,7 +52,7 @@ class MixedFERegressionBase
 		SpMat 		R0_lambda;
 		SpMat 		R1_lambda;
 		SpMat 		psi_;  		//!< Psi matrix of the model
-		SpMat       psi_mini;   //!< Psi only space version
+		SpMat           psi_mini;       //!< Psi only space version
 		SpMat 		psi_t_;  	//!< Psi ^T matrix of the model
 		SpMat 		Ptk_; 		//!< kron(Pt,IN) (separable version)
 		SpMat 		LR0k_; 		//!< kron(L,R0) (parabolic version)
@@ -84,11 +84,11 @@ class MixedFERegressionBase
 		MatrixXv _beta;			//!< A Eigen::MatrixXv storing the computed beta coefficients
 
 		// members for the iterative method
-        MatrixXr _solution_k_;       //!< A Eigen::MatrixXr: Stores the solution for each time instant (iterative method)
-        VectorXr _solution_f_old_;  //!< A Eigen::VectorXr: Stores the old system solution (iterative method)
-        VectorXr _rightHandSide_k_; //!< A Eigen::VectorXr: Stores the update system right hand side (iterative method)
+        	MatrixXr _solution_k_;       //!< A Eigen::MatrixXr: Stores the solution for each time instant (iterative method)
+        	VectorXr _solution_f_old_;  //!< A Eigen::VectorXr: Stores the old system solution (iterative method)
+        	VectorXr _rightHandSide_k_; //!< A Eigen::VectorXr: Stores the update system right hand side (iterative method)
 
-        //Flag to avoid the computation of R0, R1, Psi_ onece already performed
+        	//Flag to avoid the computation of R0, R1, Psi_ onece already performed
 		bool isAComputed   = false;
 		bool isPsiComputed = false;
 		bool isR0Computed  = false;
@@ -103,7 +103,7 @@ class MixedFERegressionBase
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
-	    void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
+	    	void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 		//! A method computing the no-covariates version of the system matrix
 		void buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock);
 
@@ -114,7 +114,7 @@ class MixedFERegressionBase
 		//! A method which takes care of missing values setting to 0 the corresponding rows of B_
 		void addNA();
 	 	//! A member function which builds the A vector containing the areas of the regions in case of areal data
-	    template<UInt ORDER, UInt mydim, UInt ndim>
+	    	template<UInt ORDER, UInt mydim, UInt ndim>
 		void setA(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 		//! A member function which sets psi_t_
 		void setpsi_t_(void);
@@ -128,16 +128,16 @@ class MixedFERegressionBase
 		void getRightHandData(VectorXr& rightHandData);
 		//! A method which builds all the matrices needed for assembling matrixNoCov_
 		void buildSpaceTimeMatrices();
-        //! A method which compute the tensorized psi for iterative method
-        void buildSpaceTimeMatrices_iterative();
+        	//! A method which compute the tensorized psi for iterative method
+        	void buildSpaceTimeMatrices_iterative();
 		//! A method computing dofs in case of exact GCV, it is called by computeDegreesOfFreedom
 		void computeDegreesOfFreedomExact(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
-        //! Exact GCV: iterative method
+        	//! Exact GCV: iterative method
 		//void computeDOFExact_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method computing dofs in case of stochastic GCV, it is called by computeDegreesOfFreedom
 		void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! Stochastic GCV: iterative method
-        //void computeDOFStochastic_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+        	//void computeDOFStochastic_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method computing GCV from the dofs
 		void computeGeneralizedCrossValidation(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 
@@ -157,21 +157,21 @@ class MixedFERegressionBase
 		template<typename Derived>
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
 
-        //! A function which solves the factorized system in presence of covariates (iterative method)
-        template<typename Derived>
-        MatrixXr solve_covariates_iter(const Eigen::MatrixBase<Derived>&, UInt time_index);
+        	//! A function which solves the factorized system in presence of covariates (iterative method)
+        	template<typename Derived>
+        	MatrixXr solve_covariates_iter(const Eigen::MatrixBase<Derived>&, UInt time_index);
 
-        // -- methods for the iterative method --
-        //! A method to initialize f
-        void initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index);
-         //! A method to initialize g
-        void initialize_g(Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
-        //! A method that stops the iterative algorithm based on difference between functionals J_k J_k+1 or n_iterations > max_num_iterations .
-        bool stopping_criterion(UInt& index, Real J, Real J_old);
-        //!A method that computes and return the current value of the functional J. It is divided in parametric and non parametric part.
-        Real compute_J(UInt& lambdaS_index, UInt& lambdaT_index);
-        //!  A methdd that update the system rhs for each time instant (iterative method)
-        void update_rhs(UInt& time_index, Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
+        	// -- methods for the iterative method --
+        	//! A method to initialize f
+        	void initialize_f(Real lambdaS, UInt& lambdaS_index, UInt& lambdaT_index);
+        	//! A method to initialize g
+        	void initialize_g(Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
+        	//! A method that stops the iterative algorithm based on difference between functionals J_k J_k+1 or n_iterations > max_num_iterations .
+        	bool stopping_criterion(UInt& index, Real J, Real J_old);
+        	//!A method that computes and return the current value of the functional J. It is divided in parametric and non parametric part.
+        	Real compute_J(UInt& lambdaS_index, UInt& lambdaT_index);
+        	//!  A methdd that update the system rhs for each time instant (iterative method)
+        	void update_rhs(UInt& time_index, Real lambdaS, Real lambdaT, UInt& lambdaS_index, UInt& lambdaT_index);
 	public:
 
 		//!A Constructor.
@@ -200,6 +200,9 @@ class MixedFERegressionBase
 		void computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 		//! A method that set WTW flag to false, in order to recompute the matrix WTW.
 		void recomputeWTW(void){ this->isWTWfactorized_ = false;}
+		//! A method used to reset the system matrix to the value obtained for a given lambda (used for inference)
+		void build_regression_inference(Real lambda_inference_) {this->buildSystemMatrix(lambda_inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
+		void build_regression_inference(Real lambda_S_Inference_, Real lambda_T_Inference_) {this->buildSystemMatrix(lambda_S_Inference_,lambda_T_Inference_); this->system_factorize();}; // If the last lambda used is not  the optimal one and inference is required, coherent system matrices are needed
 
 		// -- GETTERS --
 		//! A function returning the computed barycenters of the locationss
@@ -226,12 +229,20 @@ class MixedFERegressionBase
 		const SpMat * getR1_(void) const {return &this->R1_;}
 		//! A method returning the DMat matrix, da implementare la DMat
 		const SpMat * getDMat_(void) const {return &this->DMat_;}
+		//! A method returning the matrixNoCov, da implementare la DMat
+		const SpMat * getmatrixNoCov_(void) const {return &this->matrixNoCov_;}
 		//! A method returning the Q_ matrix -> da impementare la Q
 		const MatrixXr *	getQ_(void) const {return &this->Q_;}
 		//! A method returning the H_ matrix da implementare la H
 		const MatrixXr *	getH_(void) const {return &this->H_;}
 		//! A method returning the A_ matrix
 		const VectorXr *	getA_(void) const {return &this->A_;}
+		//! A method returning the R_ matrix
+		const MatrixXr *	getR_(void) const {return &this->R_;}
+		//! A method returning the U_ matrix
+		const MatrixXr *	getU_(void) const {return &this->U_;}
+		//! A method returning the V_ matrix
+		const MatrixXr *	getV_(void) const {return &this->V_;}
 		//! A method returning the rhs
 		const VectorXr *	getrhs_(void) const {return &this->_rightHandSide;}
 		//! A method returning the forcing term
@@ -253,6 +264,12 @@ class MixedFERegressionBase
         	
 		//! A function that given a vector u, performs Q*u efficiently
 		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
+		//! A method returning the WTW_ factorization
+		const Eigen::PartialPivLU<MatrixXr> * getWTW_(void) const {return &this->WTW_;}
+		//! A method returning the matrixNoCov_ factorization
+		const Eigen::SparseLU<SpMat> * getmatrixNoCovdec_(void) const {return &this->matrixNoCovdec_;}
+		//! A method returning the Gdec_ factorization
+		const Eigen::PartialPivLU<MatrixXr> * getGdec_(void) const {return &this->Gdec_;}
 
 		// -- APPLY --
 		//! The function solving the system, used by the children classes. Saves the result in _solution

@@ -2,10 +2,10 @@
 #define __SOLUTION_BUILDERS_IMP_H__
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data<1> & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression)
+SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data<1> & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression,  const MatrixXv & inference_Output, const InferenceData & inf_Data)
 {
         // ---- Preparation ----
-        // Prepare regresion coefficients space
+        // Prepare regression coefficients space
         MatrixXv beta;
         if(regressionData.getCovariates()->rows()==0)
         {
@@ -18,6 +18,55 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                 beta = output.betas;
         }
 
+	// Prepare the inference output space
+        UInt n_inf_implementations = inf_Data.get_test_type().size();
+	UInt p_inf = inf_Data.get_coeff_inference().rows();
+        UInt n_loc_inf = inf_Data.get_locs_inference().rows();
+        UInt inf_out_size = (p_inf > n_loc_inf) ? p_inf : n_loc_inf; 
+        MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
+	MatrixXv p_values;
+	MatrixXv intervals;
+	
+	if (inf_Data.get_definition()==false){
+	  intervals.resize(1,1);
+	  intervals(0,0).resize(3);
+	  intervals(0,0)(0) = 10e20;
+          intervals(0,0)(1) = 10e20; 
+          intervals(0,0)(2) = 10e20;
+	  
+	  p_values.resize(2,1);
+	  p_values(0,0).resize(1);
+	  p_values(0,0)(0)= 10e20;
+          p_values(1,0).resize(1);
+	  p_values(1,0)(0)= 10e20;
+	}else{
+	  
+	  p_values.resize(2, n_inf_implementations);
+	  intervals.resize(2*n_inf_implementations, inf_out_size);
+	  
+          for(UInt i=0; i < n_inf_implementations; ++i){
+	    p_values.row(0)(i) = inf_Output.col(0)(2*i);
+            p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
+          }
+
+          intervals=inf_Output.rightCols(inf_out_size);
+	}
+
+        // Prepare the local f variance output space
+        MatrixXv f_var;
+        UInt f_size = regressionData.getNumberofObservations();
+        f_var.resize(1,1);
+        f_var(0,0).resize(f_size);
+
+        if(inf_Data.get_f_var()){
+           f_var(0,0) = inference_Output(2*n_inf_implementations,0);
+        }
+	else{
+           for(long int i=0; i<f_size; ++i){
+              f_var(0,0)(i) = 10e20;
+           }
+        }
+	
         // Define string for optimzation method
         UInt code_string;
         if(output.content == "full_optimization")
@@ -38,7 +87,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
         // ---- Copy results in R memory ----
         SEXP result = NILSXP;  // Define emty term --> never pass to R empty or is "R session aborted"
-        result = PROTECT(Rf_allocVector(VECSXP, 22)); // 22 elements to be allocated
+        result = PROTECT(Rf_allocVector(VECSXP, 25)); // 25 elements to be allocated
 
         // Add solution matrix in position 0
         SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
@@ -195,6 +244,36 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                         rans11[i + barycenters.rows()*j] = barycenters(i,j);
         }
 
+	// We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
+	SET_VECTOR_ELT(result,22,Rf_allocMatrix(REALSXP,p_values(0).size()+1,p_values.cols())); // P_values info (inference)
+	Real *rans12=REAL(VECTOR_ELT(result,22));
+	for(UInt j = 0; j<p_values.cols(); j++){
+	  for(UInt i = 0; i<p_values(0).size(); i++){
+	    rans12[i+(p_values(0).size()+1)*j]=p_values(0,j)(i);
+	  }
+            rans12[p_values(0).size()+(p_values(0).size()+1)*j] = p_values(1,j)(0);
+	}
+	
+	SET_VECTOR_ELT(result, 23, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (inference)
+	Real *rans13 = REAL(VECTOR_ELT(result,23));
+	for(UInt j = 0; j<intervals.cols(); j++){
+	  for(UInt k = 0; k<intervals.rows(); k++){
+	    for(UInt i = 0; i<3 ; i++){
+	      rans13[k*3+i+intervals.rows()*3*j]=intervals(k,j)(i);
+	    } 
+	  }
+	}
+
+        // local f variance
+        UInt f_vec_size = f_var(0).size();
+        SET_VECTOR_ELT(result, 24, Rf_allocVector(REALSXP, f_vec_size));
+        Real *rans14 = REAL(VECTOR_ELT(result, 24));
+        for(long int j = 0; j < f_vec_size; j++)
+        {
+               rans14[j] = f_var(0)[j];
+        }
+        
+        
         UNPROTECT(1);
 
         return(result);
@@ -202,204 +281,284 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
 
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr & solution, const output_Data<2> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression)
+static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr & solution, const output_Data<2> & output, const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData, const MixedFERegression<InputHandler>& regression,   const MatrixXv & inference_Output, const InferenceData & inf_Data)
 {
-    std::vector<Real> const & dof = output.dof;
-    std::vector<Real> const & GCV = output.GCV_evals;
-    div_t divresult = div(output.lambda_pos, output.size_S); // from the pair index, reconstruct the original indices of LambdaS, LambdaT
-    UInt bestLambdaS = divresult.rem;
-    UInt bestLambdaT = divresult.quot; //+1 is added in R
+  std::vector<Real> const & dof = output.dof;
+  std::vector<Real> const & GCV = output.GCV_evals;
+  div_t divresult = div(output.lambda_pos, output.size_S); // from the pair index, reconstruct the original indices of LambdaS, LambdaT
+  UInt bestLambdaS = divresult.rem;
+  UInt bestLambdaT = divresult.quot; //+1 is added in R
     
-    MatrixXv beta;
-    if(regressionData.getCovariates()->rows()==0)
+  MatrixXv beta;
+  if(regressionData.getCovariates()->rows()==0)
     {
-        beta.resize(1,1);
-        beta(0,0).resize(1);
-        beta(0,0)(0) = 10e20;
+      beta.resize(1,1);
+      beta(0,0).resize(1);
+      beta(0,0)(0) = 10e20;
     }
-    else
-         beta = output.betas;
+  else
+    beta = output.betas;
+
+  //!Prepare the inference output space
+  UInt n_inf_implementations = inf_Data.get_test_type().size();
+  UInt p_inf = inf_Data.get_coeff_inference().rows();
+  MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
+  MatrixXv p_values;
+  MatrixXv intervals;
+	
+  if (inf_Data.get_definition()==false){
+    intervals.resize(1,1);
+    intervals(0,0).resize(3);
+    intervals(0,0)(0) = 10e20;
+    intervals(0,0)(1) = 10e20; 
+    intervals(0,0)(2) = 10e20;
+	  
+    p_values.resize(2,1);
+    p_values(0,0).resize(1);
+    p_values(0,0)(0)= 10e20;
+    p_values(1,0).resize(1);
+    p_values(1,0)(0)= 10e20;
+  }else{
+	  
+    p_values.resize(2, n_inf_implementations);
+    intervals.resize(2*n_inf_implementations, p_inf);
+          
+    for(UInt i=0; i < n_inf_implementations; ++i){
+      p_values.row(0)(i) = inf_Output.col(0)(2*i);
+      p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
+    }
+
+    intervals=inf_Output.rightCols(p_inf);
+	
+  }
+
+  //!Prepare the local f variance output space
+  MatrixXv f_var;
+  UInt f_size = regressionData.getNumberofObservations();
+  f_var.resize(1,1);
+  f_var(0,0).resize(f_size);
+
+  if(inf_Data.get_f_var()){
+    f_var(0,0) = inference_Output(2*n_inf_implementations,0);
+  }
+  else{
+    for(long int i=0; i<f_size; ++i){
+      f_var(0,0)(i) = 10e20;
+    }
+  }
+
          
-    // Define string for optimzation method
-    UInt code_string;
-    if(output.content == "full_optimization")
-        code_string = 0;
-    else if(output.content == "full_dof_grid")
-        code_string = 1;
-    else
-        code_string = 2;
+  // Define string for optimzation method
+  UInt code_string;
+  if(output.content == "full_optimization")
+    code_string = 0;
+  else if(output.content == "full_dof_grid")
+    code_string = 1;
+  else
+    code_string = 2;
          
-    const MatrixXr & barycenters = regression.getBarycenters();
-    const VectorXi & elementIds = regression.getElementIds();
+  const MatrixXr & barycenters = regression.getBarycenters();
+  const VectorXi & elementIds = regression.getElementIds();
 
-    //!Copy result in R memory
-    SEXP result = NILSXP;
-    result = PROTECT(Rf_allocVector(VECSXP, 5+5+2+11));
-    SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
-    if(code_string == 0) //Newton
+  //!Copy result in R memory
+  SEXP result = NILSXP;
+  result = PROTECT(Rf_allocVector(VECSXP, 5+5+2+11+3));
+  SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
+  if(code_string == 0) //Newton
     {
-        SET_VECTOR_ELT(result, 1, Rf_allocVector(REALSXP, dof.size()));
-        SET_VECTOR_ELT(result, 2, Rf_allocVector(REALSXP, GCV.size()));
+      SET_VECTOR_ELT(result, 1, Rf_allocVector(REALSXP, dof.size()));
+      SET_VECTOR_ELT(result, 2, Rf_allocVector(REALSXP, GCV.size()));
     }
-    else //grid or prediction
+  else //grid or prediction
     {
-        SET_VECTOR_ELT(result, 1, Rf_allocMatrix(REALSXP, output.size_S, output.size_T));
-        SET_VECTOR_ELT(result, 2, Rf_allocMatrix(REALSXP, output.size_S, output.size_T));
+      SET_VECTOR_ELT(result, 1, Rf_allocMatrix(REALSXP, output.size_S, output.size_T));
+      SET_VECTOR_ELT(result, 2, Rf_allocMatrix(REALSXP, output.size_S, output.size_T));
     }
-    SET_VECTOR_ELT(result, 3, Rf_allocVector(INTSXP, 2)); //best lambdas
-    SET_VECTOR_ELT(result, 4, Rf_allocMatrix(REALSXP, beta(0,0).size(), beta.rows()));
+  SET_VECTOR_ELT(result, 3, Rf_allocVector(INTSXP, 2)); //best lambdas
+  SET_VECTOR_ELT(result, 4, Rf_allocMatrix(REALSXP, beta(0,0).size(), beta.rows()));
 
-    //! Copy solution
-    Real *rans = REAL(VECTOR_ELT(result, 0));
-    for(UInt j = 0; j < solution.cols(); j++)
-        for(UInt i = 0; i < solution.rows(); i++)
-            rans[i + solution.rows()*j] = solution.coeff(i,j);    
+  //! Copy solution
+  Real *rans = REAL(VECTOR_ELT(result, 0));
+  for(UInt j = 0; j < solution.cols(); j++)
+    for(UInt i = 0; i < solution.rows(); i++)
+      rans[i + solution.rows()*j] = solution.coeff(i,j);    
 
-    //! Copy dof matrix
-    UInt size_dof = dof.size();
-    Real *rans1 = REAL(VECTOR_ELT(result, 1));
-    for(UInt i = 0; i < size_dof; i++)
-        rans1[i] = dof[i];
+  //! Copy dof matrix
+  UInt size_dof = dof.size();
+  Real *rans1 = REAL(VECTOR_ELT(result, 1));
+  for(UInt i = 0; i < size_dof; i++)
+    rans1[i] = dof[i];
     
-    //! Copy GCV matrix
-    UInt size_vec = GCV.size();
-    Real *rans2 = REAL(VECTOR_ELT(result, 2));
-    for(UInt i = 0; i < size_vec; i++)
-        rans2[i] = GCV[i];
+  //! Copy GCV matrix
+  UInt size_vec = GCV.size();
+  Real *rans2 = REAL(VECTOR_ELT(result, 2));
+  for(UInt i = 0; i < size_vec; i++)
+    rans2[i] = GCV[i];
 
-    //! Copy best lambdas
-    UInt *rans3 = INTEGER(VECTOR_ELT(result, 3));
-    rans3[0] = bestLambdaS;
-    rans3[1] = bestLambdaT;
+  //! Copy best lambdas
+  UInt *rans3 = INTEGER(VECTOR_ELT(result, 3));
+  rans3[0] = bestLambdaS;
+  rans3[1] = bestLambdaT;
 
-    //! Copy betas
-    Real *rans4 = REAL(VECTOR_ELT(result, 4));
-    for(UInt i = 0; i < beta.rows(); i++)
-        for(UInt k = 0; k < beta(0,0).size(); k++)
-            rans4[k + beta(0,0).size()*i] = beta.coeff(i,0)(k);
+  //! Copy betas
+  Real *rans4 = REAL(VECTOR_ELT(result, 4));
+  for(UInt i = 0; i < beta.rows(); i++)
+    for(UInt k = 0; k < beta(0,0).size(); k++)
+      rans4[k + beta(0,0).size()*i] = beta.coeff(i,0)(k);
 
-    if(regressionData.getSearch()==2){
-        //SEND TREE INFORMATION TO R
-        SET_VECTOR_ELT(result, 5, Rf_allocVector(INTSXP, 1)); //tree_header information
-        int *rans5 = INTEGER(VECTOR_ELT(result, 5));
-        rans5[0] = mesh.getTree().gettreeheader().gettreelev();
+  if(regressionData.getSearch()==2){
+    //SEND TREE INFORMATION TO R
+    SET_VECTOR_ELT(result, 5, Rf_allocVector(INTSXP, 1)); //tree_header information
+    int *rans5 = INTEGER(VECTOR_ELT(result, 5));
+    rans5[0] = mesh.getTree().gettreeheader().gettreelev();
 
-        SET_VECTOR_ELT(result, 6, Rf_allocVector(REALSXP, ndim*2)); //tree_header domain origin
-        Real *rans6 = REAL(VECTOR_ELT(result, 6));
-        for(UInt i = 0; i < ndim*2; i++)
-            rans6[i] = mesh.getTree().gettreeheader().domainorig(i);
+    SET_VECTOR_ELT(result, 6, Rf_allocVector(REALSXP, ndim*2)); //tree_header domain origin
+    Real *rans6 = REAL(VECTOR_ELT(result, 6));
+    for(UInt i = 0; i < ndim*2; i++)
+      rans6[i] = mesh.getTree().gettreeheader().domainorig(i);
 
-        SET_VECTOR_ELT(result, 7, Rf_allocVector(REALSXP, ndim*2)); //tree_header domain scale
-        Real *rans7 = REAL(VECTOR_ELT(result, 7));
-        for(UInt i = 0; i < ndim*2; i++)
-            rans7[i] = mesh.getTree().gettreeheader().domainscal(i);
+    SET_VECTOR_ELT(result, 7, Rf_allocVector(REALSXP, ndim*2)); //tree_header domain scale
+    Real *rans7 = REAL(VECTOR_ELT(result, 7));
+    for(UInt i = 0; i < ndim*2; i++)
+      rans7[i] = mesh.getTree().gettreeheader().domainscal(i);
 
 
-        UInt num_tree_nodes = mesh.num_elements()+1; //Be careful! This is not equal to number of elements
-        SET_VECTOR_ELT(result, 8, Rf_allocMatrix(INTSXP, num_tree_nodes, 3)); //treenode information
-        int *rans8 = INTEGER(VECTOR_ELT(result, 8));
-        for(UInt i = 0; i < num_tree_nodes; i++)
-            rans8[i] = mesh.getTree().gettreenode(i).getid();
+    UInt num_tree_nodes = mesh.num_elements()+1; //Be careful! This is not equal to number of elements
+    SET_VECTOR_ELT(result, 8, Rf_allocMatrix(INTSXP, num_tree_nodes, 3)); //treenode information
+    int *rans8 = INTEGER(VECTOR_ELT(result, 8));
+    for(UInt i = 0; i < num_tree_nodes; i++)
+      rans8[i] = mesh.getTree().gettreenode(i).getid();
 
-        for(UInt i = 0; i < num_tree_nodes; i++)
-            rans8[i + num_tree_nodes*1] = mesh.getTree().gettreenode(i).getchild(0);
+    for(UInt i = 0; i < num_tree_nodes; i++)
+      rans8[i + num_tree_nodes*1] = mesh.getTree().gettreenode(i).getchild(0);
 
-        for(UInt i = 0; i < num_tree_nodes; i++)
-            rans8[i + num_tree_nodes*2] = mesh.getTree().gettreenode(i).getchild(1);
+    for(UInt i = 0; i < num_tree_nodes; i++)
+      rans8[i + num_tree_nodes*2] = mesh.getTree().gettreenode(i).getchild(1);
 
-        SET_VECTOR_ELT(result, 9, Rf_allocMatrix(REALSXP, num_tree_nodes, ndim*2)); //treenode box coordinate
-        Real *rans9 = REAL(VECTOR_ELT(result, 9));
-        for(UInt j = 0; j < ndim*2; j++)
-        {
-            for(UInt i = 0; i < num_tree_nodes; i++)
-                rans9[i + num_tree_nodes*j] = mesh.getTree().gettreenode(i).getbox().get()[j];
-        }
-    }
+    SET_VECTOR_ELT(result, 9, Rf_allocMatrix(REALSXP, num_tree_nodes, ndim*2)); //treenode box coordinate
+    Real *rans9 = REAL(VECTOR_ELT(result, 9));
+    for(UInt j = 0; j < ndim*2; j++)
+      {
+	for(UInt i = 0; i < num_tree_nodes; i++)
+	  rans9[i + num_tree_nodes*j] = mesh.getTree().gettreenode(i).getbox().get()[j];
+      }
+  }
 
-    //SEND BARYCENTER INFORMATION TO R
-    SET_VECTOR_ELT(result, 10, Rf_allocVector(INTSXP, elementIds.rows())); //element id of the locations point (vector)
-    int *rans10 = INTEGER(VECTOR_ELT(result, 10));
-    for(UInt i = 0; i < elementIds.rows(); i++)
-        rans10[i] = elementIds(i);
+  //SEND BARYCENTER INFORMATION TO R
+  SET_VECTOR_ELT(result, 10, Rf_allocVector(INTSXP, elementIds.rows())); //element id of the locations point (vector)
+  int *rans10 = INTEGER(VECTOR_ELT(result, 10));
+  for(UInt i = 0; i < elementIds.rows(); i++)
+    rans10[i] = elementIds(i);
 
-    SET_VECTOR_ELT(result, 11, Rf_allocMatrix(REALSXP, barycenters.rows(), barycenters.cols())); //barycenter information (matrix)
-    Real *rans11 = REAL(VECTOR_ELT(result, 11));
-    for(UInt j = 0; j < barycenters.cols(); j++)
+  SET_VECTOR_ELT(result, 11, Rf_allocMatrix(REALSXP, barycenters.rows(), barycenters.cols())); //barycenter information (matrix)
+  Real *rans11 = REAL(VECTOR_ELT(result, 11));
+  for(UInt j = 0; j < barycenters.cols(); j++)
     {
-        for(UInt i = 0; i < barycenters.rows(); i++)
-            rans11[i + barycenters.rows()*j] = barycenters(i,j);
+      for(UInt i = 0; i < barycenters.rows(); i++)
+	rans11[i + barycenters.rows()*j] = barycenters(i,j);
     }
     
-    SET_VECTOR_ELT(result, 12, Rf_allocMatrix(REALSXP, output.z_hat.rows(), output.z_hat.cols())); //z_hat
+  SET_VECTOR_ELT(result, 12, Rf_allocMatrix(REALSXP, output.z_hat.rows(), output.z_hat.cols())); //z_hat
     
-    UInt size_rmse = output.rmse.size();
-    if(code_string == 0) //Newton
-    	SET_VECTOR_ELT(result, 13, Rf_allocVector(REALSXP, size_rmse));
-    else //grid or prediction
-        SET_VECTOR_ELT(result, 13, Rf_allocMatrix(REALSXP, output.size_S, output.size_T));
+  UInt size_rmse = output.rmse.size();
+  if(code_string == 0) //Newton
+    SET_VECTOR_ELT(result, 13, Rf_allocVector(REALSXP, size_rmse));
+  else //grid or prediction
+    SET_VECTOR_ELT(result, 13, Rf_allocMatrix(REALSXP, output.size_S, output.size_T));
     
-    SET_VECTOR_ELT(result, 14, Rf_allocVector(REALSXP, 1)); //sigma_hat_sq
-    SET_VECTOR_ELT(result, 15, Rf_allocVector(REALSXP, 2)); //best lambda values
-    SET_VECTOR_ELT(result, 16, Rf_allocVector(REALSXP, 1)); //GCV opt
-    SET_VECTOR_ELT(result, 17, Rf_allocVector(INTSXP, 1)); //number of iterations
-    SET_VECTOR_ELT(result, 18, Rf_allocVector(INTSXP, 1)); //termination criterion
-    SET_VECTOR_ELT(result, 19, Rf_allocVector(INTSXP, 1)); //code string
-    UInt size_lambda = output.lambda_vec.size();
-    SET_VECTOR_ELT(result, 20, Rf_allocVector(REALSXP, size_lambda)); //lambdaS
-    SET_VECTOR_ELT(result, 21, Rf_allocVector(REALSXP, size_lambda)); //lambdaT
-    SET_VECTOR_ELT(result, 22, Rf_allocVector(REALSXP, 1)); //time partial
+  SET_VECTOR_ELT(result, 14, Rf_allocVector(REALSXP, 1)); //sigma_hat_sq
+  SET_VECTOR_ELT(result, 15, Rf_allocVector(REALSXP, 2)); //best lambda values
+  SET_VECTOR_ELT(result, 16, Rf_allocVector(REALSXP, 1)); //GCV opt
+  SET_VECTOR_ELT(result, 17, Rf_allocVector(INTSXP, 1)); //number of iterations
+  SET_VECTOR_ELT(result, 18, Rf_allocVector(INTSXP, 1)); //termination criterion
+  SET_VECTOR_ELT(result, 19, Rf_allocVector(INTSXP, 1)); //code string
+  UInt size_lambda = output.lambda_vec.size();
+  SET_VECTOR_ELT(result, 20, Rf_allocVector(REALSXP, size_lambda)); //lambdaS
+  SET_VECTOR_ELT(result, 21, Rf_allocVector(REALSXP, size_lambda)); //lambdaT
+  SET_VECTOR_ELT(result, 22, Rf_allocVector(REALSXP, 1)); //time partial
     
-    // Add prediction in locations
-    Real *rans12 = REAL(VECTOR_ELT(result, 12));
-    for(UInt j = 0; j < output.z_hat.cols(); j++)
-    	for(UInt i = 0; i < output.z_hat.rows(); i++)
-	    rans12[i + output.z_hat.rows()*j] = output.z_hat(i,j);
+  // Add prediction in locations
+  Real *rans12 = REAL(VECTOR_ELT(result, 12));
+  for(UInt j = 0; j < output.z_hat.cols(); j++)
+    for(UInt i = 0; i < output.z_hat.rows(); i++)
+      rans12[i + output.z_hat.rows()*j] = output.z_hat(i,j);
     
-    // Add rmse
-    Real *rans13 = REAL(VECTOR_ELT(result, 13));
-    for(UInt j = 0; j < size_rmse; j++)
-    	rans13[j] = output.rmse[j];
+  // Add rmse
+  Real *rans13 = REAL(VECTOR_ELT(result, 13));
+  for(UInt j = 0; j < size_rmse; j++)
+    rans13[j] = output.rmse[j];
 
-    // Add predicted variance of error
-    Real *rans14 = REAL(VECTOR_ELT(result, 14));
-    rans14[0] = output.sigma_hat_sq;
+  // Add predicted variance of error
+  Real *rans14 = REAL(VECTOR_ELT(result, 14));
+  rans14[0] = output.sigma_hat_sq;
 
-    // Add best lambda values
-    Real *rans15 = REAL(VECTOR_ELT(result, 15));
-    rans15[0] = output.lambda_sol(0);
-    rans15[1] = output.lambda_sol(1);
+  // Add best lambda values
+  Real *rans15 = REAL(VECTOR_ELT(result, 15));
+  rans15[0] = output.lambda_sol(0);
+  rans15[1] = output.lambda_sol(1);
     
-    // Add GCV value
-    Real *rans16 = REAL(VECTOR_ELT(result, 16));
-    rans16[0] = output.GCV_opt;
+  // Add GCV value
+  Real *rans16 = REAL(VECTOR_ELT(result, 16));
+  rans16[0] = output.GCV_opt;
 
-    // Add number of iterations
-    UInt *rans17 = INTEGER(VECTOR_ELT(result, 17));
-    rans17[0] = output.n_it;
+  // Add number of iterations
+  UInt *rans17 = INTEGER(VECTOR_ELT(result, 17));
+  rans17[0] = output.n_it;
 
-    // Add termination criterion
-    UInt *rans18 = INTEGER(VECTOR_ELT(result, 18));
-    rans18[0] = output.termination;
+  // Add termination criterion
+  UInt *rans18 = INTEGER(VECTOR_ELT(result, 18));
+  rans18[0] = output.termination;
 
-    // Add code to identify the optimization method
-    UInt *rans19 = INTEGER(VECTOR_ELT(result, 19));
-    rans19[0] = code_string;
+  // Add code to identify the optimization method
+  UInt *rans19 = INTEGER(VECTOR_ELT(result, 19));
+  rans19[0] = code_string;
     
-    // Add the vectors of lambdaS and lambdaT
-    Real *rans20 = REAL(VECTOR_ELT(result, 20));
-    Real *rans21 = REAL(VECTOR_ELT(result, 21));
-    for(UInt j = 0; j < size_lambda; j++)
+  // Add the vectors of lambdaS and lambdaT
+  Real *rans20 = REAL(VECTOR_ELT(result, 20));
+  Real *rans21 = REAL(VECTOR_ELT(result, 21));
+  for(UInt j = 0; j < size_lambda; j++)
     {
-        rans20[j] = output.lambda_vec[j](0);
-        rans21[j] = output.lambda_vec[j](1);
+      rans20[j] = output.lambda_vec[j](0);
+      rans21[j] = output.lambda_vec[j](1);
     }
     
-    // Add time employed
-    Real *rans22 = REAL(VECTOR_ELT(result, 22));
-    rans22[0] = output.time_partial;
+  // Add time employed
+  Real *rans22 = REAL(VECTOR_ELT(result, 22));
+  rans22[0] = output.time_partial;
+
+  // We take p_values(0).size() to be general, since inference object could be NULL, otherwise all vectors in p_values have the same size
+  SET_VECTOR_ELT(result,23,Rf_allocMatrix(REALSXP,p_values(0).size()+1,p_values.cols())); // P_values info (inference on betas)
+  Real *rans23=REAL(VECTOR_ELT(result,23));
+  for(UInt j = 0; j<p_values.cols(); j++){
+    for(UInt i = 0; i<p_values(0).size(); i++){
+      rans23[i+(p_values(0).size()+1)*j]=p_values(0,j)(i);
+    }
+    rans23[p_values(0).size()+(p_values(0).size()+1)*j] = p_values(1,j)(0);
+  }
+	
+  SET_VECTOR_ELT(result, 24, Rf_allocMatrix(REALSXP,3*intervals.rows(),intervals.cols())); // Confidence Intervals info (Inference on betas)
+  Real *rans24 = REAL(VECTOR_ELT(result,24));
+  for(UInt j = 0; j<intervals.cols(); j++){
+    for(UInt k = 0; k<intervals.rows(); k++){
+      for(UInt i = 0; i<3 ; i++){
+	rans24[k*3+i+intervals.rows()*3*j]=intervals(k,j)(i);
+      } 
+    }
+  }
+
+
+  // local f variance
+  // Add the vector of lambdas
+  UInt f_vec_size = f_var(0).size();
+  SET_VECTOR_ELT(result, 25, Rf_allocVector(REALSXP, f_vec_size));
+  Real *rans25 = REAL(VECTOR_ELT(result, 25));
+  for(long int j = 0; j < f_vec_size; j++)
+    {
+      rans25[j] = f_var(0)[j];
+    }
     
-    UNPROTECT(1);
-    return(result);
+  UNPROTECT(1);
+  return(result);
 }
 
 #endif

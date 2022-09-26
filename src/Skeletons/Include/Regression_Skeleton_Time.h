@@ -12,6 +12,14 @@
 #include "../../Regression/Include/Mixed_FE_Regression.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "../../Global_Utilities/Include/Lambda.h"
+#include "../../Inference/Include/Inference_Data.h"
+#include "../../Inference/Include/Inference_Carrier.h"
+#include "../../Inference/Include/Inverter.h"
+#include "../../Inference/Include/Wald.h"
+#include "../../Inference/Include/Speckman.h"
+#include "../../Inference/Include/Eigen_Sign_Flip.h"
+#include "../../Inference/Include/Inference_Factory.h"
+#include <memory>
 
 template<typename CarrierType>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Temporal, CarrierType>::value>, t_type>::value,
@@ -24,8 +32,14 @@ typename std::enable_if<size==2, std::pair<MatrixXr, output_Data<2>>>::type
 template<class GCV_type, typename CarrierType>
 std::pair<MatrixXr, output_Data<2>> parabolic_routine(CarrierType & carrier);
 
+template<typename InputHandler>
+void lambda_inference_selection(const OptimizationData & optimizationData, const  output_Data<2> & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference_S, Real & lambda_inference_T);
+
+template<typename InputHandler>
+void inference_wrapper_time(const OptimizationData & opt_data, const output_Data<2> & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
+
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, SEXP Rmesh, SEXP Rmesh_time)
+SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh, SEXP Rmesh_time)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, regressionData.getSearch());//! load the mesh
 	UInt n_time = Rf_length(Rmesh_time);
@@ -34,11 +48,15 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 	{
 		mesh_time[i] = REAL(Rmesh_time)[i];
 	}
+	
 	MixedFERegression<InputHandler> regression(mesh_time, regressionData, optimizationData, mesh.num_nodes());//! load data in a C++ object
 	
 	regression.preapply(mesh); // preliminary apply (preapply) to store all problem matrices
 
 	std::pair<MatrixXr, output_Data<2>> solution_bricks;	// Prepare solution to be filled
+	MatrixXv inference_Output; 				// Matrix that will store the output from inference, i.e. p-values and/or intervals
+        Real lambda_inference_S = 0; 				// Will store the value of the optimal lambda_S
+	Real lambda_inference_T = 0; 				// Will store the value of the optimal lambda_T
 	
 	// Build the Carrier according to problem type
 	if(regression.isSV())
@@ -49,6 +67,8 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 			Carrier<InputHandler,Temporal,Forced,Areal>
 				carrier = CarrierBuilder<InputHandler>::build_temporal_forced_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Temporal,Forced,Areal>>(carrier);
+
+			lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference_S, lambda_inference_T); // Set lambdas for inference
 		}
 		else
 		{
@@ -56,6 +76,8 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 			Carrier<InputHandler,Temporal,Forced>
 				carrier = CarrierBuilder<InputHandler>::build_temporal_forced_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Temporal,Forced>>(carrier);
+
+			lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference_S, lambda_inference_T); // Set lambdas for inference
 		}
 	}
 	else
@@ -66,6 +88,8 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 			Carrier<InputHandler,Temporal,Areal>
 				carrier = CarrierBuilder<InputHandler>::build_temporal_areal_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Temporal,Areal>>(carrier);
+
+			lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference_S, lambda_inference_T); // Set lambdas for inference
 		}
 		else
 		{
@@ -73,11 +97,21 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 			Carrier<InputHandler,Temporal>
 				carrier = CarrierBuilder<InputHandler>::build_temporal_plain_carrier(regressionData, regression, optimizationData);
 			solution_bricks = optimizer_method_selection<Carrier<InputHandler,Temporal>>(carrier);
+
+			lambda_inference_selection(optimizationData, solution_bricks.second, inferenceData, regression, lambda_inference_S, lambda_inference_T); // Set lambdas for inference
 		}
 	}
+
+	//!Inference 
+	if(inferenceData.get_definition()==true){ 
+
+		//!Only if inference is actually required
+		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second,  &inferenceData, lambda_inference_S, lambda_inference_T); //Carrier for inference
+		inference_wrapper_time(optimizationData, solution_bricks.second, inf_car, inference_Output);    
+        }
 	
 	//Se si riesce, usare plain anche nel caso temporal
- 	return Solution_Builders::build_solution_temporal_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first, solution_bricks.second, mesh, regressionData, regression);
+ 	return Solution_Builders::build_solution_temporal_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first, solution_bricks.second, mesh, regressionData, regression, inference_Output,inferenceData);
 }
 
 
@@ -364,6 +398,77 @@ optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 
 		return {solution, output};
 	}
+}
+
+
+
+//! Function to select the right inference method
+/*
+  \tparam InputHandler the type of regression problem
+  \param opt_data the object containing optimization data
+  \param output the output_Data object containing the solution to be returned
+  \param inf_car the object wrapping all the objects needed to make inference
+  \param inference_output the object to be filled with inference output 
+  \return void
+*/
+template<typename InputHandler>
+void inference_wrapper_time(const OptimizationData & opt_data, output_Data<2> & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output)
+{
+  UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
+  UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+
+  // since only inference on beta is implemented for ST, the rows corresponding to f inference will be empty to be coherent with the size of inference_Solver's output
+  inference_output.resize(2*n_implementations+1, p+1);
+
+  // Select the right policy for inversion of MatrixNoCov
+  std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
+
+  for(UInt i=0; i<n_implementations; ++i){
+    // Factory instantiation for solver: using factory provided in Inference_Factory.h
+    std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method(inf_car.getInfData()->get_implementation_type()[i], inference_Inverter, inf_car, i); // Selects the right implementation and solves the inferential problems
+    inference_output.middleRows(2*i,2) = inference_Solver->compute_inference_output();
+
+    if(inf_car.getInfData()->get_implementation_type()[i]=="wald" && opt_data.get_loss_function()=="unused" && opt_data.get_size_S()==1 && opt_data.get_size_T()==1){
+      output.GCV_opt=inference_Solver->compute_GCV_from_inference(); // Computing GCV if Wald has being called is an almost zero-cost function, since tr(S) hase been already computed
+    }
+  }
+    
+  // Check if local f variance has to be computed
+  if(inf_car.getInfData()->get_f_var()){
+    std::shared_ptr<Inference_Base<InputHandler,MatrixXr>> inference_Solver = Inference_Factory<InputHandler,MatrixXr>::create_inference_method("wald", inference_Inverter, inf_car, n_implementations);
+    inference_output(2*n_implementations,0) = inference_Solver->compute_f_var();
+  }
+
+  return;
+  
+}
+
+//! Function that sets the correct lambda needed for inferential operations
+/*
+  \tparam InputHandler the type of regression problem
+  \param optimization_data the object containing optimization data
+  \param output the output_Data object containing the solution of the optimization problem
+  \param inferenceData the object containing the data needed for inference
+  \param regression the object containing the model of the problem
+  \param lambda_inference_S the spatial smoothing parameter that will be used to compute the optimal model and the right inferential solutions
+  \param lambda_inference_T the temporal smoothing parameter that will be used to compute the optimal model and the right inferential solutions
+  \return void
+*/
+template<typename InputHandler>
+void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data<2> & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference_S, Real & lambda_inference_T){
+  if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
+    lambda_inference_S = output.lambda_sol(0);
+    lambda_inference_T = output.lambda_sol(1);
+    if(optimizationData.get_last_lS_used() != lambda_inference_S || optimizationData.get_last_lT_used() != lambda_inference_T){
+      regression.build_regression_inference(lambda_inference_S, lambda_inference_T);
+    }
+  }else{ 		// supposing we have only one lambda when GCV is unused, otherwise inference gets discarded in smoothing.R
+    if(inferenceData.get_definition()==true){
+      lambda_inference_S = optimizationData.get_last_lS_used();
+      lambda_inference_T = optimizationData.get_last_lT_used();
+    }
+  }
+  return; 
 }
 
 #endif

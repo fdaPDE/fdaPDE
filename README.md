@@ -1,11 +1,10 @@
 # fdaPDE
 
-
 This repository contains the development version of fdaPDE package. 
 
-New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data. Smooth regression for space-time problems.
+New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data. Smooth regression for space-time problems. Inference over linear and nonlinear components is also available for space and space-time models.
 
-smooth.FEM.basis, smooth.PDE.FEM.basis, smooth.FEM.PDE.sv.basis are deprecated, smooth.FEM has to be used in all cases.
+Compiled in Ubuntu using g++ compiler and in macOS: for the precise versions tested, see the report. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE.
 
 Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying regression have been fixed. Issues of point location in 2.5D have been fixed.
 Compiled in Win RStudio, Ubuntu using g++ compiler and in macOS: for the precise versions tested, see the report. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and before fdaPDE. If using Windows, it is advisable to install Rtools and then rgl, plot3D, geometry and RcppEigen libraries. 
