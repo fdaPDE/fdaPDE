@@ -3269,7 +3269,7 @@ void info()
 /*                                                                           */
 /*****************************************************************************/
 
-void internalerror()
+void internalerror(void)
 {
   printf("  Please report this bug to jrs@cs.berkeley.edu\n");
   printf("  Include the message above, your input data set, and the exact\n");
@@ -4734,7 +4734,7 @@ void makesubseg(struct mesh *m, struct osub *newsubseg)
 /*                                                                           */
 /*****************************************************************************/
 
-void exactinit()
+void exactinit(void)
 {
   TRIREAL half;
   TRIREAL check, lastcheck;
@@ -7844,7 +7844,7 @@ void unflip(struct mesh *m, struct behavior *b, struct otri *flipedge)
 /*                                                                           */
 /*****************************************************************************/
 
-#num insertvertexresult insertvertex(struct mesh *m, struct behavior *b,
+enum insertvertexresult insertvertex(struct mesh *m, struct behavior *b,
                                      vertex newvertex, struct otri *searchtri,
                                      struct osub *splitseg,
                                      int segmentflaws, int triflaws)
@@ -12494,7 +12494,7 @@ void tallyencs(struct mesh *m, struct behavior *b)
 
 #ifndef CDT_ONLY
 
-void precisionerror()
+void precisionerror(void)
 {
   printf("Try increasing the area criterion and/or reducing the minimum\n");
   printf("  allowable angle so that tiny triangles are not created.\n");
