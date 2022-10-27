@@ -132,7 +132,7 @@ template<typename InputHandler, typename MatrixType>
     N_Eig_Out=0;
     for(unsigned long int j=0;j<TildeX.cols();j++){
       UInt flip;
-      if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){ // Enhanced ESF test has been required and component biased
+      if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) && (N_Eig_Out<n_obs/2) && (fabs(Tilder_hat(j))>threshold)){ // Enhanced ESF test has been required and component biased
 	flip=1; // Fix the biased component
 	++N_Eig_Out;
       }else{
@@ -313,7 +313,7 @@ template<typename InputHandler, typename MatrixType>
       result.resize(p);
     
       for(UInt k=0;k<p;k++){
-	result(k)==10e20;
+	result(k)=10e20;
       }
       return result;
     }
@@ -375,7 +375,7 @@ template<typename InputHandler, typename MatrixType>
       N_Eig_Out=0;
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
-        if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){ // If enhanced-ESF is required and component is biased
+        if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) && (N_Eig_Out<n_obs/2) && (fabs(Tilder_hat(j))>threshold)){ // If enhanced-ESF is required and component is biased
 	  flip=1; // Fix the biased component
           ++N_Eig_Out;
         }else{
@@ -446,7 +446,7 @@ template<typename InputHandler, typename MatrixType>
       N_Eig_Out=0;
       for(unsigned long int j=0;j<TildeX.cols();j++){
 	UInt flip;
-	if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) & (N_Eig_Out<n_obs/2) & (fabs(Tilder_hat(j))>threshold)){ // If enhanced-ESF is required and component is biased
+	if((this->inf_car.getInfData()->get_enhanced_inference()[this->pos_impl]==true) && (N_Eig_Out<n_obs/2) && (fabs(Tilder_hat(j))>threshold)){ // If enhanced-ESF is required and component is biased
 	  flip=1; // Fix the biased component
           ++N_Eig_Out;
 	}else{
