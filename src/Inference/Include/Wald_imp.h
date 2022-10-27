@@ -115,7 +115,7 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
       result.resize(C.rows());
     
       for(UInt k=0;k<C.rows();k++){
-	result(k)==10e20;
+	result(k)=10e20;
       }
       return result;
     }
@@ -148,7 +148,7 @@ VectorXr Wald_Base<InputHandler, MatrixType>::compute_beta_pvalue(void){
     result(0) = stat;
     
     for(UInt k=1;k<C.rows();k++){
-      result(k)==10e20;
+      result(k)=10e20;
     }
     
     return result;
