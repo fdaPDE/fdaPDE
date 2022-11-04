@@ -3,9 +3,12 @@
 
 // Insert principal libraries
 #define R_NO_REMAP
-#include <R.h>
-#include <Rdefines.h>
-#include <Rinternals.h>
+
+#ifdef __MACH__
+#include<mach/boolean.h> 
+#endif
+
+#include <Rcpp.h>
 
 #include <stdint.h>
 #include <iostream>
