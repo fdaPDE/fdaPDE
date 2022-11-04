@@ -1,6 +1,5 @@
 #include "Wald.h"
 #include <cmath>
-#include <Rcpp.h>
 
 template<typename InputHandler, typename MatrixType> 
   void Wald_Base<InputHandler, MatrixType>::compute_sigma_hat_sq(void){
