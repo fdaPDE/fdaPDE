@@ -149,7 +149,7 @@ DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_ti
                                                        SEXP RflagMass, SEXP RflagLumped, bool isTime):
   DataProblem<ORDER, mydim, ndim>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals,
                                     Rtol1, Rtol2, Rprint, Rsearch, Rmesh, isTime),
-  deData_time_(Rdata_time, Rlambda_time), mesh_time_(mesh_time), spline_(mesh_time) {
+  deData_time_(Rdata_time, Rlambda_time), spline_(mesh_time), mesh_time_(mesh_time){
 
     flagMass_ = INTEGER(RflagMass)[0];
     flagLumped_ = INTEGER(RflagLumped)[0];
@@ -327,7 +327,7 @@ SpMat DataProblem_time<ORDER, mydim, ndim>::computeUpsilon(const SpMat& phi, con
     const UInt phi_c = phi.cols();
     const UInt psi_c = psi.cols();
 
-    if (deData_time_.getNTimes() != deData_time_.dataSize() & this->Print()) {
+    if ((deData_time_.getNTimes() != deData_time_.dataSize()) & (this->Print())) {
         //Rprintf("WARNING: %d temporal duplicates.\n", deData_time_.dataSize() - deData_time_.getNTimes());
         Rprintf("%d distinct time instants.\n", deData_time_.getNTimes());
     }
