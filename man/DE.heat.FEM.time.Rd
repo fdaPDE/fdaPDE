@@ -5,7 +5,7 @@
 \title{Spatio-temporal density initialization}
 \usage{
 DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=10,
-                 init="Heat", nFolds=5, search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+                 init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -56,7 +56,6 @@ This function implements two methods for the density initialization procedure.
 }
 \examples{
 library(fdaPDE)
-library(mvtnorm) # library to generate the data
 
 ## Create a 2D mesh over a squared domain
 Xbound <- seq(-3, 3, length.out = 10)
@@ -73,7 +72,9 @@ mesh_time <- seq(0, 1, length.out=11)
 ## Generate data
 n <- 1000
 set.seed(10)
-locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
+x <- rnorm(n,0,2)
+y <- rnorm(n,0,2)
+locations <- cbind(x,y)
 times <- runif(n,0,1)
 data <- cbind(locations, times)
 

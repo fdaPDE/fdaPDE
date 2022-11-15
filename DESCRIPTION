@@ -35,7 +35,7 @@ Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 	            person("Stefano", "Spaziani", role = "ctb"),
 		    person("Andrea", "Vicini", role = "ctb")
 		    )
-Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
+Maintainer: Blerta Begu <blerta.begu@gmail.com>
 Depends: 
     R (>= 3.5.0),
     stats, grDevices, graphics,

@@ -18,7 +18,7 @@ checkParametersDE_time <- function(data, data_time, FEMbasis, mesh_time, lambda,
 
   if (is.null(FEMbasis))
     stop("'FEMbasis' required; is NULL.")
-  if(class(FEMbasis)!="FEMbasis")
+  if(!is(FEMbasis, "FEMbasis"))
     stop("'FEMbasis' is not class 'FEMbasis'.")
 
   if (is.null(mesh_time))

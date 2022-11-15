@@ -52,7 +52,7 @@ CPP_FEM.DE_init_time <- function(data, data_time, FEMbasis, mesh_time, lambda, l
 }
 
 
-CPP_FEM.manifold.DE_init <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+CPP_FEM.manifold.DE_init_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
                                      mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
                                      nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds)
 {
@@ -106,7 +106,7 @@ CPP_FEM.manifold.DE_init <- function(data, data_time, FEMbasis, mesh_time, lambd
 }
 
 
-CPP_FEM.volume.DE_init <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+CPP_FEM.volume.DE_init_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
                                    mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
                                    nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds)
 {

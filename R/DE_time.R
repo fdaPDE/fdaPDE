@@ -90,7 +90,6 @@
 #' @export
 #' @examples
 #' library(fdaPDE)
-#' library(mvtnorm) # library to generate the data
 #'
 #' ## Create a 2D mesh over a squared domain
 #' Xbound <- seq(-3, 3, length.out = 10)
@@ -107,7 +106,9 @@
 #' ## Generate data
 #' n <- 1000
 #' set.seed(10)
-#' locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
+#' x <- rnorm(n,0,2)
+#' y <- rnorm(n,0,2)
+#' locations <- cbind(x,y)
 #' times <- runif(n,0,1)
 #' data <- cbind(locations, times)
 #'
@@ -131,11 +132,6 @@
 #' Y <- seq(-3, 3, length.out = n)
 #' grid <- expand.grid(X, Y)
 #'
-#' data_grid <- mvtnorm::dmvnorm(grid, mean=c(0,0), sigma=diag(2))
-#' image2D(x = X, y = Y, z = matrix(as.matrix(data_grid), n, n), col=heat.colors(100),
-#'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
-#'         main = paste("True density at t = ", t), zlim=c(0,0.2), asp = 1)
-#'
 #' FEMfunction = FEM.time(sol$g, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 #' evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
 #' image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
@@ -149,13 +145,13 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
                         step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
                         search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D")){
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(is(FEMbasis$mesh, "mesh.3D")){
     ndim = 3
     mydim = 3
   }else{
@@ -167,9 +163,9 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
     search=1
   }else if(search=="tree"){
     search=2
-  }else if(search=="walking" & class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
     stop("walking search is not available for mesh class mesh.2.5D.")
-  }else if(search=="walking" & class(FEMbasis$mesh) != "mesh.2.5D"){
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
     search=3
   }else{
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
@@ -197,19 +193,19 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
 
   ################################################# C++ Code Execution #################################################
   bigsol = NULL
-  if(class(FEMbasis$mesh) == 'mesh.2D'){
+  if(is(FEMbasis$mesh, "mesh.2D")){
 
     bigsol = CPP_FEM.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
                              mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
                              nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
 
-  } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
+  } else if(is(FEMbasis$mesh, "mesh.2.5D")){
 
     bigsol = CPP_FEM.manifold.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
                                       mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
                                       nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
 
-  } else if(class(FEMbasis$mesh) == 'mesh.3D'){
+  } else if(is(FEMbasis$mesh, "mesh.3D")){
     bigsol = CPP_FEM.volume.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
                                     mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
                                     nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)

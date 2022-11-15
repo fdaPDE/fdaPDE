@@ -52,10 +52,10 @@ class DirectionConjugateGradient : public DirectionBase<ORDER, mydim, ndim, T>{
 private:
     // Old gradient and old direction
     VectorXr gradOld_, directionOld_;
-    // Flag for the first iteration
-    bool first_iteration_;
     // Flag to choose the update formula for beta
     UInt betaFormula_;
+    // Flag for the first iteration
+    bool first_iteration_;
     // Counter for restart
     UInt restart;
 public:

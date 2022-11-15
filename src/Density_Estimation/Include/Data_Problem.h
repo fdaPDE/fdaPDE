@@ -128,10 +128,11 @@ private:
     static const UInt SPLINE_DEGREE = 3;
     static const UInt ORDER_DERIVATIVE = 2;
     using Integrator_t = IntegratorGaussP9;
-    Spline<SPLINE_DEGREE, ORDER_DERIVATIVE> spline_;
 
     // Time data (stored in a DEData_time object).
     DEData_time deData_time_;
+    // Splines for temporal integration
+    Spline<SPLINE_DEGREE, ORDER_DERIVATIVE> spline_;
     // Time mesh.
     std::vector<Real> mesh_time_;
     // Matrix containing evaluations of the spline basis functions at different time instants; time mass matrix.

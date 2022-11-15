@@ -6,8 +6,8 @@
 \usage{
 DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
             stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-            direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=0, flagMass=0,
-            flagLumped=0)
+            direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=FALSE, flagMass=FALSE,
+            flagLumped=FALSE)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -121,7 +121,6 @@ order time-derivative), when points are located over a planar mesh. The computat
 }
 \examples{
 library(fdaPDE)
-library(mvtnorm) # library to generate the data
 
 ## Create a 2D mesh over a squared domain
 Xbound <- seq(-3, 3, length.out = 10)
@@ -138,7 +137,9 @@ mesh_time <- seq(0, 1, length.out=11)
 ## Generate data
 n <- 1000
 set.seed(10)
-locations <- mvtnorm::rmvnorm(n, mean=c(0,0), sigma=diag(2))
+x <- rnorm(n,0,2)
+y <- rnorm(n,0,2)
+locations <- cbind(x,y)
 times <- runif(n,0,1)
 data <- cbind(locations, times)
 
@@ -161,11 +162,6 @@ n = 100
 X <- seq(-3, 3, length.out = n)
 Y <- seq(-3, 3, length.out = n)
 grid <- expand.grid(X, Y)
-
-data_grid <- mvtnorm::dmvnorm(grid, mean=c(0,0), sigma=diag(2))
-image2D(x = X, y = Y, z = matrix(as.matrix(data_grid), n, n), col=heat.colors(100),
-        xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
-        main = paste("True density at t = ", t), zlim=c(0,0.2), asp = 1)
 
 FEMfunction = FEM.time(sol$g, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
