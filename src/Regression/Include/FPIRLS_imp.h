@@ -261,8 +261,8 @@ std::array<Real,2> FPIRLS_Base<InputHandler,ORDER, mydim, ndim>::compute_J(const
 
   const VectorXr * z = inputData_.getInitialObservations();
 
-  for(UInt i=0; i < mu_.size(); i++){
-    tmp =std::sqrt( var_function( mu_[lambdaS_index][lambdaT_index](i)) ) * ((*z)(i) - mu_[lambdaS_index][lambdaT_index](i)) ;
+  for(UInt i=0; i < mu_[lambdaS_index][lambdaT_index].size(); i++){
+    tmp = 1./std::sqrt( var_function( mu_[lambdaS_index][lambdaT_index](i)) ) * ((*z)(i) - mu_[lambdaS_index][lambdaT_index](i)) ;
     parametric_value += tmp*tmp;
   }
 
