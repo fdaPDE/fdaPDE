@@ -161,7 +161,7 @@ DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_ti
 
     // REMOVE POINTS NOT IN THE DOMAIN
     for (auto it = data_.begin(); it != data_.end();) {
-        Element<this->EL_NNODES, mydim, ndim> tri_activated = this->mesh_.findLocation(data_[it - data_.begin()]);
+        Element<DataProblem<ORDER, mydim, ndim>::EL_NNODES, mydim, ndim> tri_activated = this->mesh_.findLocation(data_[it - data_.begin()]);
         if (tri_activated.getId() == Identifier::NVAL || (data_time_[it - data_.begin()] < t_min || data_time_[it - data_.begin()] > t_max)) {
             data_time_.erase(data_time_.begin() + (it - data_.begin()));
             it = data_.erase(it);
@@ -327,7 +327,7 @@ SpMat DataProblem_time<ORDER, mydim, ndim>::computeUpsilon(const SpMat& phi, con
     const UInt phi_c = phi.cols();
     const UInt psi_c = psi.cols();
 
-    if ((deData_time_.getNTimes() != deData_time_.dataSize()) & (this->Print())) {
+    if ((deData_time_.getNTimes() != deData_time_.dataSize()) && (this->Print())) {
         //Rprintf("WARNING: %d temporal duplicates.\n", deData_time_.dataSize() - deData_time_.getNTimes());
         Rprintf("%d distinct time instants.\n", deData_time_.getNTimes());
     }
