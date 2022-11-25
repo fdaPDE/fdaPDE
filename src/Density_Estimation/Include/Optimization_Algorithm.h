@@ -188,7 +188,7 @@ public:
                       const std::string& d):
       MinimizationAlgorithm_time<ORDER, mydim, ndim>(dp, fp, d){};
     //! A pure virtual clone method.
-    virtual std::unique_ptr<MinimizationAlgorithm_time<ORDER, mydim, ndim>> clone() const = 0;
+    virtual std::unique_ptr<MinimizationAlgorithm_time<ORDER, mydim, ndim>> clone() const override = 0;
     //! A method to perform the minimization algorithm when the step is computed for each iteration.
     VectorXr apply_core(const SpMat& Upsilon, Real lambda_S, Real lambda_T, const VectorXr& g) const override;
 
