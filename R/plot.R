@@ -349,14 +349,14 @@ plot.mesh.2.5D<-function(x,...){
 
   open3d()
   axes3d()
-  rgl.pop("lights")
+  pop3d("lights")
   light3d(specular="black")
 
-  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black", ...)
-  rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
+  points3d(nodes[,1], nodes[,2], nodes[,3], col="black", ...)
+  segments3d(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
 
   aspect3d("iso")
-  rgl.viewpoint(0,-45)
+  view3d(0,-45)
 
 }
 
@@ -394,15 +394,15 @@ plot.mesh.3D<-function(x,...){
 
   open3d()
   axes3d()
-  rgl.pop("lights")
+  pop3d("lights")
   light3d(specular="black")
 
-  rgl.triangles(nodes[faces,1],nodes[faces,2],nodes[faces,3],col="white",...)
-  rgl.points(nodes[,1], nodes[,2], nodes[,3], col="black", ...)
-  rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
+  triangles3d(nodes[faces,1],nodes[faces,2],nodes[faces,3],col="white",...)
+  points3d(nodes[,1], nodes[,2], nodes[,3], col="black", ...)
+  segments3d(nodes[edges,1], nodes[edges,2], nodes[edges,3], col="black",...)
 
   aspect3d("iso")
-  rgl.viewpoint(0,-45)
+  view3d(0,-45)
 
 }
 
@@ -458,11 +458,11 @@ plot.mesh.1.5D<-function(x, ...)
       axes3d()
 
       z <- FEM$coeff[triangles,i]
-      rgl.triangles(nodes[triangles,1], nodes[triangles,2], z,
+      triangles3d(nodes[triangles,1], nodes[triangles,2], z,
                     color = heat[round(99*(z-min(z))/diff(range(z)))+1],...)
 
       aspect3d(2,2,1)
-      rgl.viewpoint(0,-45)
+      view3d(0,-45)
    }
  }
 
@@ -523,14 +523,14 @@ plot.mesh.1.5D<-function(x, ...)
    {
      open3d()
      axes3d()
-     rgl.pop("lights")
+     pop3d("lights")
      light3d(specular="black")
      z = locations[as.vector(t(triangles)), 2 + isurf]
-     rgl.triangles(x = locations[as.vector(t(triangles)) ,1], y = locations[as.vector(t(triangles)) ,2],
+     triangles3d(x = locations[as.vector(t(triangles)) ,1], y = locations[as.vector(t(triangles)) ,2],
                    z = z,
                    color = heat[round(99*(z-min(z))/(max(z)-min(z)))+1],...)
      aspect3d(2,2,1)
-     rgl.viewpoint(0,-45)
+     view3d(0,-45)
      if (nsurf > 1)
      {readline("Press a button for the next plot...")}
    }
@@ -555,19 +555,19 @@ plot.mesh.1.5D<-function(x, ...)
 
       open3d()
       axes3d()
-      rgl.pop("lights")
+      pop3d("lights")
       light3d(specular="black")
 
       col <- coeff[triangles,i]
       col <- (ncolor-1)*(col-min(col))/diff(range(col))+1
       col <- p[col]
 
-      rgl.triangles(nodes[triangles,1], nodes[triangles,2],
+      triangles3d(nodes[triangles,1], nodes[triangles,2],
                     nodes[triangles,3], color = col,...)
-      rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3],
+      segments3d(nodes[edges,1], nodes[edges,2], nodes[edges,3],
                 color = "black",...)
       aspect3d("iso")
-      rgl.viewpoint(0,-45)
+      view3d(0,-45)
    }
  }
 
@@ -592,19 +592,19 @@ plot.mesh.1.5D<-function(x, ...)
 
       open3d()
       axes3d()
-      rgl.pop("lights")
+      pop3d("lights")
       light3d(specular="black")
 
       col <- coeff[faces,i]
       col <- (ncolor-1)*(col-min(col))/diff(range(col))+1
       col <- p[col]
 
-      rgl.triangles(nodes[faces,1], nodes[faces,2],
+      triangles3d(nodes[faces,1], nodes[faces,2],
                     nodes[faces,3], color = col,...)
-      # rgl.lines(nodes[edges,1], nodes[edges,2], nodes[edges,3],
+      # segments3d(nodes[edges,1], nodes[edges,2], nodes[edges,3],
       #           color = "black",...)
       aspect3d("iso")
-      rgl.viewpoint(0,-45)
+      view3d(0,-45)
    }
 }
 
@@ -631,16 +631,16 @@ R_plot_graph = function(FEM, ...){
       if (i > 1)
          readline("Press any key for the next plot...")
       open3d()
-      rgl.pop("lights")
+      pop3d("lights")
       light3d(specular="black")
       
       col <- coeff[edges,i]
       col <- (ncolor-1)*(col-min(col))/diff(range(col))+1
       col <- p[col]
       
-      rgl.lines(nodes[edges,1], nodes[edges,2],rep(0,dim(nodes)[1]),
+      segments3d(nodes[edges,1], nodes[edges,2],rep(0,dim(nodes)[1]),
                 color = col,lwd=2.5,...)
-      rgl.viewpoint(0,0,zoom=0.75)  
+      view3d(0,0,zoom=0.75)  
    }
    
 }
@@ -782,15 +782,15 @@ R_plot_graph = function(FEM, ...){
 
       open3d()
       axes3d()
-      rgl.pop("lights")
+      pop3d("lights")
       light3d(specular="black")
 
       z <- FEM$coeff[triangles,i]
-      rgl.triangles(nodes[triangles,1], nodes[triangles,2], 0,
+      triangles3d(nodes[triangles,1], nodes[triangles,2], 0,
                     color = heat[round(99*(z-min(z))/diff(range(z)))+1])
 
       aspect3d(2,2,1)
-      rgl.viewpoint(0,0)
+      view3d(0,0)
    }
 }
 
@@ -847,14 +847,14 @@ R_plot_graph = function(FEM, ...){
    {
      open3d()
      axes3d()
-     rgl.pop("lights")
+     pop3d("lights")
      light3d(specular="black")
      z = locations[as.vector(t(triangles)), 2 + isurf];
-     rgl.triangles(x = locations[as.vector(t(triangles)) ,1], y = locations[as.vector(t(triangles)) ,2],
+     triangles3d(x = locations[as.vector(t(triangles)) ,1], y = locations[as.vector(t(triangles)) ,2],
                    z=0,
                    color = heat[round(99*(z- min(z))/(max(z)-min(z)))+1])
      aspect3d(2,2,1)
-     rgl.viewpoint(0,0)
+     view3d(0,0)
      if (nsurf > 1)
      {readline("Press a button for the next plot...")}
    }
