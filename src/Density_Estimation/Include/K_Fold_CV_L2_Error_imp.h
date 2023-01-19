@@ -10,4 +10,13 @@ Real KfoldCV_L2_error<ORDER,mydim,ndim>::operator() (const SpMat& Psi, const Vec
   return (integral - 2./Psi.rows() *test);
 }
 
+template<UInt ORDER, UInt mydim, UInt ndim>
+Real KfoldCV_L2_error_time<ORDER,mydim,ndim>::operator() (const SpMat& Upsilon, const VectorXr& g)
+{
+    Real integral = dataProblem_.FEintegrate_exponential(2.*g);
+    Real test = (Upsilon*g).array().exp().sum();
+
+    return (integral - 2./Upsilon.rows() * test);
+}
+
 #endif

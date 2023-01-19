@@ -5,9 +5,9 @@
 \title{Nonparametric density estimation with differential regularization}
 \usage{
 DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, 
-              stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, 
-              nsimulations=500, step_method="Fixed_Step", direction_method="BFGS", 
-              preprocess_method="NoCrossValidation", search = "tree")
+       stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL,
+       nsimulations=500, step_method="Fixed_Step", direction_method="BFGS",
+       preprocess_method="NoCrossValidation", search = "tree")
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point, 
@@ -24,14 +24,14 @@ If this is \code{NULL} the initial density is estimated thanks to a discretized 
 process that starts from the empirical density of the data. Default is \code{NULL}.
 N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).}
 
-\item{heatStep}{Real specifying the time step for the discretized heat diffusionn process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
 
-\item{heatIter}{Integer specifying the number of iteriations to perform the discretized heat diffusion process.}
+\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
 
-\item{stepProposals}{A scalar or a vector containing the step parameters useful for the descent algotihm. If there is a 
+\item{stepProposals}{A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
 vector of parameters, the biggest one such that the functional decreases at each iteration is choosen. If it is \code{NULL}
 the following vector \code{c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)} is proposed. Default is \code{NULL}.
-N.B. If the program does not receive a right parameter, it abort the R session. Try a smaller parameter.}
+N.B. If the program does not receive a right parameter, it aborts the R session. Try a smaller parameter.}
 
 \item{tol1}{A scalar specifying the tolerance to use for the termination criterion based on the percentage difference
 between two consecutive iterations of the minimization algorithm of the loss function, the log-likelihood and the
@@ -58,7 +58,13 @@ if it is \code{Wolfe_Method}, the step is computed at each iteration according t
 \item{direction_method}{String. This parameter specifies which descent direction use in the descent algorithm. 
 If it is \code{Gradient}, the direction is the one given by the gradient descent method (the opposite to the gradient of
 the functional); if instead it is \code{BFGS} the direction is the one given by the BFGS method
-(Broyden Fletcher Goldfarb and Shanno, a Quasi-Newton method). Default is \code{BFGS}.}
+(Broyden Fletcher Goldfarb and Shanno, a Quasi-Newton method). Default is \code{BFGS}. Other possible choices:
+Conjugate Gradient direction with Fletcher-Reeves formula (\code{ConjugateGradientFR}), Conjugate Gradient direction with
+Polak-Ribiére-Polyak formula (\code{ConjugateGradientPRP}), Conjugate Gradient direction with Hestenes-Stiefel formula
+(\code{ConjugateGradientHS}), Conjugate Gradient direction with Dai-Yuan formula (\code{ConjugateGradientDY}), Conjugate
+Gradient direction with Conjugate-Descent formula (\code{ConjugateGradientCD}), Conjugate Gradient direction with Liu-Storey
+formula (\code{ConjugateGradientLS}), L-BFGS direction with 5 correction vectors (\code{L-BFGS5}), L-BFGS direction with 10
+correction vectors (\code{L-BFGS10}).}
 
 \item{preprocess_method}{String. This parameter specifies the k fold cross validation technique to use, if there is more
 than one smoothing parameter \code{lambda} (otherwise it should be \code{NULL}). If it is \code{RightCV} the usual k fold 

@@ -1,6 +1,6 @@
-checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search) 
+checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
 {
-  #################### Parameter Check #########################
+  ################################################### Parameter Check ##################################################
   if (is.null(data)) 
     stop("'data' required;  is NULL.")
   else{
@@ -10,7 +10,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
   
   if (is.null(FEMbasis)) 
     stop("'FEMbasis' required;  is NULL.")
-  if(!is(FEMbasis, "FEMbasis"))
+  if(class(FEMbasis)!="FEMbasis")
     stop("'FEMbasis' is not class 'FEMbasis'.")
   
   if (is.null(lambda))  
@@ -32,8 +32,8 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
   if (is.null(direction_method)) 
     stop("'direction_method' is required;  is NULL.")
   else{
-    if(direction_method!="Gradient" && direction_method!="BFGS")
-      stop("'direction_method' needs to be either 'Gradient' or 'BFGS'.")
+    if(direction_method!="Gradient" && direction_method!="ConjugateGradientFR" && direction_method!="ConjugateGradientPRP" && direction_method!="ConjugateGradientHS" && direction_method!="ConjugateGradientDY" && direction_method!="ConjugateGradientCD" && direction_method!="ConjugateGradientLS" && direction_method!="BFGS" && direction_method!="L-BFGS5" && direction_method!="L-BFGS10")
+      stop("'direction_method' needs to be 'Gradient', 'ConjugateGradientFR', 'ConjugateGradientPRP', 'ConjugateGradientHS', 'ConjugateGradientDY', 'ConjugateGradientCD', 'ConjugateGradientLS', 'BFGS', 'L-BFGS5' or 'L-BFGS10'.")
   }
 
   if(length(lambda)>1 && preprocess_method!="RightCV" && preprocess_method!="SimplifiedCV")
@@ -52,7 +52,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
     stop("'nfolds' needs to be an integer greater or equal than two.")
 
   if(!is.numeric(nsimulations) || nsimulations<1)
-    stop("'nrealizations' needs to be a positive integer.")
+    stop("'nsimulations' needs to be a positive integer.")
   
   if(!is.numeric(heatStep) || heatStep<0 || heatStep>1)
     stop("'heatStep' needs to be a positive real number not greater than 1.")
@@ -67,7 +67,7 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
 }
 
 
-checkParametersSizeDE <- function(data, FEMbasis, ndim, fvec, preprocess_method, nfolds) 
+checkParametersSizeDE <- function(data, FEMbasis, ndim, fvec, preprocess_method, nfolds)
 {
   if(nrow(data) < 1)
     stop("'data' must contain at least one element.")
