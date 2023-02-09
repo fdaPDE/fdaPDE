@@ -4,10 +4,11 @@
 \alias{DE.FEM.time}
 \title{Nonparametric spatio-temporal density estimation with differential regularization}
 \usage{
-DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
-            stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-            direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=FALSE, flagMass=FALSE,
-            flagLumped=FALSE)
+DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL,
+                   heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, 
+                   print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step", 
+                   direction_method="BFGS", preprocess_method="NoCrossValidation",
+                   search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -128,14 +129,14 @@ Ybound <- seq(-3, 3, length.out = 10)
 grid_XY <- expand.grid(Xbound, Ybound)
 Bounds <- grid_XY[(grid_XY$Var1 \%in\% c(-3, 3)) | (grid_XY$Var2 \%in\% c(-3, 3)), ]
 mesh <- create.mesh.2D(nodes = Bounds, order = 1)
-mesh <- refine.mesh.2D(mesh, maximum_area = 0.1, minimum_angle = 20)
+mesh <- refine.mesh.2D(mesh, maximum_area = 0.25, minimum_angle = 20)
 FEMbasis <- create.FEM.basis(mesh)
 
 ## Create a 1D time mesh over a (non-negative) interval
-mesh_time <- seq(0, 1, length.out=11)
+mesh_time <- seq(0, 1, length.out=3)
 
 ## Generate data
-n <- 1000
+n <- 50
 set.seed(10)
 x <- rnorm(n,0,2)
 y <- rnorm(n,0,2)
@@ -152,9 +153,11 @@ points(sample, col="red", pch=19, cex=1, main=paste('Sample | ', t-0.05,' < t < 
 ## Density Estimation
 lambda <- 0.1
 lambda_time <- 0.001
-sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-                   fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
-                   nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
+sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, 
+                   mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
+                   fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0,
+                   print=FALSE, nfolds=NULL, nsimulations=300, step_method="Fixed_Step",
+                   direction_method="BFGS", preprocess_method="NoCrossValidation",
                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 
 ## Visualization

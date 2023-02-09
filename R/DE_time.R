@@ -83,10 +83,11 @@
 #' @description This function implements a nonparametric spatio-temporal density estimation method with differential regularization
 #' (given by the sum of the square of the L2 norm of the laplacian of the density function and the square of the L2 norm of the second-
 #' order time-derivative), when points are located over a planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
-#'             stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-#'             direction_method="BFGS", preprocess_method="NoCrossValidation", search="tree", isTimeDiscrete=FALSE, flagMass=FALSE,
-#'             flagLumped=FALSE)
+#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL,
+#'                    heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, 
+#'                    print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step", 
+#'                    direction_method="BFGS", preprocess_method="NoCrossValidation",
+#'                    search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 #' @export
 #' @examples
 #' library(fdaPDE)
@@ -97,14 +98,14 @@
 #' grid_XY <- expand.grid(Xbound, Ybound)
 #' Bounds <- grid_XY[(grid_XY$Var1 %in% c(-3, 3)) | (grid_XY$Var2 %in% c(-3, 3)), ]
 #' mesh <- create.mesh.2D(nodes = Bounds, order = 1)
-#' mesh <- refine.mesh.2D(mesh, maximum_area = 0.1, minimum_angle = 20)
+#' mesh <- refine.mesh.2D(mesh, maximum_area = 0.25, minimum_angle = 20)
 #' FEMbasis <- create.FEM.basis(mesh)
 #'
 #' ## Create a 1D time mesh over a (non-negative) interval
-#' mesh_time <- seq(0, 1, length.out=11)
+#' mesh_time <- seq(0, 1, length.out=3)
 #'
 #' ## Generate data
-#' n <- 1000
+#' n <- 50
 #' set.seed(10)
 #' x <- rnorm(n,0,2)
 #' y <- rnorm(n,0,2)
@@ -121,9 +122,11 @@
 #' ## Density Estimation
 #' lambda <- 0.1
 #' lambda_time <- 0.001
-#' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-#'                    fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE,
-#'                    nfolds=NULL, nsimulations=300, step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
+#' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, 
+#'                    mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
+#'                    fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0,
+#'                    print=FALSE, nfolds=NULL, nsimulations=300, step_method="Fixed_Step",
+#'                    direction_method="BFGS", preprocess_method="NoCrossValidation",
 #'                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
 #'
 #' ## Visualization
@@ -140,9 +143,10 @@
 #'
 
 
-DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL, heatStep=0.1, heatIter=10,
-                        stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
-                        step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
+DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL,
+                        heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, 
+                        print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step", 
+                        direction_method="BFGS", preprocess_method="NoCrossValidation",
                         search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
   if(is(FEMbasis$mesh, "mesh.2D")){
