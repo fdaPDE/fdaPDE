@@ -28,8 +28,10 @@
 #' for each possible pair (\code{lambda}, \code{lambda_time}). If \code{init = 'CV'} it returns the initial vector associated
 #' to the unique pair (\code{lambda}, \code{lambda_time}) given.
 #' @description This function implements two methods for the density initialization procedure.
-#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1, heatIter=10,
-#'                  init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+#' @usage DE.heat.FEM.time(data, data_time, FEMbasis, mesh_time, lambda=NULL,
+#'                             lambda_time=NULL, heatStep=0.1, heatIter=10, 
+#'                             init="Heat", nFolds=5, search="tree", 
+#'                             isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 #' @export
 #' @examples
 #' library(fdaPDE)
@@ -40,14 +42,14 @@
 #' grid_XY <- expand.grid(Xbound, Ybound)
 #' Bounds <- grid_XY[(grid_XY$Var1 %in% c(-3, 3)) | (grid_XY$Var2 %in% c(-3, 3)), ]
 #' mesh <- create.mesh.2D(nodes = Bounds, order = 1)
-#' mesh <- refine.mesh.2D(mesh, maximum_area = 0.1, minimum_angle = 20)
+#' mesh <- refine.mesh.2D(mesh, maximum_area = 0.25, minimum_angle = 20)
 #' FEMbasis <- create.FEM.basis(mesh)
 #'
 #' ## Create a 1D time mesh over a (non-negative) interval
-#' mesh_time <- seq(0, 1, length.out=11)
+#' mesh_time <- seq(0, 1, length.out=3)
 #'
 #' ## Generate data
-#' n <- 1000
+#' n <- 50
 #' set.seed(10)
 #' x <- rnorm(n,0,2)
 #' y <- rnorm(n,0,2)
@@ -64,7 +66,8 @@
 #' ## Density initialization
 #' lambda = 0.1
 #' lambda_time <- 0.001
-#' sol = DE.heat.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
+#' sol = DE.heat.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis,
+#'                        mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
 #'                        heatStep=0.1, heatIter=10, init="Heat")
 #'
 #' ## Visualization
@@ -81,8 +84,10 @@
 #'         main = paste("Initial guess at t = ", t), zlim=c(0,0.2), asp = 1)
 #'
 
-DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL, lambda_time=NULL, heatStep=0.1,
-                             heatIter=10, init="Heat", nFolds=5, search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
+                             lambda_time=NULL, heatStep=0.1, heatIter=10, 
+                             init="Heat", nFolds=5, search="tree", 
+                             isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
   if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
