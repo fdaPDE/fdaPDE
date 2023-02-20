@@ -20,7 +20,7 @@
   \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,
-			     SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_,SEXP f0_eval_, SEXP f_Var_,
+			     SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_,SEXP f0_eval_, SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -188,11 +188,11 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 			     SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP time_locs_inf_ ,SEXP coeff_Inference_, SEXP beta_0_,
 			     SEXP f_0_, SEXP f_Var_,SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, locs_Inference_, locs_index_Inference_, locs_are_nodes_, coeff_Inference_, beta_0_, f_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
 
-  //f_eval
+  //time_locs_inf
   UInt size_time_locs_inf=Rf_length(time_locs_inf_); 
   time_locs_inf.resize(size_time_locs_inf);
   for(UInt i=0;i<size_time_locs_inf;i++){
-    time_locs_inf[i]=REAL(time_loc_inf_)[i];
+    time_locs_inf[i]=REAL(time_locs_inf_)[i];
   }
 };
 
