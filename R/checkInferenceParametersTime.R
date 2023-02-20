@@ -114,6 +114,7 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
       for(i in 1:dim(locs)[1])
         inference.data.object@f0_eval <- rbind(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2], locs[i,3], time_locations)) 
     }
+    inference.data.object@f0_eval <- as.vector(inference.data.object@f0_eval)
   }
   else{
     # in case only inference on parametric component is requested, set f0_eval and locations with default values, just for transmission safety
