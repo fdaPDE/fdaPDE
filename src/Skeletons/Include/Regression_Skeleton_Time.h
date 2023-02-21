@@ -35,7 +35,7 @@ void lambda_inference_selection(const OptimizationData & optimizationData, const
 template<typename InputHandler>
 void inference_wrapper_time(const OptimizationData & opt_data, const output_Data<2> & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> meshTime_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_)
+void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> meshTime_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh, SEXP Rmesh_time)
@@ -542,11 +542,7 @@ void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydi
 	  }
       } // End of for loop
         
-    psi_temp.makeCompressed();   
-           
-    // update the inference carrier
-    inf_car_.setPsi_loc(psi);
-    inf_car_.setN_loc(psi.rows());                 	
+    psi_temp.makeCompressed();                  	
   }
   else{
     // the locations are chosen among the observed ones, hence psi can be extracted from Psi
@@ -588,13 +584,15 @@ void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydi
     
   }
   // Now we compute the temporal Phi_loc and then we compute the kroenecker product
-  VectorXr time_locs_inf = inf_car.getInfData()->get_time_locs_inf();
+  VectorXr time_locs_inf = inf_car_.getInfData()->get_time_locs_inf();
     
-  Spline<SPLINE_DEGREE, ORDER_DERIVATIVE> spline(meshTime_);
-  UInt M = spline.num_knots()-SPLINE_DEGREE-1;
+  SpMat phi;
+    
+  Spline<3, 2> spline(meshTime_);
+  UInt M = spline.num_knots()-4;
   UInt m = time_locs_inf.size();
     
-  phi_.resize(m, M);
+  phi.resize(m, M);
   Real value;
 
   for(UInt i=0; i<m; ++i)
@@ -604,14 +602,17 @@ void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydi
 	  value = spline.BasisFunction(j, time_locs_inf[i]);
 	  if(value!=0)
 	    {
-	      phi_.coeffRef(i,j) = value;
+	      phi.coeffRef(i,j) = value;
 	    }
 	}
     }
-  phi_.makeCompressed();
+  phi.makeCompressed();
+  
+  SpMat psi = kroneckerProduct(phi, psi_temp);
+  psi.makeCompressed();
     
   // set the spatial Psi_loc into the inference carrier
-  inf_car_.setPsi_loc(kroneckerProduct(phi, psi_temp));
+  inf_car_.setPsi_loc(psi);
   inf_car_.setN_loc(psi.rows());
 }
 
