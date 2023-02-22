@@ -15,14 +15,14 @@ public:
                            std::shared_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> ma, const std::string& p)
     {
         if(p=="RightCV")
-		    return make_unique<RightCrossValidation<ORDER, mydim, ndim>>(dp, fp, ma);
+		    return fdaPDE::make_unique<RightCrossValidation<ORDER, mydim, ndim>>(dp, fp, ma);
         else if(p=="SimplifiedCV")
-			return make_unique<SimplifiedCrossValidation<ORDER, mydim, ndim>>(dp, fp, ma);
+			return fdaPDE::make_unique<SimplifiedCrossValidation<ORDER, mydim, ndim>>(dp, fp, ma);
 		else if(p=="NoCrossValidation")
-            return make_unique<NoCrossValidation<ORDER, mydim, ndim>>(dp, fp);
+            return fdaPDE::make_unique<NoCrossValidation<ORDER, mydim, ndim>>(dp, fp);
         else {
             Rprintf("Unknown preprocess option - using right cross validation\n");
-            return make_unique<RightCrossValidation<ORDER, mydim, ndim>>(dp, fp, ma);
+            return fdaPDE::make_unique<RightCrossValidation<ORDER, mydim, ndim>>(dp, fp, ma);
         }
     }
 
@@ -39,14 +39,14 @@ public:
                            std::shared_ptr<MinimizationAlgorithm_time<ORDER, mydim, ndim>> ma, const std::string& p)
     {
         if(p=="RightCV")
-            return make_unique_time<RightCrossValidation_time<ORDER, mydim, ndim>>(dp, fp, ma);
+            return fdaPDE::make_unique_time<RightCrossValidation_time<ORDER, mydim, ndim>>(dp, fp, ma);
         else if(p=="SimplifiedCV")
-            return make_unique_time<SimplifiedCrossValidation_time<ORDER, mydim, ndim>>(dp, fp, ma);
+            return fdaPDE::make_unique_time<SimplifiedCrossValidation_time<ORDER, mydim, ndim>>(dp, fp, ma);
         else if(p=="NoCrossValidation")
-            return make_unique_time<NoCrossValidation_time<ORDER, mydim, ndim>>(dp, fp);
+            return fdaPDE::make_unique_time<NoCrossValidation_time<ORDER, mydim, ndim>>(dp, fp);
         else {
             Rprintf("Unknown preprocess option - using right cross validation\n");
-            return make_unique_time<RightCrossValidation_time<ORDER, mydim, ndim>>(dp, fp, ma);
+            return fdaPDE::make_unique_time<RightCrossValidation_time<ORDER, mydim, ndim>>(dp, fp, ma);
         }
 
     }
