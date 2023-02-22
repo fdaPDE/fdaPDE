@@ -20,18 +20,18 @@ class MixedFEFPCAfactory
 		static std::unique_ptr<MixedFEFPCABase> createFPCAsolver(const std::string & validation, const FPCAData& fpcaData)
 		{
 			if(validation=="GCV")
-			    return make_unique<MixedFEFPCAGCV>(fpcaData);
+			    return fdaPDE::make_unique<MixedFEFPCAGCV>(fpcaData);
 
 			else if(validation=="KFold")
-			    return make_unique<MixedFEFPCAKFold>(fpcaData);
+			    return fdaPDE::make_unique<MixedFEFPCAKFold>(fpcaData);
 
 			else if(validation=="NoValidation")
-			    return make_unique<MixedFEFPCA>(fpcaData);
+			    return fdaPDE::make_unique<MixedFEFPCA>(fpcaData);
 
 			else{
 				Rprintf("Unknown validation option - using no validation");
 
-				return make_unique<MixedFEFPCA>(fpcaData);
+				return fdaPDE::make_unique<MixedFEFPCA>(fpcaData);
 			}
 		}
 };

@@ -51,13 +51,13 @@ class FPIRLSfactory
 		}
 
 		if(family=="binomial"){
-		    return make_unique<FPIRLS_Bernoulli<InputHandler, ORDER,  mydim, ndim>>(mesh, inputData, optimizationData, mu0);
+		    return fdaPDE::make_unique<FPIRLS_Bernoulli<InputHandler, ORDER,  mydim, ndim>>(mesh, inputData, optimizationData, mu0);
 		}else if(family=="poisson"){
-		    return make_unique<FPIRLS_Poisson<InputHandler, ORDER,  mydim, ndim>>(mesh, inputData, optimizationData, mu0);
+		    return fdaPDE::make_unique<FPIRLS_Poisson<InputHandler, ORDER,  mydim, ndim>>(mesh, inputData, optimizationData, mu0);
 		}else if(family=="exponential"){
-		    return make_unique<FPIRLS_Exponential<InputHandler, ORDER,  mydim, ndim>>(mesh, inputData, optimizationData, mu0);
+		    return fdaPDE::make_unique<FPIRLS_Exponential<InputHandler, ORDER,  mydim, ndim>>(mesh, inputData, optimizationData, mu0);
 		}else if(family=="gamma"){
-		    return make_unique<FPIRLS_Gamma<InputHandler, ORDER,  mydim, ndim>>(mesh,inputData, optimizationData, mu0, scale_parameter, scale_parameter_flag);
+		    return fdaPDE::make_unique<FPIRLS_Gamma<InputHandler, ORDER,  mydim, ndim>>(mesh,inputData, optimizationData, mu0, scale_parameter, scale_parameter_flag);
 		}
 
 		return std::unique_ptr<FPIRLS<InputHandler, ORDER,  mydim,  ndim>>(nullptr);
@@ -96,13 +96,13 @@ class FPIRLSfactory
 		}
 
 		if(family=="binomial"){
-		    return make_unique<FPIRLS_Bernoulli<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0);
+		    return fdaPDE::make_unique<FPIRLS_Bernoulli<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0);
 		}else if(family=="poisson"){
-		    return make_unique<FPIRLS_Poisson<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0);
+		    return fdaPDE::make_unique<FPIRLS_Poisson<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0);
 		}else if(family=="exponential"){
-		    return make_unique<FPIRLS_Exponential<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0);
+		    return fdaPDE::make_unique<FPIRLS_Exponential<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0);
 		}else if(family=="gamma"){
-		    return make_unique<FPIRLS_Gamma<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0, scale_parameter, scale_parameter_flag);
+		    return fdaPDE::make_unique<FPIRLS_Gamma<InputHandler, ORDER,  mydim, ndim>>(mesh, mesh_time, inputData, optimizationData, mu0, scale_parameter, scale_parameter_flag);
 		}
 
 		return std::unique_ptr<FPIRLS<InputHandler, ORDER,  mydim,  ndim>>(nullptr);

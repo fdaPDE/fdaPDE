@@ -28,7 +28,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::unique_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> FixedStep<ORDER, mydim, ndim>::clone() const
 {
 
-  return make_unique<FixedStep<ORDER, mydim, ndim>>(*this);
+  return fdaPDE::make_unique<FixedStep<ORDER, mydim, ndim>>(*this);
 
 }
 
@@ -234,7 +234,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::unique_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> BacktrackingMethod<ORDER, mydim, ndim>::clone() const
 {
 
-  return make_unique<BacktrackingMethod<ORDER, mydim, ndim>>(*this);
+  return fdaPDE::make_unique<BacktrackingMethod<ORDER, mydim, ndim>>(*this);
 
 }
 
@@ -298,7 +298,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::unique_ptr<MinimizationAlgorithm<ORDER, mydim, ndim>> WolfeMethod<ORDER, mydim, ndim>::clone() const
 {
 
-  return make_unique<WolfeMethod<ORDER, mydim, ndim>>(*this);
+  return fdaPDE::make_unique<WolfeMethod<ORDER, mydim, ndim>>(*this);
 
 }
 
@@ -329,7 +329,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::unique_ptr<MinimizationAlgorithm_time<ORDER, mydim, ndim>> FixedStep_time<ORDER, mydim, ndim>::clone() const
 {
 
-    return make_unique<FixedStep_time<ORDER, mydim, ndim>>(*this);
+    return fdaPDE::make_unique<FixedStep_time<ORDER, mydim, ndim>>(*this);
 
 }
 
@@ -538,7 +538,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::unique_ptr<MinimizationAlgorithm_time<ORDER, mydim, ndim>> BacktrackingMethod_time<ORDER, mydim, ndim>::clone() const
 {
 
-    return make_unique<BacktrackingMethod_time<ORDER, mydim, ndim>>(*this);
+    return fdaPDE::make_unique<BacktrackingMethod_time<ORDER, mydim, ndim>>(*this);
 
 }
 
@@ -602,7 +602,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 std::unique_ptr<MinimizationAlgorithm_time<ORDER, mydim, ndim>> WolfeMethod_time<ORDER, mydim, ndim>::clone() const
 {
 
-    return make_unique<WolfeMethod_time<ORDER, mydim, ndim>>(*this);
+    return fdaPDE::make_unique<WolfeMethod_time<ORDER, mydim, ndim>>(*this);
 
 }
 

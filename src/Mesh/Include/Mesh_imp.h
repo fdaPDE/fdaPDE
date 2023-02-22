@@ -7,7 +7,7 @@ MeshHandler<ORDER,mydim,ndim>::MeshHandler(SEXP Rmesh, UInt search) :
 		elements_(VECTOR_ELT(Rmesh, 3)), neighbors_(VECTOR_ELT(Rmesh, 8)),
 		 	search_(search) {
 		 		if(search==2)
-		 			tree_ptr_=make_unique<const ADTree<meshElement> > (Rmesh);
+		 			tree_ptr_= fdaPDE::make_unique<const ADTree<meshElement> > (Rmesh);
 				}
 
 template <UInt ORDER, UInt mydim, UInt ndim>
@@ -154,7 +154,7 @@ MeshHandler<ORDER,1,2>::MeshHandler(SEXP Rmesh, UInt search) :
         search_(search) {
 
     if(search==2)
-        tree_ptr_=make_unique<const ADTree<meshElement> > (Rmesh);
+        tree_ptr_= fdaPDE::make_unique<const ADTree<meshElement> > (Rmesh);
 
 }
 

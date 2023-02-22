@@ -43,7 +43,7 @@ SEXP DE_init_skeleton_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec,
     if(init == "Heat"){
 
         // Construct densityInit object
-        std::unique_ptr<DensityInitialization_time<ORDER, mydim, ndim>> densityInit = make_unique<HeatProcess_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem);
+        std::unique_ptr<DensityInitialization_time<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<HeatProcess_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem);
 
         // Fill fInit
         std::vector<VectorXr> fInit(dataProblem.getNlambda() * dataProblem.getNlambda_time());
@@ -73,7 +73,7 @@ SEXP DE_init_skeleton_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec,
     else if(init=="CV"){
 
         // Construct densityInit object
-        std::unique_ptr<Heat_CV_time<ORDER, mydim, ndim>> densityInit = make_unique<Heat_CV_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem, init_fold);
+        std::unique_ptr<Heat_CV_time<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<Heat_CV_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem, init_fold);
 
         // Fill fInit
         VectorXr fInit;
