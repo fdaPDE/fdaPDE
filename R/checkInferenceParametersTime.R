@@ -98,8 +98,11 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
     # }
     
     # Check time_locations definition
-    if(length(length(inference.data.object@time_locations)==0)) # That is inference on f is required but no time locations are provided: by default we resort to the observed ones
+    if(length(inference.data.object@time_locations)==0) # That is inference on f is required but no time locations are provided: by default we resort to the observed ones
       inference.data.object@time_locations = as.vector(time_locations)
+    else
+      if(min(inference.data.object@time_locations)<min(time_locations) || max(inference.data.object@time_locations)>max(time_locations))
+        warning("The time locations provided for inference are not inside the time frame provided for observations: inference may not be reliable in this case")
     
     # finally evaluate f0 at the chosen locations
     f0 <- inference.data.object@f0
