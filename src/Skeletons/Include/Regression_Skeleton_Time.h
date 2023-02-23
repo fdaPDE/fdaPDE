@@ -35,7 +35,7 @@ void lambda_inference_selection(const OptimizationData & optimizationData, const
 template<typename InputHandler>
 void inference_wrapper_time(const OptimizationData & opt_data, const output_Data<2> & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> meshTime_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_);
+void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> mesh_time_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh, SEXP Rmesh_time)
@@ -500,7 +500,7 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
   \return void
 */
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> meshTime_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
+void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> mesh_time_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
   // if a matrix of locations has been provided, compute spatial Psi_loc by directly evaluating the spatial basis functions in the provided points
   
   // define the psi matrix
@@ -590,11 +590,11 @@ void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydi
   SpMat phi;
   phi.resize(M,M);
   
-  if(regression_data_.getFlagParabolic()){ // Parabolic case
+  if(regressionData_.getFlagParabolic()){ // Parabolic case
   phi.setIdentity();
   }else{// Separable case
   
-  Spline<MixedSplineRegression<InputHandler>::SPLINE_DEGREE, MixedSplineRegression<InputHandler>::ORDER_DERIVATIVE> spline(meshTime_);
+  Spline<MixedSplineRegression<InputHandler>::SPLINE_DEGREE, MixedSplineRegression<InputHandler>::ORDER_DERIVATIVE> spline(mesh_time_);
   M = spline.num_knots()-1-MixedSplineRegression<InputHandler>::SPLINE_DEGREE; // -1 - SPLINE_DEGREE, where SPLINE_DEGREE=3
   UInt m = time_locs_inf.size();
     
