@@ -99,22 +99,24 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
     
     # Check time_locations definition
     if(length(length(inference.data.object@time_locations)==0)) # That is inference on f is required but no time locations are provided: by default we resort to the observed ones
-      inference.data.object@time_locations = time_locations
+      inference.data.object@time_locations = as.vector(time_locations)
     
     # finally evaluate f0 at the chosen locations
     f0 <- inference.data.object@f0
     dim <- inference.data.object@dim
     locs <- inference.data.object@locations
     
+    f0_matr <- matrix(data=NA, nrow=dim(locs), ncol=length(time_locations))
+    
     if(dim == 2){
       for(i in 1:dim(locs)[1])
-        inference.data.object@f0_eval <- rbind(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2], 0, time_locations)) 
+        f0_matr[i,] <- f0(locs[i,1], locs[i,2], 0, time_locations) 
     }
     else{
       for(i in 1:dim(locs)[1])
-        inference.data.object@f0_eval <- rbind(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2], locs[i,3], time_locations)) 
+        f0_matr[i,] <- f0(locs[i,1], locs[i,2], locs[i,3], time_locations) 
     }
-    inference.data.object@f0_eval <- as.vector(inference.data.object@f0_eval)
+    inference.data.object@f0_eval <- as.vector(f0_matr)
   }
   else{
     # in case only inference on parametric component is requested, set f0_eval and locations with default values, just for transmission safety

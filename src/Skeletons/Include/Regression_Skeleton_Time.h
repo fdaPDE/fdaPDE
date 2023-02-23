@@ -586,10 +586,16 @@ void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydi
   // Now we compute the temporal Phi_loc and then we compute the kroenecker product
   VectorXr time_locs_inf = inf_car_.getInfData()->get_time_locs_inf();
     
+  UInt M = mesh_time.size()-1;
   SpMat phi;
-    
+  phi.resize(M,M);
+  
+  if(){ // Parabolic case
+  phi.setIdentity();
+  }else{// Separable case
+  
   Spline<3, 2> spline(meshTime_);
-  UInt M = spline.num_knots()-4;
+  M = spline.num_knots()-4; // -1 - SPLINE_DEGREE, where SPLINE_DEGREE=3
   UInt m = time_locs_inf.size();
     
   phi.resize(m, M);
@@ -606,6 +612,7 @@ void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydi
 	    }
 	}
     }
+  }
   phi.makeCompressed();
   
   SpMat psi = kroneckerProduct(phi, psi_temp);

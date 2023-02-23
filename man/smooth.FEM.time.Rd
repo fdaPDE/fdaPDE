@@ -59,7 +59,7 @@ This is only for areal data. In case of pointwise data, this parameter is set to
 
 \item{areal.data.avg}{Boolean. It involves the computation of Areal Data. If \code{TRUE} the areal data are averaged, otherwise not.}
 
-\item{FLAG_MASS}{Boolean. This parameter is considerd only for separable problems i.e. when \code{FLAG_PARABOLIC==FALSE}. If \code{TRUE} the mass matrix in space and in time are used, if \code{FALSE} they are substituted with proper identity matrices.}
+\item{FLAG_MASS}{Boolean. This parameter is considered only for separable problems i.e. when \code{FLAG_PARABOLIC==FALSE}. If \code{TRUE} the mass matrix in space and in time are used, if \code{FALSE} they are substituted with proper identity matrices.}
 
 \item{FLAG_PARABOLIC}{Boolean. If \code{TRUE} the parabolic problem problem is selected, if \code{FALSE} the separable one.}
 
@@ -82,7 +82,7 @@ also data at the initial time. IC will be estimated from them.}
 \code{element ids}, a vector of element id of the points from the mesh where they are located;
 \code{barycenters}, a vector of barycenter of points from the located element.}
 
-\item{family}{This parameter specify the distibution within exponential family used for GLM model.
+\item{family}{This parameter specify the distribution within exponential family used for GLM model.
 The following distribution are implemented: "binomial", "exponential", "gamma", "poisson", "gaussian", "invgaussian".
 The default link function for binomial is \code{logit} if you want either \code{probit} or \code{clogloc} set \code{family = "probit"}, \code{family = "cloglog"}.}
 
@@ -144,12 +144,12 @@ A list with the following variables:
 \itemize{
 \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
-\item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
+\item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
 the smoothing parameter is equal to \code{lambda[j]}.}
 \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or matrix with the trace of the smoothing matrix for each combination of the smoothing parameters specified in \code{lambdaS} and \code{lambdaT}.}
 \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or matrix with the estimate of the standard deviation of the error for each combination of the smoothing parameters specified in \code{lambdaS} and \code{lambdaT}.}
 \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or matrix with the value of the GCV criterion for each combination of the smoothing parameters specified in \code{lambdaS} and \code{lambdaT}.}
-\item{\code{bestlambda}}{If GCV is \code{TRUE}, a 2-elements vector with the indices of smoothing parameters returnig the lowest GCV}
+\item{\code{bestlambda}}{If GCV is \code{TRUE}, a 2-elements vector with the indices of smoothing parameters returning the lowest GCV}
 \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
@@ -202,6 +202,6 @@ Bernardi, M. S., Sangalli, L. M., Mazza, G., & Ramsay, J. O. (2017). A penalized
 regression model for spatial functional data with application to the analysis of the 
 production of waste in Venice province. 
 Stochastic Environmental Research and Risk Assessment, 31(1), 23-38.
-Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
-   with differential regularization. Journal of Multivariate Analysis, to appear
+Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2022). Some first inferential tools for spatial regression
+with differential regularization. Journal of Multivariate Analysis, 189, 104866.
 }

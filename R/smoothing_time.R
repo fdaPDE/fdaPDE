@@ -383,7 +383,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
 
   # Checking inference data: after time_locations definition
   # Most of the checks have already been carried out by inferenceDataObjectBuilderTime function
-  inference.data.object <- checkInferenceParameters(inference.data.object,ncol(covariates),time_locations) #checking inference data consistency, constructing default object in NULL case
+  inference.data.object <- checkInferenceParametersTime(inference.data.object,ncol(covariates),time_locations,locations,FEMbasis$mesh$nodes) #checking inference data consistency, constructing default object in NULL case
   
   # Check whether the locations coincide with the mesh nodes (should be put after all the validations)
   if (!is.null(locations))
@@ -669,6 +669,14 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
             inference$beta$CI$enh_eigen_sign_flip=as.list(inference$beta$CI$enh_eigen_sign_flip)
           }
         }
+        if(inference.data.object@component[i]!=1){ # intervals for f were requested
+          n_loc = dim(inference.data.object@locations)[1]
+          ci_f=t(confidence_intervals[(3*(2*i-1)+1):(3*(2*i-1)+3),])
+          if(inference.data.object@type[i]==1){ # wald confidence intervals for f
+            inference$f$CI$wald[[length(inference$f$CI$wald)+1]] = ci_f
+            inference$f$CI$wald=as.list(inference$f$CI$wald)
+          }
+        }
       }
       
       if(inference.data.object@test[i]!=0){ # Test requested by this setting, adding them to the right implementation position
@@ -716,6 +724,15 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
           else if(inference.data.object@type[i]==4){
             inference$beta$p_values$enh_eigen_sign_flip[[length(inference$beta$p_values$enh_eigen_sign_flip)+1]] = p_values
             inference$beta$p_values$enh_eigen_sign_flip=as.list(inference$beta$p_values$enh_eigen_sign_flip)
+          }
+        }
+        if(inference.data.object@component[i]!=1){ # test on f was requested
+          p_value = statistics[length(statistics)]
+          
+          # add p-value in the right position
+          if(inference.data.object@type[i]==1){
+            inference$f$p_values$wald[[length(inference$f$p_values$wald)+1]] = p_value
+            inference$f$p_values$wald=as.list(inference$f$p_values$wald)
           }
         }
       }

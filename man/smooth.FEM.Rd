@@ -390,7 +390,7 @@ Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75
 via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
-   \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
-   with differential regularization. Journal of Multivariate Analysis, to appear}
+   \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2022). Some first inferential tools for spatial regression
+   with differential regularization. Journal of Multivariate Analysis, 189, 104866.}
 }
 }
