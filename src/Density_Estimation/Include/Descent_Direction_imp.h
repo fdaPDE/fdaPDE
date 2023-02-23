@@ -4,7 +4,7 @@
 template<UInt ORDER, UInt mydim, UInt ndim, class T>
 std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>> DirectionGradient<ORDER, mydim, ndim, T>::clone() const {
 
-    return make_unique<DirectionGradient<ORDER, mydim, ndim, T>>(*this);
+    return fdaPDE::make_unique<DirectionGradient<ORDER, mydim, ndim, T>>(*this);
 
 }
 
@@ -31,7 +31,7 @@ DirectionConjugateGradient<ORDER, mydim, ndim, T>::DirectionConjugateGradient(co
 template<UInt ORDER, UInt mydim, UInt ndim, class T>
 std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>> DirectionConjugateGradient<ORDER, mydim, ndim, T>::clone() const {
 
-    return make_unique<DirectionConjugateGradient<ORDER, mydim, ndim, T>>(*this);
+    return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim, T>>(*this);
 
 }
 
@@ -115,7 +115,7 @@ DirectionBase<ORDER, mydim, ndim, T>(rhs) {
 template<UInt ORDER, UInt mydim, UInt ndim, class T>
 std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>> DirectionBFGS<ORDER, mydim, ndim, T>::clone() const {
 
-    return make_unique<DirectionBFGS<ORDER, mydim, ndim, T>>(*this);
+    return fdaPDE::make_unique<DirectionBFGS<ORDER, mydim, ndim, T>>(*this);
 
 }
 
@@ -186,7 +186,7 @@ DirectionBase<ORDER, mydim, ndim, T>(rhs) {
 template<UInt ORDER, UInt mydim, UInt ndim, class T>
 std::unique_ptr<DirectionBase<ORDER, mydim, ndim, T>> DirectionLBFGS<ORDER, mydim, ndim, T>::clone() const {
 
-    return make_unique<DirectionLBFGS<ORDER, mydim, ndim, T>>(*this);
+    return fdaPDE::make_unique<DirectionLBFGS<ORDER, mydim, ndim, T>>(*this);
 
 }
 

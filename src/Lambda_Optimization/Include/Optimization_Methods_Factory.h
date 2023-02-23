@@ -25,13 +25,13 @@ class Opt_method_factory
         	static std::unique_ptr<Opt_methods<Tuple,Hessian,EvaluationType>> create_Opt_method(const std::string & validation, Function_Wrapper<Tuple, Real, Tuple, Hessian,EvaluationType> & F)
                 {
                 	if(validation=="newton")
-                                return make_unique<Newton_ex<Tuple, Hessian, EvaluationType>>(F);
+                                return fdaPDE::make_unique<Newton_ex<Tuple, Hessian, EvaluationType>>(F);
                 	if(validation=="newton_fd")
-                                return make_unique<Newton_fd<Tuple, Hessian, EvaluationType>>(F);
+                                return fdaPDE::make_unique<Newton_fd<Tuple, Hessian, EvaluationType>>(F);
 			else // default is fd
 			{
 				Rprintf("Method not found, using Newton_fd");
-				return make_unique<Newton_fd<Tuple, Hessian, EvaluationType>>(F);
+				return fdaPDE::make_unique<Newton_fd<Tuple, Hessian, EvaluationType>>(F);
 			}
         	}
 };

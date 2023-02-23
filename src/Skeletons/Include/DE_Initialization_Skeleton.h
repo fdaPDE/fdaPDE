@@ -28,7 +28,7 @@ SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP 
 	if(init == "Heat"){
 
 		// Construct densityInit object
-		std::unique_ptr<DensityInitialization<ORDER, mydim, ndim>> densityInit = make_unique<HeatProcess<ORDER, mydim, ndim>>(dataProblem, functionalProblem);
+		std::unique_ptr<DensityInitialization<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<HeatProcess<ORDER, mydim, ndim>>(dataProblem, functionalProblem);
 
 		// fill fInit
 		std::vector<VectorXr> fInit(dataProblem.getNlambda());
@@ -56,7 +56,7 @@ SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP 
 	else if(init=="CV"){
 
 		// Construct densityInit object
-		std::unique_ptr<Heat_CV<ORDER, mydim, ndim>> densityInit = make_unique<Heat_CV<ORDER, mydim, ndim>>(dataProblem, functionalProblem, init_fold);
+		std::unique_ptr<Heat_CV<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<Heat_CV<ORDER, mydim, ndim>>(dataProblem, functionalProblem, init_fold);
 
 		// fill fInit
 		VectorXr fInit;

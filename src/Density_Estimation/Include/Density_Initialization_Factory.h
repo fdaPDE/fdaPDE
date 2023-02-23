@@ -14,9 +14,9 @@ public:
     {
 
         if(!dp.isFvecEmpty())
-    		return make_unique<UserInitialization<ORDER, mydim, ndim>>(dp);
+    		return fdaPDE::make_unique<UserInitialization<ORDER, mydim, ndim>>(dp);
     	else
-    		return make_unique<HeatProcess<ORDER, mydim, ndim>>(dp, fp);
+    		return fdaPDE::make_unique<HeatProcess<ORDER, mydim, ndim>>(dp, fp);
 
     }
 
@@ -34,9 +34,9 @@ public:
     {
 
         if(!dp.isFvecEmpty())
-            return make_unique<UserInitialization_time<ORDER, mydim, ndim>>(dp);
+            return fdaPDE::make_unique<UserInitialization_time<ORDER, mydim, ndim>>(dp);
         else
-            return make_unique<HeatProcess_time<ORDER, mydim, ndim>>(dp, fp);
+            return fdaPDE::make_unique<HeatProcess_time<ORDER, mydim, ndim>>(dp, fp);
 
     }
 
