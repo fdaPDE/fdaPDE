@@ -113,11 +113,13 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
     
     if(dim == 2){
       for(i in 1:dim(locs)[1])
-        f0_matr[i,] <- f0(locs[i,1], locs[i,2], 0, time_locations) 
+        for(j in 1:length(inference.data.object@time_locations))
+          f0_matr[i,j] <- f0(locs[i,1], locs[i,2], 0, time_locations[j]) 
     }
     else{
       for(i in 1:dim(locs)[1])
-        f0_matr[i,] <- f0(locs[i,1], locs[i,2], locs[i,3], time_locations) 
+        for(j in 1:length(inference.data.object@time_locations))
+        f0_matr[i,] <- f0(locs[i,1], locs[i,2], locs[i,3], time_locations[j]) 
     }
     inference.data.object@f0_eval <- as.vector(f0_matr)
   }
