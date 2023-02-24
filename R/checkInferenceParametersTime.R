@@ -109,7 +109,7 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
     dim <- inference.data.object@dim
     locs <- inference.data.object@locations
     
-    f0_matr <- matrix(data=NA, nrow=dim(locs), ncol=length(time_locations))
+    f0_matr <- matrix(data=NA, nrow=dim(locs), ncol=length(inference.data.object@time_locations)))
     
     if(dim == 2){
       for(i in 1:dim(locs)[1])
