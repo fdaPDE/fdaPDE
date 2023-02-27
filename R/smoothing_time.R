@@ -631,7 +631,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Save statistics and intervals
   if(inference.data.object@definition==1){
     inference = {}
-    confidence_intervals = matrix(data = bigsol[[25]], nrow = 2*3*length(inference.data.object@type), ncol = dim(inference.data.object@coeff)[1]) #since inference for f is not implemented for ST
+    confidence_intervals = matrix(data = bigsol[[25]], nrow = 2*3*length(inference.data.object@type), ncol = max(dim(inference.data.object@coeff)[1], dim(inference.data.object@locations)[1]*length(inference.data.object@time_locations)))
     p_val = matrix(data = bigsol[[24]], nrow = dim(inference.data.object@coeff)[1]+1, ncol = length(inference.data.object@type))
     
     for(i in 1:length(inference.data.object@type)){ # each element is a different inferential setting
@@ -670,7 +670,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
           }
         }
         if(inference.data.object@component[i]!=1){ # intervals for f were requested
-          n_loc = dim(inference.data.object@locations)[1]
+          n_loc = dim(inference.data.object@locations)[1]*length(inference.data.object@time_locations)
           ci_f=t(confidence_intervals[(3*(2*i-1)+1):(3*(2*i-1)+3),])
           if(inference.data.object@type[i]==1){ # wald confidence intervals for f
             inference$f$CI$wald[[length(inference$f$CI$wald)+1]] = ci_f
