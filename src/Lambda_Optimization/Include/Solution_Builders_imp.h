@@ -304,6 +304,8 @@ static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr
     UInt n_inf_implementations = inf_Data.get_test_type().size();
     UInt p_inf = inf_Data.get_coeff_inference().rows();
     MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
+    UInt n_loc_inf = inf_Data.get_locs_inference().rows()*inf_Data.get_time_locs_inf().size();
+    UInt inf_out_size = (p_inf > n_loc_inf) ? p_inf : n_loc_inf; 
     MatrixXv p_values;
     MatrixXv intervals;
 	
@@ -322,14 +324,14 @@ static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr
     }else{
 	  
       p_values.resize(2, n_inf_implementations);
-      intervals.resize(2*n_inf_implementations, p_inf);
+      intervals.resize(2*n_inf_implementations, inf_out_size);
           
       for(UInt i=0; i < n_inf_implementations; ++i){
 	p_values.row(0)(i) = inf_Output.col(0)(2*i);
 	p_values.row(1)(i) = inf_Output.col(0)(2*i+1);
       }
 
-      intervals=inf_Output.rightCols(p_inf);
+      intervals=inf_Output.rightCols(inf_out_size);
 	
     }
 
