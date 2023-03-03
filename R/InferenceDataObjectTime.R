@@ -353,10 +353,11 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
   }
   
   if(sum(component == "parametric")==length(component)){
-    if(!is.null(locations) || !is.null(locations_indices))
+    if(!is.null(locations) || !is.null(locations_indices)  || !is.null(time_locations))
       warning("locations are provided but not used, since inference is requested only on the paramteric component")
     locations_indices = NULL
     locations = matrix(data = 1, nrow = 1, ncol = 1)
+    time_locations = 1
   }
   else{
     if(is.null(locations) && is.null(locations_indices)){
@@ -374,6 +375,8 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
         warning("'locations' are provided but not used, since 'locations_indices' is not NULL")
       # other dimensional checks on 'locations_indices' will be performed later, inside checkInferenceParameters
     }
+    if(is.null(time_locations))
+      time_locations = numeric(0)
   }  
   
   # Consistency check for number of implementations required (default values assigned in case of NULL)

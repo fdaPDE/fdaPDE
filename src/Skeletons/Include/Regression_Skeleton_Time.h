@@ -435,9 +435,12 @@ void inference_wrapper_time(const OptimizationData & opt_data, output_Data<2> & 
 {
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+  UInt n_loc = inf_car.getN_loc();
+
+  UInt out_dim = (p > n_loc) ? p : n_loc; 
 
   // since only inference on beta is implemented for ST, the rows corresponding to f inference will be empty to be coherent with the size of inference_Solver's output
-  inference_output.resize(2*n_implementations+1, p+1);
+  inference_output.resize(2*n_implementations+1, out_dim+1);
 
   if(inf_car.getInfData()->get_exact_inference() == "exact"){
     // Select the right policy for inversion of MatrixNoCov

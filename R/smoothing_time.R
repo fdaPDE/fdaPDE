@@ -671,7 +671,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
           }
         }
         if(inference.data.object@component[i]!=1){ # intervals for f were requested
-          n_loc = dim(inference.data.object@locations)[1]
+          n_loc = dim(inference.data.object@locations)[1]*length(inference.data.object@time_locations)
           ci_f=t(confidence_intervals[(3*(2*i-1)+1):(3*(2*i-1)+3),])
           if(inference.data.object@type[i]==1){ # wald confidence intervals for f
             inference$f$CI$wald[[length(inference$f$CI$wald)+1]] = ci_f
