@@ -6,12 +6,12 @@
   \param implementation_Type_ vector parameter used to define which type of implementations (Wald, Speckman, ESF) are used for the tests and intervals computation
   \param component_Type_ vector parameter used to on which component of the model (parametric, nonparametric, both) inference has to be performed
   \param exact_Inference_ parameter for the method used to invert E matrix in Woodbury decomposition for inference
-  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals
   \param locs_Inference_ matrix that specifies the spatial locations to be considered when performing inference on the nonparametric component
   \param locs_index_Inference_ vector containing the spatial locations indices to be considered among the observed ones for inference on the nonparametric component
   \param locs_are_nodes_ boolean that specifies if all the locations taken in consideration for the hypothesis test on f are coinciding with nodes
+  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals
   \param beta_0_ vector for the null hypotesis (if a test on the parametric component is required)
-  \param f_0_ vector for the null hypotesis (if a test on the nonparametric component is required)
+  \param f0_eval_ vector for the null hypotesis (if a test on the nonparametric component is required)
   \param f_Var_ parameter used to decide whether to compute local f variance or not
   \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
   \param inference_Alpha_ significance used to compute ESF confidence intervals
@@ -181,6 +181,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   \param locs_Inference_ matrix that specifies the spatial locations to be considered when performing inference on the nonparametric component
   \param locs_index_Inference_ vector containing the spatial locations indices to be considered among the observed ones for inference on the nonparametric component
   \param locs_are_nodes_ boolean that specifies if all the locations taken in consideration for the hypothesis test on f are coinciding with nodes
+  \param time_locs_inf_ an R-vector of times selected for inference on the nonparametric component
   \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
   \param beta_0_ vector for the null hypotesis (if a test on the parametric component is required)
   \param f_0_ vector for the null hypotesis (if a test on the nonparametric component is required)
