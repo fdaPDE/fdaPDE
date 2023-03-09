@@ -379,7 +379,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   
   # Checking inference data: after time_locations definition
   # Most of the checks have already been carried out by inferenceDataObjectBuilderTime function
-  inference.data.object <- checkInferenceParametersTime(inference.data.object,ncol(covariates),time_locations,locations,FEMbasis$mesh$nodes) #checking inference data consistency, constructing default object in NULL case
+  inference.data.object <- checkInferenceParametersTime(inference.data.object,ncol(covariates),time_locations,locations,FEMbasis$mesh$nodes, FLAG_PARABOLIC, is.null(IC)) #checking inference data consistency, constructing default object in NULL case
 
   # Check whether the locations coincide with the mesh nodes (should be put after all the validations)
   if (!is.null(locations))

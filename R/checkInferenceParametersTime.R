@@ -1,4 +1,4 @@
-checkInferenceParametersTime <- function(inference.data.object,checknumber,time_locations, locations=NULL,nodes=NULL){
+checkInferenceParametersTime <- function(inference.data.object,checknumber,time_locations, locations=NULL,nodes=NULL,  FLAG_PARABOLIC, FLAG_IC){
   
   #if no inference is required, construct a dummy inference object, where all parameters are set to nonsense values on purpose
   if(is.null(inference.data.object) || inference.data.object@definition==0){
@@ -98,12 +98,18 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
     # }
     
     # Check time_locations definition
-    if(length(inference.data.object@time_locations)==0) # That is inference on f is required but no time locations are provided: by default we resort to the observed ones
-      inference.data.object@time_locations = as.vector(time_locations)
-    else
-      if(min(inference.data.object@time_locations)<min(time_locations) || max(inference.data.object@time_locations)>max(time_locations))
-        warning("The time locations provided for inference are not inside the time frame provided for observations: inference may not be reliable in this case")
-    
+    if(FLAG_PARABOLIC){
+      if(length(inference.data.object@time_locations)!=0)
+        stop("Inference in ST parabolic case can be computed only on the overall time locations provided to smooth.FEM.time() and does not allow time locations specification")
+      else
+        inference.data.object@time_locations = as.vector(time_locations[ifelse(FLAG_IC,2,1):length(time_locations)]) # If IC is null, drop the first time point, else keep it
+    }else{
+      if(length(inference.data.object@time_locations)==0) # That is inference on f is required but no time locations are provided: by default we resort to the observed ones
+        inference.data.object@time_locations = as.vector(time_locations)
+      else
+        if(min(inference.data.object@time_locations)<min(time_locations) || max(inference.data.object@time_locations)>max(time_locations))
+          warning("The time locations provided for inference are not inside the time frame provided for observations: inference may not be reliable in this case")
+    }
     # finally evaluate f0 at the chosen locations
     f0 <- inference.data.object@f0
     dim <- inference.data.object@dim
