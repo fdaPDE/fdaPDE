@@ -112,6 +112,9 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 		//!Only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second,  &inferenceData, lambda_inference_S, lambda_inference_T); //Carrier for inference
 		
+		//get the component on which inference is required
+    		const std::vector<std::string> inf_component = inferenceData.get_component_type(); 
+		
 		//if nonparametric inference is required
     		if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end()){
     		// set the solution of the system inside the inference carrier
