@@ -303,7 +303,12 @@ static SEXP Solution_Builders::build_solution_temporal_regression(const MatrixXr
     //!Prepare the inference output space
     UInt n_inf_implementations = inf_Data.get_test_type().size();
     UInt p_inf = inf_Data.get_coeff_inference().rows();
-    UInt n_loc_inf = inf_Data.get_locs_inference().rows()*inf_Data.get_time_locs_inf().size();
+    UInt n_loc_inf = 0;
+    if(regressionData.getFlagParabolic()){
+      n_loc_inf = inf_Data.get_locs_inference().rows()*(inf_Data.get_time_locs_inf().size()-1);
+    }else{
+      n_loc_inf = inf_Data.get_locs_inference().rows()*inf_Data.get_time_locs_inf().size();
+    }
     UInt inf_out_size = (p_inf > n_loc_inf) ? p_inf : n_loc_inf; 
     MatrixXv inf_Output = inference_Output.topRows(2*n_inf_implementations);
     MatrixXv p_values;
