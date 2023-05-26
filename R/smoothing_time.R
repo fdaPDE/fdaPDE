@@ -631,7 +631,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Save statistics and intervals
   if(inference.data.object@definition==1){
     inference = {}
-    confidence_intervals = matrix(data = bigsol[[25]], nrow = 2*3*length(inference.data.object@type), ncol = max(dim(inference.data.object@coeff)[1], dim(inference.data.object@locations)[1]*length(inference.data.object@time_locations)))
+    n_loc_inference = ifelse(FLAG_PARABOLIC==TRUE,dim(inference.data.object@locations)[1]*(length(inference.data.object@time_locations)-1),dim(inference.data.object@locations)[1]*length(inference.data.object@time_locations))
+    confidence_intervals = matrix(data = bigsol[[25]], nrow = 2*3*length(inference.data.object@type), ncol = max(dim(inference.data.object@coeff)[1], n_loc_inference))
     p_val = matrix(data = bigsol[[24]], nrow = dim(inference.data.object@coeff)[1]+1, ncol = length(inference.data.object@type))
     
     for(i in 1:length(inference.data.object@type)){ # each element is a different inferential setting
