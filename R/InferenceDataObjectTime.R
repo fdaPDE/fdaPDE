@@ -464,11 +464,12 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
   for (index in 1:n_of_implementations){
     
     if(type[index]!="w" & type[index]!="s" & type[index]!="esf" & type[index]!="enh-esf"){
-      stop("type should be chosen between 'w', 's', 'esf' or 'enh-esf'")}else{
+      stop("type should be chosen between 'w', 's', 'sf', 'esf' or 'enh-esf'")}else{
         if(type[index]=="w") type_numeric[index]=as.integer(1)
         if(type[index]=="s") type_numeric[index]=as.integer(2)
         if(type[index]=="esf") type_numeric[index]=as.integer(3)
         if(type[index]=="enh-esf") type_numeric[index]=as.integer(4)
+        if(type[index]=="sf") type_numeric[index]=as.integer(5)
       }
     
     if(component[index]!="parametric" & component[index]!="nonparametric" & component[index]!="both"){
