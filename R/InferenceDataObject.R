@@ -423,7 +423,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
   for (index in 1:n_of_implementations){
     
       if(type[index]!="w" & type[index]!="s" & type[index]!="esf" & type[index]!="enh-esf" & type[index]!="sf"){
-        stop("type should be chosen between 'w', 's' 'sf', 'esf' or 'enh-esf'")}else{
+        stop("type should be chosen between 'w', 's', 'sf', 'esf' or 'enh-esf'")}else{
           if(type[index]=="w") type_numeric[index]=as.integer(1)
           if(type[index]=="s") type_numeric[index]=as.integer(2)
           if(type[index]=="esf") type_numeric[index]=as.integer(3)
