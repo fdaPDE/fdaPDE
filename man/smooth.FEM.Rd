@@ -134,7 +134,7 @@ It is advised to set \code{GCV.inflation.factor} larger than 1 to avoid overfitt
 Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 Default value \code{lambda.optimization.tolerance=0.05}.}
 
-\item{inference.data.object}{An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+\item{inference.data.object}{An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear and nonlinear parameters of the model. This parameter needs to be 
 consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.}
 }
 \value{
