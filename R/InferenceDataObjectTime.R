@@ -88,10 +88,10 @@ inferenceDataObjectTime<-setClass("inferenceDataObjectTime", slots = list(test =
 #'@param type A list of strings defining the type of implementation for the inferential analysis. The possible values are:
 #'\itemize{
 #'\item{'w'}{: Wald parametric approach (default).}
-#'\item{'s'}{: Speckman parametric approach.}
-#'\item{'sf'}{: sign-flip nonparametric approach.}
-#'\item{'esf'}{: eigen-sign-flip nonparametric approach.}
-#'\item{'enh-esf'}{: enhanced-eigen-sign-flip nonparametric approach.}
+#'\item{'s'}{: Speckman parametric approach, available only when \code{component} is 'parametric'.}
+#'\item{'sf'}{: sign-flip nonparametric approach, available only when \code{component} is 'parametric'.}
+#'\item{'esf'}{: eigen-sign-flip nonparametric approach, available only when \code{component} is 'parametric'.}
+#'\item{'enh-esf'}{: enhanced-eigen-sign-flip nonparametric approach, available only when \code{component} is 'parametric'.}
 #'}
 #'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
@@ -103,7 +103,7 @@ inferenceDataObjectTime<-setClass("inferenceDataObjectTime", slots = list(test =
 #'@param locations_indices A vector of indices indicating the locations to be considered among the observed ones for nonparametric inference, defaulted to NULL.
 #'If a vector of indices is provided, then the slot 'locations' is discarded.
 #'@param locations_by_nodes A logical used to indicate wether the selected locations to perform inference on f are all coinciding with the nodes;  
-#'@param time_locations A vector of times of interest when testing the nonparametric component f, defaulted to NULL.
+#'@param time_locations A vector of times of interest when testing the nonparametric component f, defaulted to NULL. If \code{FLAG_parabolic = TRUE} the \code{time-locations} need to be NULL or coincide with the time mesh.
 #'@param coeff A matrix, with \code{n_cov} number of columns, of numeric coefficients representing the linear combinations of the parametric components of the model.
 #'The default is NULL, corresponding to an identity matrix. If at least one sing-flipping approach is required in \code{type}, needs to be an identity matrix.
 #'@param beta0 Vector of real numbers (default NULL). It is used only if the \code{test} parameter is set, and \code{component} is not 'nonparametric'; its length is the number of rows of matrix \code{coeff} if provided. 
