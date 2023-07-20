@@ -427,7 +427,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
-      inference.data.object.time = inference.data.object.time)
+      inference.data.object = inference.data.object.time)
   }else if(is(FEMbasis$mesh, "mesh.2D") & !is.null(PDE_parameters) & space_varying==FALSE)
   {
     bigsol = NULL
@@ -437,7 +437,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
        search = search, bary.locations = bary.locations,
        optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
-       inference.data.object.time = inference.data.object.time)
+       inference.data.object = inference.data.object.time)
                                       
   }else if(is(FEMbasis$mesh, "mesh.2D") & !is.null(PDE_parameters) & space_varying==TRUE)
   {
@@ -448,7 +448,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
-      inference.data.object.time = inference.data.object.time)
+      inference.data.object = inference.data.object.time)
   }else if(is(FEMbasis$mesh, "mesh.2.5D"))
   {
     bigsol = NULL
@@ -458,7 +458,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance,
-      inference.data.object.time = inference.data.object.time)
+      inference.data.object = inference.data.object.time)
   }else if(is(FEMbasis$mesh, "mesh.3D") & is.null(PDE_parameters))
   {
     bigsol = NULL
@@ -468,7 +468,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, 
-      inference.data.object.time = inference.data.object.time)
+      inference.data.object = inference.data.object.time)
   }else if(is(FEMbasis$mesh, "mesh.3D") & !is.null(PDE_parameters) & space_varying==FALSE)
   {
     bigsol = NULL
@@ -478,7 +478,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
        search = search, bary.locations = bary.locations,
        optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, 
-       inference.data.object.time = inference.data.object.time)
+       inference.data.object = inference.data.object.time)
                                       
   }else if(is(FEMbasis$mesh, "mesh.3D") & !is.null(PDE_parameters) & space_varying==TRUE)
   {
@@ -489,7 +489,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold, max.steps = max.steps, IC = IC,
       search = search, bary.locations = bary.locations,
       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, 
-      inference.data.object.time = inference.data.object.time)
+      inference.data.object = inference.data.object.time)
   }else if(is(FEMbasis$mesh, "mesh.1.5D"))
   {
     bigsol = NULL
@@ -499,7 +499,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                                           FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC,FLAG_ITERATIVE=FLAG_ITERATIVE, threshold = threshold , max.steps = max.steps, IC = IC,
                                           search = search, bary.locations = bary.locations,
                                           optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance, 
-                                          inference.data.object.time = inference.data.object.time)
+                                          inference.data.object = inference.data.object.time)
   }
 
   # ---------- Solution -----------
