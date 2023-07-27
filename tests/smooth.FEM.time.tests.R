@@ -266,6 +266,8 @@ output_CPP$inference$f$p_values
 output_CPP$inference$f$CI$wald[[1]]
 
 #### Test 2.7: overall inference on beta parameters, parabolic case
+inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
+
 lambdaS = 1 #10^(-1:1)
 lambdaT = 1e-6 #10^(-6:-4)
 output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
@@ -300,7 +302,6 @@ new_locs <- mesh$nodes[which(mesh$nodesmarkers!=1),][c(10,11),]
 new_locs[,1] <- new_locs[,1] + 0.2
  
 # Note that only the original time mesh is allowed here
-
 inf_obj <- inferenceDataObjectTimeBuilder (test='sim', interval='oat',  dim=2, n_cov=1, type=c('w'), f0 = f, component='nonparametric', locations = new_locs)
 
 lambdaS = 10^(-1:1)
@@ -410,7 +411,7 @@ observations = matrix(data,nrow(locations),NumTimePoints)
 # Inference obj: inference test, adding cov, PDE, separable case
 inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0=3, component='parametric', n_flip=1000, f_var=T)
 
-#### Test 3.4: overall inference on beta parameters, parabolic case 
+#### Test 3.4: overall inference on beta parameters, separable case 
 lambdaS = 10^-4 #10^(-5:-3)
 lambdaT = 10^-4 #10^(-5:-3)
 output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations, 

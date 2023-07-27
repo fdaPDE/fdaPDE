@@ -409,6 +409,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   coeff_Inference=as.matrix(inference.data.object@coeff)
   beta_0=as.vector(inference.data.object@beta0)
   f_0_eval<-as.vector(inference.data.object@f0_eval)
+  f_var_Inference<-inference.data.object@f_var
   inference_Quantile=as.vector(inference.data.object@quantile)
   inference_Alpha=as.vector(inference.data.object@alpha)
   inference_N_Flip=inference.data.object@n_flip
@@ -732,6 +733,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   coeff_Inference=as.matrix(inference.data.object@coeff)
   beta_0=as.vector(inference.data.object@beta0)
   f_0_eval<-as.vector(inference.data.object@f0_eval)
+  f_var_Inference<-inference.data.object@f_var
   inference_Quantile=as.vector(inference.data.object@quantile)
   inference_Alpha=inference.data.object@alpha
   inference_N_Flip=inference.data.object@n_flip
