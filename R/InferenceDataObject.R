@@ -110,7 +110,8 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'The possible values are: FALSE (default) and TRUE. 
 #'@param level A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
 #'@param n_flip Number of flips performed in sign-flipping approaches, defaulted to 1000.
-#'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.
+#'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to NULL. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.
+#'If left to NULL it is by default selected as the number of \code{locations} times 10^-5.
 #'@return The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
 #'@description A function that build an \code{\link{inferenceDataObject}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
@@ -129,7 +130,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'f_var = FALSE,
 #'level = 0.95,
 #'n_flip = 1000,
-#'tol_fspai = 0.05)
+#'tol_fspai = NULL)
 #' @export
 #' @examples 
 #' obj<-inferenceDataObjectBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
@@ -151,7 +152,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 f_var = F,
                                 level = 0.95,
                                 n_flip = 1000,
-                                tol_fspai = 0.05){
+                                tol_fspai = NULL){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -287,7 +288,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
     n_flip=as.integer(n_flip)
   }
   
-  if(tol_fspai!=0.05){
+  if(!is.null(tol_fspai)){
     if(class(tol_fspai)!="numeric")
       stop("'tol_fspai' should be numeric")
     if(length(tol_fspai)==0)
@@ -597,7 +598,7 @@ if(sum(component == "nonparametric")!=length(component)){
     n_flip <- as.integer(1000)
   }
   
-  if(exact==FALSE){
+  if(exact==FALSE & !is.null(tol_fspai)){
     if(tol_fspai <= 0 )                                                
       stop("tol_fspai should be a positive value")
   }

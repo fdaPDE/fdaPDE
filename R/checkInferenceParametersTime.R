@@ -137,6 +137,10 @@ checkInferenceParametersTime <- function(inference.data.object,checknumber,time_
     
   }
   
+  if(is.null(inference.data.object@tol_fspai)){
+    inference.data.object@tol_fspai <- nrow(locations)*10^-5
+  }
+  
   return(inference.data.object)    #return the original object
 }
 

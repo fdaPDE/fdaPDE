@@ -19,7 +19,7 @@ f0 = NULL,
 f_var = FALSE,
 level = 0.95,
 n_flip = 1000,
-tol_fspai = 0.05)
+tol_fspai = NULL)
 }
 \arguments{
 \item{test}{A string defining the type of test to be performed. Multiple tests can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
@@ -81,7 +81,8 @@ The possible values are: FALSE (default) and TRUE.}
 
 \item{n_flip}{Number of flips performed in sign-flipping approaches, defaulted to 1000.}
 
-\item{tol_fspai}{Tolerance for FSPAI algorithm taking value greater than 0, defaulted to 0.05. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.}
+\item{tol_fspai}{Tolerance for FSPAI algorithm taking value greater than 0, defaulted to NULL. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.
+If left to NULL it is by default selected as the number of \code{locations} times 10^-5.}
 }
 \value{
 The output is a well defined \code{\link{inferenceDataObject}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
