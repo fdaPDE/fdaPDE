@@ -47,10 +47,11 @@ LinkingTo:
 	RcppEigen, Rcpp
 Suggests: 
     MASS,
-    testthat
+    testthat (>= 3.0.0)
 Description: An implementation of regression models with partial differential regularizations, making use of the Finite Element Method. The models efficiently handle data distributed over irregularly shaped domains and can comply with various conditions at the boundaries of the domain. A priori information about the spatial structure of the phenomenon under study can be incorporated in the model via the differential regularization. See Sangalli, L. M. (2021) <doi:10.1111/insr.12444> "Spatial Regression With Partial Differential Equation Regularisation" for an overview. The release 1.1-9 requires R (>= 4.2.0) to be installed on windows machines.
 License: GPL-3
 NeedsCompilation: yes
 SystemRequirements: GNU make
 RoxygenNote: 7.2.2
 Encoding: UTF-8
+Config/testthat/edition: 3
