@@ -1,10 +1,7 @@
 
 test_that("Density Estimation - Square domain", {
 
-if(!require(pacman)) install.packages("pacman")
-pacman::p_load("fdaPDE")
-getwd()
-foldername <- "../data/DE-PDE/test_1/"  
+foldername <- test_path("../data/DE-PDE/test_1")
   
 ## Create a 2D mesh over a squared domain
 Xbound <- seq(-3, 3, length.out = 10)
@@ -32,7 +29,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="RightCV")))
 
-load(file = paste0(foldername, "test_1_1.RData"))
+load(file = paste0(foldername, "/test_1_1.RData"))
 expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
 
 # 2) Lambda fixed
@@ -40,8 +37,8 @@ lambda = 0.1
 invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
-load(file = paste0(foldername, "test_1_2.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_2.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 # 3) Cross-validation simplified version
 lambda = c(0.0001, 0.001, 0.01, 0.1, 1)
@@ -49,8 +46,8 @@ nfolds = 5
 invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, nfolds=nfolds, 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="SimplifiedCV")))
-load(file = paste0(foldername, "test_1_3.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_3.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 # 4) Initialization given
 lambda = 0.1
@@ -58,32 +55,32 @@ initF = rep(1, nrow(mesh$nodes))
 invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, fvec = initF,
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
-load(file = paste0(foldername, "test_1_4.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_4.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 # 5) step_method = Backtracking method
 lambda = 0.1
 invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
               step_method = "Backtracking_Method", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
-load(file = paste0(foldername, "test_1_5.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_5.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 # 6) step_method = Wolfe method
 lambda = 0.1
 invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
               step_method = "Wolfe_Method", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
-load(file = paste0(foldername, "test_1_6.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_6.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 # 7) direction_method = Gradient
 lambda = 0.1
 invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
               step_method = "Fixed_Step", direction_method = "Gradient",
               preprocess_method="NoCrossValidation")))
-load(file = paste0(foldername, "test_1_7.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_7.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 
 # 8) Naive search algorithm
@@ -92,6 +89,6 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="NoCrossValidation", search = "naive")))
 
-load(file = paste0(foldername, "test_1_8.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+load(file = paste0(foldername, "/test_1_8.RData"))
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 })
