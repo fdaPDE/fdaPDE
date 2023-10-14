@@ -30,7 +30,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               preprocess_method="RightCV")))
 
 load(file = paste0(foldername, "/test_1_1.RData"))
-expect_equal( sqrt(mean((sol_ex$g-sol$g)^2)) < 10*.Machine$double.eps, TRUE);
+expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
 
 # 2) Lambda fixed
 lambda = 0.1
