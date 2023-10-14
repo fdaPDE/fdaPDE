@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("Density Estimation - Linear Network", {
   foldername <- test_path("../data/DE-PDE/test_3/")
   set.seed(0)
   eps = 1 / 2
@@ -27,5 +27,5 @@ test_that("multiplication works", {
   lambda = 1e-3
   invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda)))
   load(file=paste0(foldername, "/test_3.RData"))
-  expect_equal( mean((sol_ex$g-sol$g)^2) < 10*.Machine$double.eps, TRUE);
+  expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
 })
