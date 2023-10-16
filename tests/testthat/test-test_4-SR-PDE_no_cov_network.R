@@ -84,7 +84,7 @@ test_that("Spatial Regression (no covariates) - Linear Network", {
   # Set smoothing parameter
   lambda = 10^seq(-4,-2,length.out=10)
   
-  #### Test 1.2: grid with exact GCV
+  #### Test 4.2: grid with exact GCV
   invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                          lambda.selection.criterion='grid', DOF.evaluation='exact', 
                          lambda.selection.lossfunction='GCV')))
@@ -92,7 +92,7 @@ test_that("Spatial Regression (no covariates) - Linear Network", {
   load(file=paste0(foldername,"/test_4_2.RData"))
   expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
   
-  #### Test 1.5: Inference on f, hypothesis testing and CI, Wald and SF implementations
+  #### Test 4.5: Inference on f, hypothesis testing and CI, Wald and SF implementations
   inf_obj <- inferenceDataObjectBuilder(test = "sim", interval = "oat", type = c("w", "sf"), component = "nonparametric", dim = 2, n_cov = 0, f0 = AUX, locations_by_nodes = T)
   
   invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,

@@ -123,7 +123,7 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   # expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
   # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
    
-  #### Test 2.4: Newton method with exact GCV, default initial lambda and tolerance
+  #### Test 5.4: Newton method with exact GCV, default initial lambda and tolerance
   invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
                          covariates = cov1,
                          FEMbasis=FEMbasis, 
@@ -135,7 +135,7 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
   expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
   
-  #### Test 2.5: Newton_fd method with exact GCV, default initial lambda and tolerance
+  #### Test 5.5: Newton_fd method with exact GCV, default initial lambda and tolerance
   invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
                          covariates = cov1,
                          FEMbasis=FEMbasis, 
@@ -147,7 +147,7 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
   expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
   
-  #### Test 2.7: Inference on beta and f, hypothesis testing and CI, Wald and Enhanced-ESF implementation
+  #### Test 5.7: Inference on beta and f, hypothesis testing and CI, Wald and Enhanced-ESF implementation
   inf_obj <- inferenceDataObjectBuilder(test = c("sim", "oat"), interval = "oat", component = c("both", "parametric"), type = c("w", "enh-esf"), dim = 2, n_cov = 1, beta0 = 1, f0 = f, n_flip = 150000, locations_by_nodes = T)
   
   invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
