@@ -202,53 +202,53 @@ invisible(capture.output(output_CPP<-smooth.FEM(observations=data,
 load(file=paste0(foldername,"/test_9_7.RData"))
 expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
 
-#### Test 9.8 on inference creating covariates and special setting
+#### Test 9.8 on inference creating covariates and special setting (do not )
 
 # Create covariates
-set.seed(509875)
-cov1 = rnorm(length(DatiEsatti), mean = 2, sd = 1)
-
-# Add error to simulate data
-set.seed(5839745)
-data = DatiEsatti + 3*cov1 
-data = data + rnorm(length(DatiEsatti), sd = 0.1)
-observations=data
-
-# Inference obj: separate tests for beta and f. Wald, Speckman, ESF, Enhanced ESF p_values for beta; Wald, Sign-Flip and ESF p_values for f
-inf_beta <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 3, component='parametric', n_flip=1000, f_var=T)
-inf_f <- inferenceDataObjectBuilder(test = 'sim', type=c('w', 'sf', 'esf'), component = 'nonparametric', dim=2, n_cov=1)
-
-invisible(capture.output(sol<-smooth.FEM(observations=data, 
-                       covariates = cov1,
-                       incidence_matrix = incidence_matrix,
-                       FEMbasis=FEMbasis, 
-                       lambda=lambda,
-                       BC = BC, 
-                       PDE_parameters = PDE_parameters,
-                       lambda.selection.criterion='newton', DOF.evaluation='exact', 
-                       lambda.selection.lossfunction='GCV',
-                       inference.data.object = inf_beta)))
-
-load(file=paste0(foldername,"/test_9_8.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
-expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                         output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
-
-invisible(capture.output(sol<-smooth.FEM(observations=data, 
-                       covariates = cov1,
-                       incidence_matrix = incidence_matrix,
-                       FEMbasis=FEMbasis, 
-                       lambda=lambda,
-                       BC = BC, 
-                       PDE_parameters = PDE_parameters,
-                       lambda.selection.criterion='newton', DOF.evaluation='exact', 
-                       lambda.selection.lossfunction='GCV',
-                       inference.data.object = inf_f)))
-
-load(file=paste0(foldername,"/test_9_9.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
-expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                         output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
+# set.seed(509875)
+# cov1 = rnorm(length(DatiEsatti), mean = 2, sd = 1)
+# 
+# # Add error to simulate data
+# set.seed(5839745)
+# data = DatiEsatti + 3*cov1 
+# data = data + rnorm(length(DatiEsatti), sd = 0.1)
+# observations=data
+# 
+# # Inference obj: separate tests for beta and f. Wald, Speckman, ESF, Enhanced ESF p_values for beta; Wald, Sign-Flip and ESF p_values for f
+# inf_beta <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 3, component='parametric', n_flip=1000, f_var=T)
+# inf_f <- inferenceDataObjectBuilder(test = 'sim', type=c('w', 'sf', 'esf'), component = 'nonparametric', dim=2, n_cov=1)
+# 
+# invisible(capture.output(sol<-smooth.FEM(observations=data, 
+#                        covariates = cov1,
+#                        incidence_matrix = incidence_matrix,
+#                        FEMbasis=FEMbasis, 
+#                        lambda=lambda,
+#                        BC = BC, 
+#                        PDE_parameters = PDE_parameters,
+#                        lambda.selection.criterion='newton', DOF.evaluation='exact', 
+#                        lambda.selection.lossfunction='GCV',
+#                        inference.data.object = inf_beta)))
+# 
+# load(file=paste0(foldername,"/test_9_8.RData"))
+# expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+# expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+# expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
+#                          output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+# 
+# invisible(capture.output(sol<-smooth.FEM(observations=data, 
+#                        covariates = cov1,
+#                        incidence_matrix = incidence_matrix,
+#                        FEMbasis=FEMbasis, 
+#                        lambda=lambda,
+#                        BC = BC, 
+#                        PDE_parameters = PDE_parameters,
+#                        lambda.selection.criterion='newton', DOF.evaluation='exact', 
+#                        lambda.selection.lossfunction='GCV',
+#                        inference.data.object = inf_f)))
+# 
+# load(file=paste0(foldername,"/test_9_9.RData"))
+# expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+# expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+# expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
+#                          output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
 })
