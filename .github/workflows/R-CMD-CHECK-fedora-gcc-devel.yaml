@@ -27,12 +27,17 @@ jobs:
         sudo ln -s /opt/R-devel/bin/Rscript /usr/local/bin/Rscript
       shell: bash
       
+    - name: installing rgl support on Fedora
+      run: |
+        sudo dnf install mesa-libGL-devel mesa-libGLU-devel libpng-devel
+      shell: bash
+      
     - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
+      with:
+        extra-packages: any::rcmdcheck
+        needs: check
 
     - uses: r-lib/actions/check-r-package@v2
-        with:
-          upload-snapshots: true
+      with:
+        upload-snapshots: true
           
