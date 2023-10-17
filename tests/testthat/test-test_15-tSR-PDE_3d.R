@@ -89,7 +89,7 @@ test_that("tSR-PDE Sphere",{
                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)))
   #save(output_CPP, file=paste0(foldername,"/test_15_1.RData"))
   load(file=paste0(foldername,"/test_15_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   invisible(capture.output(sol <- smooth.FEM.time(locations=loc[1:nloc,2:4],time_locations = timeloc,
                                   observations = data_noloc,
@@ -98,15 +98,15 @@ test_that("tSR-PDE Sphere",{
   
   #save(output_CPP, file=paste0(foldername,"/test_15_2.RData"))
   load(file=paste0(foldername,"/test_15_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   invisible(capture.output(sol <- smooth.FEM.time(observations = datacov,time_mesh = TimeLocations, covariates = W,
                               FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)))
   
   #save(output_CPP, file=paste0(foldername,"/test_15_3.RData"))
   load(file=paste0(foldername,"/test_15_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   ##########################################PARABOLIC####################################################
   ### MONOLITIC METHOD
@@ -115,14 +115,14 @@ test_that("tSR-PDE Sphere",{
   
   #save(output_CPP, file=paste0(foldername,"/test_15_4.RData"))
   load(file=paste0(foldername,"/test_15_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   invisible(capture.output(sol <- smooth.FEM.time(locations=loc[1:nloc,2:4],observations = data_noloc,time_mesh = timeloc,
                                   FEMbasis = FEMbasis, lambdaS = lambdaS_par2, lambdaT = lambdaT_par2, FLAG_PARABOLIC = TRUE)))
   
   #save(output_CPP, file=paste0(foldername,"/test_15_5.RData"))
   load(file=paste0(foldername,"/test_15_5.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   invisible(capture.output(sol <- smooth.FEM.time(observations = datacov[,2:length(TimeLocations)],time_mesh = TimeLocations, 
                                                          covariates = W[(1+nnodes):(length(TimeLocations)*nnodes),],
@@ -131,6 +131,6 @@ test_that("tSR-PDE Sphere",{
   
   #save(output_CPP, file=paste0(foldername,"/test_15_6.RData"))
   load(file=paste0(foldername,"/test_15_6.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 })

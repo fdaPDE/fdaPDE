@@ -98,8 +98,8 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   #                        FEMbasis=FEMbasis, 
   #                        lambda=lambda[1])))
   # load(file=paste0(foldername,"/test_5_1.RData"))
-  # expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  # expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   #### Test 2.2: grid with exact GCV
   invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL,
@@ -109,8 +109,8 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
                          DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_5_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   # #### Test 2.3: grid with stochastic GCV
   # invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
@@ -120,8 +120,8 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   #                        DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')))
   # 
   # load(file=paste0(foldername,"/test_5_3.RData"))
-  # expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  # expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
    
   #### Test 5.4: Newton method with exact GCV, default initial lambda and tolerance
   invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
@@ -132,8 +132,8 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   
   
   load(file=paste0(foldername,"/test_5_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   #### Test 5.5: Newton_fd method with exact GCV, default initial lambda and tolerance
   invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
@@ -144,8 +144,8 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   
   
   load(file=paste0(foldername,"/test_5_5.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   #### Test 5.7: Inference on beta and f, hypothesis testing and CI, Wald and Enhanced-ESF implementation
   inf_obj <- inferenceDataObjectBuilder(test = c("sim", "oat"), interval = "oat", component = c("both", "parametric"), type = c("w", "enh-esf"), dim = 2, n_cov = 1, beta0 = 1, f0 = f, n_flip = 150000, locations_by_nodes = T)
@@ -158,10 +158,10 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   
   
   load(file=paste0(foldername,"/test_5_7.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                        output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+                        output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                        output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
+                        output_CPP$inference$f$p_values$wald[[1]]))) < tol, TRUE);
 })

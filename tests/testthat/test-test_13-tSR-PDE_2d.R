@@ -58,8 +58,8 @@ test_that("tSR-PDE CShaped domain FE order 2",{
   
   #save(output_CPP, file=paste0(foldername,"/test_13_1.RData"))
   load(file=paste0(foldername,"/test_13_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   #### Test 13.2: exact GCV
   lambdaS = 10^(-1:1)
@@ -73,8 +73,8 @@ test_that("tSR-PDE CShaped domain FE order 2",{
                               lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_13_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   #save(output_CPP, file=paste0(foldername,"/test_13_2.RData"))
   
   ### Inference
@@ -93,8 +93,8 @@ test_that("tSR-PDE CShaped domain FE order 2",{
                               inference.data.object = inf_obj)))
   
   load(file=paste0(foldername,"/test_13_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   #save(output_CPP, file=paste0(foldername,"/test_13_3.RData"))
   
@@ -113,6 +113,6 @@ test_that("tSR-PDE CShaped domain FE order 2",{
   #save(output_CPP, file=paste0(foldername,"/test_13_4.RData"))
   
   load(file=paste0(foldername,"/test_13_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 })

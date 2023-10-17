@@ -67,7 +67,7 @@ invisible(capture.output(sol <- smooth.FEM(observations = data,
                          FEMbasis = FEMbasis, 
                          lambda = lambda)))
 load(file=paste0(foldername,"/test_10_1.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 ### PDE penalization in 3D ################################
 # Include PDE parameters and use a penalization term with
@@ -120,5 +120,5 @@ data=exact_sol + rnorm(nrow(mesh_sphere$nodes), mean=0, sd=0.10*diff(range(exact
 invisible(capture.output(sol <- smooth.FEM(observations = data, PDE_parameters = PDE_parameters_anys,
                          FEMbasis = FEMbasis, lambda = lambda)))
 load(file=paste0(foldername,"/test_10_2.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 })

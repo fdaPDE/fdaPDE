@@ -45,8 +45,8 @@ test_that("SR-PDE Horseshoe domain",{
                                            lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_7_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   
   ### Test 7.2: Newton exact method with exact  GCV, default initial lambda and tolerance
@@ -59,8 +59,8 @@ test_that("SR-PDE Horseshoe domain",{
   
   #save(output_CPP,file=paste0(foldername,"/test_7_2.RData"))
   load(file=paste0(foldername,"/test_7_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   
   ### Test 7.3: Inference on beta, hypothesis testing, Wald, Speckman, ESF, and enhanced ESF p_values
@@ -74,16 +74,16 @@ test_that("SR-PDE Horseshoe domain",{
 
   load(file=paste0(foldername,"/test_7_3.RData"))
    
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
   # expect_equal( max(abs((sol$inference$beta$p_values$eigen_sign_flip[[1]]-
-  #                          output_CPP$inference$beta$p_values$eigen_sign_flip[[1]]))) < 1e-8, TRUE);
+  #                          output_CPP$inference$beta$p_values$eigen_sign_flip[[1]]))) < tol, TRUE);
   # expect_equal( max(abs((sol$inference$beta$p_values$enh_eigen_sign_flip[[1]]-
-  #                          output_CPP$inference$beta$p_values$enh_eigen_sign_flip[[1]]))) < 1e-8, TRUE);
+  #                          output_CPP$inference$beta$p_values$enh_eigen_sign_flip[[1]]))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           output_CPP$inference$beta$p_values$speckman[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
   
   ### Test 7.4: Inference on beta, hypothesis testing and confidence intervals of linear combinations, Wald and Speckman p_values  
   inf_obj<-inferenceDataObjectBuilder(test = "oat", interval = "oat", dim = 2, n_cov = 2, type = c("w", "s"), coeff = matrix(data = c(1,1,1,-1), nrow = 2, byrow = T))
@@ -95,16 +95,16 @@ test_that("SR-PDE Horseshoe domain",{
   
   load(file=paste0(foldername,"/test_7_4.RData"))
   
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           output_CPP$inference$beta$p_values$speckman[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
   
   # for(i in 1:length(output_CPP$inference$beta$p_values))
   #   expect_equal( max(abs((sol$inference$beta$p_values[[i]][[1]] - 
-  #                            output_CPP$inference$beta$p_values[[i]][[1]] ))) < 1e-8, TRUE);
+  #                            output_CPP$inference$beta$p_values[[i]][[1]] ))) < tol, TRUE);
   
   ### Test 7.5: Inference on f, hypothesis testing, equality to f0, Wald, Sign-flip and ESF p_values
   inf_obj<-inferenceDataObjectBuilder(test = "sim", dim = 2, n_cov = 2, type = c("w","sf","esf"), component = "nonparametric", f0 = fs.test)
@@ -118,10 +118,10 @@ test_that("SR-PDE Horseshoe domain",{
   #save(output_CPP,file=paste0(foldername,"/test_7_5.RData"))
   load(file=paste0(foldername,"/test_7_5.RData"))
   
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                           output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$f$p_values$wald[[1]]))) < tol, TRUE);
   
   ### Test 7.6: Inference on f, hypothesis testing and confidence intervals, Wald with new locations  
   mesh_loc = create.mesh.2D(nodes=horseshoe2D$boundary_nodes, segments = horseshoe2D$boundary_segments)
@@ -140,10 +140,10 @@ test_that("SR-PDE Horseshoe domain",{
   #save(output_CPP,file=paste0(foldername,"/test_7_6.RData"))
   load(file=paste0(foldername,"/test_7_6.RData"))
   
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                           output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$f$p_values$wald[[1]]))) < tol, TRUE);
   
   ### Test 7.7: Inference on both beta and f, hypothesis testing: all implementations p_values 
   inf_obj<-inferenceDataObjectBuilder(test = c("sim", "oat", "sim", "sim", "oat"), dim = 2, n_cov = 2, type = c("w","s","sf","esf","enh-esf"), 
@@ -159,11 +159,11 @@ test_that("SR-PDE Horseshoe domain",{
   #save(output_CPP,file=paste0(foldername,"/test_7_7.RData"))
   load(file=paste0(foldername,"/test_7_7.RData"))
   
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                           output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$f$p_values$wald[[1]]))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$f$p_values$speckman[[1]]-
-                           output_CPP$inference$f$p_values$speckman[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$f$p_values$speckman[[1]]))) < tol, TRUE);
   
 })

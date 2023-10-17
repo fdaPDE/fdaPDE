@@ -60,7 +60,7 @@ test_that("tSR-PDE Manifold",{
   #save(output_CPP, file=paste0(foldername,"/test_16_1.RData"))
   
   load(file=paste0(foldername,"/test_16_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 16.2
   invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates = W,
@@ -69,8 +69,8 @@ test_that("tSR-PDE Manifold",{
                               FLAG_PARABOLIC = FALSE)))
 
   load(file=paste0(foldername,"/test_16_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   ##########################################PARABOLIC####################################################
   ### MONOLITIC METHOD
@@ -81,7 +81,7 @@ test_that("tSR-PDE Manifold",{
                            FLAG_PARABOLIC = TRUE)))
   
   load(file=paste0(foldername,"/test_16_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 16.4
   invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
@@ -92,8 +92,8 @@ test_that("tSR-PDE Manifold",{
                               FLAG_PARABOLIC = TRUE)))
   
   load(file=paste0(foldername,"/test_16_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   
   ### Inference test: 
   inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
@@ -109,12 +109,12 @@ test_that("tSR-PDE Manifold",{
   # #save(output_CPP, file=paste0(foldername,"/test_16_5.RData"))
   # 
   # load(file=paste0(foldername,"/test_16_5.RData"))
-  # expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  # expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  # expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   # expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-  #                          output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+  #                          output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
   # expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-  #                          output_CPP$inference$beta$p_values$speckman[[1]]))) < 1e-8, TRUE);
+  #                          output_CPP$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
  
   #### Test 16.6: overall inference on beta, parabolic case
   invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
@@ -125,10 +125,10 @@ test_that("tSR-PDE Manifold",{
                             inference.data.object = inf_obj)))
   
   load(file=paste0(foldername,"/test_16_6.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           output_CPP$inference$beta$p_values$speckman[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
 })

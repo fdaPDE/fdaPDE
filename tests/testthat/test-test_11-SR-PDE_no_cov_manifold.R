@@ -26,12 +26,12 @@ lambda = 10^seq(-2,0.5,by=0.25)
 invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)))
 
 load(file=paste0(foldername,"/test_11_1.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 #### Test 1.2: grid with exact GCV
 #it takes a lot of time
 invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
 
 load(file=paste0(foldername,"/test_11_2.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 })

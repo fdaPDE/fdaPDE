@@ -38,7 +38,7 @@ test_that("SR-PDE Unit Square",{
                                            DOF.evaluation='exact', 
                                            lambda.selection.lossfunction='GCV')))
   load(file = paste0(foldername, "/test_6_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
   
   ### Test 6.2: Newton exact method with exact GCV, default initial lambda and tolerance
   invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
@@ -46,5 +46,5 @@ test_that("SR-PDE Unit Square",{
                                            DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
   load(file = paste0(foldername, "/test_6_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 })

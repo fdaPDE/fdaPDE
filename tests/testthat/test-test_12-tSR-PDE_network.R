@@ -119,7 +119,7 @@ invisible(capture.output(sol <- smooth.FEM.time(observations=data,
                          FLAG_PARABOLIC = FALSE)))
 
 load(file=paste0(foldername,"/test_12_1.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
 
 invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates = W,
                             FEMbasis = FEMbasis, time_mesh = TimeNodes,
@@ -127,8 +127,8 @@ invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates
                             FLAG_PARABOLIC = FALSE)))
 
 load(file=paste0(foldername,"/test_12_2.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 ##########################################PARABOLIC####################################################
 ### MONOLITIC METHOD
 invisible(capture.output(sol <- smooth.FEM.time(observations=data,
@@ -138,7 +138,7 @@ invisible(capture.output(sol <- smooth.FEM.time(observations=data,
                          FLAG_PARABOLIC = TRUE)))
 
 load(file=paste0(foldername,"/test_12_3.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
 
 invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
                                                 covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
@@ -148,8 +148,8 @@ invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(T
                             FLAG_PARABOLIC = TRUE)))
 
 load(file=paste0(foldername,"/test_12_4.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 
 ### ITERATIVE METHOD
 invisible(capture.output(sol <- smooth.FEM.time(observations=data,
@@ -159,7 +159,7 @@ invisible(capture.output(sol <- smooth.FEM.time(observations=data,
                              FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)))
 
 load(file=paste0(foldername,"/test_12_5.RData"))
-expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 
 invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
                                                 covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
@@ -169,6 +169,6 @@ invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(T
                                 FLAG_PARABOLIC = TRUE , FLAG_ITERATIVE = TRUE)))
 
 load(file=paste0(foldername,"/test_12_6.RData"))
-expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 
 })

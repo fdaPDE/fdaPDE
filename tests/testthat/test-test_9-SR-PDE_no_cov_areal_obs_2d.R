@@ -67,7 +67,7 @@ invisible(capture.output(sol<-smooth.FEM(observations=data,
                        PDE_parameters = PDE_parameters)))
 
 load(file=paste0(foldername,"/test_9_1.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 #### Test 9.2: Forcing term = 0  grid with exact  GCV 
 invisible(capture.output(sol<-smooth.FEM(observations=data, 
@@ -80,7 +80,7 @@ invisible(capture.output(sol<-smooth.FEM(observations=data,
                        lambda.selection.lossfunction='GCV')))
 
 load(file=paste0(foldername,"/test_9_2.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 #### Test 9.3: Forcing term != 0 without GCV 
 # forcing function != 0
@@ -105,7 +105,7 @@ invisible(capture.output(sol<-smooth.FEM(observations=data,
                        BC = BC, 
                        PDE_parameters = PDE_parameters)))
 load(file=paste0(foldername,"/test_9_3.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 
 #### Test 9.4: Forcing term != 0 grid with exact GCV 
@@ -133,7 +133,7 @@ invisible(capture.output(sol<-smooth.FEM(observations=data,
                        lambda.selection.criterion='grid', DOF.evaluation='exact', 
                        lambda.selection.lossfunction='GCV')))
 load(file=paste0(foldername,"/test_9_4.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 
 #### Test 9.5: Forcing term != 0 Newton finite differences with exact GCV 
@@ -160,7 +160,7 @@ invisible(capture.output(sol<-smooth.FEM(observations=data,
                        lambda.selection.criterion='newton_fd', DOF.evaluation='exact',
                        lambda.selection.lossfunction='GCV')))
 load(file=paste0(foldername,"/test_9_5.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 #### Test 9.6: BC != 0      without GCV 
 # Add a constat to the data to change true BC
@@ -178,7 +178,7 @@ invisible(capture.output(sol<-smooth.FEM(observations=data,
                        PDE_parameters = PDE_parameters)))
 
 load(file=paste0(foldername,"/test_9_6.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 data=data_backup #restore original data for next tests
 
@@ -200,7 +200,7 @@ invisible(capture.output(output_CPP<-smooth.FEM(observations=data,
                        lambda.selection.lossfunction='GCV')))
 
 load(file=paste0(foldername,"/test_9_7.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
 
 #### Test 9.8 on inference creating covariates and special setting (do not )
 
@@ -230,10 +230,10 @@ expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRU
 #                        inference.data.object = inf_beta)))
 # 
 # load(file=paste0(foldername,"/test_9_8.RData"))
-# expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-# expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+# expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+# expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 # expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-#                          output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+#                          output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
 # 
 # invisible(capture.output(sol<-smooth.FEM(observations=data, 
 #                        covariates = cov1,
@@ -247,8 +247,8 @@ expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRU
 #                        inference.data.object = inf_f)))
 # 
 # load(file=paste0(foldername,"/test_9_9.RData"))
-# expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
-# expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+# expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
+# expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
 # expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-#                          output_CPP$inference$f$p_values$wald[[1]]))) < 1e-8, TRUE);
+#                          output_CPP$inference$f$p_values$wald[[1]]))) < tol, TRUE);
 })

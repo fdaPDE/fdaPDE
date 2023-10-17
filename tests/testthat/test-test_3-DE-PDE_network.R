@@ -27,5 +27,5 @@ test_that("Density Estimation - Linear Network", {
   lambda = 1e-3
   invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda)))
   load(file=paste0(foldername, "/test_3.RData"))
-  expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 })

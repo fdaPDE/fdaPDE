@@ -73,7 +73,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               DOF.evaluation = NULL)))
   
   load(file=paste0(foldername,"/test_14_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 14.2: Forcing term = 0 exact  GCV,  monolitic method
   invisible(capture.output(sol<-smooth.FEM.time(observations=observations,
@@ -87,7 +87,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_14_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 14.3: Forcing term != 0 without GCV
   # forcing function != 0
@@ -110,7 +110,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               FLAG_PARABOLIC = TRUE)))
   
   load(file=paste0(foldername,"/test_14_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 14.4: Forcing term != 0 exact GCV, monolitic method
   invisible(capture.output(sol<-smooth.FEM.time(observations=observations,
@@ -124,7 +124,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_14_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 14.5: BC != 0  without GCV
   u_func<-function(points)
@@ -150,7 +150,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               FLAG_PARABOLIC = TRUE)))
 
   load(file=paste0(foldername,"/test_14_5.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   #### Test 14.6: BC != 0 exact GCV
   ### monolitic method
@@ -165,7 +165,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_14_6.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
   
   ### Inference
   
@@ -195,10 +195,10 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
                               inference.data.object = inf_obj)))
   
   load(file=paste0(foldername,"/test_14_7.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < 1e-8, TRUE);
-  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM.time$coeff-output_CPP$fit.FEM.time$coeff))) < tol, TRUE);
+  expect_equal( max(abs((sol$solution$beta-output_CPP$solution$beta))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           output_CPP$inference$beta$p_values$wald[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
   expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           output_CPP$inference$beta$p_values$speckman[[1]]))) < 1e-8, TRUE);
+                           output_CPP$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
 })

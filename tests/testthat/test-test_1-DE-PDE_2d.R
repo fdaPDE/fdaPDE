@@ -30,7 +30,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               preprocess_method="RightCV")))
 
 load(file = paste0(foldername, "/test_1_1.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 # 2) Lambda fixed
 lambda = 0.1
@@ -38,7 +38,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
 load(file = paste0(foldername, "/test_1_2.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 # 3) Cross-validation simplified version
 lambda = c(0.0001, 0.001, 0.01, 0.1, 1)
@@ -47,7 +47,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="SimplifiedCV")))
 load(file = paste0(foldername, "/test_1_3.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 # 4) Initialization given
 lambda = 0.1
@@ -56,7 +56,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Fixed_Step", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
 load(file = paste0(foldername, "/test_1_4.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 # 5) step_method = Backtracking method
 lambda = 0.1
@@ -64,7 +64,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Backtracking_Method", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
 load(file = paste0(foldername, "/test_1_5.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 # 6) step_method = Wolfe method
 lambda = 0.1
@@ -72,7 +72,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Wolfe_Method", direction_method = "BFGS",
               preprocess_method="NoCrossValidation")))
 load(file = paste0(foldername, "/test_1_6.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 # 7) direction_method = Gradient
 lambda = 0.1
@@ -80,7 +80,7 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               step_method = "Fixed_Step", direction_method = "Gradient",
               preprocess_method="NoCrossValidation")))
 load(file = paste0(foldername, "/test_1_7.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 
 
 # 8) Naive search algorithm
@@ -90,5 +90,5 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
               preprocess_method="NoCrossValidation", search = "naive")))
 
 load(file = paste0(foldername, "/test_1_8.RData"))
-expect_equal( max(abs((sol_ex$g-sol$g))) < 1e-8, TRUE);
+expect_equal( max(abs((sol_ex$g-sol$g))) < tol, TRUE);
 })

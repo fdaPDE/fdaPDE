@@ -90,7 +90,7 @@ test_that("Spatial Regression (no covariates) - Linear Network", {
                          lambda.selection.lossfunction='GCV')))
   
   load(file=paste0(foldername,"/test_4_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
   
   #### Test 4.5: Inference on f, hypothesis testing and CI, Wald and SF implementations
   inf_obj <- inferenceDataObjectBuilder(test = "sim", interval = "oat", type = c("w", "sf"), component = "nonparametric", dim = 2, n_cov = 0, f0 = AUX, locations_by_nodes = T)
@@ -100,9 +100,9 @@ test_that("Spatial Regression (no covariates) - Linear Network", {
                          lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)))
   
   load(file=paste0(foldername,"/test_4_5.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < 1e-8, TRUE);
+  expect_equal( max(abs((sol$fit.FEM$coeff-output_CPP$fit.FEM$coeff))) < tol, TRUE);
   expect_equal( max(abs(sol$inference$f$p_values$wald[[1]] - 
-                   output_CPP$inference$f$p_values$wald[[1]]))< 1e-8, TRUE); 
+                   output_CPP$inference$f$p_values$wald[[1]]))< tol, TRUE); 
   
 })
 

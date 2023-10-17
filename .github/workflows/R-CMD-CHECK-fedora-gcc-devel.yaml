@@ -1,0 +1,35 @@
+
+name: R-CMD-check-fedora-gcc-devel:
+on:
+  push:
+     branches: [master]
+     
+jobs:
+  R-CMD-CHECK-fedora-gcc-devel:
+    runs-on: ubuntu-latest
+    container:
+      image: rhub/fedora-gcc-devel:latest
+      
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      RGL_USE_NULL: true
+      DISPLAY: 99.0
+      
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup-r
+      run: |
+        sudo ln -s /opt/R-devel/bin/R /usr/local/bin/R
+        sudo ln -s /opt/R-devel/bin/Rscript /usr/local/bin/Rscript
+      shell: bash
+      
+    - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+    - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          
