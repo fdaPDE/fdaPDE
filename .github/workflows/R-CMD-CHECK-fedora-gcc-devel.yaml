@@ -1,11 +1,14 @@
 
-name: R-CMD-check-fedora-gcc-devel:
 on:
   push:
      branches: [master]
+  pull_request:
+     branches: [master]
+
+name: R-CMD-check-fedora-gcc-devel
      
 jobs:
-  R-CMD-CHECK-fedora-gcc-devel:
+  R-CMD-check-fedora-gcc-devel:
     runs-on: ubuntu-latest
     container:
       image: rhub/fedora-gcc-devel:latest
