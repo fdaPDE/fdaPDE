@@ -5,13 +5,25 @@ on:
   pull_request:
      branches: [master]
 
-name: R-CMD-check-fedora-gcc-devel
+name: R-CMD-check-fedora
      
 jobs:
-  R-CMD-check-fedora-gcc-devel:
-    runs-on: ubuntu-latest
+  R-CMD-check-fedora:
+    
+    runs-on: ${{ matrix.config.os }}
+
+    name: fedora-latest (${{ matrix.config.compiler }}-${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest,   r: 'devel', compiler: 'gcc', image: 'rhub/fedora-gcc-devel:latest'}
+          - {os: ubuntu-latest,   r: 'devel', compiler: 'clang', image: 'rhub/fedora-clang-devel:latest'}
+          
+    runs-on: ${{ matrix.config.os }}
     container:
-      image: rhub/fedora-gcc-devel:latest
+      image: ${{ matrix.config.image }}
       
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -20,7 +32,10 @@ jobs:
       DISPLAY: 99.0
       
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    
+    - uses: r-lib/actions/setup-pandoc@v2
+    
     - name: setup-r
       run: |
         sudo ln -s /opt/R-devel/bin/R /usr/local/bin/R
@@ -31,7 +46,7 @@ jobs:
       run: |
         sudo dnf install -y mesa-libGL-devel mesa-libGLU-devel libpng-devel
       shell: bash
-      
+    
     - uses: r-lib/actions/setup-r-dependencies@v2
       with:
         extra-packages: any::rcmdcheck
