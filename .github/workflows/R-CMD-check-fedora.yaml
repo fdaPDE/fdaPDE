@@ -21,7 +21,6 @@ jobs:
           - {os: ubuntu-latest,   r: 'devel', compiler: 'gcc', image: 'rhub/fedora-gcc-devel:latest'}
           - {os: ubuntu-latest,   r: 'devel', compiler: 'clang', image: 'rhub/fedora-clang-devel:latest'}
           
-    runs-on: ${{ matrix.config.os }}
     container:
       image: ${{ matrix.config.image }}
       
