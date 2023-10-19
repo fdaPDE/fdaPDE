@@ -65,7 +65,7 @@ jobs:
           library(testthat)
           source("tests/data/setup.R")
           remove.packages("fdaPDE")
-        shell: Rscript{0}
+        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
