@@ -1,3 +1,9 @@
+if(!dir.exists(test_path("../data/DE-PDE")))
+  dir.create(test_path("../data/DE-PDE"))
+
+if(!dir.exists(test_path("../data/DE-PDE/test_3")))
+  dir.create(test_path("../data/DE-PDE/test_3"))
+
 
   foldername <- test_path("../data/DE-PDE/test_3/")
   set.seed(0)

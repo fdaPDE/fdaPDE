@@ -1,4 +1,10 @@
-  options(warn=-1)
+if(!dir.exists(test_path("../data/tSR-PDE")))
+  dir.create(test_path("../data/tSR-PDE"))
+
+if(!dir.exists(test_path("../data/tSR-PDE/test_15")))
+  dir.create(test_path("../data/tSR-PDE/test_15"))  
+
+options(warn=-1)
   foldername <- test_path("../data/tSR-PDE/test_15/")
   
   set.seed(0)

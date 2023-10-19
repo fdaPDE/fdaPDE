@@ -1,3 +1,8 @@
+if(!dir.exists(test_path("../data/tSR-PDE")))
+  dir.create(test_path("../data/tSR-PDE"))
+
+if(!dir.exists(test_path("../data/tSR-PDE/test_12")))
+  dir.create(test_path("../data/tSR-PDE/test_12"))
 
 options(warn=-1)
 foldername <- test_path("../data/tSR-PDE/test_12")

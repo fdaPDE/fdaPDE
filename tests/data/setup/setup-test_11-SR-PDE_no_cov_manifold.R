@@ -1,3 +1,8 @@
+if(!dir.exists(test_path("../data/SR-PDE")))
+  dir.create(test_path("../data/SR-PDE"))
+
+if(!dir.exists(test_path("../data/SR-PDE/test_11")))
+  dir.create(test_path("../data/SR-PDE/test_11"))
 
 options(warn=-1)
 foldername = test_path("../data/SR-PDE/test_11/")

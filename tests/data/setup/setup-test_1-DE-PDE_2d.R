@@ -1,4 +1,10 @@
 
+if(!dir.exists(test_path("../data/DE-PDE")))
+  dir.create(test_path("../data/DE-PDE"))
+
+if(!dir.exists(test_path("../data/DE-PDE/test_1")))
+  dir.create(test_path("../data/DE-PDE/test_1"))
+
 foldername <- test_path("../data/DE-PDE/test_1")
   
 ## Create a 2D mesh over a squared domain

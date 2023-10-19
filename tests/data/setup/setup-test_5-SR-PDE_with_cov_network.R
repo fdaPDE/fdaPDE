@@ -1,4 +1,10 @@
 
+if(!dir.exists(test_path("../data/SR-PDE")))
+  dir.create(test_path("../data/SR-PDE"))
+
+if(!dir.exists(test_path("../data/SR-PDE/test_5")))
+  dir.create(test_path("../data/SR-PDE/test_5"))
+
   foldername <- test_path("../data/SR-PDE/test_5/")
   
   eps = 1 / 2

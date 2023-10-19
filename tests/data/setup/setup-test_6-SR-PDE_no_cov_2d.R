@@ -1,3 +1,8 @@
+if(!dir.exists(test_path("../data/SR-PDE")))
+  dir.create(test_path("../data/SR-PDE"))
+
+if(!dir.exists(test_path("../data/SR-PDE/test_6")))
+  dir.create(test_path("../data/SR-PDE/test_6"))
 
   foldername = test_path("../data/SR-PDE/test_6/")  
   x = seq(0,1, length.out = 20)
@@ -19,6 +24,7 @@
   
   # Exact solution (pointwise at nodes)
   sol_exact = f(mesh$nodes[,1], mesh$nodes[,2])
+  
   
   # Add error to simulate data
   set.seed(7893475)

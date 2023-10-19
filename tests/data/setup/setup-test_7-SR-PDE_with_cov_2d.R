@@ -1,4 +1,10 @@
 
+if(!dir.exists(test_path("../data/SR-PDE")))
+  dir.create(test_path("../data/SR-PDE"))
+
+if(!dir.exists(test_path("../data/SR-PDE/test_7")))
+  dir.create(test_path("../data/SR-PDE/test_7"))
+
   foldername = test_path("../data/SR-PDE/test_7/")  
   
   data(horseshoe2D)
