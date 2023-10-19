@@ -39,7 +39,7 @@ jobs:
         sudo ln -s /opt/R-devel/bin/Rscript /usr/local/bin/Rscript
       shell: bash
       
-    - name: installing rgl support on Fedora
+    - name: install rgl support on Fedora
       run: |
         sudo dnf install -y mesa-libGL-devel mesa-libGLU-devel libpng-devel
       shell: bash
@@ -49,7 +49,7 @@ jobs:
         extra-packages: any::rcmdcheck
         needs: check
         
-    - name: building data
+    - name: build data
       run: |
         install.packages("fdaPDE", repos="https://cran.stat.unipd.it/")
         library(fdaPDE)
@@ -58,6 +58,11 @@ jobs:
         remove.packages("fdaPDE")
       shell: Rscript {0}
     
+    - name: remove last row of .Rbuildignore
+      run: |
+        sed -i '$d' fdaPDE/.Rbuildignore
+      shell: bash
+      
     - uses: r-lib/actions/check-r-package@v2
       with:
         upload-snapshots: true
