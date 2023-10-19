@@ -60,7 +60,7 @@ jobs:
     
     - name: remove last row of .Rbuildignore
       run: |
-        sed -i '$d' fdaPDE/.Rbuildignore
+        sed -i '$d' .Rbuildignore
       shell: bash
       
     - uses: r-lib/actions/check-r-package@v2
