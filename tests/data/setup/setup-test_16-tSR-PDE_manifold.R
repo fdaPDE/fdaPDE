@@ -1,4 +1,3 @@
-test_that("tSR-PDE Manifold",{
   options(warn=-1)
   foldername <- test_path("../data/tSR-PDE/test_16/")
   
@@ -53,81 +52,52 @@ test_that("tSR-PDE Manifold",{
   
   #########################################SEPARABLE####################################################
   #### Test 16.1
-  invisible(capture.output(sol <-  smooth.FEM.time(observations=data,
+  invisible(capture.output(sol_ref <-  smooth.FEM.time(observations=data,
                            FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
                            lambdaS = lambdaS, lambdaT = lambdaT,
                            FLAG_PARABOLIC = FALSE)))
-  #save(sol_ref, file=paste0(foldername,"/test_16_1.RData"))
+  #save(output_CPP, file=paste0(foldername,"/test_16_1.RData"))
   
-  load(file=paste0(foldername,"/test_16_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_16_1.RData"))
   
   #### Test 16.2
-  invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates = W,
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov, covariates = W,
                               FEMbasis = FEMbasis, time_mesh = TimeNodes,
                               lambdaS = lambdaS, lambdaT = lambdaT,
                               FLAG_PARABOLIC = FALSE)))
 
-  load(file=paste0(foldername,"/test_16_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_16_2.RData"))
   
   ##########################################PARABOLIC####################################################
   ### MONOLITIC METHOD
   #### Test 16.3
-  invisible(capture.output(sol <- smooth.FEM.time(observations=data,
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations=data,
                            FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
                            lambdaS = lambdaS, lambdaT = lambdaT,
                            FLAG_PARABOLIC = TRUE)))
   
-  load(file=paste0(foldername,"/test_16_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_16_3.RData"))
   
   #### Test 16.4
-  invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
                                                          covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
                               FEMbasis = FEMbasis, time_mesh = TimeNodes,
                               lambdaS = lambdaS, lambdaT = lambdaT,
                               IC=func_evaluation[1:nrow(mesh$nodes)],
                               FLAG_PARABOLIC = TRUE)))
   
-  load(file=paste0(foldername,"/test_16_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_16_4.RData"))
   
   ### Inference test: 
   inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
   
-  # #### Test 16.5: overall inference on beta, serparable case
-  # invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates = W,
-  #                           FEMbasis = FEMbasis, time_mesh = TimeNodes,
-  #                           lambdaS = lambdaS, lambdaT = lambdaT,
-  #                           lambda.selection.lossfunction = 'GCV', lambda.selection.criterion = 'grid',
-  #                           DOF.evaluation = 'stochastic',
-  #                           FLAG_PARABOLIC = FALSE,
-  #                           inference.data.object = inf_obj)))
-  # 
-  # load(file=paste0(foldername,"/test_16_5.RData"))
-  # expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  # expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  # expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-  #                          sol_ref$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
-  # expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-  #                          sol_ref$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
- 
   #### Test 16.6: overall inference on beta, parabolic case
-  invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
                             FEMbasis = FEMbasis, time_mesh = TimeNodes,
                             lambdaS = lambdaS, lambdaT = lambdaT,
                             IC=func_evaluation[1:nrow(mesh$nodes)],
                             FLAG_PARABOLIC = TRUE, 
                             inference.data.object = inf_obj)))
   
-  load(file=paste0(foldername,"/test_16_6.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           sol_ref$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           sol_ref$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
-})
+  save(sol_ref, file=paste0(foldername,"/test_16_6.RData"))
+ 

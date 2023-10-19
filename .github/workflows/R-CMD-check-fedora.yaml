@@ -12,14 +12,14 @@ jobs:
     
     runs-on: ${{ matrix.config.os }}
 
-    name: fedora-latest (${{ matrix.config.compiler }}-${{ matrix.config.r }})
+    name: fedora-latest (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest,   r: 'devel', compiler: 'gcc', image: 'rhub/fedora-gcc-devel:latest'}
-          - {os: ubuntu-latest,   r: 'devel', compiler: 'clang', image: 'rhub/fedora-clang-devel:latest'}
+          - {os: ubuntu-latest,   r: 'devel-gcc',    image: 'rhub/fedora-gcc-devel:latest'}
+          - {os: ubuntu-latest,   r: 'devel-clang',  image: 'rhub/fedora-clang-devel:latest'}
           
     container:
       image: ${{ matrix.config.image }}
@@ -48,7 +48,16 @@ jobs:
       with:
         extra-packages: any::rcmdcheck
         needs: check
-
+        
+    - name: building data
+      run: |
+        install.packages("fdaPDE", repos="https://cran.stat.unipd.it/")
+        library(fdaPDE)
+        library(testthat)
+        source("tests/data/setup.R")
+        remove.packages("fdaPDE")
+      shell: Rscript{0}
+    
     - uses: r-lib/actions/check-r-package@v2
       with:
         upload-snapshots: true

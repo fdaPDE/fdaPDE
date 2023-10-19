@@ -1,5 +1,4 @@
-test_that("Density Estimation - Unit Sphere", {
-  
+
   foldername <- test_path("../data/DE-PDE/test_2/")
   ## Create a 3D mesh 
   set.seed(0)
@@ -17,7 +16,5 @@ test_that("Density Estimation - Unit Sphere", {
   
   ## Density Estimation:
   lambda = 1e-5
-  invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda)))
-  load(file=paste0(foldername, "/test_2.RData"))
-  expect_equal( max(abs((sol_ref$g-sol$g))) < tol, TRUE);
-})
+  invisible(capture.output(sol_ref <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda)))
+  save(sol_ref, file=paste0(foldername, "/test_2.RData"))

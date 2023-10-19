@@ -1,5 +1,3 @@
-test_that("tSR-PDE Sphere",{
-  
   options(warn=-1)
   foldername <- test_path("../data/tSR-PDE/test_15/")
   
@@ -85,52 +83,37 @@ test_that("tSR-PDE Sphere",{
   datacov = matrix(datacov,nnodes,length(TimeLocations))
   ###########################SEPARABLE###########################################
   
-  invisible(capture.output(sol <- smooth.FEM.time(observations = data,time_mesh = TimeLocations,
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations = data,time_mesh = TimeLocations,
                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)))
-  #save(sol_ref, file=paste0(foldername,"/test_15_1.RData"))
-  load(file=paste0(foldername,"/test_15_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_15_1.RData"))
   
-  invisible(capture.output(sol <- smooth.FEM.time(locations=loc[1:nloc,2:4],time_locations = timeloc,
+  invisible(capture.output(sol_ref <- smooth.FEM.time(locations=loc[1:nloc,2:4],time_locations = timeloc,
                                   observations = data_noloc,
                                   time_mesh = timeloc,FEMbasis = FEMbasis, 
                                   lambdaS = lambdaS2, lambdaT = lambdaT2)))
   
-  #save(sol_ref, file=paste0(foldername,"/test_15_2.RData"))
-  load(file=paste0(foldername,"/test_15_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_15_2.RData"))
   
-  invisible(capture.output(sol <- smooth.FEM.time(observations = datacov,time_mesh = TimeLocations, covariates = W,
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations = datacov,time_mesh = TimeLocations, covariates = W,
                               FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)))
   
-  #save(sol_ref, file=paste0(foldername,"/test_15_3.RData"))
-  load(file=paste0(foldername,"/test_15_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_15_3.RData"))
   
   ##########################################PARABOLIC####################################################
   ### MONOLITIC METHOD
-  invisible(capture.output(sol <- smooth.FEM.time(observations = data,time_mesh = TimeLocations,
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations = data,time_mesh = TimeLocations,
                            FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE)))
   
-  #save(sol_ref, file=paste0(foldername,"/test_15_4.RData"))
-  load(file=paste0(foldername,"/test_15_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  
-  invisible(capture.output(sol <- smooth.FEM.time(locations=loc[1:nloc,2:4],observations = data_noloc,time_mesh = timeloc,
+  save(sol_ref, file=paste0(foldername,"/test_15_4.RData"))
+ 
+  invisible(capture.output(sol_ref <- smooth.FEM.time(locations=loc[1:nloc,2:4],observations = data_noloc,time_mesh = timeloc,
                                   FEMbasis = FEMbasis, lambdaS = lambdaS_par2, lambdaT = lambdaT_par2, FLAG_PARABOLIC = TRUE)))
   
-  #save(sol_ref, file=paste0(foldername,"/test_15_5.RData"))
-  load(file=paste0(foldername,"/test_15_5.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+  save(sol_ref, file=paste0(foldername,"/test_15_5.RData"))
   
-  invisible(capture.output(sol <- smooth.FEM.time(observations = datacov[,2:length(TimeLocations)],time_mesh = TimeLocations, 
+  invisible(capture.output(sol_ref <- smooth.FEM.time(observations = datacov[,2:length(TimeLocations)],time_mesh = TimeLocations, 
                                                          covariates = W[(1+nnodes):(length(TimeLocations)*nnodes),],
                               FEMbasis = FEMbasis, lambdaS = lambdaS_par, lambdaT = lambdaT_par, FLAG_PARABOLIC = TRUE,
                               IC=func_evaluation[1:nnodes])))
   
-  #save(sol_ref, file=paste0(foldername,"/test_15_6.RData"))
-  load(file=paste0(foldername,"/test_15_6.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-})
+  save(sol_ref, file=paste0(foldername,"/test_15_6.RData"))

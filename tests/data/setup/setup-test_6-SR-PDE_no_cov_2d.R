@@ -1,5 +1,4 @@
-test_that("SR-PDE Unit Square",{
-  
+
   foldername = test_path("../data/SR-PDE/test_6/")  
   x = seq(0,1, length.out = 20)
   y = x
@@ -31,20 +30,18 @@ test_that("SR-PDE Unit Square",{
   
   options(warn=-1)  
   #### Test 6.1: grid with exact GCV
-  invisible(capture.output(sol<-smooth.FEM(observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, 
                                            FEMbasis=FEMbasis, 
                                            lambda=lambda, 
                                            lambda.selection.criterion='grid', 
                                            DOF.evaluation='exact', 
                                            lambda.selection.lossfunction='GCV')))
-  load(file = paste0(foldername, "/test_6_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
+  save(sol_ref, file = paste0(foldername, "/test_6_1.RData"))
   
   ### Test 6.2: Newton exact method with exact GCV, default initial lambda and tolerance
-  invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
                                            lambda.selection.criterion='newton',
                                            DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
-  load(file = paste0(foldername, "/test_6_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-})
+  save(sol_ref, file = paste0(foldername, "/test_6_2.RData"))
+  

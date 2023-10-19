@@ -1,5 +1,4 @@
-test_that("Spatial Regression (no covariates) - Linear Network", {
-  
+
   foldername <- test_path("../data/SR-PDE/test_4/")
   
   eps = 1 / 2
@@ -15,7 +14,7 @@ test_that("Spatial Regression (no covariates) - Linear Network", {
   nnodes=dim(mesh$nodes)[1]
   FEMbasis=create.FEM.basis(mesh)
   
-  # Exact solution (pointwise at nodes)
+  # Exact sol_refution (pointwise at nodes)
   aux.4 = function(x,y){
     h = 1
     source = 4 
@@ -74,35 +73,30 @@ test_that("Spatial Regression (no covariates) - Linear Network", {
     return(res)
   }
   
-  sol_exact=AUX(mesh$nodes[,1],mesh$nodes[,2])
+  sol_ref_exact=AUX(mesh$nodes[,1],mesh$nodes[,2])
   
   # Add error to simulate data
   set.seed(32)
-  ran=range(sol_exact)
-  data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
+  ran=range(sol_ref_exact)
+  data = sol_ref_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
   
   # Set smoothing parameter
   lambda = 10^seq(-4,-2,length.out=10)
   
   #### Test 4.1: grid with exact GCV
-  invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                          lambda.selection.criterion='grid', DOF.evaluation='exact', 
                          lambda.selection.lossfunction='GCV')))
   
-  load(file=paste0(foldername,"/test_4_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
+  save(sol_ref, file = paste0(foldername,"/test_4_1.RData"))
   
-  #### Test 4.5: Inference on f, hypothesis testing and CI, Wald and SF implementations
+  #### Test 4.2: Inference on f, hypothesis testing and CI, Wald and SF implementations
   inf_obj <- inferenceDataObjectBuilder(test = "sim", interval = "oat", type = c("w", "sf"), component = "nonparametric", dim = 2, n_cov = 0, f0 = AUX, locations_by_nodes = T)
   
-  invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                          lambda.selection.criterion='grid', DOF.evaluation='exact', 
                          lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)))
   
-  load(file=paste0(foldername,"/test_4_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs(sol$inference$f$p_values$wald[[1]] - 
-                   sol_ref$inference$f$p_values$wald[[1]]))< tol, TRUE); 
+  save(sol_ref, file = paste0(foldername,"/test_4_2.RData"))
   
-})
 

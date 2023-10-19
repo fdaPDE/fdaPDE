@@ -1,5 +1,4 @@
-test_that("SR-PDE Sphere domain", {
-  
+
 ### Second order FEM in 3D ################################
 # Compare the accuracy and robustness of first 
 # and second order methods in 3D settings.
@@ -63,11 +62,10 @@ data= exact_sol + rnorm(nnodes,
                         sd=noisepercent * (ran[2]-ran[1]))
 
 # Compute the solution for each lambda
-invisible(capture.output(sol <- smooth.FEM(observations = data, 
+invisible(capture.output(sol_ref <- smooth.FEM(observations = data, 
                          FEMbasis = FEMbasis, 
                          lambda = lambda)))
-load(file=paste0(foldername,"/test_10_1.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_10_1.RData"))
 
 ### PDE penalization in 3D ################################
 # Include PDE parameters and use a penalization term with
@@ -117,8 +115,6 @@ exact_sol =  sin(2*pi*mesh_sphere$nodes[,1]) +  2 * sin(2*pi*mesh_sphere$nodes[,
 data=exact_sol + rnorm(nrow(mesh_sphere$nodes), mean=0, sd=0.10*diff(range(exact_sol)))
 
 # Compute the solution for each lambda
-invisible(capture.output(sol <- smooth.FEM(observations = data, PDE_parameters = PDE_parameters_anys,
+invisible(capture.output(sol_ref <- smooth.FEM(observations = data, PDE_parameters = PDE_parameters_anys,
                          FEMbasis = FEMbasis, lambda = lambda)))
-load(file=paste0(foldername,"/test_10_2.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-})
+save(sol_ref, file=paste0(foldername,"/test_10_2.RData"))

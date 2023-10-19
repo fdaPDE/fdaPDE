@@ -1,4 +1,4 @@
-test_that("tSR-PDE CShaped domain FE order 2",{
+
   options(warn=-1)
   foldername <- test_path("../data/tSR-PDE/test_13/")
   data(horseshoe2D)
@@ -50,21 +50,18 @@ test_that("tSR-PDE CShaped domain FE order 2",{
   lambdaT = 10^-2
   
   #### Test 13.1: Without GCV
-  invisible(capture.output(sol<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+  invisible(capture.output(sol_ref<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                               observations=observations, 
                               covariates = cov1,
                               FEMbasis=FEMbasis, lambdaS=lambdaS, 
                               lambdaT=lambdaT)))
   
-  #save(sol_ref, file=paste0(foldername,"/test_13_1.RData"))
-  load(file=paste0(foldername,"/test_13_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  
+  save(sol_ref, file=paste0(foldername,"/test_13_1.RData"))
+ 
   #### Test 13.2: exact GCV
   lambdaS = 10^(-1:1)
   lambdaT = 10^(-6:-4)
-  invisible(capture.output(sol<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+  invisible(capture.output(sol_ref<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                               observations=observations, 
                               covariates = cov1,
                               FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
@@ -72,10 +69,7 @@ test_that("tSR-PDE CShaped domain FE order 2",{
                               DOF.evaluation='exact', 
                               lambda.selection.lossfunction='GCV')))
   
-  load(file=paste0(foldername,"/test_13_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  #save(sol_ref, file=paste0(foldername,"/test_13_2.RData"))
+  save(sol_ref, file=paste0(foldername,"/test_13_2.RData"))
   
   ### Inference
   # Inference obj:
@@ -84,7 +78,7 @@ test_that("tSR-PDE CShaped domain FE order 2",{
   #### Test 13.3: overall inference on beta parameters, separable case
   lambdaS = 10^(-1:1)
   lambdaT = 10^(-6:-4)
-  invisible(capture.output(sol<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+  invisible(capture.output(sol_ref<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                               observations=observations, 
                               covariates = cov1,
                               FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
@@ -92,16 +86,12 @@ test_that("tSR-PDE CShaped domain FE order 2",{
                               lambda.selection.lossfunction='GCV',
                               inference.data.object = inf_obj)))
   
-  load(file=paste0(foldername,"/test_13_3.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  
-  #save(sol_ref, file=paste0(foldername,"/test_13_3.RData"))
+  save(sol_ref, file=paste0(foldername,"/test_13_3.RData"))
   
   #### Test 13.4: overall inference on beta parameters, parabolic case
   lambdaS = 1 #10^(-1:1)
   lambdaT = 1e-6 #10^(-6:-4)
-  invisible(capture.output(sol<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+  invisible(capture.output(sol_ref<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
                               observations=observations, 
                               covariates = cov1,
                               FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
@@ -110,9 +100,4 @@ test_that("tSR-PDE CShaped domain FE order 2",{
                               FLAG_PARABOLIC = TRUE,
                               inference.data.object = inf_obj)))
   
-  #save(sol_ref, file=paste0(foldername,"/test_13_4.RData"))
-  
-  load(file=paste0(foldername,"/test_13_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-})
+  save(sol_ref, file=paste0(foldername,"/test_13_4.RData"))

@@ -1,6 +1,4 @@
 
-test_that("SR-PDE 2.5D Horseshoe domain",{
-  
 options(warn=-1)
 foldername = test_path("../data/SR-PDE/test_11/")
 
@@ -23,15 +21,13 @@ data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
 lambda = 10^seq(-2,0.5,by=0.25)
 
 #### Test 1.1: Without GCV
-invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)))
+invisible(capture.output(sol_ref<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)))
 
-load(file=paste0(foldername,"/test_11_1.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_11_1.RData"))
+
 #### Test 1.2: grid with exact GCV
 #it takes a lot of time
-invisible(capture.output(sol<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
+invisible(capture.output(sol_ref<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                        lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
 
-load(file=paste0(foldername,"/test_11_2.RData"))
-expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-})
+save(sol_ref, file=paste0(foldername,"/test_11_2.RData"))

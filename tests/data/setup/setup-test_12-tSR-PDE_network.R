@@ -1,7 +1,3 @@
-library(testthat)
-library(fdaPDE)
-
-test_that("tSR-PDE - Linear Network", {
 
 options(warn=-1)
 foldername <- test_path("../data/tSR-PDE/test_12")
@@ -113,62 +109,53 @@ data = matrix(data,nrow(mesh$nodes),length(TimeNodes))
 datacov = matrix(datacov,nrow(mesh$nodes),length(TimeNodes))
 
 #########################################SEPARABLE####################################################
-invisible(capture.output(sol <- smooth.FEM.time(observations=data,
+invisible(capture.output(sol_ref <- smooth.FEM.time(observations=data,
                          FEMbasis = FEMbasis, time_mesh = TimeNodes, time_locations = TimeNodes,
                          lambdaS = lambdaS, lambdaT = lambdaT,
                          FLAG_PARABOLIC = FALSE)))
 
-load(file=paste0(foldername,"/test_12_1.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_12_1.RData"))
 
-invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates = W,
+invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov, covariates = W,
                             FEMbasis = FEMbasis, time_mesh = TimeNodes,
                             lambdaS = lambdaS, lambdaT = lambdaT,
                             FLAG_PARABOLIC = FALSE)))
 
-load(file=paste0(foldername,"/test_12_2.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_12_2.RData"))
+
 ##########################################PARABOLIC####################################################
 ### MONOLITIC METHOD
-invisible(capture.output(sol <- smooth.FEM.time(observations=data,
+invisible(capture.output(sol_ref <- smooth.FEM.time(observations=data,
                          FEMbasis = FEMbasis, time_mesh = TimeNodes, 
                          time_locations = TimeNodes,
                          lambdaS = lambdaS, lambdaT = lambdaT,
                          FLAG_PARABOLIC = TRUE)))
 
-load(file=paste0(foldername,"/test_12_3.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_12_3.RData"))
 
-invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
+invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
                                                 covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
                             FEMbasis = FEMbasis, time_mesh = TimeNodes,
                             lambdaS = lambdaS, lambdaT = lambdaT,
                             IC=func_evaluation[1:nrow(mesh$nodes)],
                             FLAG_PARABOLIC = TRUE)))
 
-load(file=paste0(foldername,"/test_12_4.RData"))
-expect_equal( max(abs((sol$fit.FEM.time$coeff-sol_ref$fit.FEM.time$coeff))) < tol, TRUE);
-expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_12_4.RData"))
 
 ### ITERATIVE METHOD
-invisible(capture.output(sol <- smooth.FEM.time(observations=data,
+invisible(capture.output(sol_ref <- smooth.FEM.time(observations=data,
                              FEMbasis = FEMbasis, time_mesh = TimeNodes, 
                              time_locations = TimeNodes,
                              lambdaS = lambdaS_par, lambdaT = lambdaT_par,
                              FLAG_PARABOLIC = TRUE, FLAG_ITERATIVE = TRUE)))
 
-load(file=paste0(foldername,"/test_12_5.RData"))
-expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+save(sol_ref, file=paste0(foldername,"/test_12_5.RData"))
 
-invisible(capture.output(sol <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
+invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], 
                                                 covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],
                                 FEMbasis = FEMbasis, time_mesh = TimeNodes,
                                 lambdaS = lambdaS, lambdaT = lambdaT,
                                 IC=func_evaluation[1:nrow(mesh$nodes)],
                                 FLAG_PARABOLIC = TRUE , FLAG_ITERATIVE = TRUE)))
 
-load(file=paste0(foldername,"/test_12_6.RData"))
-expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-
-})
+save(sol_ref, file=paste0(foldername,"/test_12_6.RData"))

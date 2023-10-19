@@ -1,5 +1,4 @@
-test_that("Spatial Regression (with covariates) - Linear Network", {
-  
+
   foldername <- test_path("../data/SR-PDE/test_5/")
   
   eps = 1 / 2
@@ -92,76 +91,59 @@ test_that("Spatial Regression (with covariates) - Linear Network", {
   lambda = 10^seq(-4,-2,by=0.25)
   
   #### Test 2.1: Without GCV
-  # invisible(capture.output(sol<-smooth.FEM(observations=data, 
+  # invisible(capture.output(sol_ref<-smooth.FEM(observations=data, 
   #                        locations = NULL, 
   #                        covariates = cov1,
   #                        FEMbasis=FEMbasis, 
   #                        lambda=lambda[1])))
-  # load(file=paste0(foldername,"/test_5_1.RData"))
-  # expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  # expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  
+  # save(sol_ref,file=paste0(foldername,"/test_5_1.RData"))
+ 
   #### Test 2.2: grid with exact GCV
-  invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL,
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, locations = NULL,
                          covariates = cov1,
                          FEMbasis=FEMbasis, lambda=lambda,
                          lambda.selection.criterion='grid', 
                          DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
-  load(file=paste0(foldername,"/test_5_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  
+  save(sol_ref,file=paste0(foldername,"/test_5_2.RData"))
+
   # #### Test 2.3: grid with stochastic GCV
-  # invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
+  # invisible(capture.output(sol_ref<-smooth.FEM(observations=data, locations = NULL, 
   #                        covariates = cov1,
   #                        FEMbasis=FEMbasis, lambda=lambda,
   #                        lambda.selection.criterion='grid', 
   #                        DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')))
   # 
-  # load(file=paste0(foldername,"/test_5_3.RData"))
-  # expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  # expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-   
+  # save(sol_ref,file=paste0(foldername,"/test_5_3.RData"))
+  
   #### Test 5.4: Newton method with exact GCV, default initial lambda and tolerance
-  invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, locations = NULL, 
                          covariates = cov1,
                          FEMbasis=FEMbasis, 
                          lambda.selection.criterion='newton',
                          DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
   
-  load(file=paste0(foldername,"/test_5_4.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+  save(sol_ref,file=paste0(foldername,"/test_5_4.RData"))
   
   #### Test 5.5: Newton_fd method with exact GCV, default initial lambda and tolerance
-  invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, locations = NULL, 
                          covariates = cov1,
                          FEMbasis=FEMbasis, 
                          lambda.selection.criterion='newton_fd', DOF.evaluation='exact',  
                          lambda.selection.lossfunction='GCV')))
   
   
-  load(file=paste0(foldername,"/test_5_5.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
+  save(sol_ref,file=paste0(foldername,"/test_5_5.RData"))
   
   #### Test 5.7: Inference on beta and f, hypothesis testing and CI, Wald and Enhanced-ESF implementation
   inf_obj <- inferenceDataObjectBuilder(test = c("sim", "oat"), interval = "oat", component = c("both", "parametric"), type = c("w", "enh-esf"), dim = 2, n_cov = 1, beta0 = 1, f0 = f, n_flip = 150000, locations_by_nodes = T)
   
-  invisible(capture.output(sol<-smooth.FEM(observations=data, locations = NULL, 
+  invisible(capture.output(sol_ref<-smooth.FEM(observations=data, locations = NULL, 
                          covariates = cov1,
                          FEMbasis=FEMbasis, 
                          lambda.selection.criterion='newton', DOF.evaluation='exact', 
                          lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)))
   
   
-  load(file=paste0(foldername,"/test_5_7.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                        sol_ref$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                        sol_ref$inference$f$p_values$wald[[1]]))) < tol, TRUE);
-})
+  save(sol_ref,file=paste0(foldername,"/test_5_7.RData"))

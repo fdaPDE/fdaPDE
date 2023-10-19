@@ -57,6 +57,15 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          
+      - name: building data
+        run: |
+          install.packages("fdaPDE", repos="https://cran.stat.unipd.it/")
+          library(fdaPDE)
+          library(testthat)
+          source("tests/data/setup.R")
+          remove.packages("fdaPDE")
+        shell: Rscript{0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:

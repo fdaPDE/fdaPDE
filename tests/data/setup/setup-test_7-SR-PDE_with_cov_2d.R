@@ -1,5 +1,4 @@
-test_that("SR-PDE Horseshoe domain",{
-  
+
   foldername = test_path("../data/SR-PDE/test_7/")  
   
   data(horseshoe2D)
@@ -37,91 +36,58 @@ test_that("SR-PDE Horseshoe domain",{
   
   options(warn=-1)
   #### Test 7.1: grid with exact GCV
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis, lambda=lambda,
                                            lambda.selection.criterion='grid',
                                            DOF.evaluation='exact', 
                                            lambda.selection.lossfunction='GCV')))
   
-  load(file=paste0(foldername,"/test_7_1.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  
+  save(sol_ref,file=paste0(foldername,"/test_7_1.RData"))
   
   ### Test 7.2: Newton exact method with exact  GCV, default initial lambda and tolerance
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis,
                                            lambda.selection.criterion='newton', 
                                            DOF.evaluation='exact', 
                                            lambda.selection.lossfunction='GCV')))
   
-  #save(sol_ref,file=paste0(foldername,"/test_7_2.RData"))
-  load(file=paste0(foldername,"/test_7_2.RData"))
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  
+  #save(output_CPP,file=paste0(foldername,"/test_7_2.RData"))
+  save(sol_ref,file=paste0(foldername,"/test_7_2.RData"))
   
   ### Test 7.3: Inference on beta, hypothesis testing, Wald, Speckman, ESF, and enhanced ESF p_values
   inf_obj<-inferenceDataObjectBuilder(test = c("sim", rep("oat",3)), dim = 2, n_cov = 2, type = c("w", "s", "esf", "enh-esf"), beta0 = c(2,-1))
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis,
                                            lambda=lambda,
                                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
                                            inference.data.object=inf_obj)))
 
-  load(file=paste0(foldername,"/test_7_3.RData"))
+  save(sol_ref,file=paste0(foldername,"/test_7_3.RData"))
    
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           sol_ref$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
-  # expect_equal( max(abs((sol$inference$beta$p_values$eigen_sign_flip[[1]]-
-  #                          sol_ref$inference$beta$p_values$eigen_sign_flip[[1]]))) < tol, TRUE);
-  # expect_equal( max(abs((sol$inference$beta$p_values$enh_eigen_sign_flip[[1]]-
-  #                          sol_ref$inference$beta$p_values$enh_eigen_sign_flip[[1]]))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           sol_ref$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
-  
   ### Test 7.4: Inference on beta, hypothesis testing and confidence intervals of linear combinations, Wald and Speckman p_values  
   inf_obj<-inferenceDataObjectBuilder(test = "oat", interval = "oat", dim = 2, n_cov = 2, type = c("w", "s"), coeff = matrix(data = c(1,1,1,-1), nrow = 2, byrow = T))
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis, 
                                            lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
                                            inference.data.object=inf_obj)))
   
-  load(file=paste0(foldername,"/test_7_4.RData"))
-  
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$wald[[1]]-
-                           sol_ref$inference$beta$p_values$wald[[1]]))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$beta$p_values$speckman[[1]]-
-                           sol_ref$inference$beta$p_values$speckman[[1]]))) < tol, TRUE);
-  
-  # for(i in 1:length(sol_ref$inference$beta$p_values))
-  #   expect_equal( max(abs((sol$inference$beta$p_values[[i]][[1]] - 
-  #                            sol_ref$inference$beta$p_values[[i]][[1]] ))) < tol, TRUE);
+  save(sol_ref,file=paste0(foldername,"/test_7_4.RData"))
   
   ### Test 7.5: Inference on f, hypothesis testing, equality to f0, Wald, Sign-flip and ESF p_values
   inf_obj<-inferenceDataObjectBuilder(test = "sim", dim = 2, n_cov = 2, type = c("w","sf","esf"), component = "nonparametric", f0 = fs.test)
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis,
                                            lambda=lambda,
                                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
                                            inference.data.object=inf_obj)))
   
-  #save(sol_ref,file=paste0(foldername,"/test_7_5.RData"))
-  load(file=paste0(foldername,"/test_7_5.RData"))
-  
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                           sol_ref$inference$f$p_values$wald[[1]]))) < tol, TRUE);
+  #save(output_CPP,file=paste0(foldername,"/test_7_5.RData"))
+  save(sol_ref,file=paste0(foldername,"/test_7_5.RData"))
   
   ### Test 7.6: Inference on f, hypothesis testing and confidence intervals, Wald with new locations  
   mesh_loc = create.mesh.2D(nodes=horseshoe2D$boundary_nodes, segments = horseshoe2D$boundary_segments)
@@ -131,39 +97,26 @@ test_that("SR-PDE Horseshoe domain",{
   new_locs[,1] <- new_locs[,1] + 0.2
   
   inf_obj<-inferenceDataObjectBuilder(test = "sim", interval = "oat", dim = 2, n_cov = 2, type = "w", component = "nonparametric", locations = new_locs)
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis,
                                            lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
                                            inference.data.object=inf_obj)))
   
-  #save(sol_ref,file=paste0(foldername,"/test_7_6.RData"))
-  load(file=paste0(foldername,"/test_7_6.RData"))
-  
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                           sol_ref$inference$f$p_values$wald[[1]]))) < tol, TRUE);
-  
+  #save(output_CPP,file=paste0(foldername,"/test_7_6.RData"))
+  save(sol_ref,file=paste0(foldername,"/test_7_6.RData"))
+
   ### Test 7.7: Inference on both beta and f, hypothesis testing: all implementations p_values 
   inf_obj<-inferenceDataObjectBuilder(test = c("sim", "oat", "sim", "sim", "oat"), dim = 2, n_cov = 2, type = c("w","s","sf","esf","enh-esf"), 
                                       component = c("both", "parametric", "nonparametric", "both", "parametric"), f0 = fs.test, beta0 = c(2,-1))
   
-  invisible(capture.output(sol<-smooth.FEM(locations = locations, observations=data, 
+  invisible(capture.output(sol_ref<-smooth.FEM(locations = locations, observations=data, 
                                            covariates = cbind(cov1, cov2),
                                            FEMbasis=FEMbasis, 
                                            lambda=lambda,
                                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV', 
                                            inference.data.object=inf_obj)))
   
-  #save(sol_ref,file=paste0(foldername,"/test_7_7.RData"))
-  load(file=paste0(foldername,"/test_7_7.RData"))
+  #save(output_CPP,file=paste0(foldername,"/test_7_7.RData"))
+  save(sol_ref,file=paste0(foldername,"/test_7_7.RData"))
   
-  expect_equal( max(abs((sol$fit.FEM$coeff-sol_ref$fit.FEM$coeff))) < tol, TRUE);
-  expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$f$p_values$wald[[1]]-
-                           sol_ref$inference$f$p_values$wald[[1]]))) < tol, TRUE);
-  expect_equal( max(abs((sol$inference$f$p_values$speckman[[1]]-
-                           sol_ref$inference$f$p_values$speckman[[1]]))) < tol, TRUE);
-  
-})
