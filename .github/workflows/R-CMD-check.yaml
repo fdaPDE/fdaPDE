@@ -57,20 +57,6 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          
-      - name: build data
-        run: |
-          install.packages("fdaPDE", repos="https://cran.stat.unipd.it/")
-          library(fdaPDE)
-          library(testthat)
-          source("tests/data/setup.R")
-          remove.packages("fdaPDE")
-        shell: Rscript {0}
-        
-      - name: remove last row of .Rbuildignore
-        run: |
-          sed -i'' -e '$d' .Rbuildignore
-        shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
         with:
