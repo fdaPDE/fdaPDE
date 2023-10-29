@@ -1,41 +1,33 @@
 # install stable version of fdaPDE
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load("pracma", "purrr", "testthat")
 
 if("fdaPDE" %in% (.packages())){
   detach("package:fdaPDE", unload=TRUE) 
 }
 
-if("purrr" %in% (.packages())){
-  detach("package:purrr", unload=TRUE) 
-}
-
-if("pracma" %in% (.packages())){
-  detach("package:pracma", unload=TRUE) 
-}
-
 # create tests/tmp/ directory 
 setwd("../")
-dir.create("tests/tmp/")
-install.packages("fdaPDE", lib = "tests/tmp/", repos="https://cran.mirror.garr.it/CRAN/")
-install.packages("purrr", lib = "tests/tmp/")
-install.packages("pracma", lib = "tests/tmp/")
-library("fdaPDE", lib.loc = "tests/tmp/")
-library("purrr", lib.loc = "tests/tmp/")
-library("pracma", lib.loc = "tests/tmp/")
+if(all(dir.exists(c(test_path("../data/DE-PDE"),
+                    test_path("../data/SR-PDE"),
+                    test_path("../data/tSR-PDE"),
+                    test_path("../data/GSR-PDE"))))){
+  dir.create("tests/tmp/")
+  install.packages("fdaPDE", lib = "tests/tmp/", repos="https://cran.mirror.garr.it/CRAN/")
 
-source("data/setup.R")
+  library("fdaPDE", lib.loc = "tests/tmp/")
+  source("tests/data/setup.R")
 
-detach("package:fdaPDE", unload = TRUE)
-remove.packages("fdaPDE", lib = "tests/tmp/")
+  detach("package:fdaPDE", unload = TRUE)
+  remove.packages("fdaPDE", lib = "tests/tmp/")
+  unlink("tests/tmp/", recursive = TRUE)
+}
 
 # run tests
 library(fdaPDE) # develop version
-library(testthat)
-test_dir("testthat/")
+test_dir("tests/testthat/")
 
 # delete tests/tmp directory
 detach("package:purrr", unload=TRUE) 
 detach("package:pracma", unload=TRUE)
-remove.packages("purrr", lib = "tests/tmp/")
-remove.packages("pracma", lib = "tests/tmp/")
-unlink("tests/tmp/", recursive = TRUE)
 setwd("tests/")
