@@ -2,7 +2,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_5")))
+if(!dir.exists(test_path("../data/SR-PDE/test_5"))){
   dir.create(test_path("../data/SR-PDE/test_5"))
 
   foldername <- test_path("../data/SR-PDE/test_5/")
@@ -153,3 +153,4 @@ if(!dir.exists(test_path("../data/SR-PDE/test_5")))
   
   
   save(sol_ref,file=paste0(foldername,"/test_5_7.RData"))
+}

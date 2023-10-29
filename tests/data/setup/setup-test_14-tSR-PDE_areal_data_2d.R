@@ -1,7 +1,7 @@
 if(!dir.exists(test_path("../data/tSR-PDE")))
   dir.create(test_path("../data/tSR-PDE"))
 
-if(!dir.exists(test_path("../data/tSR-PDE/test_14")))
+if(!dir.exists(test_path("../data/tSR-PDE/test_14"))){
   dir.create(test_path("../data/tSR-PDE/test_14"))
 
 options(warn=-1)
@@ -194,3 +194,4 @@ options(warn=-1)
                               inference.data.object = inf_obj)))
   
   save(sol_ref, file=paste0(foldername,"/test_14_7.RData"))
+}

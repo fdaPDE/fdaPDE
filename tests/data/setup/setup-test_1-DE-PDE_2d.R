@@ -2,7 +2,7 @@
 if(!dir.exists(test_path("../data/DE-PDE")))
   dir.create(test_path("../data/DE-PDE"))
 
-if(!dir.exists(test_path("../data/DE-PDE/test_1")))
+if(!dir.exists(test_path("../data/DE-PDE/test_1"))){
   dir.create(test_path("../data/DE-PDE/test_1"))
 
 foldername <- test_path("../data/DE-PDE/test_1")
@@ -88,3 +88,4 @@ invisible(capture.output(sol_ref <- DE.FEM(data = data, FEMbasis = FEMbasis, lam
               preprocess_method="NoCrossValidation", search = "naive")))
 
 save(sol_ref, file = paste0(foldername, "/test_1_8.RData"))
+}

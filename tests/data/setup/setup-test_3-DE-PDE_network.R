@@ -1,7 +1,7 @@
 if(!dir.exists(test_path("../data/DE-PDE")))
   dir.create(test_path("../data/DE-PDE"))
 
-if(!dir.exists(test_path("../data/DE-PDE/test_3")))
+if(!dir.exists(test_path("../data/DE-PDE/test_3"))){
   dir.create(test_path("../data/DE-PDE/test_3"))
 
 
@@ -33,4 +33,4 @@ if(!dir.exists(test_path("../data/DE-PDE/test_3")))
   lambda = 1e-3
   invisible(capture.output(sol_ref <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda)))
   save(sol_ref, file=paste0(foldername, "/test_3.RData"))
-
+}

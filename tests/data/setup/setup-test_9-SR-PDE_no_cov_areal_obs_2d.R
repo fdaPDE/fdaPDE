@@ -2,7 +2,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_9")))
+if(!dir.exists(test_path("../data/SR-PDE/test_9"))){
   dir.create(test_path("../data/SR-PDE/test_9"))
 
 options(warn=-1)
@@ -197,3 +197,4 @@ invisible(capture.output(output_CPP<-smooth.FEM(observations=data,
                        lambda.selection.lossfunction='GCV')))
 
 save(sol_ref, file=paste0(foldername,"/test_9_7.RData"))
+}

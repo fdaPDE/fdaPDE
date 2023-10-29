@@ -1,7 +1,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_4")))
+if(!dir.exists(test_path("../data/SR-PDE/test_4"))){
   dir.create(test_path("../data/SR-PDE/test_4"))
 
   foldername <- test_path("../data/SR-PDE/test_4/")
@@ -103,5 +103,5 @@ if(!dir.exists(test_path("../data/SR-PDE/test_4")))
                          lambda.selection.lossfunction='GCV', inference.data.object = inf_obj)))
   
   save(sol_ref, file = paste0(foldername,"/test_4_2.RData"))
-  
+}  
 

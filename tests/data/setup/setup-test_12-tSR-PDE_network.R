@@ -1,7 +1,7 @@
 if(!dir.exists(test_path("../data/tSR-PDE")))
   dir.create(test_path("../data/tSR-PDE"))
 
-if(!dir.exists(test_path("../data/tSR-PDE/test_12")))
+if(!dir.exists(test_path("../data/tSR-PDE/test_12"))){
   dir.create(test_path("../data/tSR-PDE/test_12"))
 
 options(warn=-1)
@@ -164,3 +164,4 @@ invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov[,2:leng
                                 FLAG_PARABOLIC = TRUE , FLAG_ITERATIVE = TRUE)))
 
 save(sol_ref, file=paste0(foldername,"/test_12_6.RData"))
+}

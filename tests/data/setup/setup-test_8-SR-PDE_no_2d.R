@@ -2,7 +2,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_8")))
+if(!dir.exists(test_path("../data/SR-PDE/test_8"))){
   dir.create(test_path("../data/SR-PDE/test_8"))
 
 options(warn=-1)
@@ -100,3 +100,4 @@ invisible(capture.output(sol_ref<-smooth.FEM(observations=data,
                        inference.data.object = inf_obj)))
 
 save(sol_ref, file=paste0(foldername,"/test_8_5.RData"))
+}

@@ -7,7 +7,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_10")))
+if(!dir.exists(test_path("../data/SR-PDE/test_10"))){
   dir.create(test_path("../data/SR-PDE/test_10"))
 
 options(warn=-1)
@@ -124,3 +124,4 @@ data=exact_sol + rnorm(nrow(mesh_sphere$nodes), mean=0, sd=0.10*diff(range(exact
 invisible(capture.output(sol_ref <- smooth.FEM(observations = data, PDE_parameters = PDE_parameters_anys,
                          FEMbasis = FEMbasis, lambda = lambda)))
 save(sol_ref, file=paste0(foldername,"/test_10_2.RData"))
+}

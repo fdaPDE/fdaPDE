@@ -2,7 +2,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_7")))
+if(!dir.exists(test_path("../data/SR-PDE/test_7"))){
   dir.create(test_path("../data/SR-PDE/test_7"))
 
   foldername = test_path("../data/SR-PDE/test_7/")  
@@ -125,4 +125,4 @@ if(!dir.exists(test_path("../data/SR-PDE/test_7")))
   
   #save(output_CPP,file=paste0(foldername,"/test_7_7.RData"))
   save(sol_ref,file=paste0(foldername,"/test_7_7.RData"))
-  
+}

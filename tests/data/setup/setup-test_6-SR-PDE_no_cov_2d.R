@@ -1,7 +1,7 @@
 if(!dir.exists(test_path("../data/SR-PDE")))
   dir.create(test_path("../data/SR-PDE"))
 
-if(!dir.exists(test_path("../data/SR-PDE/test_6")))
+if(!dir.exists(test_path("../data/SR-PDE/test_6"))){
   dir.create(test_path("../data/SR-PDE/test_6"))
 
   foldername = test_path("../data/SR-PDE/test_6/")  
@@ -50,4 +50,4 @@ if(!dir.exists(test_path("../data/SR-PDE/test_6")))
                                            DOF.evaluation='exact', lambda.selection.lossfunction='GCV')))
   
   save(sol_ref, file = paste0(foldername, "/test_6_2.RData"))
-  
+}
