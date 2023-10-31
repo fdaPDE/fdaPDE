@@ -4,7 +4,7 @@ IMAGE=rhub/debian-gcc-patched
 
 docker pull $IMAGE 
 
-docker run --name=tmp-container -v $(pwd)/../../:/root/fdaPDE --rm -ti $IMAGE bin/bash -c '
+docker run --name=tmp-debian-gcc -v $(pwd)/../../:/root/fdaPDE --rm -ti $IMAGE bin/bash -c '
 
 export RGL_USE_NULL=TRUE
 export DISPLAY=99.0
