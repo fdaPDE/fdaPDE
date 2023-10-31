@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.o
+*.so
+*.dll
+*.html
+fdaPDE.Rproj
+fdaPDE.Rcheck/
+tests/data/SR-PDE
+tests/data/DE-PDE
+tests/data/tSR-PDE
