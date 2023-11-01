@@ -12,11 +12,11 @@ dim = NULL,
 n_cov = NULL,
 locations = NULL,
 locations_indices = NULL,
-locations_by_nodes = F,
+locations_by_nodes = FALSE,
 coeff = NULL, 
 beta0 = NULL, 
 f0 = NULL,
-f_var = F,
+f_var = FALSE,
 level = 0.95,
 n_flip = 1000)
 }

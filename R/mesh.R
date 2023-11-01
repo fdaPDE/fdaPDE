@@ -186,7 +186,7 @@ create.mesh.2D <- function(nodes, nodesattributes = NA, segments = NA, holes = N
     flags = paste(flags,"o2",sep = '')
   }
   if(order < 1 || order >2){
-    print('Order must be 1 or 2')
+    stop('Order must be 1 or 2')
   }
 
   if(nrow(triangles) > 0){
@@ -491,7 +491,7 @@ create.mesh.2.5D<- function(nodes, triangles = NULL, order = 1, nodesattributes 
                 edges=outCPP[[1]], edgesmarkers=outCPP[[2]], neighbors=outCPP[[4]], holes=holes, order=order)
   }
   else if(order==2 && ncol(triangles) == 3){
-    print("You set order=2 but passed a matrix of triangles with just 3 columns. The midpoints for each edge will be computed.")
+    message("You set order=2 but passed a matrix of triangles with just 3 columns. The midpoints for each edge will be computed.")
 
     outCPP <- .Call("CPP_SurfaceMeshOrder2", triangles, nodes, PACKAGE = "fdaPDE")
 
@@ -693,7 +693,7 @@ create.mesh.3D<- function(nodes, tetrahedrons, order = 1, nodesattributes = NULL
                 holes=holes, order=order)
   }
   else if(order==2 && ncol(tetrahedrons) == 4){
-    print("You set order=2 but passed a matrix of tetrahedrons with just 4 columns. The midpoints for each edge will be computed.")
+    message("You set order=2 but passed a matrix of tetrahedrons with just 4 columns. The midpoints for each edge will be computed.")
 
     outCPP <- .Call("CPP_VolumeMeshOrder2", tetrahedrons, nodes, PACKAGE = "fdaPDE")
 
@@ -900,7 +900,7 @@ create.mesh.1.5D <- function(nodes, edges = NULL, order = 1, nodesattributes = N
     
   }
   else if( order==2 && ncol(edges)==2){
-    print("You set order=2 but passed a matrix of edges with just 2 columns. The midpoints for each edge will be computed.")
+    message("You set order=2 but passed a matrix of edges with just 2 columns. The midpoints for each edge will be computed.")
     outCPP <- .Call("CPP_EdgeMeshOrder2", edges, nodes, PACKAGE = "fdaPDE")
     edges = cbind( edges , outCPP[[6]])
     nodes=rbind(nodes, outCPP[[5]])

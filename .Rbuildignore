@@ -1,1 +1,8 @@
-^LICENSE
+^LICENSE.md
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^tests$
+[.]so$
+[.]o$
+^fdaPDE.Rcheck$

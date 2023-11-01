@@ -16,8 +16,24 @@ class DescentDirection_factory
 	{
 		if (d=="Gradient")
 			return fdaPDE::make_unique<DirectionGradient<ORDER,mydim,ndim>>(fp);
-		else if (d=="BFGS")
-			return fdaPDE::make_unique<DirectionBFGS<ORDER,mydim,ndim>>(fp, dp.getNumNodes());
+		else if (d=="ConjugateGradientFR")
+            return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim>>(fp, 0);
+        else if (d=="ConjugateGradientPRP")
+            return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim>>(fp, 1);
+        else if (d=="ConjugateGradientHS")
+            return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim>>(fp, 2);
+        else if (d=="ConjugateGradientDY")
+            return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim>>(fp, 3);
+        else if (d=="ConjugateGradientCD")
+            return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim>>(fp, 4);
+        else if (d=="ConjugateGradientLS")
+            return fdaPDE::make_unique<DirectionConjugateGradient<ORDER, mydim, ndim>>(fp, 5);
+        else if (d=="BFGS")
+            return fdaPDE::make_unique<DirectionBFGS<ORDER, mydim, ndim>>(fp, dp.getNumNodes());
+        else if (d=="L-BFGS5")
+            return fdaPDE::make_unique<DirectionLBFGS<ORDER, mydim, ndim>>(fp, 5);
+        else if (d=="L-BFGS10")
+            return fdaPDE::make_unique<DirectionLBFGS<ORDER, mydim, ndim>>(fp, 10);
 		else{
 
 			Rprintf("Unknown direction option - using gradient direction");
