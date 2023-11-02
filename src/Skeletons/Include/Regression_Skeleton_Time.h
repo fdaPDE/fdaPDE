@@ -39,6 +39,10 @@ template<typename InputHandler>
 void inference_wrapper_time(const OptimizationData & opt_data, const output_Data<2> & output, const Inference_Carrier<InputHandler> & inf_car, MatrixXv & inference_output);
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
+void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> mesh_time_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_);
+
+
+template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, InferenceData & inferenceData, SEXP Rmesh, SEXP Rmesh_time)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh, regressionData.getSearch());//! load the mesh
@@ -107,6 +111,18 @@ SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & 
 
 		//!Only if inference is actually required
 		Inference_Carrier<InputHandler> inf_car(&regressionData, &regression, &solution_bricks.second,  &inferenceData, lambda_inference_S, lambda_inference_T); //Carrier for inference
+		
+		//get the component on which inference is required
+    		const std::vector<std::string> inf_component = inferenceData.get_component_type(); 
+		
+		//if nonparametric inference is required
+    		if(std::find(inf_component.begin(), inf_component.end(), "nonparametric") != inf_component.end() || std::find(inf_component.begin(), inf_component.end(), "both") != inf_component.end()){
+    		// set the solution of the system inside the inference carrier
+      		inf_car.setSolutionp(&(solution_bricks.first));
+      		// compute other local matrices according to the implementation
+      		compute_nonparametric_inference_matrices_time<InputHandler, ORDER, mydim, ndim>(mesh, mesh_time, regressionData, inferenceData, inf_car);
+    		}
+		
 		inference_wrapper_time(optimizationData, solution_bricks.second, inf_car, inference_Output);    
         }
 	
@@ -416,9 +432,12 @@ void inference_wrapper_time(const OptimizationData & opt_data, output_Data<2> & 
 {
   UInt n_implementations = inf_car.getInfData()->get_implementation_type().size();
   UInt p = inf_car.getInfData()->get_coeff_inference().rows();
+  UInt n_loc = inf_car.getN_loc();
+
+  UInt out_dim = (p > n_loc) ? p : n_loc; 
 
   // since only inference on beta is implemented for ST, the rows corresponding to f inference will be empty to be coherent with the size of inference_Solver's output
-  inference_output.resize(2*n_implementations+1, p+1);
+  inference_output.resize(2*n_implementations+1, out_dim+1);
 
   // Select the right policy for inversion of MatrixNoCov
   std::shared_ptr<Inverse_Base<MatrixXr>> inference_Inverter = std::make_shared<Inverse_Exact>(inf_car.getEp(), inf_car.getE_decp());
@@ -469,6 +488,144 @@ void lambda_inference_selection (const OptimizationData & optimizationData, cons
     }
   }
   return; 
+}
+
+//! Function that evaluates the spatial basis functions in a set of new location points, needed for inference on f
+/*
+  \tparam InputHandler the type of regression problem
+  \tparam ORDER the order of the mesh 
+  \tparam mydim specifies if the mesh lie in R^2 or R^3
+  \tparam ndim specifies if the local dimension is 2 or 3
+  \param mesh_ the mesh of the problem
+  \param regressionData_ the object containing regression informations 
+  \param inferenceData_ the object containing the data needed for inference
+  \param inf_car_ the inference carrier object to be modified 
+  \return void
+*/
+template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
+void compute_nonparametric_inference_matrices_time(const MeshHandler<ORDER, mydim, ndim>  & mesh_, const std::vector<Real> mesh_time_, const InputHandler & regressionData_, InferenceData & inferenceData_, Inference_Carrier<InputHandler> & inf_car_){
+  // if a matrix of locations has been provided, compute spatial Psi_loc by directly evaluating the spatial basis functions in the provided points
+  
+  // define the psi matrix
+  SpMat psi_temp;
+  
+  if((inferenceData_.get_locs_index_inference())[0] == -1){
+    // first fetch the dimensions
+    UInt nnodes = mesh_.num_nodes();
+    UInt nlocations = (inferenceData_.get_locs_inference()).rows();
+    psi_temp.resize(nlocations, nnodes);
+		
+    constexpr UInt EL_NNODES = how_many_nodes(ORDER,mydim);
+    Eigen::Matrix<Real,EL_NNODES,1> coefficients;    // Dummy for point evaluation
+    Real evaluator;                // Dummy for evaluation storage
+
+    for(UInt i=0; i<nlocations;i++)
+      { // Update psi looping on all locations
+	// [[GM missing a defaulted else, raising a WARNING!]]
+	VectorXr coords = (inferenceData_.get_locs_inference()).row(i);
+	Element<EL_NNODES, mydim, ndim> tri_activated = mesh_.findLocation(Point<ndim>(i, coords));
+
+	// Search the element containing the point
+	if(tri_activated.getId() == Identifier::NVAL)
+	  { // If not found
+	    Rprintf("ERROR: Point %d is not in the domain, remove point and re-perform smoothing\n", i+1);
+	  }
+	else
+	  {
+	    for(UInt node=0; node<EL_NNODES ; ++node)
+	      {// Loop on all the nodes of the found element and update the related entries of Psi
+		// Define vector of all zeros but "node" component (necessary for function evaluate_point)
+		coefficients = Eigen::Matrix<Real,EL_NNODES,1>::Zero();
+		coefficients(node) = 1; //Activates only current base-node
+		// Evaluate psi in the node
+		evaluator = tri_activated.evaluate_point(Point<ndim>(i, coords), coefficients);
+		// Insert the value in the column given by the GLOBAL indexing of the evaluated NODE
+		psi_temp.insert(i, tri_activated[node].getId()) = evaluator;
+	      }
+	  }
+      } // End of for loop
+        
+    psi_temp.makeCompressed();                  	
+  }
+  else{
+    // the locations are chosen among the observed ones, hence psi can be extracted from Psi
+    const std::vector<UInt> row_indices = inferenceData_.get_locs_index_inference();
+
+    // vector that converts global indices into local indices, common for both Psi_loc and W_loc
+    VectorXi rel_rows = VectorXi::Constant(inf_car_.getPsip()->rows(), -1);
+    for(UInt i=0; i < row_indices.size(); ++i){
+      rel_rows(row_indices[i]) = i; 
+    } 
+	
+    UInt nnodes = mesh_.num_nodes();
+    UInt nlocations = row_indices.size();
+
+    psi_temp.resize(nlocations, nnodes);
+
+    if(nlocations == inf_car_.getPsip()->rows()){
+      psi_temp = *(inf_car_.getPsip());
+    }
+    else{
+
+      // vector storing the non zero elements of Psi to be inserted in psi --> they are at most Psi.nonZeros()
+      std::vector<coeff> coefficients;
+      coefficients.reserve(inf_car_.getPsip()->nonZeros());
+
+      // loop over the nonzero elements
+      for (UInt k = 0; k < inf_car_.getPsip()->outerSize(); ++k){
+	for (SpMat::InnerIterator it(*(inf_car_.getPsip()),k); it; ++it)
+	  {
+	    if(std::find(row_indices.begin(), row_indices.end(), it.row()) != row_indices.end()){
+	      coefficients.push_back(coeff(rel_rows(it.row()), it.col(), it.value()));
+	    }
+	  }
+      }
+
+      psi_temp.setFromTriplets(coefficients.begin(), coefficients.end());
+      psi_temp.makeCompressed();
+    }
+    
+  }
+  // Now we compute the temporal Phi_loc and then we compute the kroenecker product
+  VectorXr time_locs_inf = inf_car_.getInfData()->get_time_locs_inf();
+    
+  UInt M = mesh_time_.size()-1;
+  SpMat phi;
+  phi.resize(M,M);
+  
+  if(regressionData_.getFlagParabolic()){ // Parabolic case
+  phi.setIdentity();
+  }else{// Separable case
+  
+  Spline<MixedSplineRegression<InputHandler>::SPLINE_DEGREE, MixedSplineRegression<InputHandler>::ORDER_DERIVATIVE> spline(mesh_time_);
+  M = spline.num_knots()-1-MixedSplineRegression<InputHandler>::SPLINE_DEGREE; // -1 - SPLINE_DEGREE, where SPLINE_DEGREE=3
+  UInt m = time_locs_inf.size();
+    
+  phi.resize(m, M);
+  Real value;
+
+  for(UInt i=0; i<m; ++i)
+    {
+      for(UInt j=0; j<M; ++j)
+	{
+	  value = spline.BasisFunction(j, time_locs_inf[i]);
+	  if(value!=0)
+	    {
+	      phi.coeffRef(i,j) = value;
+	    }
+	}
+    }
+  }
+  phi.makeCompressed();
+  
+  SpMat psi = kroneckerProduct(phi, psi_temp);
+  psi.makeCompressed();
+    
+  // set the spatial Psi_loc into the inference carrier
+  inf_car_.setPsi_loc(psi);
+  inf_car_.setN_loc(psi.rows());
+  
+  return;
 }
 
 #endif

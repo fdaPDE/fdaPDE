@@ -77,8 +77,13 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   implementation_Type<-as.vector(inference.data.object@type)
   component_Type<-as.vector(inference.data.object@component)
   exact_Inference<-inference.data.object@exact
+  locs_Inference<-as.matrix(inference.data.object@locations)
+  locs_index_Inference<-as.vector(inference.data.object@locations_indices - 1) #converting the indices from R to c++ ones 
+  locs_are_nodes_Inference<-inference.data.object@locations_are_nodes
+  time_locations_Inference<-inference.data.object@time_locations
   coeff_Inference=as.matrix(inference.data.object@coeff)
   beta_0=as.vector(inference.data.object@beta0)
+  f_0_eval<-as.vector(inference.data.object@f0_eval)
   f_var_Inference<-inference.data.object@f_var
   inference_Quantile=as.vector(inference.data.object@quantile)
   inference_Alpha=inference.data.object@alpha
@@ -157,8 +162,13 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(implementation_Type) <- "integer"
   storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
+  storage.mode(locs_Inference) <- "double"
+  storage.mode(locs_index_Inference) <- "integer"
+  storage.mode(locs_are_nodes_Inference) <- "integer"
+  storage.mode(time_locations_Inference) <- "double"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_0_eval) <- "double"
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_Alpha) <- "double"
@@ -276,7 +286,8 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
                   IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, 
-                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,locs_are_nodes_Inference, time_locations_Inference,
+                  coeff_Inference,beta_0,f_0_eval,f_var_Inference,inference_Quantile, inference_Alpha,inference_N_Flip,inference_Tol_Fspai, inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(c(bigsol,ICsol))

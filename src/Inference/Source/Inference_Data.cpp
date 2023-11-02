@@ -6,8 +6,12 @@
   \param implementation_Type_ vector parameter used to define which type of implementations (Wald, Speckman, ESF) are used for the tests and intervals computation
   \param component_Type_ vector parameter used to on which component of the model (parametric, nonparametric, both) inference has to be performed
   \param exact_Inference_ parameter for the method used to invert E matrix in Woodbury decomposition for inference
-  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
+  \param locs_Inference_ matrix that specifies the spatial locations to be considered when performing inference on the nonparametric component
+  \param locs_index_Inference_ vector containing the spatial locations indices to be considered among the observed ones for inference on the nonparametric component
+  \param locs_are_nodes_ boolean that specifies if all the locations taken in consideration for the hypothesis test on f are coinciding with nodes
+  \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals
   \param beta_0_ vector for the null hypotesis (if a test on the parametric component is required)
+  \param f0_eval_ vector for the null hypotesis (if a test on the nonparametric component is required)
   \param f_Var_ parameter used to decide whether to compute local f variance or not
   \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
   \param inference_Alpha_ significance used to compute ESF confidence intervals
@@ -15,7 +19,8 @@
   \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
   \param definition_ parameter used to set definition of the InferenceData object
 */
-InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,  SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
+InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,
+			     SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_,SEXP f0_eval_, SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -84,6 +89,31 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
       enhanced_Inference[i] = false;
   }
 
+   //locs_Inference
+  UInt m_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[0]; // #Rows
+  UInt d_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[1]; // #Columns
+  locs_Inference.resize(m_, d_);
+  for(auto i=0; i<m_; ++i)
+    {
+      for(auto j=0; j<d_ ; ++j)
+	{
+	  locs_Inference(i,j) = REAL(locs_Inference_)[i+ m_*j];
+	}
+    }
+
+  //locs_index_Inference
+  UInt size_locs_index=Rf_length(locs_index_Inference_); 
+  locs_index_Inference.resize(size_locs_index);
+  for(UInt i=0;i<size_locs_index;i++){
+    locs_index_Inference[i]=INTEGER(locs_index_Inference_)[i];
+  }
+
+  //locations_are_nodes
+  if(INTEGER(locs_are_nodes_)[0]==1)
+    this->set_locs_are_nodes_inference(true);
+  else
+    this->set_locs_are_nodes_inference(false);
+
   //coeff_Inference
   UInt n_ = INTEGER(Rf_getAttrib(coeff_Inference_, R_DimSymbol))[0]; // #Rows
   UInt p_ = INTEGER(Rf_getAttrib(coeff_Inference_, R_DimSymbol))[1]; // #Columns
@@ -102,7 +132,14 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   for(UInt i=0;i<size_beta_0;i++){
     beta_0[i]=REAL(beta_0_)[i];
   }
-
+  
+  //f0_eval
+  UInt size_f0_eval_=Rf_length(f0_eval_); 
+  f0_eval.resize(size_f0_eval_);
+  for(UInt i=0;i<size_f0_eval_;i++){
+    f0_eval[i]=REAL(f0_eval_)[i];
+  }
+  
   //f_var
   if(INTEGER(f_Var_)[0]==1)
     this->set_f_Var(true);
@@ -134,7 +171,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 
 };
 
-//! Space-only main constructor of the class, with inference for f
+//! Space-only main constructor of the class, without time locations
 /*!
   \param test_Type_ vector parameter used to define the type of tests that are required (if any)
   \param interval_Type_ vector parameter used to define which type of confidence intervals are required (if any)
@@ -144,6 +181,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   \param locs_Inference_ matrix that specifies the spatial locations to be considered when performing inference on the nonparametric component
   \param locs_index_Inference_ vector containing the spatial locations indices to be considered among the observed ones for inference on the nonparametric component
   \param locs_are_nodes_ boolean that specifies if all the locations taken in consideration for the hypothesis test on f are coinciding with nodes
+  \param time_locs_inf_ an R-vector of times selected for inference on the nonparametric component
   \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
   \param beta_0_ vector for the null hypotesis (if a test on the parametric component is required)
   \param f_0_ vector for the null hypotesis (if a test on the nonparametric component is required)
@@ -155,39 +193,14 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
-			     SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_0_, SEXP f_Var_,
-			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, coeff_Inference_, beta_0_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
-   
-  //locs_Inference
-  UInt m_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[0]; // #Rows
-  UInt d_ = INTEGER(Rf_getAttrib(locs_Inference_, R_DimSymbol))[1]; // #Columns
-  locs_Inference.resize(m_, d_);
-  for(auto i=0; i<m_; ++i)
-    {
-      for(auto j=0; j<d_ ; ++j)
-	{
-	  locs_Inference(i,j) = REAL(locs_Inference_)[i+ m_*j];
-	}
-    }
+			     SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP time_locs_inf_ ,SEXP coeff_Inference_, SEXP beta_0_,
+			     SEXP f0_eval_, SEXP f_Var_,SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, locs_Inference_, locs_index_Inference_, locs_are_nodes_, coeff_Inference_, beta_0_, f0_eval_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
 
-  //locs_index_Inference
-  UInt size_locs_index=Rf_length(locs_index_Inference_); 
-  locs_index_Inference.resize(size_locs_index);
-  for(UInt i=0;i<size_locs_index;i++){
-    locs_index_Inference[i]=INTEGER(locs_index_Inference_)[i];
-  }
-
-  //locations_are_nodes
-  if(INTEGER(locs_are_nodes_)[0]==1)
-    this->set_locs_are_nodes_inference(true);
-  else
-    this->set_locs_are_nodes_inference(false);  
-  
-  //f0_eval
-  UInt size_f_0=Rf_length(f_0_); 
-  f0_eval.resize(size_f_0);
-  for(UInt i=0;i<size_f_0;i++){
-    f0_eval[i]=REAL(f_0_)[i];
+  //time_locs_inf
+  UInt size_time_locs_inf=Rf_length(time_locs_inf_); 
+  time_locs_inf.resize(size_time_locs_inf);
+  for(UInt i=0;i<size_time_locs_inf;i++){
+    time_locs_inf[i]=REAL(time_locs_inf_)[i];
   }
 };
 
@@ -237,6 +250,11 @@ void InferenceData::print_inference_data() const{
 
   
   Rprintf("locations_are_nodes: %d\n",locations_are_nodes);
+
+  Rprintf("time_locs_inf: \n");
+  for(UInt i=0; i < time_locs_inf.size(); ++i){
+    Rprintf(" %f \n", time_locs_inf(i));
+  }
   
   Rprintf("coeff_inference:");
   for(UInt i=0; i < coeff_Inference.rows(); ++i){

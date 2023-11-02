@@ -94,7 +94,7 @@
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
-#' @param inference.data.object An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+#' @param inference.data.object An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear and nonlinear parameters of the model. This parameter needs to be 
 #' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.
 #' @return A list with the following variables:
 #' \itemize{
@@ -163,8 +163,8 @@
 #' via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
 #'    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
 #'  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
-#'    \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
-#'    with differential regularization. Journal of Multivariate Analysis, to appear}
+#'    \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2022). Some first inferential tools for spatial regression
+#'    with differential regularization. Journal of Multivariate Analysis, 189, 104866.}
 #' }
 #' @examples
 #' library(fdaPDE)

@@ -2,7 +2,7 @@
 
 This repository contains the development version of fdaPDE package. 
 
-New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data. Smooth regression for space-time problems. Inference over linear and nonlinear components is also available for space and space-time models.
+New features wrt CRAN: Wald inference on the nonparametric term for space-time models.
 
 Compiled in Ubuntu using g++ compiler and in macOS: for the precise versions tested, see the report. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE.
 

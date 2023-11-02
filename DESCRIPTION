@@ -1,6 +1,6 @@
 Package: fdaPDE
-Version: 1.1-16
-Date: 2023-02-28
+Version: 1.1-17
+Date: 2023-11-01
 Title: Physics-Informed Spatial and Functional Data Analysis
 Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		     email = "eleonora.arnone@polimi.it"),
@@ -52,6 +52,6 @@ Description: An implementation of regression models with partial differential re
 License: GPL-3
 NeedsCompilation: yes
 SystemRequirements: GNU make
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Config/testthat/edition: 3

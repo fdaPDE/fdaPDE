@@ -70,7 +70,8 @@ extern "C"
     //Set input data
     RegressionData regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RlocsInference, RlocsindexInference, Rlocsarenodes, RcoeffInference, Rbeta0, Rf0eval, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RlocsInference, RlocsindexInference, Rlocsarenodes, RcoeffInference, Rbeta0, Rf0eval,
+    RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];
@@ -135,8 +136,13 @@ extern "C"
     \param RimplementationType an R-vector defining the type of implementation required for inferential analysis (wald, speckman, eigen-sign-flip, enhanced-eigen-sign-flip)
     \param RcomponentType an R-vector specifying on which component of the model the inferential analysis should be peformed (parametric, nonparametric, both)
     \param RexactInference an R-integer that defines if an exact inferential analysis is required or not
+    \param RlocsInference an R-matrix of location points selected for inference on the nonparametric component
+    \param RlocsindexInference an R-vector of location indices selected for inference on the nonparametric component
+    \param Rlocsarenodes an R-integer specifying wheter the selected locations are a subset of mesh nodes 
+    \param RtimeLocsInf an R-vector of times selected for inference on the nonparametric component
     \param RcoeffInference an R-matrix of coefficients that defines the linear combinations of the betas parameters of interest for inferential analysis
     \param Rbeta0 an R-vector containing the null hypotesis values for the betas parameters, needed for the test
+    \param Rf0eval an R-vector containing the evaluation of the nonparametric component under the null hypothesis at the selected locations
     \param RfvarInference an R-integer that defines if local f variance has to be estimated or not
     \param RinferenceQuantile an R-vector defining the quantiles needed for the confidence intervals for the betas parameters of the model
     \param RinferenceAlpha an R-double defining the significance used to compute the sign-flip confidence intervals
@@ -149,14 +155,15 @@ extern "C"
 			       SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,  SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Rflag_iterative,
 			       SEXP Rmax_num_iteration, SEXP Rtreshold, SEXP Ric, SEXP Rsearch,
 			       SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct,
-			       SEXP RtestType, SEXP RintervalType, SEXP RimplementationType,SEXP RcomponentType, SEXP RexactInference, SEXP RcoeffInference,
-			       SEXP Rbeta0, SEXP RfvarInference, SEXP RinferenceQuantile, SEXP RinferenceAlpha, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
+			       SEXP RtestType, SEXP RintervalType, SEXP RimplementationType,SEXP RcomponentType, SEXP RexactInference, SEXP RlocsInference, SEXP RlocsindexInference,
+			       SEXP Rlocsarenodes, SEXP RtimeLocsInf ,SEXP RcoeffInference, SEXP Rbeta0, SEXP Rf0eval, SEXP RfvarInference,
+			       SEXP RinferenceQuantile, SEXP RinferenceAlpha, SEXP RinferenceFlip, SEXP RinferenceTolFspai, SEXP RinferenceDefined)
   {
     //Set input data
     RegressionData regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
 				  RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Rflag_iterative, Rmax_num_iteration, Rtreshold, Ric, Rsearch);
     OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct);
-    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RcoeffInference, Rbeta0, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
+    InferenceData inferenceData(RtestType, RintervalType, RimplementationType, RcomponentType, RexactInference, RlocsInference, RlocsindexInference, Rlocsarenodes, RtimeLocsInf, RcoeffInference, Rbeta0, Rf0eval, RfvarInference, RinferenceQuantile, RinferenceAlpha, RinferenceFlip, RinferenceTolFspai, RinferenceDefined);
 
     UInt mydim = INTEGER(Rmydim)[0];
     UInt ndim = INTEGER(Rndim)[0];
