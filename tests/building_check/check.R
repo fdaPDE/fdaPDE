@@ -1,8 +1,5 @@
 install.packages('distro', repos='https://cran.stat.unipd.it/')
 
-install.packages(c('rgl', 'Matrix', 'plot3D', 'RcppEigen', 'Rcpp', 'MASS', 'testthat', 'rcmdcheck'), 
-                 repos='https://cran.stat.unipd.it/')
-
 # get compiler -----------------------------------------------------------------
 compiler <- "gcc"
 if(!distro::distro()$id == "fedora"){

@@ -180,7 +180,7 @@ test_that("tSR-PDE Cshaped - areal data - 2D",{
   observations=matrix(data,nrow(incidence_matrix),length(time_mesh))
   
   # Inference obj: inference test, adding cov, PDE, separable case
-  inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), component='parametric', n_flip=10000, f_var=T)
+  inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), component='parametric', n_flip=10000, f_var=T)
   
   #### Test 14.7: overall inference on beta, forcing term = 0 exact  GCV,  monolitic method
   invisible(capture.output(sol<-smooth.FEM.time(observations=observations,

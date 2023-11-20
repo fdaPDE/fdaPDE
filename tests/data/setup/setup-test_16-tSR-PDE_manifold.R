@@ -95,7 +95,7 @@ options(warn=-1)
   save(sol_ref, file=paste0(foldername,"/test_16_4.RData"))
   
   ### Inference test: 
-  inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
+  inf_obj <- inferenceDataObjectTimeBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
   
   #### Test 16.6: overall inference on beta, parabolic case
   invisible(capture.output(sol_ref <- smooth.FEM.time(observations=datacov[,2:length(TimeNodes)], covariates = W[(1+nrow(mesh$nodes)):(length(TimeNodes)*nrow(mesh$nodes)),],

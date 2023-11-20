@@ -11,7 +11,6 @@ test_that("tGSR-PDE 2d",{
                         segments = horseshoe2D$boundary_segments)
   mesh = refine.mesh.2D(mesh, maximum_area =  0.025, minimum_angle = 30 )
   FEMbasis = create.FEM.basis(mesh)
-  plot(mesh)
   
   f <- function(x, y, t) {
     
@@ -123,7 +122,6 @@ test_that("tGSR-PDE 2d",{
                         segments = horseshoe2D$boundary_segments)
   mesh = refine.mesh.2D(mesh, maximum_area =  0.025, minimum_angle = 30 )
   FEMbasis = create.FEM.basis(mesh)
-  plot(mesh)
   
   f <- function(x, y, t) {
     

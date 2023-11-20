@@ -19,7 +19,6 @@ if(!dir.exists(test_path("../data/DE-PDE/test_3"))){
   
   nnodes=dim(mesh$nodes)[1]
   FEMbasis=create.FEM.basis(mesh)
-  plot(mesh, asp=1)
   
   ## Generate data
   n = 100

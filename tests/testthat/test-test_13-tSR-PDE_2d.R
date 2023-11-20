@@ -79,7 +79,7 @@ test_that("tSR-PDE CShaped domain FE order 2",{
   
   ### Inference
   # Inference obj:
-  inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
+  inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
   
   #### Test 13.3: overall inference on beta parameters, separable case
   lambdaS = 10^(-1:1)
