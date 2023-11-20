@@ -1028,3 +1028,63 @@ refine.by.splitting.mesh.1.5D <- function (mesh=NULL){
   return(splittedmesh)
 }
 
+CPP_search_points<-function(mesh, locations)
+{
+  if(is(mesh, "mesh.2D")){
+    ndim = 2
+    mydim = 2
+  }else if(is(mesh, "mesh.1.5D")){
+    ndim = 2
+    mydim = 1
+  }else if(is(mesh, "mesh.2.5D")){
+    ndim = 3
+    mydim = 2
+  }else if(is(mesh, "mesh.3D")){
+    ndim = 3
+    mydim = 3
+  }else{
+    stop('Unknown mesh class')
+  }
+  
+  ## Set propr type for correct C++ reading
+  if( (ndim==2 && mydim==2) || (ndim==3 && mydim==2) ){
+    # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
+    
+    mesh$triangles = mesh$triangles - 1
+    mesh$edges = mesh$edges - 1
+    mesh$neighbors[mesh$neighbors != -1] = mesh$neighbors[mesh$neighbors != -1] - 1
+    
+    ## Set propr type for correct C++ reading
+    storage.mode(mesh$triangles) <- "integer"
+    storage.mode(mesh$edges) <- "integer"
+    storage.mode(mesh$neighbors) <- "integer"
+    
+  }else if( ndim==2 && mydim==1){
+    # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
+    mesh$edges = mesh$edges - 1
+    
+    ## Set propr type for correct C++ reading
+    storage.mode(mesh$edges) <- "integer"
+    
+  }else if( ndim==3 && mydim==3){
+    # Indexes in C++ starts from 0, in R from 1, opporGCV.inflation.factor transformation
+    mesh$tetrahedrons = mesh$tetrahedrons - 1
+    mesh$faces = mesh$faces - 1
+    mesh$neighbors[mesh$neighbors != -1] = mesh$neighbors[mesh$neighbors != -1] - 1
+    
+    ## Set propr type for correct C++ reading
+    storage.mode(mesh$faces) <- "integer"
+    storage.mode(mesh$neighbors) <- "integer"
+    storage.mode(mesh$tetrahedrons) <- "integer"
+  }
+  
+  storage.mode(mesh$order) <- "integer"
+  storage.mode(mesh$nodes) <- "double"
+  storage.mode(ndim)<-"integer"
+  storage.mode(mydim)<-"integer"
+  
+  ## Call C++ function
+  idx_elems <- .Call("points_search", mesh, locations,  mydim, ndim,
+                     PACKAGE = "fdaPDE")
+  return(idx_elems)
+}

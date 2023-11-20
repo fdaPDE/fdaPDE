@@ -306,4 +306,45 @@ SEXP Eval_FEM_time_skeleton (SEXP Rmesh, SEXP Rmesh_time, SEXP Rlocations, SEXP 
     return result;
 }
 
+template<UInt ORDER, UInt mydim, UInt ndim>
+SEXP points_search_skeleton(SEXP Rmesh, SEXP Rlocations){
+
+    RNumericMatrix locations(Rlocations);
+    UInt nlocations = locations.nrows();
+
+    // Cast all computation parameters
+    std::vector<Point<ndim> > locationsVector(nlocations);
+    
+    std::array<Real,ndim> coords;
+    for(UInt i=0; i<nlocations; ++i) {
+        for(UInt n=0; n<ndim; ++n)
+            coords[n] = locations(i,n);
+        locationsVector[i] = Point<ndim>(coords);
+
+    }
+    
+    SEXP result;
+
+    if (nlocations>0) //pointwise data
+    {
+        PROTECT(result = Rf_allocMatrix(INTSXP, nlocations, 1));
+        MeshHandler<ORDER,mydim,ndim> mesh(Rmesh,2);
+        
+        RIntegerMatrix res(result);
+            
+        for(UInt i = 0; i < nlocations; ++i){
+        	auto elem = mesh.findLocation(locationsVector[i]);
+        	if( elem.hasValidId()) 
+        		res[i] = elem.id()+1; 
+		else 
+			res[i] = 0;
+	}
+        
+        UNPROTECT(1);
+        return(result);
+    }
+
+    return(NILSXP);
+}
+
 #endif

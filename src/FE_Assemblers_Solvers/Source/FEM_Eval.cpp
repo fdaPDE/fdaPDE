@@ -251,6 +251,32 @@ SEXP points_projection(SEXP Rmesh, SEXP Rlocations,SEXP Rmydim, SEXP Rndim){
         return points_projection_skeleton<2,2,3>(Rmesh,Rlocations);
 
     return(NILSXP);
+  
+}
+
+SEXP points_search(SEXP Rmesh, SEXP Rlocations,SEXP Rmydim, SEXP Rndim){
+    UInt order = INTEGER(VECTOR_ELT(Rmesh,10))[0];
+    UInt mydim = INTEGER(Rmydim)[0];
+    UInt ndim = INTEGER(Rndim)[0];
+
+    if(order==1 && mydim==1 && ndim==2)
+        return points_search_skeleton<1,1,2>(Rmesh,Rlocations);
+    else if(order==2 && mydim==1 && ndim==2)
+        return points_search_skeleton<2,1,2>(Rmesh,Rlocations);
+    else if(order==1 && mydim==2 && ndim==2)
+        return points_search_skeleton<1,2,2>(Rmesh,Rlocations);
+    else if(order==2 && mydim==2 && ndim==2)
+        return points_search_skeleton<2,2,2>(Rmesh,Rlocations);    
+    else if(order==1 && mydim==2 && ndim==3)
+        return points_search_skeleton<1,2,3>(Rmesh,Rlocations);
+    else if(order==2 && mydim==2 && ndim==3)
+        return points_search_skeleton<2,2,3>(Rmesh,Rlocations);
+    else if(order==1 && mydim==3 && ndim==3)
+        return points_search_skeleton<1,3,3>(Rmesh,Rlocations);
+    else if(order==2 && mydim==3 && ndim==3)
+        return points_search_skeleton<2,3,3>(Rmesh,Rlocations);
+
+    return(NILSXP);
 }
 
 }
