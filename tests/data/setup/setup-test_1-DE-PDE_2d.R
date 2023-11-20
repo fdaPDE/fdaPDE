@@ -88,4 +88,22 @@ invisible(capture.output(sol_ref <- DE.FEM(data = data, FEMbasis = FEMbasis, lam
               preprocess_method="NoCrossValidation", search = "naive")))
 
 save(sol_ref, file = paste0(foldername, "/test_1_8.RData"))
+
+# 9) Confidence Intervals with default scaling
+lambda = 0.1
+invisible(capture.output(sol_ref <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
+              step_method = "Fixed_Step", direction_method = "BFGS",
+              preprocess_method="NoCrossValidation", inference = TRUE)))
+
+save(sol_ref, file = paste0(foldername, "/test_1_9.RData"))
+
+# 10) Confidence Intervals with given scaling
+lambda = 0.1
+scaling_factor = 10
+invisible(capture.output(sol_ref <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, scaling = scaling_factor,
+              step_method = "Fixed_Step", direction_method = "BFGS",
+              preprocess_method="NoCrossValidation", inference = TRUE)))
+
+save(sol_ref, file = paste0(foldername, "/test_1_10.RData"))
+
 }

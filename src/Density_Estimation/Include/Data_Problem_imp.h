@@ -2,10 +2,10 @@
 #define __DATA_PROBLEM_IMP_H__
 
 template<UInt ORDER, UInt mydim, UInt ndim>
-DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
+DataProblem<ORDER, mydim, ndim>::DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter,
                                              SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1,
-                                             SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh, bool isTime):
-  deData_(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch),
+                                             SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh, SEXP Rinference, bool isTime):
+  deData_(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, Rinference),
   mesh_(Rmesh, INTEGER(Rsearch)[0]){
 
     std::vector<Point<ndim>>& data = deData_.data();
@@ -142,13 +142,13 @@ DataProblem<ORDER, mydim, ndim>::computePsi(const std::vector<UInt>& indices) co
 // ------------------------------------------------
 
 template<UInt ORDER, UInt mydim, UInt ndim>
-DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec, SEXP RheatStep,
+DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep,
                                                        SEXP RheatIter, SEXP Rlambda, SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim,
                                                        SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch,
                                                        SEXP Rmesh, const std::vector<Real>& mesh_time, SEXP RisTimeDiscrete,
-                                                       SEXP RflagMass, SEXP RflagLumped, bool isTime):
-  DataProblem<ORDER, mydim, ndim>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals,
-                                    Rtol1, Rtol2, Rprint, Rsearch, Rmesh, isTime),
+                                                       SEXP RflagMass, SEXP RflagLumped, SEXP Rinference, bool isTime):
+  DataProblem<ORDER, mydim, ndim>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals,
+                                    Rtol1, Rtol2, Rprint, Rsearch, Rmesh, Rinference, isTime),
   deData_time_(Rdata_time, Rlambda_time), spline_(mesh_time), mesh_time_(mesh_time){
 
     flagMass_ = INTEGER(RflagMass)[0];

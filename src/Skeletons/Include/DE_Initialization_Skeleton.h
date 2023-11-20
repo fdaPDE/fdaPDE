@@ -16,11 +16,11 @@
 #include "../../Density_Estimation/Include/FE_Density_Estimation.h"
 
 template<UInt ORDER, UInt mydim, UInt ndim>
-SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
-	SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rmesh, SEXP Rsearch, const std::string & init, UInt init_fold)
+SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
+	SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rmesh, SEXP Rsearch, SEXP Rinference, const std::string & init, UInt init_fold)
 {
 	// Construct data problem object
-	DataProblem<ORDER, mydim, ndim> dataProblem(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, Rmesh);
+	DataProblem<ORDER, mydim, ndim> dataProblem(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rsearch, Rmesh, Rinference);
 
 	// Construct functional problem object
 	FunctionalProblem<ORDER, mydim, ndim> functionalProblem(dataProblem);

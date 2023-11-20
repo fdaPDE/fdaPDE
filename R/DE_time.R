@@ -12,12 +12,14 @@
 #' is chosen, together with the optimal smoothing parameter in time, with a \code{k}-fold cross-validation procedure based on the L2 norm.
 #' @param lambda_time A scalar or vector of smoothing parameters in time. If it is a vector, the optimal smoothing parameter in time
 #' is chosen, together with the optimal smoothing parameter in space, with a \code{k}-fold cross-validation procedure based on the L2 norm.
+#' @param scaling A positive factor needed to scale the smoothing parameters in the construction of confidence intervals.
+#' If the scaling is not specified, it is automatically set as the square root of the number of observations.
 #' @param fvec A vector of length #\code{nodes} of the spatial mesh times #\code{B-spline} temporal functional basis. It corresponds to the
 #' node values of the initial density function. If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion
 #' process that starts from the empirical density of the data. Default is \code{NULL}.
 #' N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).
-#' @param heatStep A real specifying the time step for the discretized heat diffusion process.
-#' @param heatIter An integer specifying the number of iterations to perform the discretized heat diffusion process.
+#' @param heatStep A real specifying the time step for the discretized heat diffusion process. Default is \code{0.1}.
+#' @param heatIter An integer specifying the number of iterations to perform the discretized heat diffusion process. Default is \code{10}.
 #' @param stepProposals A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
 #' vector of parameters, the biggest one such that the functional decreases at each iteration is chosen. If it is \code{NULL}
 #' the following vector \code{c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)} is proposed. Default is \code{NULL}.
@@ -54,7 +56,7 @@
 #' If it is \code{RightCV} the usual k fold cross validation method is performed. If it is \code{SimplifiedCV} a simplified
 #' version is performed. In the latter case the number of possible pairs of smoothing parameters in space and in time
 #' (\code{lambda}, \code{lambda_time}) must be equal to the number of folds \code{nfolds}. Default is \code{NULL}.
-#' @param search A flag to decide the search algorithm type (tree or naive or walking search algorithm).
+#' @param search A flag to decide the search algorithm type (tree or naive or walking search algorithm). Default is \code{tree}.
 #' @param isTimeDiscrete A boolean specifying the time data type: \code{TRUE} for discrete (with many duplicates) time data;
 #' \code{FALSE} for continuous time data. Default is \code{FALSE}.
 #' @param flagMass A boolean specifying whether to consider full mass matrices (\code{TRUE}) or identity mass matrices
@@ -62,7 +64,8 @@
 #' @param flagLumped A boolean specifying whether to perform mass lumping. This numerical technique presents computational
 #' advantages during the procedure involving a mass matrix inversion for the computation of the space penalty matrix.
 #' Default is \code{FALSE}.
-#' N.B. We suggest to put it \code{TRUE} in case of a large spatial domain or in case of a dense/refined spatial mesh.
+#' N.B. We suggest to use it as \code{TRUE} in case of a large spatial domain or in case of a dense/refined spatial mesh.
+#' @param inference A boolean that is \code{TRUE} if the user wants to estimate confidence intervals. Default is \code{FALSE}.
 #' @return A list with the following variables:
 #' \item{\code{FEMbasis}}{Given FEMbasis with tree information.}
 #' \item{\code{g}}{A vector of length #\code{nodes} times #\code{B-splines} that represents the value of the g-function estimated for
@@ -83,11 +86,13 @@
 #' @description This function implements a nonparametric spatio-temporal density estimation method with differential regularization
 #' (given by the sum of the square of the L2 norm of the laplacian of the density function and the square of the L2 norm of the second-
 #' order time-derivative), when points are located over a planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL,
-#'                    heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, 
-#'                    print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step", 
-#'                    direction_method="BFGS", preprocess_method="NoCrossValidation",
-#'                    search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+#' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling=NULL,
+#'                    fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4,
+#'                    tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
+#'                    step_method="Fixed_Step", direction_method="BFGS",
+#'                    preprocess_method="NoCrossValidation", search="tree",
+#'                    isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE,
+#'                    inference = FALSE)
 #' @export
 #' @examples
 #' library(fdaPDE)
@@ -122,12 +127,8 @@
 #' ## Density Estimation
 #' lambda <- 0.1
 #' lambda_time <- 0.001
-#' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, 
-#'                    mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-#'                    fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0,
-#'                    print=FALSE, nfolds=NULL, nsimulations=300, step_method="Fixed_Step",
-#'                    direction_method="BFGS", preprocess_method="NoCrossValidation",
-#'                    search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+#' sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time,
+#'                    lambda = lambda, lambda_time = lambda_time, nsimulations=300, inference=TRUE)
 #'
 #' ## Visualization
 #' n = 100
@@ -137,17 +138,26 @@
 #'
 #' FEMfunction = FEM.time(sol$g, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 #' evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
+#' FEMfunction_L = FEM.time(sol$g_CI_L, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+#' evaluation_L <- eval.FEM.time(FEM.time = FEMfunction_L, locations = grid, time.instants = t)
+#' FEMfunction_U = FEM.time(sol$g_CI_U, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+#' evaluation_U <- eval.FEM.time(FEM.time = FEMfunction_U, locations = grid, time.instants = t)
+#'
+#' image2D(x = X, y = Y, z = matrix(exp(evaluation_L), n, n), col = heat.colors(100),
+#'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
+#'         main = paste("Estimated CI lower bound at t = ", t), zlim=c(0,0.3), asp = 1)
 #' image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
 #'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
-#'         main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
-#'
+#'         main = paste("Estimated density at t = ", t), zlim=c(0,0.3), asp = 1)
+#' image2D(x = X, y = Y, z = matrix(exp(evaluation_U), n, n), col = heat.colors(100),
+#'         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
+#'         main = paste("Estimated CI upper bound at t = ", t), zlim=c(0,0.3), asp = 1)
 
 
-DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL,
-                        heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, 
-                        print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step", 
-                        direction_method="BFGS", preprocess_method="NoCrossValidation",
-                        search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling=NULL, fvec=NULL, heatStep=0.1, heatIter=10,
+                        stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
+                        step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
+                        search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE, inference=FALSE)
 {
   if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
@@ -175,9 +185,11 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
   }
 
+  if(is.null(scaling))
+    scaling=sqrt(dim(data)[1])
 
   ###################################### Checking parameters, sizes and conversion #####################################
-  checkParametersDE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, step_method, direction_method,
+  checkParametersDE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, step_method, direction_method,
                          preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
 
   ## Converting to format for internal usage
@@ -199,20 +211,20 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
   bigsol = NULL
   if(is(FEMbasis$mesh, "mesh.2D")){
 
-    bigsol = CPP_FEM.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+    bigsol = CPP_FEM.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                              mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                             nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
+                             nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, inference)
 
   } else if(is(FEMbasis$mesh, "mesh.2.5D")){
 
-    bigsol = CPP_FEM.manifold.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+    bigsol = CPP_FEM.manifold.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                                       mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                                      nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
+                                      nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, inference)
 
   } else if(is(FEMbasis$mesh, "mesh.3D")){
-    bigsol = CPP_FEM.volume.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+    bigsol = CPP_FEM.volume.DE_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                                     mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                                    nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
+                                    nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, inference)
   }
 
   ################################################### Collect Results ##################################################
@@ -224,16 +236,18 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
   data = bigsol[[5]]
   data_time = bigsol[[6]]
   CV_err = bigsol[[7]]
+  g_CI_L = bigsol[[8]]
+  g_CI_U = bigsol[[9]]
 
   # Save information of Tree Mesh
   tree_mesh = list(
-    treelev = bigsol[[8]][1],
-    header_orig= bigsol[[9]],
-    header_scale = bigsol[[10]],
-    node_id = bigsol[[11]][,1],
-    node_left_child = bigsol[[11]][,2],
-    node_right_child = bigsol[[11]][,3],
-    node_box= bigsol[[12]])
+    treelev = bigsol[[10]][1],
+    header_orig= bigsol[[11]],
+    header_scale = bigsol[[12]],
+    node_id = bigsol[[13]][,1],
+    node_left_child = bigsol[[13]][,2],
+    node_right_child = bigsol[[13]][,3],
+    node_box= bigsol[[14]])
 
   # Reconstruct FEMbasis with tree mesh
   mesh.class = class(FEMbasis$mesh)
@@ -243,7 +257,7 @@ DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_tim
   class(FEMbasis$mesh) = mesh.class
 
   reslist = list(FEMbasis = FEMbasis, g = g, f_init = f_init, lambda = lambda, lambda_time = lambda_time, data = data,
-                 data_time = data_time, CV_err = CV_err)
+                 data_time = data_time, CV_err = CV_err, g_CI_L = g_CI_L, g_CI_U = g_CI_U)
   return(reslist)
 }
 

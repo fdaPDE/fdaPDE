@@ -27,6 +27,8 @@ class FEDE{
     Real bestLambda_;
     // A member to store CV errors
     std::vector<Real> CV_errors_;
+    // A member to store the CI bounds for gcoeff_
+    std::pair<VectorXr,VectorXr> g_CI_;
 
   public:
     //! A constructor.
@@ -40,6 +42,9 @@ class FEDE{
     // Getters
     //! A method returning the estimated density coefficients.
     VectorXr getDensity_g() const {return gcoeff_;}
+    //! A method returning the CI bounds of the density coefficients.
+    VectorXr getCI_L_g() const {return g_CI_.first;}
+    VectorXr getCI_U_g() const {return g_CI_.second;}
     //! A method returning initial densities.
     std::vector<const VectorXr*> getInitialDensity() const {return fInit_;}
     //! A method returning the smoothing parameter selected.
@@ -70,6 +75,8 @@ private:
     Real bestLambda_T;
     // A member to store CV errors
     std::vector<Real> CV_errors_;
+    // A member to store the CI bounds for gcoeff_
+    std::pair<VectorXr,VectorXr> g_CI_;
 
 public:
     //! A constructor.
@@ -83,6 +90,9 @@ public:
     // Getters
     //! A method returning the estimated density coefficients.
     VectorXr getDensity_g() const {return gcoeff_;}
+    //! A method returning the CI lower and upper bounds of the density coefficients.
+    VectorXr getCI_L_g() const {return g_CI_.first;}
+    VectorXr getCI_U_g() const {return g_CI_.second;}
     //! A method returning initial densities.
     std::vector<const VectorXr*> getInitialDensity() const {return fInit_;}
     //! A method returning the smoothing parameters selected in space and in time.

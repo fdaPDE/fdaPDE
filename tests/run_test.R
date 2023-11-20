@@ -13,7 +13,8 @@ if(!all(dir.exists(c(test_path("../data/DE-PDE"),
                      test_path("../data/tSR-PDE"),
                      test_path("../data/GSR-PDE"),
                      test_path("../data/tGSR-PDE"),
-                     test_path("../data/fPCA"))))){
+                     test_path("../data/fPCA"),
+                     test_path("../data/STDE-PDE")))){
   dir.create("tests/tmp/")
   install.packages("fdaPDE", lib = "tests/tmp/", repos="https://cran.mirror.garr.it/CRAN/")
 

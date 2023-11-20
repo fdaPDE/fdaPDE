@@ -1,4 +1,4 @@
-checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
+checkParametersDE <- function(data, FEMbasis, lambda, scaling, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
 {
   ################################################### Parameter Check ##################################################
   if (is.null(data)) 
@@ -21,7 +21,10 @@ checkParametersDE <- function(data, FEMbasis, lambda, step_method, direction_met
         stop("'lambda' has to have positive members.")
     }
   }
-  
+
+  if(scaling<=0)
+    stop("'scaling' needs to be a positive factor.")
+
   if (is.null(step_method)) 
     stop("'step_method' is required;  is NULL.")
   else{

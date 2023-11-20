@@ -4,11 +4,13 @@
 \alias{DE.FEM.time}
 \title{Nonparametric spatio-temporal density estimation with differential regularization}
 \usage{
-DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec=NULL,
-                   heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0, 
-                   print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step", 
-                   direction_method="BFGS", preprocess_method="NoCrossValidation",
-                   search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
+DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling=NULL,
+                   fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4,
+                   tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
+                   step_method="Fixed_Step", direction_method="BFGS",
+                   preprocess_method="NoCrossValidation", search="tree",
+                   isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE,
+                   inference = FALSE)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point,
@@ -29,14 +31,17 @@ is chosen, together with the optimal smoothing parameter in time, with a \code{k
 \item{lambda_time}{A scalar or vector of smoothing parameters in time. If it is a vector, the optimal smoothing parameter in time
 is chosen, together with the optimal smoothing parameter in space, with a \code{k}-fold cross-validation procedure based on the L2 norm.}
 
+\item{scaling}{A positive factor needed to scale the smoothing parameters in the construction of confidence intervals.
+If the scaling is not specified, it is automatically set as the square root of the number of observations.}
+
 \item{fvec}{A vector of length #\code{nodes} of the spatial mesh times #\code{B-spline} temporal functional basis. It corresponds to the
 node values of the initial density function. If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion
 process that starts from the empirical density of the data. Default is \code{NULL}.
 N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).}
 
-\item{heatStep}{A real specifying the time step for the discretized heat diffusion process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusion process. Default is \code{0.1}.}
 
-\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
+\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process. Default is \code{10}.}
 
 \item{stepProposals}{A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
 vector of parameters, the biggest one such that the functional decreases at each iteration is chosen. If it is \code{NULL}
@@ -83,7 +88,7 @@ If it is \code{RightCV} the usual k fold cross validation method is performed. I
 version is performed. In the latter case the number of possible pairs of smoothing parameters in space and in time
 (\code{lambda}, \code{lambda_time}) must be equal to the number of folds \code{nfolds}. Default is \code{NULL}.}
 
-\item{search}{A flag to decide the search algorithm type (tree or naive or walking search algorithm).}
+\item{search}{A flag to decide the search algorithm type (tree or naive or walking search algorithm). Default is \code{tree}.}
 
 \item{isTimeDiscrete}{A boolean specifying the time data type: \code{TRUE} for discrete (with many duplicates) time data;
 \code{FALSE} for continuous time data. Default is \code{FALSE}.}
@@ -94,7 +99,9 @@ version is performed. In the latter case the number of possible pairs of smoothi
 \item{flagLumped}{A boolean specifying whether to perform mass lumping. This numerical technique presents computational
 advantages during the procedure involving a mass matrix inversion for the computation of the space penalty matrix.
 Default is \code{FALSE}.
-N.B. We suggest to put it \code{TRUE} in case of a large spatial domain or in case of a dense/refined spatial mesh.}
+N.B. We suggest to use it as \code{TRUE} in case of a large spatial domain or in case of a dense/refined spatial mesh.}
+
+\item{inference}{A boolean that is \code{TRUE} if the user wants to estimate confidence intervals. Default is \code{FALSE}.}
 }
 \value{
 A list with the following variables:
@@ -153,12 +160,8 @@ points(sample, col="red", pch=19, cex=1, main=paste('Sample | ', t-0.05,' < t < 
 ## Density Estimation
 lambda <- 0.1
 lambda_time <- 0.001
-sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, 
-                   mesh_time = mesh_time, lambda = lambda, lambda_time = lambda_time,
-                   fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4, tol2=0,
-                   print=FALSE, nfolds=NULL, nsimulations=300, step_method="Fixed_Step",
-                   direction_method="BFGS", preprocess_method="NoCrossValidation",
-                   search="tree", isTimeDiscrete=0, flagMass=0, flagLumped=0)
+sol <- DE.FEM.time(data = locations, data_time = times, FEMbasis = FEMbasis, mesh_time = mesh_time,
+                   lambda = lambda, lambda_time = lambda_time, nsimulations=300, inference=TRUE)
 
 ## Visualization
 n = 100
@@ -168,8 +171,18 @@ grid <- expand.grid(X, Y)
 
 FEMfunction = FEM.time(sol$g, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
 evaluation <- eval.FEM.time(FEM.time = FEMfunction, locations = grid, time.instants = t)
+FEMfunction_L = FEM.time(sol$g_CI_L, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+evaluation_L <- eval.FEM.time(FEM.time = FEMfunction_L, locations = grid, time.instants = t)
+FEMfunction_U = FEM.time(sol$g_CI_U, mesh_time, FEMbasis, FLAG_PARABOLIC = FALSE)
+evaluation_U <- eval.FEM.time(FEM.time = FEMfunction_U, locations = grid, time.instants = t)
+
+image2D(x = X, y = Y, z = matrix(exp(evaluation_L), n, n), col = heat.colors(100),
+        xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
+        main = paste("Estimated CI lower bound at t = ", t), zlim=c(0,0.3), asp = 1)
 image2D(x = X, y = Y, z = matrix(exp(evaluation), n, n), col = heat.colors(100),
         xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
-        main = paste("Estimated density at t = ", t), zlim=c(0,0.2), asp = 1)
-
+        main = paste("Estimated density at t = ", t), zlim=c(0,0.3), asp = 1)
+image2D(x = X, y = Y, z = matrix(exp(evaluation_U), n, n), col = heat.colors(100),
+        xlab = "x", ylab = "y", contour = list(drawlabels = FALSE),
+        main = paste("Estimated CI upper bound at t = ", t), zlim=c(0,0.3), asp = 1)
 }

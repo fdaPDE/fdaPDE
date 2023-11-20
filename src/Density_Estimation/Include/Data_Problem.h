@@ -38,8 +38,8 @@ protected:
 
 public:
     //! A constructor: it delegates DEData and MeshHandler constructors.
-    DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds,
-                SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh,
+    DataProblem(SEXP Rdata, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds,
+                SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rmesh, SEXP Rinference,
                 bool isTime = 0);
 
     //! A method to compute the integral of a function (over the spatial domain).
@@ -60,6 +60,7 @@ public:
     UInt dataSize() const {return deData_.dataSize();}
 	//! A method returning the the input order. It calls the same method of DEData class.
     UInt getOrder() const {return deData_.getOrder();}
+    Real getScaling() const {return deData_.getScaling();}
 	//! A method returning the initial coefficients for the density. It calls the same method of DEData class.
     VectorXr getFvec() const {return deData_.getFvec();}
 	//! A method returning a bool which says if there is a user's initial density. It calls the same method of DEData class.
@@ -88,6 +89,8 @@ public:
     bool Print() const {return deData_.Print();}
     //! A method returning the integer that specifies the search algorithm type.
     UInt getSearch() const {return deData_.getSearch();}
+    //! A method returning the boolean inference member. It calls the same method of DEData class.
+    bool Inference() const {return deData_.Inference();}
 
     // Getters for mesh
     //! A method returning the mesh.
@@ -163,10 +166,10 @@ private:
 
 public:
     //! A constructor: it delegates DataProblem, DEData_time and Spline constructors.
-    DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
+    DataProblem_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
                      SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint,
                      SEXP Rsearch, SEXP Rmesh, const std::vector<Real>& mesh_time, SEXP RisTimeDiscrete,
-                     SEXP RflagMass, SEXP RflagLumped, bool isTime = 1);
+                     SEXP RflagMass, SEXP RflagLumped, SEXP Rinference, bool isTime = 1);
 
     //! A method to compute the integral of a function (over the temporal domain).
     Real FEintegrate_time(const VectorXr& f) const {return (kroneckerProduct(getTimeMass(), this->getMass())*f).sum();}

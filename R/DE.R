@@ -4,16 +4,18 @@
 #' the first column corresponds to the \code{x}-coordinates, the second column corresponds to the \code{y}-coordinates 
 #' and, if ndim=3, the third column corresponds to the \code{z}-coordinates. 
 #' @param FEMbasis A \code{FEMbasis} object describing the Finite Element basis, as created by \code{\link{create.FEM.basis}}.
-#' @param lambda A scalar or vector of smoothing parameters. If it is a vector, the optimal smoothing parameter is choosen
+#' @param lambda A scalar or vector of smoothing parameters. If it is a vector, the optimal smoothing parameter is chosen
 #' with a \code{k}-fold cross-validation procedure based on the L2 norm.
-#' @param fvec A vector of length #\code{nodes} of the mesh. It corresponds to the node values of the initial density function. 
+#' @param scaling A positive factor needed to scale the smoothing parameter in the construction of confidence intervals.
+#' If the scaling is not specified, it is automatically set as the square root of the number of observations.
+#' @param fvec A vector of length #\code{nodes} of the mesh. It corresponds to the node values of the initial density function.
 #' If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion 
 #' process that starts from the empirical density of the data. Default is \code{NULL}.
-#' N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).
-#' @param heatStep A real specifying the time step for the discretized heat diffusionn process.
-#' @param heatIter An integer specifying the number of iterations to perform the discretized heat diffusion process.
+#' N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).
+#' @param heatStep A real specifying the time step for the discretized heat diffusion process. Default is \code{0.1}.
+#' @param heatIter An integer specifying the number of iterations to perform the discretized heat diffusion process. Default is \code{500}.
 #' @param stepProposals A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
-#' vector of parameters, the biggest one such that the functional decreases at each iteration is choosen. If it is \code{NULL}
+#' vector of parameters, the biggest one such that the functional decreases at each iteration is chosen. If it is \code{NULL}
 #' the following vector \code{c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)} is proposed. Default is \code{NULL}.
 #' N.B. If the program does not receive a right parameter, it aborts the R session. Try a smaller parameter.
 #' @param tol1 A scalar specifying the tolerance to use for the termination criterion based on the percentage difference
@@ -25,11 +27,11 @@
 #' @param print A boolean that is \code{TRUE} if the user wants the value of the functional, of the loglikelihood and of the
 #' penalization term printed on console at each iteration of the descent algorithm. Default is \code{FALSE}.
 #' N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.
-#' @param nfolds An integer specifying the number of folds used in cross validation techinque to find the best \code{lambda} parameter.
+#' @param nfolds An integer specifying the number of folds used in cross validation technique to find the best \code{lambda} parameter.
 #' If there is only one \code{lambda} it can be \code{NULL}. Default is \code{NULL}.
 #' @param nsimulations An integer specifying the number of iterations used in the optimization algorithms. Default value is 500.
 #' @param step_method String. This parameter specifies which step method use in the descent algorithm. 
-#' If it is \code{Fixed_Step}, the step is constant during all the algorithm and it is choosen according to \code{stepProposals};
+#' If it is \code{Fixed_Step}, the step is constant during all the algorithm and it is chosen according to \code{stepProposals};
 #' if it is \code{Backtracking_Method}, the step is computed at each iteration according to the backtracking method; finally
 #' if it is \code{Wolfe_Method}, the step is computed at each iteration according to the Wolfe method. Default is \code{Fixed_Step}.
 #' @param direction_method String. This parameter specifies which descent direction use in the descent algorithm. 
@@ -47,9 +49,10 @@
 #' cross validation method is performed. If it is \code{SimplifiedCV} a simplified version is performed. 
 #' In the latter case the number of smoothing parameters \code{lambda} must be equal to the number of folds \code{nfolds}.
 #' Default is \code{NULL}.
-#' @param search a flag to decide the search algorithm type (tree or naive or walking search algorithm).
+#' @param search a flag to decide the search algorithm type (tree or naive or walking search algorithm). Default is \code{tree}.
+#' @param inference A boolean that is \code{TRUE} if the user wants to estimate confidence intervals. Default is \code{FALSE}.
 #' @return A list with the following variables:
-#' \item{\code{FEMbasis}}{Given FEMbasis with tree informations.}
+#' \item{\code{FEMbasis}}{Given FEMbasis with tree information.}
 #' \item{\code{g}}{A vector of length #\code{nodes} that represents the value of the g-function estimated for each \code{node} of the mesh.
 #' The density is the exponential of this function.}
 #' \item{\code{f_init}}{A #\code{nodes}-by-#\code{lambda} parameters matrix. Each column contains the node values of the initial
@@ -63,10 +66,10 @@
 #' @description This function implements a nonparametric density estimation method with differential regularization 
 #' (given by the square root of the L2 norm of the laplacian of the density function), when points are located over a 
 #' planar mesh. The computation relies only on the C++ implementation of the algorithm.
-#' @usage DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, 
+#' @usage DE.FEM(data, FEMbasis, lambda, scaling=NULL, fvec=NULL, heatStep=0.1, heatIter=500,
 #'        stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL,
 #'        nsimulations=500, step_method="Fixed_Step", direction_method="BFGS",
-#'        preprocess_method="NoCrossValidation", search = "tree")
+#'        preprocess_method="NoCrossValidation", search = "tree", inference = FALSE)
 #' @export
 #'
 #' @references
@@ -100,9 +103,7 @@
 #' ## Density Estimation
 #' lambda = 0.1
 #' sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, fvec=NULL, heatStep=0.1,
-#'                   heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, 
-#'                   nfolds=NULL, nsimulations=300,step_method = "Fixed_Step", 
-#'                   direction_method = "BFGS",preprocess_method="NoCrossValidation")
+#'                   heatIter=500, nsimulations=300,step_method = "Fixed_Step", inference = TRUE)
 #' 
 #' ## Visualization 
 #' n = 100
@@ -111,15 +112,25 @@
 #' grid <- expand.grid(X, Y)
 #'
 #' evaluation <- eval.FEM(FEM(FEMbasis, coeff = sol$g), locations = grid)
+#' lower_bound_g <- eval.FEM(FEM(FEMbasis, coeff = sol$g_CI_L), locations = grid)
+#' upper_bound_g <- eval.FEM(FEM(FEMbasis, coeff = sol$g_CI_U), locations = grid)
 #' evaluation <- exp(evaluation)
+#' lower_bound_g <- exp(lower_bound_g)
+#' upper_bound_g <- exp(upper_bound_g)
 #' eval <- matrix(evaluation, n, n)
-#' 
+#' eval_L <- matrix(lower_bound_g, n, n)
+#' eval_U <- matrix(upper_bound_g, n, n)
+#'
+#' image2D(x = X, y = Y, z = eval_L, col = heat.colors(100), xlab = "x", ylab = "y",
+#'         contour = list(drawlabels = FALSE), main = "Estimated CI lower bound")
 #' image2D(x = X, y = Y, z = eval, col = heat.colors(100), xlab = "x", ylab = "y", 
 #'         contour = list(drawlabels = FALSE), main = "Estimated density")
+#' image2D(x = X, y = Y, z = eval_U, col = heat.colors(100), xlab = "x", ylab = "y",
+#'         contour = list(drawlabels = FALSE), main = "Estimated CI upper bound")
 
-DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
+DE.FEM <- function(data, FEMbasis, lambda, scaling=NULL, fvec=NULL, heatStep=0.1, heatIter=500, stepProposals=NULL,
                   tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500, step_method="Fixed_Step",
-                  direction_method="BFGS", preprocess_method="NoCrossValidation", search = "tree") 
+                  direction_method="BFGS", preprocess_method="NoCrossValidation", search = "tree", inference = FALSE)
 { 
   if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
@@ -154,9 +165,11 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
   }
 
-  
+  if(is.null(scaling))
+    scaling=sqrt(dim(data)[1])
+
   ###################### Checking parameters, sizes and conversion #################################
-  checkParametersDE(data, FEMbasis, lambda, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search) 
+  checkParametersDE(data, FEMbasis, lambda, scaling, step_method, direction_method, preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
   
   ## Converting to format for internal usage
   data = as.matrix(data)
@@ -174,21 +187,21 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
   bigsol = NULL
   if(is(FEMbasis$mesh, "mesh.2D")){	  
     
-    bigsol = CPP_FEM.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                        stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+    bigsol = CPP_FEM.DE(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                        stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
     
   } else if(is(FEMbasis$mesh, "mesh.2.5D")){
     
-    bigsol = CPP_FEM.manifold.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                 stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+    bigsol = CPP_FEM.manifold.DE(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                                 stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
     
   } else if(is(FEMbasis$mesh, "mesh.3D")){
-    bigsol = CPP_FEM.volume.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+    bigsol = CPP_FEM.volume.DE(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
   } else if(is(FEMbasis$mesh, "mesh.1.5D")){
     
-    bigsol = CPP_FEM.graph.DE(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+    bigsol = CPP_FEM.graph.DE(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
     
   }
   
@@ -199,16 +212,18 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
   lambda = bigsol[[3]]
   data = bigsol[[4]]
   CV_err = bigsol[[5]]
-  
+  g_CI_L = bigsol[[6]]
+  g_CI_U = bigsol[[7]]
+
   # Save information of Tree Mesh
   tree_mesh = list(
-    treelev = bigsol[[6]][1],
-    header_orig= bigsol[[7]],
-    header_scale = bigsol[[8]],
-    node_id = bigsol[[9]][,1],
-    node_left_child = bigsol[[9]][,2],
-    node_right_child = bigsol[[9]][,3],
-    node_box= bigsol[[10]])
+  treelev = bigsol[[8]][1],
+  header_orig= bigsol[[9]],
+  header_scale = bigsol[[10]],
+  node_id = bigsol[[11]][,1],
+  node_left_child = bigsol[[11]][,2],
+  node_right_child = bigsol[[11]][,3],
+  node_box= bigsol[[12]])
 
   # Reconstruct FEMbasis with tree mesh
   mesh.class= class(FEMbasis$mesh)
@@ -217,6 +232,6 @@ DE.FEM <- function(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500
   } #if already exist the tree information, don't append
   class(FEMbasis$mesh) = mesh.class  
   
-  reslist = list(FEMbasis = FEMbasis, g = g, f_init = f_init, lambda = lambda, data = data, CV_err = CV_err)
+  reslist = list(FEMbasis = FEMbasis, g = g, f_init = f_init, lambda = lambda, data = data, CV_err = CV_err, g_CI_L = g_CI_L, g_CI_U = g_CI_U)
   return(reslist)
 }

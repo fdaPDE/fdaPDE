@@ -72,6 +72,58 @@ FunctionalProblem<ORDER, mydim, ndim>::computeLlikPen_f(const VectorXr& f) const
   return std::pair<Real, Real>(llik,pen);
 }
 
+template<UInt ORDER, UInt mydim, UInt ndim>
+MatrixXr
+FunctionalProblem<ORDER, mydim, ndim>::computellikLaplacian(const VectorXr& g) const {
+    using EigenMap2WEIGHTS = Eigen::Map<const Eigen::Matrix<Real, Integrator::NNODES, 1>>;
+
+    MatrixXr int3 = MatrixXr::Zero(dataProblem_.getNumNodes(),dataProblem_.getNumNodes());
+
+    for(UInt triangle = 0; triangle < dataProblem_.getNumElements(); triangle++){
+
+        Element<EL_NNODES, mydim, ndim> tri_activated = dataProblem_.getElement(triangle);
+
+        Eigen::Matrix<Real,EL_NNODES,1> sub_g;
+        for (UInt i = 0; i < EL_NNODES; i++){
+            sub_g[i] = g[tri_activated[i].getId()];
+        }
+
+        Eigen::Matrix<Real, Integrator::NNODES, 1> expg = (dataProblem_.getPsiQuad()*sub_g).array().exp();
+        Eigen::Matrix<Real, Integrator::NNODES, 1> sub_expg = expg.cwiseProduct(EigenMap2WEIGHTS(&Integrator::WEIGHTS[0]));
+        Eigen::Matrix<Real, EL_NNODES, EL_NNODES> sub_int3;
+
+        sub_int3 = dataProblem_.getPsiQuad().transpose() * sub_expg.asDiagonal() * dataProblem_.getPsiQuad()  * tri_activated.getMeasure();
+
+        for (UInt i = 0; i < EL_NNODES; i++){
+            for(UInt j = 0; j < EL_NNODES; j++){
+                int3(tri_activated[i].getId(),tri_activated[j].getId()) += sub_int3(i,j);
+            }
+        }
+
+    }
+
+    return int3;
+}
+
+template<UInt ORDER, UInt mydim, UInt ndim>
+std::pair<VectorXr, VectorXr>
+FunctionalProblem<ORDER, mydim, ndim>::computeCovariance_CI(const VectorXr& g, Real lambda) const {
+    const Real n = dataProblem_.dataSize();
+    MatrixXr int3 = computellikLaplacian(g);
+    const Real scaling = dataProblem_.getScaling();
+    MatrixXr gamma = int3 + 2*lambda/scaling*dataProblem_.getP();
+    MatrixXr gamma_inv = (2/n) * gamma.inverse();
+    VectorXr v_g = gamma_inv.diagonal();
+    VectorXr g_L = VectorXr::Zero(g.size());
+    VectorXr g_U = VectorXr::Zero(g.size());
+    for (UInt i = 0; i < v_g.size() ; ++i) {
+        g_L(i) = g(i)-1.96*sqrt(v_g(i));
+        g_U(i) = g(i)+1.96*sqrt(v_g(i));
+    }
+    return std::make_pair(g_L,g_U);
+}
+
+
 // ------------------------------------------------------
 // --------------- FunctionalProblem_time ---------------
 // ------------------------------------------------------
@@ -128,6 +180,67 @@ FunctionalProblem_time<ORDER, mydim, ndim>::computeIntegrals(const VectorXr& g) 
 }
 
 template<UInt ORDER, UInt mydim, UInt ndim>
+MatrixXr
+FunctionalProblem_time<ORDER, mydim, ndim>::computellikLaplacian(const VectorXr& g) const {
+    // Kronecker product of the Gauss quadrature rules weights
+    VectorXr weights_kronecker;
+    weights_kronecker.resize(Integrator::NNODES * Integrator_t::NNODES);
+    UInt k=0;
+    for (UInt i = 0;  i < Integrator_t::NNODES; i++) {
+        for (UInt j = 0;  j < Integrator::NNODES; j++){
+            weights_kronecker[k] = Integrator::WEIGHTS[j]*Integrator_t::WEIGHTS[i];
+            ++k;
+        }
+    }
+
+    MatrixXr int3 = MatrixXr::Zero(dataProblem_time_.getNumNodes()*dataProblem_time_.getSplineNumber(),dataProblem_time_.getNumNodes()*dataProblem_time_.getSplineNumber());
+    const MatrixXr& PsiQuad = dataProblem_time_.getPsiQuad(); //It is always the same
+
+    UInt global_idx = 0; //index that keeps track of the first B-spline basis function active in the current time-interval
+    for (int time_step = 0; time_step < dataProblem_time_.getNumNodes_time()-1;  ++time_step) {
+        MatrixXr PhiQuad = dataProblem_time_.fillPhiQuad(time_step); //PhiQuad changes at each time interval
+        MatrixXr Phi_kronecker_Psi = kroneckerProduct_Matrix(PhiQuad,PsiQuad);
+        for (UInt triangle = 0; triangle < dataProblem_time_.getNumElements(); triangle++) {
+            Element<EL_NNODES, mydim, ndim> tri_activated = dataProblem_time_.getElement(triangle);
+
+            VectorXr sub_g;
+            sub_g.resize(Phi_kronecker_Psi.cols());
+            UInt k=0; //index for sub_g
+            for (int j = global_idx; j < global_idx+PhiQuad.cols(); ++j) {
+                for (UInt i = 0; i < PsiQuad.cols(); ++i){
+                    sub_g[k++]=g[tri_activated[i].getId()+dataProblem_time_.getNumNodes()*j];
+                }
+            }
+
+            VectorXr expg = (Phi_kronecker_Psi*sub_g).array().exp();
+            VectorXr sub_expg = expg.cwiseProduct(weights_kronecker);
+
+            MatrixXr sub_int3;
+
+            sub_int3 = Phi_kronecker_Psi.transpose() * sub_expg.asDiagonal() *
+                       Phi_kronecker_Psi * tri_activated.getMeasure()*
+                       (dataProblem_time_.getMesh_time()[time_step+1]-dataProblem_time_.getMesh_time()[time_step])/2;
+
+            UInt col;
+            UInt row = 0;
+            for (UInt t = global_idx; t < global_idx+PhiQuad.cols(); ++t) {
+                for (UInt i = 0; i < PsiQuad.cols(); ++i){
+                    col = 0;
+                    for (UInt j = global_idx; j < global_idx+PhiQuad.cols(); ++j) {
+                        for (int l = 0; l < PsiQuad.cols(); ++l) {
+                            int3(tri_activated[i].getId()+dataProblem_time_.getNumNodes()*t,tri_activated[l].getId()+dataProblem_time_.getNumNodes()*j) += sub_int3(row,col++);
+                        }
+                    }
+                    ++row;
+                }
+            }
+        }
+        ++global_idx;
+    }
+    return int3;
+}
+
+template<UInt ORDER, UInt mydim, UInt ndim>
 std::tuple<Real, VectorXr, Real, Real, Real>
 FunctionalProblem_time<ORDER, mydim, ndim>::computeFunctional_g(const VectorXr& g, Real lambda_S, Real lambda_T,
                                                                 const SpMat& Upsilon) const {
@@ -154,6 +267,33 @@ FunctionalProblem_time<ORDER, mydim, ndim>::computeFunctional_g(const VectorXr& 
 
     return std::make_tuple(llik + lambda_S * pen_S + lambda_T * pen_T, grad, llik, pen_S, pen_T);
 }
+
+template<UInt ORDER, UInt mydim, UInt ndim>
+std::pair<VectorXr, VectorXr>
+FunctionalProblem_time<ORDER, mydim, ndim>::computeCovariance_CI(const VectorXr& g, Real lambda_S, Real lambda_T) const {
+    const Real n = dataProblem_time_.dataSize();
+    const Real scaling = dataProblem_time_.getScaling();
+    MatrixXr int3 = computellikLaplacian(g);
+    MatrixXr gamma = int3 + 2*lambda_S/scaling*dataProblem_time_.computePen_s() + 2*lambda_T/scaling*dataProblem_time_.computePen_t();
+    MatrixXr gamma_2 = int3 + 2*lambda_S*dataProblem_time_.computePen_s() + 2*lambda_T*dataProblem_time_.computePen_t();
+    MatrixXr gamma_inv = (2/n)*gamma.inverse();
+    MatrixXr gamma_inv_2 = (2/n)*gamma_2.inverse();
+    VectorXr v_g = gamma_inv.diagonal();
+    VectorXr v_g_2 = gamma_inv_2.diagonal();
+    VectorXr g_L = VectorXr::Zero(g.size());
+    VectorXr g_U = VectorXr::Zero(g.size());
+    for (UInt i = 0; i < v_g.size() ; ++i) {
+        if(g(i)<-10){
+            g_L(i) = g(i)-1.96*sqrt(v_g_2(i));
+        }
+        else{
+            g_L(i) = g(i)-1.96*sqrt(v_g(i));
+        }
+        g_U(i) = g(i)+1.96*sqrt(v_g(i));
+    }
+    return std::make_pair(g_L,g_U);
+}
+
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 std::tuple<Real, Real, Real>
