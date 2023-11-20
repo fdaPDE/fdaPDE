@@ -4,10 +4,10 @@
 \alias{DE.FEM}
 \title{Nonparametric density estimation with differential regularization}
 \usage{
-DE.FEM(data, FEMbasis, lambda, fvec=NULL, heatStep=0.1, heatIter=500, 
+DE.FEM(data, FEMbasis, lambda, scaling=NULL, fvec=NULL, heatStep=0.1, heatIter=500,
        stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL,
        nsimulations=500, step_method="Fixed_Step", direction_method="BFGS",
-       preprocess_method="NoCrossValidation", search = "tree")
+       preprocess_method="NoCrossValidation", search = "tree", inference = FALSE)
 }
 \arguments{
 \item{data}{A matrix of dimensions #observations-by-ndim. Data are locations: each row corresponds to one point, 
@@ -16,20 +16,23 @@ and, if ndim=3, the third column corresponds to the \code{z}-coordinates.}
 
 \item{FEMbasis}{A \code{FEMbasis} object describing the Finite Element basis, as created by \code{\link{create.FEM.basis}}.}
 
-\item{lambda}{A scalar or vector of smoothing parameters. If it is a vector, the optimal smoothing parameter is choosen
+\item{lambda}{A scalar or vector of smoothing parameters. If it is a vector, the optimal smoothing parameter is chosen
 with a \code{k}-fold cross-validation procedure based on the L2 norm.}
 
-\item{fvec}{A vector of length #\code{nodes} of the mesh. It corresponds to the node values of the initial density function. 
+\item{scaling}{A positive factor needed to scale the smoothing parameter in the construction of confidence intervals.
+If the scaling is not specified, it is automatically set as the square root of the number of observations.}
+
+\item{fvec}{A vector of length #\code{nodes} of the mesh. It corresponds to the node values of the initial density function.
 If this is \code{NULL} the initial density is estimated thanks to a discretized heat diffusion 
 process that starts from the empirical density of the data. Default is \code{NULL}.
-N.B. This vector cannot be the constant vector of zeros since the algortihm works with the log(f).}
+N.B. This vector cannot be the constant vector of zeros since the algorithm works with the log(f).}
 
-\item{heatStep}{A real specifying the time step for the discretized heat diffusionn process.}
+\item{heatStep}{A real specifying the time step for the discretized heat diffusion process. Default is \code{0.1}.}
 
-\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process.}
+\item{heatIter}{An integer specifying the number of iterations to perform the discretized heat diffusion process. Default is \code{500}.}
 
 \item{stepProposals}{A scalar or a vector containing the step parameters useful for the descent algorithm. If there is a
-vector of parameters, the biggest one such that the functional decreases at each iteration is choosen. If it is \code{NULL}
+vector of parameters, the biggest one such that the functional decreases at each iteration is chosen. If it is \code{NULL}
 the following vector \code{c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)} is proposed. Default is \code{NULL}.
 N.B. If the program does not receive a right parameter, it aborts the R session. Try a smaller parameter.}
 
@@ -45,13 +48,13 @@ criterion. Default is 0.}
 penalization term printed on console at each iteration of the descent algorithm. Default is \code{FALSE}.
 N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.}
 
-\item{nfolds}{An integer specifying the number of folds used in cross validation techinque to find the best \code{lambda} parameter.
+\item{nfolds}{An integer specifying the number of folds used in cross validation technique to find the best \code{lambda} parameter.
 If there is only one \code{lambda} it can be \code{NULL}. Default is \code{NULL}.}
 
 \item{nsimulations}{An integer specifying the number of iterations used in the optimization algorithms. Default value is 500.}
 
 \item{step_method}{String. This parameter specifies which step method use in the descent algorithm. 
-If it is \code{Fixed_Step}, the step is constant during all the algorithm and it is choosen according to \code{stepProposals};
+If it is \code{Fixed_Step}, the step is constant during all the algorithm and it is chosen according to \code{stepProposals};
 if it is \code{Backtracking_Method}, the step is computed at each iteration according to the backtracking method; finally
 if it is \code{Wolfe_Method}, the step is computed at each iteration according to the Wolfe method. Default is \code{Fixed_Step}.}
 
@@ -72,11 +75,13 @@ cross validation method is performed. If it is \code{SimplifiedCV} a simplified 
 In the latter case the number of smoothing parameters \code{lambda} must be equal to the number of folds \code{nfolds}.
 Default is \code{NULL}.}
 
-\item{search}{a flag to decide the search algorithm type (tree or naive or walking search algorithm).}
+\item{search}{a flag to decide the search algorithm type (tree or naive or walking search algorithm). Default is \code{tree}.}
+
+\item{inference}{A boolean that is \code{TRUE} if the user wants to estimate confidence intervals. Default is \code{FALSE}.}
 }
 \value{
 A list with the following variables:
-\item{\code{FEMbasis}}{Given FEMbasis with tree informations.}
+\item{\code{FEMbasis}}{Given FEMbasis with tree information.}
 \item{\code{g}}{A vector of length #\code{nodes} that represents the value of the g-function estimated for each \code{node} of the mesh.
 The density is the exponential of this function.}
 \item{\code{f_init}}{A #\code{nodes}-by-#\code{lambda} parameters matrix. Each column contains the node values of the initial
@@ -118,9 +123,7 @@ points(data, col="red", pch=19, cex=0.5)
 ## Density Estimation
 lambda = 0.1
 sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, fvec=NULL, heatStep=0.1,
-                  heatIter=500, stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, 
-                  nfolds=NULL, nsimulations=300,step_method = "Fixed_Step", 
-                  direction_method = "BFGS",preprocess_method="NoCrossValidation")
+                  heatIter=500, nsimulations=300,step_method = "Fixed_Step", inference = TRUE)
 
 ## Visualization 
 n = 100
@@ -129,11 +132,21 @@ Y<- seq(-3, 3, length.out = n)
 grid <- expand.grid(X, Y)
 
 evaluation <- eval.FEM(FEM(FEMbasis, coeff = sol$g), locations = grid)
+lower_bound_g <- eval.FEM(FEM(FEMbasis, coeff = sol$g_CI_L), locations = grid)
+upper_bound_g <- eval.FEM(FEM(FEMbasis, coeff = sol$g_CI_U), locations = grid)
 evaluation <- exp(evaluation)
+lower_bound_g <- exp(lower_bound_g)
+upper_bound_g <- exp(upper_bound_g)
 eval <- matrix(evaluation, n, n)
+eval_L <- matrix(lower_bound_g, n, n)
+eval_U <- matrix(upper_bound_g, n, n)
 
+image2D(x = X, y = Y, z = eval_L, col = heat.colors(100), xlab = "x", ylab = "y",
+        contour = list(drawlabels = FALSE), main = "Estimated CI lower bound")
 image2D(x = X, y = Y, z = eval, col = heat.colors(100), xlab = "x", ylab = "y", 
         contour = list(drawlabels = FALSE), main = "Estimated density")
+image2D(x = X, y = Y, z = eval_U, col = heat.colors(100), xlab = "x", ylab = "y",
+        contour = list(drawlabels = FALSE), main = "Estimated CI upper bound")
 }
 \references{
 \itemize{

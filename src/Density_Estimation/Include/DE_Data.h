@@ -19,6 +19,7 @@ class  DEData{
 		std::vector<Point<ndim>> data_;
 		// Finite element order.
 		UInt order_;
+        Real scaling_;
 		// Initial coefficients for the density.
 		VectorXr fvec_;
 		// Time step parameter for the heat diffusion process.
@@ -40,6 +41,8 @@ class  DEData{
 		bool print_;
 		// Integer specifying the search algorithm type (tree or naive search algorithm),
 		UInt search_;
+        // A boolean: true if the user wants to calculate confidence intervals.
+        bool inference_;
 
 		// Auxiliary methods used in the constructor.
 		void setData(SEXP Rdata);
@@ -51,9 +54,9 @@ class  DEData{
 		// Constructors
 		DEData(){};
 
-		explicit DEData(const std::vector<Point<ndim>>& data, const UInt& order, const VectorXr& fvec, Real heatStep,
+		explicit DEData(const std::vector<Point<ndim>>& data, const UInt& order,const Real& scaling, const VectorXr& fvec, Real heatStep,
                         UInt heatIter, const std::vector<Real>& lambda, const UInt& nfolds, const UInt& nsim,
-                        const std::vector<Real>& stepProposals, Real tol1, Real tol2, bool print, UInt search);
+                        const std::vector<Real>& stepProposals, Real tol1, Real tol2, bool print, UInt search, bool inference);
 
 		/*! Constructor useful for the R/C++ interface.
 			It initializes the object storing the R given objects.
@@ -70,9 +73,10 @@ class  DEData{
 			\param Rtol2 an R-double specifying the tolerance to use for the termination criterion based on the norm of the gradient.
 			\param Rprint and R-integer specifying if print on console.
 			\param Rsearch an R-integer to decide the search algorithm type (tree or naive search algorithm).
+		    \param Rinference an R-integer specifying if to calculate confidence intervals.
 		*/
-		explicit DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds,
-                        SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch);
+		explicit DEData(SEXP Rdata, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds,
+                        SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rinference);
 
 		// Getters
 		//! A method to access the data.
@@ -87,6 +91,7 @@ class  DEData{
 		UInt dataSize() const {return data_.size();}
 		//! A method returning the the input order.
 		UInt getOrder() const {return order_;}
+        Real getScaling() const {return scaling_;}
 		//! A method returning the initial coefficients for the density.
 		VectorXr getFvec() const {return fvec_;}
 		//! A method returning the heat diffusion process alpha parameter.
@@ -115,6 +120,8 @@ class  DEData{
 		bool Print() const {return print_;}
 		//! A method returning the integer that specifies the search algorithm type.
 		UInt getSearch() const {return search_;}
+        //! A method returning the boolean inference member.
+        bool Inference() const {return inference_;}
 
 		// Print
 		//! A method printing data.

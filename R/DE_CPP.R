@@ -1,5 +1,5 @@
-CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                       stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+CPP_FEM.DE <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                       stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
 
@@ -21,6 +21,7 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, m
   storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(lambda) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -42,11 +43,12 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, m
   nsimulations <- as.integer(nsimulations)
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
+  storage.mode(inference) <- "logical"
 
   ## Call C++ function
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec,
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2,
-                  print, step_method, direction_method, preprocess_method, search,
+                  print, step_method, direction_method, preprocess_method, search, inference,
                   PACKAGE = "fdaPDE")
 
   ## Reset them correctly
@@ -57,8 +59,8 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, m
 }
 
 
-CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                                stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
 
@@ -82,6 +84,7 @@ CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter
   storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(lambda) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -101,18 +104,19 @@ CPP_FEM.manifold.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter
   storage.mode(nfolds) <- "integer"
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
+  storage.mode(inference) <- "logical"
 
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec,
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2,
-                  print, step_method, direction_method, preprocess_method, search,
+                  print, step_method, direction_method, preprocess_method, search, inference,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
 }
 
 
-CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                              stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                              stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
 {
 
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
@@ -135,6 +139,7 @@ CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, 
   storage.mode(FEMbasis$mesh$neighbors) <- "integer"
   storage.mode(FEMbasis$mesh$tetrahedrons) <- "integer"
   storage.mode(lambda) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -154,17 +159,18 @@ CPP_FEM.volume.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, 
   storage.mode(nfolds) <- "integer"
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
+  storage.mode(inference) <- "logical"
 
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec,
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2,
-                  print, step_method, direction_method, preprocess_method, search,
+                  print, step_method, direction_method, preprocess_method, search, inference,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
 }
 
-CPP_FEM.graph.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                stepProposals, tol1, tol2, print, nfolds, nsimulations, search)
+CPP_FEM.graph.DE <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                                stepProposals, tol1, tol2, print, nfolds, nsimulations, search, inference)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
 
@@ -193,6 +199,7 @@ CPP_FEM.graph.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, n
   
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(lambda) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -212,10 +219,11 @@ CPP_FEM.graph.DE <- function(data, FEMbasis, lambda, fvec, heatStep, heatIter, n
   storage.mode(nfolds) <- "integer"
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
-  
-  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, fvec,
+  storage.mode(inference) <- "logical"
+
+  bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2,
-                  print, step_method, direction_method, preprocess_method, search,
+                  print, step_method, direction_method, preprocess_method, search, inference,
                   PACKAGE = "fdaPDE")
   
   return(bigsol)

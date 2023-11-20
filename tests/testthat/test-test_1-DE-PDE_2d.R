@@ -91,4 +91,27 @@ invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda 
 
 load(file = paste0(foldername, "/test_1_8.RData"))
 expect_equal( max(abs((sol_ref$g-sol$g))) < tol, TRUE);
+
+# 9) Confidence Intervals with default scaling
+lambda = 0.1
+invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda,
+              step_method = "Fixed_Step", direction_method = "BFGS",
+              preprocess_method="NoCrossValidation", inference = TRUE)))
+
+load(file = paste0(foldername, "/test_1_9.RData"))
+expect_equal( max(abs((sol_ref$g-sol$g))) < tol, TRUE);
+expect_equal( max(abs((sol_ref$g_CI_L-sol$g_CI_L))) < tol, TRUE);
+expect_equal( max(abs((sol_ref$g_CI_U-sol$g_CI_U))) < tol, TRUE);
+
+# 10) Confidence Intervals with given scaling
+lambda = 0.1
+scaling_factor = 10
+invisible(capture.output(sol <- DE.FEM(data = data, FEMbasis = FEMbasis, lambda = lambda, scaling = scaling_factor,
+              step_method = "Fixed_Step", direction_method = "BFGS",
+              preprocess_method="NoCrossValidation", inference = TRUE)))
+
+load(file = paste0(foldername, "/test_1_10.RData"))
+expect_equal( max(abs((sol_ref$g-sol$g))) < tol, TRUE);
+expect_equal( max(abs((sol_ref$g_CI_L-sol$g_CI_L))) < tol, TRUE);
+expect_equal( max(abs((sol_ref$g_CI_U-sol$g_CI_U))) < tol, TRUE);
 })

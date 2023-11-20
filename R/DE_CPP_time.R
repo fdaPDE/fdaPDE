@@ -1,6 +1,6 @@
-CPP_FEM.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+CPP_FEM.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                             mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                            nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
+                            nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, inference)
 {
   # Indexes in C++ starts from 0, in R from 1: opportune transformation
 
@@ -25,6 +25,7 @@ CPP_FEM.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(lambda) <- "double"
   storage.mode(lambda_time) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -51,9 +52,9 @@ CPP_FEM.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda
   storage.mode(flagLumped) <- "logical"
 
   ## Call C++ function
-  bigsol <- .Call("Density_Estimation_time", data, data_time, FEMbasis$mesh, mesh_time, FEMbasis$order, mydim, ndim, fvec,
+  bigsol <- .Call("Density_Estimation_time", data, data_time, FEMbasis$mesh, mesh_time, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, lambda_time, nfolds, nsimulations, stepProposals, tol1, tol2, print,
-                  step_method, direction_method, preprocess_method, search, isTimeDiscrete, flagMass, flagLumped,
+                  step_method, direction_method, preprocess_method, search, isTimeDiscrete, flagMass, flagLumped, inference,
                   PACKAGE = "fdaPDE")
 
   ## Reset them correctly
@@ -64,9 +65,9 @@ CPP_FEM.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda
 }
 
 
-CPP_FEM.manifold.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter,
+CPP_FEM.manifold.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter,
                                      ndim, mydim, step_method, direction_method, preprocess_method, stepProposals, tol1,
-                                     tol2, print, nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
+                                     tol2, print, nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, inference)
 {
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
 
@@ -92,6 +93,7 @@ CPP_FEM.manifold.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambd
   storage.mode(FEMbasis$order) <- "integer"
   storage.mode(lambda) <- "double"
   storage.mode(lambda_time) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -115,18 +117,18 @@ CPP_FEM.manifold.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambd
   storage.mode(flagMass) <- "logical"
   storage.mode(flagLumped) <- "logical"
 
-  bigsol <- .Call("Density_Estimation_time", data, data_time, FEMbasis$mesh, mesh_time, FEMbasis$order, mydim, ndim, fvec,
+  bigsol <- .Call("Density_Estimation_time", data, data_time, FEMbasis$mesh, mesh_time, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, lambda_time, nfolds, nsimulations, stepProposals, tol1, tol2,
-                  print, step_method, direction_method, preprocess_method, search, isTimeDiscrete, flagMass, flagLumped,
+                  print, step_method, direction_method, preprocess_method, search, isTimeDiscrete, flagMass, flagLumped, inference,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
 }
 
 
-CPP_FEM.volume.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter,
+CPP_FEM.volume.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter,
                                    ndim, mydim, step_method, direction_method, preprocess_method, stepProposals, tol1,
-                                   tol2, print, nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped)
+                                   tol2, print, nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, inference)
 {
 
   # Indexes in C++ starts from 0, in R from 1, opportune transformation
@@ -152,6 +154,7 @@ CPP_FEM.volume.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda,
   storage.mode(FEMbasis$mesh$order) <- "integer"
   storage.mode(lambda) <- "double"
   storage.mode(lambda_time) <- "double"
+  storage.mode(scaling) <- "double"
   storage.mode(fvec) <- "double"
   storage.mode(heatStep) <- "double"
   heatIter <- as.integer(heatIter)
@@ -175,9 +178,9 @@ CPP_FEM.volume.DE_time <- function(data, data_time, FEMbasis, mesh_time, lambda,
   storage.mode(flagMass) <- "logical"
   storage.mode(flagLumped) <- "logical"
 
-  bigsol <- .Call("Density_Estimation_time", data, data_time, FEMbasis$mesh, mesh_time, FEMbasis$order, mydim, ndim, fvec,
+  bigsol <- .Call("Density_Estimation_time", data, data_time, FEMbasis$mesh, mesh_time, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, lambda_time, nfolds, nsimulations, stepProposals, tol1, tol2,
-                  print, step_method, direction_method, preprocess_method, search, isTimeDiscrete, flagMass, flagLumped,
+                  print, step_method, direction_method, preprocess_method, search, isTimeDiscrete, flagMass, flagLumped, inference,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)

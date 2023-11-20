@@ -102,6 +102,7 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
     stop('Unknown mesh class')
   }
 
+  scaling=NULL
   fvec=NULL
   stepProposals=NULL
   tol1=NULL
@@ -112,6 +113,7 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
   step_method=NULL
   direction_method=NULL
   preprocess_method=NULL
+  inference=NULL
 
   # Search algorithm
   if(search=="naive"){
@@ -145,20 +147,20 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
   bigsol = NULL
   if(is(FEMbasis$mesh, "mesh.2D")){
 
-    bigsol = CPP_FEM.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+    bigsol = CPP_FEM.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                                   mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                                  nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds)
+                                  nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds, inference)
 
   } else if(is(FEMbasis$mesh, "mesh.2.5D")){
 
-    bigsol = CPP_FEM.manifold.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+    bigsol = CPP_FEM.manifold.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                                            mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                                           nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds)
+                                           nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds, inference)
 
   } else if(is(FEMbasis$mesh, "mesh.3D")){
-    bigsol = CPP_FEM.volume.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, fvec, heatStep, heatIter, ndim,
+    bigsol = CPP_FEM.volume.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                                          mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
-                                         nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds)
+                                         nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds, inference)
   }
 
   ################################################### Collect Results ##################################################

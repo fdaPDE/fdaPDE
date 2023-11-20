@@ -1,4 +1,4 @@
-checkParametersDE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, step_method, direction_method,
+checkParametersDE_time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, step_method, direction_method,
                                    preprocess_method, tol1, tol2, nfolds, nsimulations, heatStep, heatIter, search)
 {
   ################################################## Parameters Check ##################################################
@@ -47,6 +47,9 @@ checkParametersDE_time <- function(data, data_time, FEMbasis, mesh_time, lambda,
         stop("'lambda_time' must have positive members.")
     }
   }
+
+  if (scaling<=0)
+    stop("'scaling' must be a positive number.")
 
   if (is.null(step_method))
     stop("'step_method' is required; is NULL.")

@@ -46,10 +46,10 @@ extern "C" {
         	\return R-list containing solutions.
         */
 
-        SEXP Density_Estimation(SEXP Rdata, SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP Rfvec, SEXP RheatStep,
+        SEXP Density_Estimation(SEXP Rdata, SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep,
                                 SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1,
                                 SEXP Rtol2, SEXP Rprint, SEXP RstepMethod, SEXP RdirectionMethod, SEXP RpreprocessMethod,
-                                SEXP Rsearch)
+                                SEXP Rsearch, SEXP Rinference)
         {
 
             UInt order= INTEGER(Rorder)[0];
@@ -61,31 +61,31 @@ extern "C" {
         	std::string preprocess_method=CHAR(STRING_ELT(RpreprocessMethod, 0));
 
             if(order== 1 && mydim==2 && ndim==2)
-        		return(DE_skeleton<1, 2, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+        		return(DE_skeleton<1, 2, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
         	else if(order== 2 && mydim==2 && ndim==2)
-        		return(DE_skeleton<2, 2, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+        		return(DE_skeleton<2, 2, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
         	else if(order== 1 && mydim==2 && ndim==3)
-        		return(DE_skeleton<1, 2, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+        		return(DE_skeleton<1, 2, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
         	else if(order== 2 && mydim==2 && ndim==3)
-        		return(DE_skeleton<2, 2, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+        		return(DE_skeleton<2, 2, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
         	else if(order == 1 && mydim==3 && ndim==3)
-        		return(DE_skeleton<1, 3, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+        		return(DE_skeleton<1, 3, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
         	else if(order == 2 && mydim==3 && ndim==3)
-                return(DE_skeleton<2, 3, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+                return(DE_skeleton<2, 3, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 1 && mydim==1 && ndim==2)
-                return(DE_skeleton<1, 1, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+                return(DE_skeleton<1, 1, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 2 && mydim==1 && ndim==2)
-                return(DE_skeleton<2, 1, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, step_method, direction_method, preprocess_method));
+                return(DE_skeleton<2, 1, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, step_method, direction_method, preprocess_method));
 
             return(NILSXP);
 
         }
 
 
-        SEXP Density_Initialization(SEXP Rdata, SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP Rfvec,
+        SEXP Density_Initialization(SEXP Rdata, SEXP Rmesh, SEXP Rorder, SEXP Rmydim, SEXP Rndim, SEXP Rscaling, SEXP Rfvec,
                                     SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim,
                                     SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rinit,
-                                    SEXP Rinit_fold)
+                                    SEXP Rinit_fold, SEXP Rinference)
         {
 
         	UInt order = INTEGER(Rorder)[0];
@@ -97,21 +97,21 @@ extern "C" {
         	std::string init = CHAR(STRING_ELT(Rinit, 0));
 
             if(order == 1 && mydim == 2 && ndim == 2)
-        		return(DE_init_skeleton<1, 2, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+        		return(DE_init_skeleton<1, 2, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
         	else if(order== 2 && mydim == 2 && ndim == 2)
-        		return(DE_init_skeleton<2, 2, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+        		return(DE_init_skeleton<2, 2, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
         	else if(order == 1 && mydim == 2 && ndim == 3)
-        		return(DE_init_skeleton<1, 2, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+        		return(DE_init_skeleton<1, 2, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
         	else if(order == 2 && mydim == 2 && ndim == 3)
-        		return(DE_init_skeleton<2, 2, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+        		return(DE_init_skeleton<2, 2, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
         	else if(order == 1 && mydim == 3 && ndim == 3)
-        		return(DE_init_skeleton<1, 3, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+        		return(DE_init_skeleton<1, 3, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
             else if(order == 2 && mydim == 3 && ndim == 3)
-                return(DE_init_skeleton<2, 3, 3>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+                return(DE_init_skeleton<2, 3, 3>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
             else if(order == 1 && mydim==1 && ndim==2)
-                return(DE_init_skeleton<1, 1, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+                return(DE_init_skeleton<1, 1, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
             else if(order == 2 && mydim==1 && ndim==2)
-                return(DE_init_skeleton<2, 1, 2>(Rdata, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, init, init_fold));
+                return(DE_init_skeleton<2, 1, 2>(Rdata, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rsearch, Rinference, init, init_fold));
 
             return(NILSXP);
 
@@ -149,11 +149,11 @@ extern "C" {
             \return R-list containing solutions.
         */
         SEXP Density_Estimation_time(SEXP Rdata, SEXP Rdata_time, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder, SEXP Rmydim,
-                                     SEXP Rndim, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
+                                     SEXP Rndim, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
                                      SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1,
                                      SEXP Rtol2, SEXP Rprint, SEXP RstepMethod, SEXP RdirectionMethod,
                                      SEXP RpreprocessMethod, SEXP Rsearch, SEXP RisTimeDiscrete, SEXP RflagMass,
-                                     SEXP RflagLumped)
+                                     SEXP RflagLumped, SEXP Rinference)
         {
 
             UInt order = INTEGER(Rorder)[0];
@@ -165,17 +165,17 @@ extern "C" {
             std::string preprocess_method = CHAR(STRING_ELT(RpreprocessMethod, 0));
 
             if(order == 1 && mydim == 2 && ndim == 2)
-                return(DE_skeleton_time<1, 2, 2>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, step_method, direction_method, preprocess_method));
+                return(DE_skeleton_time<1, 2, 2>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 2 && mydim == 2 && ndim == 2)
-                return(DE_skeleton_time<2, 2, 2>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, step_method, direction_method, preprocess_method));
+                return(DE_skeleton_time<2, 2, 2>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 1 && mydim == 2 && ndim == 3)
-                return(DE_skeleton_time<1, 2, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, step_method, direction_method, preprocess_method));
+                return(DE_skeleton_time<1, 2, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 2 && mydim == 2 && ndim == 3)
-                return(DE_skeleton_time<2, 2, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, step_method, direction_method, preprocess_method));
+                return(DE_skeleton_time<2, 2, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 1 && mydim == 3 && ndim == 3)
-                return(DE_skeleton_time<1, 3, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, step_method, direction_method, preprocess_method));
+                return(DE_skeleton_time<1, 3, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, step_method, direction_method, preprocess_method));
             else if(order == 2 && mydim == 3 && ndim == 3)
-                return(DE_skeleton_time<2, 3, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, step_method, direction_method, preprocess_method));
+                return(DE_skeleton_time<2, 3, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, step_method, direction_method, preprocess_method));
 
             return(NILSXP);
 
@@ -183,10 +183,10 @@ extern "C" {
 
 
         SEXP Density_Initialization_time(SEXP Rdata, SEXP Rdata_time, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder,
-                                         SEXP Rmydim, SEXP Rndim, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
+                                         SEXP Rmydim, SEXP Rndim, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda,
                                          SEXP Rlambda_time, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals, SEXP Rtol1, SEXP Rtol2,
                                          SEXP Rprint, SEXP Rsearch, SEXP RisTimeDiscrete, SEXP RflagMass, SEXP RflagLumped,
-                                         SEXP Rinit, SEXP Rinit_fold)
+                                         SEXP Rinit, SEXP Rinit_fold, SEXP Rinference)
 
         {
 
@@ -199,17 +199,17 @@ extern "C" {
             std::string init = CHAR(STRING_ELT(Rinit, 0));
 
             if(order == 1 && mydim == 2 && ndim == 2)
-                return(DE_init_skeleton_time<1, 2, 2>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, init, init_fold));
+                return(DE_init_skeleton_time<1, 2, 2>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, init, init_fold));
             else if(order == 2 && mydim == 2 && ndim == 2)
-                return(DE_init_skeleton_time<2, 2, 2>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, init, init_fold));
+                return(DE_init_skeleton_time<2, 2, 2>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, init, init_fold));
             else if(order == 1 && mydim == 2 && ndim == 3)
-                return(DE_init_skeleton_time<1, 2, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, init, init_fold));
+                return(DE_init_skeleton_time<1, 2, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, init, init_fold));
             else if(order == 2 && mydim == 2 && ndim == 3)
-                return(DE_init_skeleton_time<2, 2, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, init, init_fold));
+                return(DE_init_skeleton_time<2, 2, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, init, init_fold));
             else if(order == 1 && mydim == 3 && ndim == 3)
-                return(DE_init_skeleton_time<1, 3, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, init, init_fold));
+                return(DE_init_skeleton_time<1, 3, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, init, init_fold));
             else if(order == 2 && mydim == 3 && ndim == 3)
-                return(DE_init_skeleton_time<2, 3, 3>(Rdata, Rdata_time, Rorder, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, init, init_fold));
+                return(DE_init_skeleton_time<2, 3, 3>(Rdata, Rdata_time, Rorder, Rscaling, Rfvec, RheatStep, RheatIter, Rlambda, Rlambda_time, Rnfolds, Rnsim, RstepProposals, Rtol1, Rtol2, Rprint, Rmesh, Rmesh_time, Rsearch, RisTimeDiscrete, RflagMass, RflagLumped, Rinference, init, init_fold));
 
             return(NILSXP);
 

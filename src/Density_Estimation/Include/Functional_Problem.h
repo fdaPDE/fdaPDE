@@ -17,6 +17,8 @@ class FunctionalProblem{
 
     //! A method to compute the integrals of the functional.
     std::pair<Real, VectorXr> computeIntegrals(const VectorXr& g) const;
+    //! A method to compute the laplacian of the log-likelihood
+    MatrixXr computellikLaplacian(const VectorXr& g) const;
 
   public:
     //! A constructor
@@ -25,6 +27,8 @@ class FunctionalProblem{
     std::tuple<Real, VectorXr, Real, Real> computeFunctional_g(const VectorXr& g, Real lambda, const SpMat& Psi) const;
     //! A method to compute the log-likelihood and the penalization term for the f-function.
     std::pair<Real,Real> computeLlikPen_f(const VectorXr& f) const;
+    //! A method to compute the covariance of the Gaussian approximation for the Confidence Bounds
+    std::pair<VectorXr, VectorXr> computeCovariance_CI(const VectorXr& g, Real lambda) const;
 
 };
 
@@ -43,12 +47,18 @@ private:
     //! A method to compute the integrals of the functional.
     std::pair<Real, VectorXr> computeIntegrals(const VectorXr& g) const;
 
+    //! A method to compute the laplacian of the log-likelihood, needed for confidence intervals.
+    MatrixXr computellikLaplacian(const VectorXr& g) const;
+
+
 public:
     //! A constructor.
     FunctionalProblem_time(const DataProblem_time<ORDER, mydim, ndim>& dp_t) : dataProblem_time_(dp_t){};
     //! A method to compute the functional for the g-function. Output: loss, gradient, llik, penterms.
     std::tuple<Real, VectorXr, Real, Real, Real> computeFunctional_g(const VectorXr& g, Real lambda, Real lambda_T,
                                                                      const SpMat& Upsilon) const;
+    //! A method to compute for the Confidence Bounds obtained thanks to the Gaussian approximation.
+    std::pair<VectorXr, VectorXr> computeCovariance_CI(const VectorXr& g, Real lambda_S, Real lambda_T) const;
     //! A method to compute the log-likelihood and the penalization terms for the f-function.
     std::tuple<Real, Real, Real> computeLlikPen_f(const VectorXr& f) const;
 

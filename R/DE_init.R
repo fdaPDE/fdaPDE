@@ -64,7 +64,7 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
     stop('Unknown mesh class')
   }
   
-  
+  scaling=NULL
   fvec=NULL
   stepProposals=NULL
   tol1=NULL
@@ -75,6 +75,7 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   step_method=NULL
   direction_method=NULL
   preprocess_method=NULL
+  inference=NULL
 
     # Search algorithm
   if(search=="naive"){
@@ -107,20 +108,20 @@ DE.heat.FEM <- function(data, FEMbasis, lambda=NULL, heatStep=0.1, heatIter=500,
   bigsol = NULL
   if(is(FEMbasis$mesh, "mesh.2D")){	  
     
-    bigsol = CPP_FEM.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                        stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+    bigsol = CPP_FEM.DE_init(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                        stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds, inference)
     
   } else if(is(FEMbasis$mesh, "mesh.2.5D")){
     
-    bigsol = CPP_FEM.manifold.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                                 stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+    bigsol = CPP_FEM.manifold.DE_init(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                                 stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds, inference)
     
   } else if(is(FEMbasis$mesh, "mesh.3D")){
-    bigsol = CPP_FEM.volume.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+    bigsol = CPP_FEM.volume.DE_init(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds, inference)
   }else if(is(FEMbasis$mesh, "mesh.1.5D")){
-    bigsol = CPP_FEM.graph.DE_init(data, FEMbasis, lambda, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
-                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds)
+    bigsol = CPP_FEM.graph.DE_init(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter, ndim, mydim, step_method, direction_method, preprocess_method,
+                               stepProposals, tol1, tol2, print, nfolds, nsimulations, search, init, nFolds, inference)
   }
   
   ###################### Collect Results ############################################################  

@@ -2,12 +2,14 @@
 #define __DE_DATA_IMP_H__
 
 template<UInt ndim>
-DEData<ndim>::DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
-  SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch)
+DEData<ndim>::DEData(SEXP Rdata, SEXP Rorder, SEXP Rscaling, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
+  SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch, SEXP Rinference)
 {
   setData(Rdata);
 
   order_ = INTEGER(Rorder)[0];
+
+  scaling_ = REAL(Rscaling)[0];
 
   setFvec(Rfvec);
 
@@ -31,14 +33,16 @@ DEData<ndim>::DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP R
 
   search_ = INTEGER(Rsearch)[0];
 
+  inference_ = INTEGER(Rinference)[0];
+
 }
 
 template<UInt ndim>
-DEData<ndim>::DEData(const std::vector<Point<ndim> >& data, const UInt& order, const VectorXr& fvec, Real heatStep, UInt heatIter, const std::vector<Real>& lambda,
+DEData<ndim>::DEData(const std::vector<Point<ndim> >& data, const UInt& order, const Real& scaling, const VectorXr& fvec, Real heatStep, UInt heatIter, const std::vector<Real>& lambda,
                const UInt& nfolds, const UInt& nsim, const std::vector<Real>& stepProposals, Real tol1, Real tol2,
-               bool print, UInt search):
-                data_(data), order_(order), fvec_(fvec), heatStep_(heatStep), heatIter_(heatIter), lambda_(lambda), Nfolds_(nfolds),
-                nsim_(nsim), stepProposals_(stepProposals), tol1_(tol1), tol2_(tol2), print_(print), search_(search)
+               bool print, UInt search, bool inference):
+                data_(data), order_(order), scaling_(scaling), fvec_(fvec), heatStep_(heatStep), heatIter_(heatIter), lambda_(lambda), Nfolds_(nfolds),
+                nsim_(nsim), stepProposals_(stepProposals), tol1_(tol1), tol2_(tol2), print_(print), search_(search), inference_(inference)
 {
 }
 

@@ -28,6 +28,13 @@ void FEDE<ORDER, mydim, ndim>::apply()
     Rprintf("##### FINAL STEP #####\n");
 
     gcoeff_ = minAlgo_->apply_core(dataProblem_.getGlobalPsi(), bestLambda_, gInit);
+
+    if(dataProblem_.Inference()){
+        // CI computation
+        Rprintf("##### CI COMPUTATION #####\n");
+
+        g_CI_ = funcProblem_.computeCovariance_CI(gcoeff_, bestLambda_);
+    }
 }
 
 // -----------------------------------------
@@ -64,6 +71,13 @@ void FEDE_time<ORDER, mydim, ndim>::apply()
     Rprintf("##### FINAL STEP #####\n");
 
     gcoeff_ = minAlgo_->apply_core(dataProblem_.getUpsilon(), bestLambda_S, bestLambda_T, gInit);
+
+    if(dataProblem_.Inference()){
+        // CI computation
+        Rprintf("##### CI COMPUTATION #####\n");
+
+        g_CI_ = funcProblem_.computeCovariance_CI(gcoeff_, bestLambda_S, bestLambda_T);
+    }
 }
 
 #endif
