@@ -10,6 +10,7 @@ for( file in list.files("tests/data/setup/")){
   path <- test_path("../data/setup", file)
   source(path)
   i <- i + 1
+  setTxtProgressBar(pb, i)
 }
 close(pb)
 cat("-------------- \t \t \t ------------- \t \t \t --------------\n")
