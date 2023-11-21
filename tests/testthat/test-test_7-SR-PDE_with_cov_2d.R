@@ -20,13 +20,6 @@ test_that("SR-PDE Horseshoe domain",{
   # Exact solution (pointwise at nodes)
   DatiEsatti=fs.test(locations[,1], locations[,2]) + 2*cov1 - cov2
   
-  for(ind in 1:100)
-  {
-    points(locations[which(round((DatiEsatti-min(DatiEsatti))/(max(DatiEsatti)-min(DatiEsatti))*100)==ind),1],
-           locations[which(round((DatiEsatti-min(DatiEsatti))/(max(DatiEsatti)-min(DatiEsatti))*100)==ind),2],
-           col=heat.colors(100)[ind], pch=16)
-  }
-  
   # Add error to simulate data
   set.seed(543663)
   ran = range(DatiEsatti)

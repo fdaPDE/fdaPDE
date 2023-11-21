@@ -16,7 +16,7 @@ test_that("Space-Time Density Estimation - Unit Sphere", {
   data_y <- fact*rnorm(n)
   data_z <- fact*rnorm(n)
   times <- runif(n,0,1)
-  data <- cbind(data_x, data_y, data_z)
+  locations <- cbind(data_x, data_y, data_z)
 
   ## Density Estimation:
   lambda = 1e-5

@@ -6,7 +6,7 @@ cat("-------------- \t \t \t Building Data \t \t \t --------------\n")
 pb = txtProgressBar(min = 0, max = length(list.files(test_path("../data/setup/"))), 
                     initial = 0, style = 3)
 i = 0
-for( file in list.files("tests/data/setup/")){
+for( file in list.files(test_path("../data/setup/"))){
   path <- test_path("../data/setup", file)
   source(path)
   i <- i + 1

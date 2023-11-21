@@ -14,6 +14,7 @@ tests/data/tSR-PDE
 tests/data/GSR-PDE
 tests/data/tGSR-PDE/
 tests/data/fPCA/
+tests/data/STDE-PDE/
 tests/building_check/fedora_gcc_devel/
 tests/building_check/fedora_clang_devel/
 tests/building_check/debian_gcc_patched/
