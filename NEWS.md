@@ -1,10 +1,11 @@
 
-# fdaPDE 1.1-16
+# fdaPDE 1.1-17
 
 ## New features
 
 1) Wald inference on the nonparametric term f for space-time models
 
+2) Spatio-Temporal Density Estimation
 
 # fdaPDE 1.1-9
 
