@@ -231,7 +231,7 @@ void InferenceData::print_inference_data() const{
 
   Rprintf("enhanced_Inference:");
   for(UInt i=0; i < enhanced_Inference.size(); ++i){
-    Rprintf(" %d",enhanced_Inference[i]);
+    Rprintf(" %d", static_cast<int>(enhanced_Inference[i]));
   }
   Rprintf("\n");
 							     
