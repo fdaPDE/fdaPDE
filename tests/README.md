@@ -1,14 +1,22 @@
 # Testing the development version of fdaPDE package
 
-Compare the development version of `fdaPDE` package with the stable version available on CRAN.  
-To run correctly the tests, check whether the following conditions holds:
+Compare the development version of the `fdaPDE` package with the stable version available in the `fdaPDE/fdaPDE` repository. 
 
-  - your working directory is set to `fdaPDE/tests/`.
-  
-  - your development version of `fdaPDE` is loaded through `library(fdaPDE)`
-  
-Finally, to check the development version of the package, run from terminal:
+### Install docker 
+Docker is needed to compare the development version of `fdaPDE` package with the stable version available on CRAN.
+To install docker, run from terminal:
 ```
-  Rscript run_test.R
+  sudo apt-get install -y docker.io
+  sudo usermod -aG docker $USER
 ```
-The script `run_test.R` will generate, only once, reference solutions relying on the stable version of `fdaPDE` package and it will compare these reference solutions with the outputs of your version of the package exploiting the R package `testthat`. 
+Finally, reboot your PC or run from terminal:
+```
+  sudo reboot
+```
+
+### Run tests
+Assuming your working directory is set to `fdaPDE/tests/` and you have installed 'docker' as explained in the previous section, to check the development version of the package, run the following command from the terminal:
+```
+  ./run_tests.sh
+```
+The bash script `run_tests.sh` will generate reference solutions, only once, using the stable version of the `fdaPDE` package. It will then compare these reference solutions with the outputs of your version of the package, exploiting the R package `testthat`. 

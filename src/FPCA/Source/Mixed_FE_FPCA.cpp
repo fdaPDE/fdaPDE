@@ -287,7 +287,7 @@ void MixedFEFPCAGCV::computeGCV(FPCAObject& FPCAinput,UInt output_index)
 	
 	if(s-dof_[output_index]<0)
 	{
-			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconsistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->fpcaData_.getLambda()[output_index]);
+			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconsistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %f \n", this->fpcaData_.getLambda()[output_index]);
 	}
 	Real stderror=norm_squared/(s-dof_[output_index]);
 	GCV_[output_index]=(s/(s-dof_[output_index]))*stderror;

@@ -13,7 +13,6 @@ test_that("Density Estimation - Linear Network", {
   
   nnodes=dim(mesh$nodes)[1]
   FEMbasis=create.FEM.basis(mesh)
-  plot(mesh, asp=1)
   
   ## Generate data
   n = 100

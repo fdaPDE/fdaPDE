@@ -12,7 +12,6 @@ y = x
 locations = expand.grid(x,y)
 
 mesh = create.mesh.2D(locations)
-plot(mesh)
 
 nnodes = dim(mesh$nodes)[1]
 

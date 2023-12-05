@@ -96,7 +96,7 @@ test_that("tSR-PDE Manifold",{
   expect_equal( max(abs((sol$solution$beta-sol_ref$solution$beta))) < tol, TRUE);
   
   ### Inference test: 
-  inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
+  inf_obj <- inferenceDataObjectTimeBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
   
   # #### Test 16.5: overall inference on beta, serparable case
   # invisible(capture.output(sol <- smooth.FEM.time(observations=datacov, covariates = W,

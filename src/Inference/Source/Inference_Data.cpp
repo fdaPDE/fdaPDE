@@ -231,7 +231,7 @@ void InferenceData::print_inference_data() const{
 
   Rprintf("enhanced_Inference:");
   for(UInt i=0; i < enhanced_Inference.size(); ++i){
-    Rprintf(" %d",enhanced_Inference[i]);
+    Rprintf(" %d", static_cast<int>(enhanced_Inference[i]));
   }
   Rprintf("\n");
 							     
@@ -286,7 +286,7 @@ void InferenceData::print_inference_data() const{
     Rprintf(" %f \n", inference_Alpha(i));
   }
 
-  Rprintf("n_Flip: %d\n", n_Flip);
+  Rprintf("n_Flip: %lu\n", n_Flip);
   Rprintf("tol_Fspai: %f\n", tol_Fspai);
   Rprintf("definition: %d\n",definition);
 };

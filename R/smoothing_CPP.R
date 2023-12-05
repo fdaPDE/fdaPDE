@@ -674,7 +674,7 @@ CPP_get.FEM.PDE.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$faces) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
     
-  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(mesh, "mesh.1.5D")){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(FEMbasis$mesh, "mesh.1.5D")){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
@@ -753,7 +753,7 @@ CPP_get.FEM.PDE.sv.Matrix<-function(observations, FEMbasis, PDE_parameters)
     storage.mode(FEMbasis$mesh$faces) <- "integer"
     storage.mode(FEMbasis$mesh$neighbors) <- "integer"
     
-  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(mesh, "mesh.1.5D")){
+  }else if(is(FEMbasis$mesh, "mesh.2.5D") || is(FEMbasis$mesh, "mesh.1.5D")){
     stop('Function not yet implemented for this mesh class')
   }else{
     stop('Unknown mesh class')
