@@ -19,3 +19,4 @@ tests/building_check/fedora_gcc_devel/
 tests/building_check/fedora_clang_devel/
 tests/building_check/debian_gcc_patched/
 tests/building_check/debian_clang_devel/
+tests/building_check/debian_gcc_devel/
