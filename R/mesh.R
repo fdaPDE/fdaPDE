@@ -67,7 +67,7 @@ triangulate_native <- function(P, PB, PA, S, SB,H, TR, flags) {
 #'                      triangles = NA, order = 1, verbosity = 0)
 #' @seealso \code{\link{refine.mesh.2D}}, \code{\link{create.FEM.basis}}
 #' @return An object of the class mesh.2D with the following output:
-#' \itemize{
+#' \describe{
 #' \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 #' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.
@@ -256,7 +256,7 @@ create.mesh.2D <- function(nodes, nodesattributes = NA, segments = NA, holes = N
 #' @usage refine.mesh.2D(mesh, minimum_angle, maximum_area, delaunay, verbosity)
 #' @seealso \code{\link{create.mesh.2D}}, \code{\link{create.FEM.basis}}
 #' @return A mesh.2D object representing the refined triangular mesh,  with the following output:
-#' \itemize{
+#' \describe{
 #' \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 #' \item{\code{nodesattributes}}{nodesattributes A matrix with #nodes rows containing nodes' attributes.
@@ -388,7 +388,7 @@ refine.mesh.2D<-function(mesh, minimum_angle = NA, maximum_area = NA, delaunay =
 #' @param holes A #holes-by-3 matrix containing the x, y, z coordinates of a point internal to each hole of the mesh. These points are used to carve holes
 #' in the triangulation, when the domain has holes. This has been added for consistency with the function \code{create.mesh.2D}.
 #' @return An object of the class mesh.2.5D with the following output:
-#' \itemize{
+#' \describe{
 #' \item{\code{nodes}}{A #nodes-by-3 matrix containing the x, y, z coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 #' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.
@@ -590,7 +590,7 @@ projection.points.2.5D<-function(mesh, locations) {
 #' @param holes A #holes-by-3 matrix containing the x, y, z coordinates of a point internal to each hole of the mesh. These points are used to carve holes
 #' in the triangulation, when the domain has holes. This has been added for consistency with the function \code{create.mesh.2D}.
 #' @return An object of the class mesh.3D with the following output:
-#' \itemize{
+#' \describe{
 #' \item{\code{nodes}}{A #nodes-by-3 matrix containing the x, y, z coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 #' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.
@@ -828,7 +828,7 @@ refine.by.splitting.mesh.3D <- function (mesh=NULL){
 #' respectively used for linear (order = 1) and quadratic (order = 2) Finite Elements. Default is \code{order} = 1.
 #' @usage create.mesh.1.5D(nodes, edges = NULL, order = 1, nodesattributes = NULL)
 #' @return An object of the class mesh.1.5D with the following output:
-#' \itemize{
+#' \describe{
 #' \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 #' \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 #' \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.

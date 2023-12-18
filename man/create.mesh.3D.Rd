@@ -36,7 +36,7 @@ in the triangulation, when the domain has holes. This has been added for consist
 }
 \value{
 An object of the class mesh.3D with the following output:
-\itemize{
+\describe{
 \item{\code{nodes}}{A #nodes-by-3 matrix containing the x, y, z coordinates of the mesh nodes.}
 \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.

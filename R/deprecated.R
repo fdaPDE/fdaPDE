@@ -634,11 +634,12 @@ R_tricoefCal = function(mesh)
 #'        the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.
 #' @param CPP_CODE Boolean. If \code{TRUE} the computation relies on the C++ implementation of the algorithm. This usually ensures a much faster computation.
 #' @return A list with the following variables:
-#' \itemize{
+#' \describe{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
 #'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
+#'          \describe{
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
@@ -646,7 +647,9 @@ R_tricoefCal = function(mesh)
 #'          \item{\code{rmse}}{Estimate of the root mean square error in the locations}
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
+#'        }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \describe{
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
@@ -655,6 +658,7 @@ R_tricoefCal = function(mesh)
 #'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
 #'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
 #'          }
+#'        }
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #' }
@@ -692,11 +696,12 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #'        the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.
 #' @param CPP_CODE Boolean. If \code{TRUE} the computation relies on the C++ implementation of the algorithm. This usually ensures a much faster computation.
 #' @return A list with the following variables:
-#' \itemize{
+#' \describe{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
 #'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
+#'          \describe{
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
@@ -704,7 +709,9 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #'          \item{\code{rmse}}{Estimate of the root mean square error in the locations}
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
+#'        }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \describe{
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
@@ -712,6 +719,7 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
 #'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
 #'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
+#'          }
 #'          }
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
@@ -755,11 +763,12 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #'        the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.
 #' @param CPP_CODE Boolean. If \code{TRUE} the computation relies on the C++ implementation of the algorithm. This usually ensures a much faster computation.
 #' @return A list with the following variables:
-#' \itemize{
+#' \describe{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
 #'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
+#'          \describe{
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
@@ -767,7 +776,9 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #'          \item{\code{rmse}}{Estimate of the root mean square error in the locations}
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
+#'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \describe{
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
@@ -775,6 +786,7 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
 #'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
 #'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
+#'          }
 #'          }
 #'    \item{\code{time}}{Duration of the entire optimization computation}
 #'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}

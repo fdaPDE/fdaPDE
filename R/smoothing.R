@@ -97,10 +97,10 @@
 #' @param inference.data.object An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear and nonlinear parameters of the model. This parameter needs to be 
 #' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.
 #' @return A list with the following variables:
-#' \itemize{
+#' \describe{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction=NULL}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction=NULL}.}
 #'          In all the other cases, only the column related to the best smoothing parameter is returned.
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector.}
 #'          \item{\code{g}}{Matrix, second half of solution vector.}
@@ -108,8 +108,8 @@
 #'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate.}
 #'          \item{\code{rmse}}{Estimate of the root mean square error in the locations.}
 #'          \item{\code{estimated_sd}}{Estimate of the standard deviation of the error.}
-#'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \describe{
 #'          \item{\code{lambda_solution}}{numerical value of best lambda according to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
 #'          \item{\code{lambda_position}}{integer, position in \code{lambda_vector} of best lambda according to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum.}
@@ -118,24 +118,36 @@
 #'          \item{\code{lambda_vector}}{vector of positive numbers: penalizations either passed by the user or found in the iterations of the optimization method.}
 #'          \item{\code{GCV_vector}}{vector of positive numbers, GCV values for all the lambdas in \code{lambda_vector}}
 #'          }
+#'    }
 #'    \item{\code{time}}{Duration of the entire optimization computation.}
 #'    \item{\code{bary.locations}}{Barycenter information of the given locations, if the locations are not mesh nodes.}
 #'    \item{\code{GAM_output}}{A list of GAM related data:
+#'          \describe{
 #'          \item{\code{fn_hat}}{A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contains the evaluaton of the spatial field in the location points.}
 #'          \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
 #'          \item{\code{variance.est}}{A vector which returns the variance estimates for the Generative Additive Models.}
 #'         }
-#'    \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
-#'          \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
-#'               \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
-#'               \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
-#'               \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.}
-#'               }
-#'         \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
-#'               \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
-#'               \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.}
-#'              }
-#'         }
+#'      }
+#' \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
+#'          \enumerate{
+#'            \item \code{p_values} list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+#'                \tabular{ll}{
+#'                 \code{wald} list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. \cr
+#'                 \tab \cr
+#'                 \code{speckman} list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. \cr
+#'                 \tab \cr
+#'                 \code{eigen_sign_flip} list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. \cr
+#'                 \tab \cr
+#'                }
+#'            \item \code{CI} list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+#'                \tabular{ll}{
+#'                \code{wald} list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix. \cr
+#'                 \tab \cr
+#'                \code{speckman} list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix. \cr
+#'                 \tab \cr
+#'                }
+#'            }
+#' }
 #' }
 #' @description This function implements a spatial regression model with differential regularization.
 #'  The regularizing term involves a Partial Differential Equation (PDE). In the simplest case the PDE involves only the
@@ -157,14 +169,14 @@
 #' @export
 #' @references
 #' \itemize{
-#'    \item{Sangalli, L. M., Ramsay, J. O., Ramsay, T. O. (2013). Spatial spline regression models.
-#' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75(4), 681-703.}
-#'    \item{Azzimonti, L., Sangalli, L. M., Secchi, P., Domanin, M., Nobile, F. (2015). Blood flow velocity field estimation
-#' via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
-#'    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
-#'  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
-#'    \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2022). Some first inferential tools for spatial regression
-#'    with differential regularization. Journal of Multivariate Analysis, 189, 104866.}
+#'    \item Sangalli, L. M., Ramsay, J. O., Ramsay, T. O. (2013). Spatial spline regression models.
+#' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75(4), 681-703.
+#'    \item Azzimonti, L., Sangalli, L. M., Secchi, P., Domanin, M., Nobile, F. (2015). Blood flow velocity field estimation
+#' via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.
+#'    \item Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
+#'  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.
+#'    \item Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2022). Some first inferential tools for spatial regression
+#'    with differential regularization. Journal of Multivariate Analysis, 189, 104866.
 #' }
 #' @examples
 #' library(fdaPDE)
