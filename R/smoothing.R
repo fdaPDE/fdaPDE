@@ -111,7 +111,8 @@
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
 #'          \describe{
 #'          \item{\code{lambda_solution}}{numerical value of best lambda according to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
-#'          \item{\code{lambda_position}}{integer, position in \code{lambda_vector} of best lambda according to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
+#'          \item{\code{lambda_position}}{integer, position in \code{lambda_vector} of best lambda according to
+#'           \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}.}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum.}
 #'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations.}
 #'          \item{\code{dof}}{vector of positive numbers, DOFs for all the lambdas in \code{lambda_vector}, empty or invalid if not computed.}
@@ -128,25 +129,32 @@
 #'          \item{\code{variance.est}}{A vector which returns the variance estimates for the Generative Additive Models.}
 #'         }
 #'      }
-#' \item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
-#'          \enumerate{
-#'            \item \code{p_values} list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
-#'                \tabular{ll}{
-#'                 \code{wald} list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. \cr
-#'                 \tab \cr
-#'                 \code{speckman} list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. \cr
-#'                 \tab \cr
-#'                 \code{eigen_sign_flip} list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. \cr
-#'                 \tab \cr
-#'                }
-#'            \item \code{CI} list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
-#'                \tabular{ll}{
-#'                \code{wald} list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix. \cr
-#'                 \tab \cr
-#'                \code{speckman} list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix. \cr
-#'                 \tab \cr
+#' \item{\code{inference}}{A list set only if a well defined \code{\link{inferenceDataObject}} is passed as parameter to the function; contains all inference outputs required:
+#'          \describe{
+#'            \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+#'                \describe{
+#'                 \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object}. 
+#'                 If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.
+#'                 }
+#'                 \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object}. 
+#'                 If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}.
+#'                 }
+#'                 \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object}. 
+#'                 If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object}. 
+#'                 }
 #'                }
 #'            }
+#'            \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+#'                \describe{
+#'                \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}.
+#'                 Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix. 
+#'                }
+#'                \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object}.
+#'                 Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object}; each row is the CI for the corresponding row of \code{coeff} matrix.
+#'                 }
+#'                }
+#'            }
+#' }
 #' }
 #' }
 #' @description This function implements a spatial regression model with differential regularization.
