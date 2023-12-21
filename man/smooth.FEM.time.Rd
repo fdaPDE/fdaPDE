@@ -141,7 +141,7 @@ consistent with \code{covariates} and mesh dimension number, otherwise will be d
 }
 \value{
 A list with the following variables:
-\itemize{
+\describe{
 \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
 \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
@@ -152,17 +152,33 @@ the smoothing parameter is equal to \code{lambda[j]}.}
 \item{\code{bestlambda}}{If GCV is \code{TRUE}, a 2-elements vector with the indices of smoothing parameters returning the lowest GCV}
 \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
-\item{\code{inference}}{A list set only if a well defined [inferenceDataObject] is passed as parameter to the function; contains all inference outputs required:
-         \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
-              \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object.time}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object.time}.}
-              \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object.time}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object.time}.}
-              \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object.time}. If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object.time}.}
-              }
-        \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
-              \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object.time}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object.time}; each row is the CI for the corresponding row of \code{coeff} matrix.}
-              \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object.time}. Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object.time}; each row is the CI for the corresponding row of \code{coeff} matrix.}
-             }
-        }
+\item{\code{inference}}{A list set only if a well defined \code{\link{inferenceDataObjectTime}} is passed as parameter to the function; contains all inference outputs required:
+         \describe{
+           \item{\code{p_values}}{list of lists set only if at least one p-value is required; contains the p-values divided by implementation:
+               \describe{
+                \item{\code{wald}}{list containing all the Wald p-values required, in the same order of the  \code{type} list in \code{inference.data.object.time}. 
+                If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object.time}.
+                }
+                \item{\code{speckman}}{list containing all the Speckman p-values required, in the same order of the  \code{type} list in  \code{inference.data.object.time}. 
+                If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object.time}.
+                }
+                \item{\code{eigen_sign_flip}}{list containing all the Eigen-Sign-Flip p-values required, in the same order of the \code{type} list in \code{inference.data.object.time}. 
+                If one-at-the-time tests are required, the corresponding item is a vector of p values ordered as the rows of \code{coeff} matrix in \code{inference.data.object.time}. 
+                }
+               }
+           }
+           \item{\code{CI}}{list of lists set only if at least one confidence interval is required; contains the confidence intervals divided by implementation:
+               \describe{
+               \item{\code{wald}}{list containing all the Wald confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object.time}.
+                Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object.time}; each row is the CI for the corresponding row of \code{coeff} matrix. 
+               }
+               \item{\code{speckman}}{list containing all the Speckman confidence intervals required, in the same order of the  \code{type} list in \code{inference.data.object.time}.
+                Each item is a matrix with 3 columns and p rows, p being the number of rows of \code{coeff} matrix in \code{inference.data.object.time}; each row is the CI for the corresponding row of \code{coeff} matrix.
+                }
+               }
+           }
+}
+}
 }
 }
 \description{

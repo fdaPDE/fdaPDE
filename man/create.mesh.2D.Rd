@@ -38,7 +38,7 @@ Default is \code{verbosity} = 0.}
 }
 \value{
 An object of the class mesh.2D with the following output:
-\itemize{
+\describe{
 \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 \item{\code{nodesattributes}}{A matrix with #nodes rows containing nodes' attributes.

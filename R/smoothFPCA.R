@@ -32,7 +32,7 @@
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
 #' @return A list with the following variables:
-#' \itemize{
+#' \describe{
 #' \item{\code{loadings.FEM}}{A \code{FEM} object that represents the L^2-normalized functional loadings for each
 #' Principal Component computed.}
 #' \item{\code{scores}}{A #samples-by-#PrincipalComponents matrix that represents the unnormalized scores or PC vectors.}

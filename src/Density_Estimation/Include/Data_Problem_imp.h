@@ -171,7 +171,7 @@ DataProblem_time<ORDER, mydim, ndim>::DataProblem_time(SEXP Rdata, SEXP Rdata_ti
         }
     }
 
-    Rprintf("WARNING: %lu observations used in the algorithm.\n", data_.size());
+    Rprintf("WARNING: %zu observations used in the algorithm.\n", data_.size());
 
     // FILL SPACE MATRIX
     std::vector <UInt> v(this->deData_.dataSize());

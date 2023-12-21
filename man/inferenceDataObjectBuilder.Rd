@@ -23,7 +23,7 @@ n_flip = 1000)
 \arguments{
 \item{test}{A string defining the type of test to be performed. Multiple tests can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
 \code{component} and \code{interval}. The default is NULL, and can take values:
-\itemize{
+\describe{
 \item{'oat'}{: one-at-the-time tests, available only when \code{component} is 'parametric'.}
 \item{'sim'}{: simultaneous tests.}
 \item{'none'}{: no test required. \code{interval} must be set.}
@@ -31,7 +31,7 @@ n_flip = 1000)
 
 \item{interval}{A string defining the type of confidence intervals to be computed. Multiple intervals can be required. In this case the length of the list needs to be coherent with the ones of \code{type},
 \code{component} and \code{test}. The default is NULL, and can take values:
-\itemize{
+\describe{
 \item{'oat'}{: one-at-the-time intervals.}
 \item{'sim'}{: simultaneous intervals, available only when \code{component} is 'parametric' and no sign-flipping approaches are required.}
 \item{'bonf'}{: Bonferroni intervals, available only when \code{component} is 'parametric'}
@@ -39,7 +39,7 @@ n_flip = 1000)
 }}
 
 \item{type}{A list of strings defining the type of implementation for the inferential analysis. The possible values are:
-\itemize{
+\describe{
 \item{'w'}{: Wald parametric approach (default).}
 \item{'s'}{: Speckman parametric approach.}
 \item{'sf'}{: sign-flip nonparametric approach.}

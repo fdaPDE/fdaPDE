@@ -53,7 +53,7 @@ of the GCV index. If set to "Stochastic" the GCV is approximated by a stochastic
 }
 \value{
 A list with the following variables:
-\itemize{
+\describe{
 \item{\code{loadings.FEM}}{A \code{FEM} object that represents the L^2-normalized functional loadings for each
 Principal Component computed.}
 \item{\code{scores}}{A #samples-by-#PrincipalComponents matrix that represents the unnormalized scores or PC vectors.}

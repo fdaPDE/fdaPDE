@@ -19,7 +19,7 @@ refine.mesh.2D(mesh, minimum_angle, maximum_area, delaunay, verbosity)
 }
 \value{
 A mesh.2D object representing the refined triangular mesh,  with the following output:
-\itemize{
+\describe{
 \item{\code{nodes}}{A #nodes-by-2 matrix containing the x and y coordinates of the mesh nodes.}
 \item{\code{nodesmarkers}}{A vector of length #nodes, with entries either '1' or '0'. An entry '1' indicates that the corresponding node is a boundary node; an entry '0' indicates that the corresponding node is not a boundary node.}
 \item{\code{nodesattributes}}{nodesattributes A matrix with #nodes rows containing nodes' attributes.
