@@ -25,6 +25,7 @@ NULL
 #'@slot beta0 Vector of null hypothesis values for the linear parameters of the model. Used only if \code{test} is not 0 and \code{component} is not 2.
 #'@slot f0 Function representing the expression of the nonparametric component f under the null hypothesis. Used only if \code{component} is not 1.
 #'@slot f0_eval Vector of f0 evaluations at the choosen test locations. It will be eventually set later in checkInferenceParameters, if nonparametric inference is required. 
+#'@slot scaling_factor A scaling factor used to adjust lambda in inference variances computation, if not positive it is ignored.
 #'@slot f_var An integer taking value 1 or 2. If 1 local variance estimates for the nonlinear part of the model will be computed,
 #'whereas if 2 they will not.
 #'@slot quantile Vector of quantiles needed for confidence intervals, used only if interval is not 0.
@@ -57,6 +58,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
                                                                   beta0 = "numeric",
                                                                   f0 = "function",
                                                                   f0_eval = "numeric",
+                                                                  scaling_factor = "numeric",
                                                                   f_var = "integer",
                                                                   quantile = "numeric",
                                                                   alpha = "numeric",
@@ -106,6 +108,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'If \code{test} is set and \code{beta0} is NULL, will be set to a vector of zeros.
 #'@param f0 A function object representing the expression of the nonparametric component f under the null hypothesis. Taken into account if \code{test} is set and \code{component} is not parametric.
 #'If NULL, the default is the null function, hence a test on the significance of the nonparametric component is carried out. 
+#'@param scaling_factor A real positive number used to scale the \code{lambda} effect when computing inference. If left to NULL by default becomes 1 (no scaling). 
 #'@param f_var A logical used to decide whether to estimate the local variance of the nonlinear part of the model.
 #'The possible values are: FALSE (default) and TRUE. 
 #'@param level A vector containing the level of significance used to compute quantiles for confidence intervals, defaulted to 0.95. It is taken into account only if \code{interval} is set.
@@ -149,6 +152,7 @@ inferenceDataObjectBuilder<-function(test = NULL,
                                 coeff = NULL, 
                                 beta0 = NULL,
                                 f0 = NULL,
+                                scaling_factor = NULL,
                                 f_var = F,
                                 level = 0.95,
                                 n_flip = 1000,
@@ -260,6 +264,18 @@ inferenceDataObjectBuilder<-function(test = NULL,
       stop("'f0' should be a function")
     if(length(f0)==0)
       stop("'f0' is zerodimensional")
+  }
+  
+  if(!is.null(scaling_factor)){
+    if(!is(scaling_factor,"numeric"))
+      stop("'scaling_factor' should be numeric")
+    if(length(scaling_factor)==0)
+      stop("'scaling_factor' is zerodimensional")
+    if(scaling_factor<0){
+      stop("'scaling_factor' should be positive")
+    }
+  }else{
+    scaling_factor = as.numeric(1)
   }
   
   if(f_var != F){
@@ -609,10 +625,10 @@ if(sum(component == "nonparametric")!=length(component)){
   # Building the output object, returning it
   if(!is.null(locations_indices))
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
-              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+              locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D,  scaling_factor = scaling_factor, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
   else
     result<-new("inferenceDataObject", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
-                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+                locations = locations, locations_are_nodes =locations_by_nodes_numeric, coeff = coeff, beta0 = beta0, f0 = f0_3D, scaling_factor = scaling_factor, f_var = f_var_numeric, quantile = quantile, alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
     
   
   return(result)

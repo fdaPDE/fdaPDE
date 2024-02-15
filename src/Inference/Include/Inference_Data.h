@@ -27,6 +27,7 @@ class InferenceData
                 VectorXr time_locs_inf;             	              				//!< Time locations used in ST Wald inference on f 
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
 		VectorXr f0_eval;								//!< Evaluations of the field f under the null hypothesis in the selected locations 
+		Real scaling_Factor                             = 1.00;             	        //!< Factor used to scale lambda in inference variances computation
                 bool f_Var                                      = false;             	        //!< Defines whether the local f variance has to be computed or not
   		VectorXr inference_Quantile;		 					//!< Quantiles needed for confidence intervals if interval_Type != not-defined
 		VectorXr inference_Alpha                        = VectorXr::Constant(1,0.05); 	//!< Significance used in ESF confidence interval computation;
@@ -40,12 +41,12 @@ class InferenceData
   		InferenceData() = default;
                 //! Space constructor (with inference for f)
   		InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
-				SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP f_Var_,
+				SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_,
 			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
                 //! Space-time constructor (without inference for f --> not implemented yet)
                 InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, 
                 	      SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP time_locs_inf_, SEXP coeff_Inference_, SEXP beta_0_,
-                	      SEXP f0_eval_, SEXP f_Var_, SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
+                	      SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_, SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
                 
                 
         //Setters
@@ -62,6 +63,7 @@ class InferenceData
   		inline void set_coeff_inference(const MatrixXr & coeff_inf){coeff_Inference = coeff_inf;};		        //!< Setter for coeff_Inference \param coeff_inf new coeff_Inference
   		inline void set_beta_0(const VectorXr & beta_0_){beta_0 = beta_0_;};					        //!< Setter for beta0 \param beta0_ new beta0
 		inline void set_f_0(const VectorXr & f_0_){f0_eval = f_0_;};					        	//!< Setter for f0_eval \param f_0_ new f0_eval
+		inline void set_scaling_Factor(Real scaling_Factor_){scaling_Factor = scaling_Factor_;};			//!< Setter for scaling_Factor \param scaling_Factor_ new scaling_Factor
                 inline void set_f_Var(const bool & f_Var_){f_Var = f_Var_;};				                        //!< Setter for f_Var \param f_Var_ new f_Var
   		inline void set_inference_quantile(const VectorXr & inference_Quantile_){inference_Quantile = inference_Quantile_;};//!< Setter for inference_Quantile \param inference_Quantile_ new inference_Quantile
 		inline void set_inference_Alpha(const VectorXr & inference_Alpha_){inference_Alpha=inference_Alpha_;}; 		//!< Setter for inference_Alpha \param inference_Alpha_ new inference_Alpha
@@ -83,6 +85,7 @@ class InferenceData
  		inline MatrixXr get_coeff_inference() const{return this->coeff_Inference;};		                        //!< Getter for coeff_Inference \return coeff_Inference
   		inline VectorXr get_beta_0() const{return this->beta_0;};				                        //!< Getter for beta0 \return beta0
 		inline VectorXr get_f_0() const{return this->f0_eval;};				                        	//!< Getter for f0_eval \return f0_eval
+		inline Real get_scaling_factor() const{return this->scaling_Factor;};			                        //!< Getter for scaling_Factor \return scaling_Factor
                 inline bool get_f_var() const{return this->f_Var;};					                        //!< Getter for f_var \return f_var
   		inline VectorXr get_inference_quantile() const{return this->inference_Quantile;};			        //!< Getter for inference_Quantile \return inference_Quantile
 		inline VectorXr get_inference_alpha() const{return this->inference_Alpha;}; 			                //!< Getter for inference_Alpha \return inference_Alpha

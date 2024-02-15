@@ -13,6 +13,7 @@
   \param beta_0_ vector for the null hypotesis (if a test on the parametric component is required)
   \param f_0_ vector for the null hypotesis (if a test on the nonparametric component is required)
   \param f_Var_ parameter used to decide whether to compute local f variance or not
+  \param scaling_Factor_ factor used to scale the lambda effect in inference variances computation
   \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
   \param inference_Alpha_ significance used to compute ESF confidence intervals
   \param n_Flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
@@ -20,7 +21,7 @@
   \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,
-			     SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_,SEXP f0_eval_, SEXP f_Var_,
+			     SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_,SEXP f0_eval_,  SEXP scaling_Factor_,  SEXP f_Var_,
 			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
@@ -139,6 +140,9 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   for(UInt i=0;i<size_f0_eval_;i++){
     f0_eval[i]=REAL(f0_eval_)[i];
   }
+
+  //scaling_Factor
+  this->set_scaling_Factor(REAL(scaling_Factor_)[0]);
   
   //f_var
   if(INTEGER(f_Var_)[0]==1)
@@ -184,6 +188,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   \param coeff_Inference_ matrix that specifies the linear combinations of the linear parameters to be tested and/or estimated via confidence intervals 
   \param beta_0_ vector for the null hypotesis (if a test on the parametric component is required)
   \param f_0_ vector for the null hypotesis (if a test on the nonparametric component is required)
+  \param scaling_Factor_ factor used to scale the lambda effect in inference variances computation (ingored in time cases)
   \param f_Var_ parameter used to decide whether to compute local f variance or not
   \param inference_Quantile_ vector parameter containing the quantiles to be used for the computation of the confidence intervals (if interval_type is defined)
   \param inference_Alpha_ significance used to compute ESF confidence intervals
@@ -193,7 +198,7 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
 			     SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP time_locs_inf_ ,SEXP coeff_Inference_, SEXP beta_0_,
-			     SEXP f0_eval_, SEXP f_Var_,SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, locs_Inference_, locs_index_Inference_, locs_are_nodes_, coeff_Inference_, beta_0_, f0_eval_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
+			     SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_,SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, locs_Inference_, locs_index_Inference_, locs_are_nodes_, coeff_Inference_, beta_0_, f0_eval_, scaling_Factor_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
 
  //time_locs_inf
   UInt size_time_locs_inf=Rf_length(time_locs_inf_); 
@@ -271,6 +276,8 @@ void InferenceData::print_inference_data() const{
   for(UInt i=0; i < f0_eval.size(); ++i){
     Rprintf(" %f \n", f0_eval(i));
   }
+
+  Rprintf("scaling_Factor: %f\n", scaling_Factor);
 
   Rprintf("f_var: %d\n",f_Var);
   

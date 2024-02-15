@@ -66,6 +66,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   coeff_Inference<-as.matrix(inference.data.object@coeff)
   beta_0<-as.vector(inference.data.object@beta0)
   f_0_eval<-as.vector(inference.data.object@f0_eval)
+  scaling_factor_Inference<-inference.data.object@scaling_factor
   f_var_Inference<-inference.data.object@f_var
   inference_Quantile<-as.vector(inference.data.object@quantile)
   inference_Alpha<-as.vector(inference.data.object@alpha)
@@ -115,6 +116,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
   storage.mode(f_0_eval) <- "double"
+  storage.mode(scaling_factor_Inference) <- "double"
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_Alpha) <- "double"
@@ -127,7 +129,7 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
                   BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search, 
                   optim, lambda, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance,
                   test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,locs_are_nodes_Inference,coeff_Inference,beta_0,
-                  f_0_eval,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
+                  f_0_eval,scaling_factor_Inference,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(bigsol)
