@@ -215,9 +215,9 @@ output_CPP$beta
 
 ### Inference
 # Inference obj:
-inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
-
 #### Test 2.4: overall inference on beta parameters, separable case
+inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
+
 lambdaS = 10^(-1:1)
 lambdaT = 10^(-6:-4)
 output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
@@ -230,7 +230,44 @@ output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints,
 output_CPP$inference$beta$p_values
 output_CPP$inference$beta$CI
 
-#### Test 2.5: overall inference on beta parameters, parabolic case
+#### Test 2.5: overall inference on f, separable case
+inf_obj <- inferenceDataObjectTimeBuilder (test='sim', interval='oat',  dim=2, n_cov=1, type=c('w'), f0 = f, component='nonparametric', f_var=T)
+
+lambdaS = 10^(-1:1)
+lambdaT = 10^(-6:-4)
+output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                            observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI$wald[[1]][1:10,]
+
+#### Test 2.6: overall inference on f, separable case, new space-time locations
+new_locs <- mesh$nodes[which(mesh$nodesmarkers!=1),][c(10,11),]
+new_locs[,1] <- new_locs[,1] + 0.2
+
+new_times <- TimePoints[3]+0.1
+
+inf_obj <- inferenceDataObjectTimeBuilder (test='sim', interval='oat',  dim=2, n_cov=1, type=c('w'), f0 = f, component='nonparametric', locations = new_locs, time_locations = new_times)
+
+lambdaS = 10^(-1:1)
+lambdaT = 10^(-6:-4)
+output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                            observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI$wald[[1]]
+
+#### Test 2.7: overall inference on beta parameters, parabolic case
+inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0 = 2, component='parametric', n_flip=1000, f_var=T)
+
 lambdaS = 1 #10^(-1:1)
 lambdaT = 1e-6 #10^(-6:-4)
 output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
@@ -243,6 +280,42 @@ output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints,
 
 output_CPP$inference$beta$p_values
 output_CPP$inference$beta$CI
+
+#### Test 2.8: overall inference on f, parabolic case
+inf_obj <- inferenceDataObjectTimeBuilder (test='sim', interval='oat',  dim=2, n_cov=1, type=c('w'), f0 = f, component='nonparametric', f_var=T)
+
+lambdaS = 10^(-1:1)
+lambdaT = 10^(-6:-4)
+output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                            observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            FLAG_PARABOLIC = TRUE,
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI$wald[[1]][1:10,]
+
+#### Test 2.9: overall inference on f, separable case, new space-time locations
+new_locs <- mesh$nodes[which(mesh$nodesmarkers!=1),][c(10,11),]
+new_locs[,1] <- new_locs[,1] + 0.2
+ 
+# Note that only the original time mesh is allowed here
+inf_obj <- inferenceDataObjectTimeBuilder (test='sim', interval='oat',  dim=2, n_cov=1, type=c('w'), f0 = f, component='nonparametric', locations = new_locs)
+
+lambdaS = 10^(-1:1)
+lambdaT = 10^(-6:-4)
+output_CPP<-smooth.FEM.time(locations = locations, time_mesh = TimePoints, 
+                            observations=observations, 
+                            covariates = cov1,
+                            FEMbasis=FEMbasis, lambdaS=lambdaS, lambdaT=lambdaT,
+                            lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV',
+                            FLAG_PARABOLIC = TRUE,
+                            inference.data.object = inf_obj)
+
+output_CPP$inference$f$p_values
+output_CPP$inference$f$CI$wald[[1]]
 
 
 #### Test 3: square domain ####
@@ -336,9 +409,9 @@ data = data + rnorm(length(data), mean = 0, sd =  0.05*diff(range(sol_exact)))
 observations = matrix(data,nrow(locations),NumTimePoints)
 
 # Inference obj: inference test, adding cov, PDE, separable case
-inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0=3, component='parametric', n_flip=1000, f_var=T)
+inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), beta0=3, component='parametric', n_flip=1000, f_var=T)
 
-#### Test 3.4: overall inference on beta parameters, parabolic case 
+#### Test 3.4: overall inference on beta parameters, separable case 
 lambdaS = 10^-4 #10^(-5:-3)
 lambdaT = 10^-4 #10^(-5:-3)
 output_CPP<-smooth.FEM.time(time_mesh = TimePoints, observations=observations, 
@@ -656,7 +729,7 @@ data = data + rnorm(length(DatiEsatti), sd = 0.1)
 observations=matrix(data,nrow(incidence_matrix),length(time_mesh))
 
 # Inference obj: inference test, adding cov, PDE, separable case
-inf_obj <- inferenceDataObjectBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), component='parametric', n_flip=10000, f_var=T)
+inf_obj <- inferenceDataObjectTimeBuilder (test='oat', interval='oat',  dim=2, n_cov=1, type=c('w', 's', 'esf', 'enh-esf'), component='parametric', n_flip=10000, f_var=T)
 
 #### Test 4.4.1: overall inference on beta, forcing term = 0 exact  GCV,  monolitic method
 output_CPP<-smooth.FEM.time(observations=observations,
@@ -797,7 +870,7 @@ RMSE<-function(f,g) sqrt(mean((f-g)^2))
 RMSE(sol_eval,sol_exact)
 
 ### Inference test: 
-inf_obj <- inferenceDataObjectBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
+inf_obj <- inferenceDataObjectTimeBuilder(test = 'oat', interval = 'oat', component = 'parametric', type=c('w', 's', 'esf', 'enh-esf'), beta0 = beta_exact, dim=3, n_cov=2)
 
 #### Test 1.1: overall inference on beta, serparable case
 Out_1_1 = smooth.FEM.time(observations=datacov, covariates = W,

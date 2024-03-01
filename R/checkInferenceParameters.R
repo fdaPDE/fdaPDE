@@ -17,7 +17,7 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
   }
   
   #check consistency with covariates dimension (if inference on the linear component is required)
-  if(checknumber!=inference.data.object@n_cov){
+  if(!is.null(checknumber) && checknumber!=inference.data.object@n_cov || is.null(checknumber) && inference.data.object@n_cov!=0){
     stop("Inference data dimension and covariates dimension are not consistent")
   }
   
@@ -60,8 +60,6 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
         stop("Inference data dimension and locations dimension are not consistent")
       # locations_indices is set to a nonsense value
       inference.data.object@locations_indices = as.integer(0)
-    
-      # EVENTUALLY ADD FURTHER CHECKS: are locations inside the domain??
       }
     }
     
@@ -105,7 +103,7 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
     
     if(dim == 2){
       for(i in 1:dim(locs)[1])
-        inference.data.object@f0_eval <- c(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2]),0) 
+        inference.data.object@f0_eval <- c(inference.data.object@f0_eval, f0(locs[i,1], locs[i,2],0)) 
     }
     else{
       for(i in 1:dim(locs)[1])
@@ -118,6 +116,10 @@ checkInferenceParameters <- function(inference.data.object,checknumber,locations
     inference.data.object@locations_indices <- as.integer(0)
     inference.data.object@f0_eval <- 0
     
+  }
+  
+  if(is.null(inference.data.object@tol_fspai)){
+    inference.data.object@tol_fspai <- nrow(locations)*10^-5
   }
   
   return(inference.data.object)    #return the original object
