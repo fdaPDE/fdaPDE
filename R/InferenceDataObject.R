@@ -91,6 +91,7 @@ inferenceDataObject<-setClass("inferenceDataObject", slots = list(test = "intege
 #'\item{'sf'}{: sign-flip nonparametric approach.}
 #'\item{'esf'}{: eigen-sign-flip nonparametric approach.}
 #'\item{'enh-esf'}{: enhanced-eigen-sign-flip nonparametric approach.}
+#'\item{'sc'}{: score parametric approach.}
 #'}
 #'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
@@ -174,11 +175,11 @@ inferenceDataObjectBuilder<-function(test = NULL,
   }
   
   if(length(type)==0)
-    stop("'type' is zero dimensional, should be a vector taking values among 'w', 's', 'sf' or 'esf'")
+    stop("'type' is zero dimensional, should be a vector taking values among 'w', 's', 'sf', 'esf' or 'sc")
  
    if(length(type) > 1 || type!="w"){
     if(class(type)!="character")
-      stop("'type' should be a vector of characters: choose among 'w', 's', 'sf' or 'esf'" )
+      stop("'type' should be a vector of characters: choose among 'w', 's', 'sf', 'esf' or 'sc' " )
   }
   
   
@@ -464,13 +465,14 @@ inferenceDataObjectBuilder<-function(test = NULL,
   
   for (index in 1:n_of_implementations){
     
-      if(type[index]!="w" && type[index]!="s" && type[index]!="esf" && type[index]!="enh-esf" && type[index]!="sf"){
-        stop("type should be chosen between 'w', 's', 'sf', 'esf' or 'enh-esf'")}else{
+      if(type[index]!="w" && type[index]!="s" && type[index]!="esf" && type[index]!="enh-esf" && type[index]!="sf" && type[index]!="sc"){
+        stop("type should be chosen between 'w', 's', 'sf', 'esf', 'enh-esf' or 'sc'")}else{
           if(type[index]=="w") type_numeric[index]=as.integer(1)
           if(type[index]=="s") type_numeric[index]=as.integer(2)
           if(type[index]=="esf") type_numeric[index]=as.integer(3)
           if(type[index]=="enh-esf") type_numeric[index]=as.integer(4)
           if(type[index]=="sf") type_numeric[index]=as.integer(5)
+          if(type[index]=="sc") type_numeric[index]=as.integer(6)
         }
     
     if(component[index]!="parametric" && component[index]!="nonparametric" && component[index]!="both"){
@@ -482,6 +484,9 @@ inferenceDataObjectBuilder<-function(test = NULL,
       
     if(type[index]=="sf" && component[index]!="nonparametric")
        stop("sign-flip test is implemented only for the nonparametric component")
+    
+    if(type[index]=="sc" && component[index]!="nonparametric")
+      stop("score test is implemented only for the nonparametric component")
     
     if(type[index]=="s" && component[index]!="parametric")
       stop("speckman test and confidence intervals are implemented only for the parametric component")

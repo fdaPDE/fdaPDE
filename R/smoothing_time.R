@@ -740,6 +740,10 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
             inference$f$p_values$wald[[length(inference$f$p_values$wald)+1]] = p_value
             inference$f$p_values$wald=as.list(inference$f$p_values$wald)
           }
+          if(inference.data.object.time@type[i]==6){
+            inference$f$p_values$score[[length(inference$f$p_values$score)+1]] = p_value
+            inference$f$p_values$score=as.list(inference$f$p_values$score)
+          }
         }
       }
     }

@@ -488,14 +488,13 @@ template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
     // set it into the inference carrier
     inf_car_.setPsi_loc(psi);
     inf_car_.setN_loc(psi.rows());
-         
     
-
-    // in the sign-flip and eigen-sign-flip cases, additional matrices have to be computed
+    // in the sign-flip, eigen-sign-flip and score cases, additional matrices have to be computed
     const std::vector<std::string> implementation_type = inferenceData_.get_implementation_type();
 
     if(std::find(implementation_type.begin(), implementation_type.end(), "sign-flip") != implementation_type.end() ||
-       std::find(implementation_type.begin(), implementation_type.end(), "eigen-sign-flip") != implementation_type.end()){
+       std::find(implementation_type.begin(), implementation_type.end(), "eigen-sign-flip") != implementation_type.end() ||
+       std::find(implementation_type.begin(), implementation_type.end(), "score") != implementation_type.end()){
       // reduced vector of observations		
       VectorXr z_loc; 
       z_loc.resize(row_indices.size());

@@ -89,9 +89,10 @@ inferenceDataObjectTime<-setClass("inferenceDataObjectTime", slots = list(test =
 #'\itemize{
 #'\item{'w'}{: Wald parametric approach (default).}
 #'\item{'s'}{: Speckman parametric approach, available only when \code{component} is 'parametric'.}
-#'\item{'sf'}{: sign-flip nonparametric approach, available only when \code{component} is 'parametric'.}
+#'\item{'sf'}{: sign-flip nonparametric approach, available only when \code{component} is 'nonparametric'.}
 #'\item{'esf'}{: eigen-sign-flip nonparametric approach, available only when \code{component} is 'parametric'.}
 #'\item{'enh-esf'}{: enhanced-eigen-sign-flip nonparametric approach, available only when \code{component} is 'parametric'.}
+#'\item{'sc'}{: Score parametric approach, available only when \code{component} is 'nonparametric'.}
 #'}
 #'@param component A list of strings defining on which model component inference has to be performed. It can take values 'parametric' (default), 'nonparametric' or 'both'.
 #'@param exact A logical used to decide the method used to estimate the statistics variance.
@@ -176,11 +177,11 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
   }
   
   if(length(type)==0)
-    stop("'type' is zero dimensional, should be a vector taking values among 'w', 's', 'esf' or 'enh-esf'")
+    stop("'type' is zero dimensional, should be a vector taking values among 'w', 's', 'esf', 'enh-esf' or 'sc'")
   
   if(length(type) > 1 || type!="w"){
     if(class(type)!="character")
-      stop("'type' should be a vector of characters: choose among w', 's', 'esf' or 'enh-esf'" )
+      stop("'type' should be a vector of characters: choose among w', 's', 'esf', 'enh-esf' or 'sc" )
   }
   
   
@@ -465,12 +466,13 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
   for (index in 1:n_of_implementations){
     
     if(type[index]!="w" & type[index]!="s" & type[index]!="esf" & type[index]!="enh-esf"){
-      stop("type should be chosen between 'w', 's', 'sf', 'esf' or 'enh-esf'")}else{
+      stop("type should be chosen between 'w', 's', 'sf', 'esf', 'enh-esf' or 'sc")}else{
         if(type[index]=="w") type_numeric[index]=as.integer(1)
         if(type[index]=="s") type_numeric[index]=as.integer(2)
         if(type[index]=="esf") type_numeric[index]=as.integer(3)
         if(type[index]=="enh-esf") type_numeric[index]=as.integer(4)
         if(type[index]=="sf") type_numeric[index]=as.integer(5)
+        if(type[index]=="sc") type_numeric[index]=as.integer(6)
       }
     
     if(component[index]!="parametric" & component[index]!="nonparametric" & component[index]!="both"){
