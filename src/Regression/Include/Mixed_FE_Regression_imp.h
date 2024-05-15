@@ -730,7 +730,8 @@ template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
 {
 	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
-	switch (GCVmethod == "exact") {
+	int flag = GCVmethod == "exact";
+	switch (flag) {
 		case 1:
 			if(this->isIterative & !isGAMData)
 				Rprintf("Function computeDOFExact_iterative moved to Lambda_optimizer\n");
@@ -886,123 +887,6 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomExact(UInt outp
     _dof(output_indexS,output_indexT) = degrees;
 }
 
-/*
-// Moved to Lambda_Optimizer.h
-template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::computeDOFExact_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT) {
-    Real degrees = (regressionData_.getCovariates()->rows() != 0) ? regressionData_.getCovariates()->cols() : 0;
-    UInt nlocations = regressionData_.getNumberofSpaceObservations();
-
-
-    if (isRcomputed_ == false)
-		{
-			isRcomputed_ = true;
-			SpMat R0;
-			//take R0 from the final matrix since it has already applied the dirichlet boundary conditions
-			R0 = matrixNoCov_.bottomRightCorner(N_, N_) / lambdaS;
-			Eigen::SparseLU<SpMat> R0dec_;
-			R0dec_.compute(R0);
-			MatrixXr X2 = R0dec_.solve(R1_);
-			R_ = R1_.transpose() * X2;
-		}
-
-
-
-    for(UInt k=0; k<M_; k++)
-    {
-		MatrixXr X1;
-		MatrixXr Q_k = MatrixXr::Zero(nlocations,nlocations);
-		if (regressionData_.getCovariates()->rows() != 0)
-			Q_k = Q_.block(k*nlocations,k*nlocations,nlocations,nlocations);
-		else 
-			//for (UInt i=0; i<nlocations; i++)
-			//	Q_k(i,i)=1;
-			Q_k = MatrixXr::Identity(nlocations, nlocations);
-		
-		if (regressionData_.getNumberOfRegions() == 0)  //pointwise data
-			X1 = Q_k;
-		else //areal data
-		{
-			// VectorXr miniA_  = A_.segment(k * regressionData_.getNumberOfRegions(), regressionData_.getNumberOfRegions());
-
-			VectorXr miniA_  = A_.segment(0, regressionData_.getNumberOfRegions());
-			X1 =  miniA_.asDiagonal() * Q_k;
-		}
-
-		psi_mini = psi_.block(k * nlocations, k* N_, nlocations, N_);
-		X1=psi_mini.transpose()*X1*psi_mini;
-
-		MatrixXr X3 = X1;
-		//define the penalization matrix:
-		//  P = lambdaS * (psi_mini*R_*psi_mini.transpose());
-		MatrixXr P = lambdaS * R_;
-
-		//impose dirichlet boundary conditions if needed
-
-		if (regressionData_.getDirichletIndices()->size() != 0)
-		{
-			const std::vector<UInt> * bc_indices = regressionData_.getDirichletIndices();
-
-			UInt nbc_indices = bc_indices->size();
-			Real pen=10e20;
-			for (UInt i = 0; i < (nbc_indices/M_); i++) 
-			{
-				UInt id1=(*bc_indices)[i];
-				X3.coeffRef(id1, id1) = pen;
-			}
-		}
-
-		X3 -= P;
-
-		Eigen::PartialPivLU <MatrixXr> Dsolver(X3);
-
-
-		const auto ki = regressionData_.getObservationsIndices();
-
-        // Setup rhs B
-
-		MatrixXr psiQ_k;
-		UInt n_loc_reg = (regressionData_.getNumberOfRegions() == 0) ? nlocations : regressionData_.getNumberOfRegions();
-		//if (regressionData_.getNumberOfRegions() == 0)	//pointwise data
-		//{
-			//psiQ_k= MatrixXr::Identity(nlocations,nlocations);
-			//for(UInt i=0; i< nlocations;i++)
-			//	psiQ_k(i,i)=1;
-		if (regressionData_.getCovariates()->rows() == 0)
-			psiQ_k=psi_mini.transpose()*psi_mini;
-		else
-		{
-			psiQ_k=Q_.block(k*n_loc_reg,k*n_loc_reg,n_loc_reg,n_loc_reg);
-			psiQ_k=psi_mini.transpose()*psiQ_k*psi_mini;
-		}
-		/*}
-		else 	//areal data
-		{
-			UInt nreg=regressionData_.getNumberOfRegions();
-			if (regressionData_.getCovariates()->rows() != 0)
-			{
-			    psiQ_k=Q_.block(k*nreg,k*nreg,nreg,nreg);
-				psiQ_k=psi_mini.transpose()*psiQ_k*psi_mini;
-
-			}
-			else
-			    psiQ_k=psi_mini.transpose()*psi_mini;
-		}
-		*/
-/*
-		// Solve the system TX = B
-        MatrixXr X;
-        X = Dsolver.solve(psiQ_k);
-
-        // Compute trace(X(k,:))
-        for (UInt i = 0; i < N_; ++i)
-            degrees += X(i, i);
-    }
-      _dof(output_indexS, output_indexT) = degrees;
-}
-*/
-
-
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
 {
@@ -1056,84 +940,6 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt
 	Real mean = edf_vect.sum()/nrealizations;
 	_dof(output_indexS,output_indexT) = mean;
 }
-
-
-/*
-// Moved to Lambda_Optimizer.h
-template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::computeDOFStochastic_iterative(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
-{
-	UInt nlocations = regressionData_.getNumberofSpaceObservations();
-    Real mean=0;
-    Real q=0;
-
-    // std::random_device rd;
-    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    // Creation of the random matrix
-    std::bernoulli_distribution distribution(0.5);
-    UInt nrealizations = optimizationData_.get_nrealizations();
-    MatrixXr u(M_*nlocations, nrealizations);
-    for (int j=0; j<nrealizations; ++j) {
-        for (int i=0; i<M_*nlocations; ++i) {
-            if (distribution(generator)) {
-                u(i,j) = 1.0;
-            }
-            else {
-                u(i,j) = -1.0;
-            }
-        }
-    }
-    for(UInt k=0; k<M_; ++k){
-        // Define the first right hand side : | I  0 |^T * psi^T * A * Q * u
-        psi_mini = psi_.block(k * nlocations, k* N_, nlocations, N_);
-        MatrixXr b = MatrixXr::Zero(2*N_,u.cols());
-					MatrixXr Qu=LeftMultiplybyQ(u);
-        if (regressionData_.getNumberOfRegions() == 0){
-            b.topRows(N_) = psi_mini.transpose()* Qu.block(k*nlocations,0,nlocations,u.cols());
-        }else{
-
-            VectorXr miniA_  = A_.segment(0, regressionData_.getNumberOfRegions());
-            b.topRows(N_) =  psi_mini.transpose()*(miniA_.asDiagonal() * Qu.block(k*nlocations,0,nlocations,u.cols()));
-        }
-        // Resolution of the system
-        MatrixXr x;
-        if (regressionData_.getCovariates()->rows() == 0)
-            x = this->template system_solve(b);
-        else
-            x = this->template solve_covariates_iter(b,k);
-
-        MatrixXr uTpsi;
-        if (regressionData_.getNumberOfRegions() == 0){
-					MatrixXr ut=u.transpose();
-            uTpsi = (ut.block(0,k*nlocations,nrealizations,nlocations))*psi_mini;
-        }else{
-
-						MatrixXr ut=u.transpose();
-            uTpsi = (ut.block(0,k*regressionData_.getNumberOfRegions(),nrealizations,regressionData_.getNumberOfRegions()))*psi_mini;
-        }
-
-        VectorXr edf_vect(nrealizations);
-
-        // Degrees of freedom = q + E[ u^T * psi * | I  0 |* x ]
-        if (regressionData_.getCovariates()->rows() != 0) {
-            q = regressionData_.getCovariates()->cols();
-        }
-
-        // Degrees of freedom = q + E[ u^T * psi * | I  0 |* x ]
-        // For any realization we compute the degrees of freedom
-        for (UInt i=0; i<nrealizations; ++i) {
-
-            edf_vect(i) = uTpsi.row(i).dot(x.col(i).head(N_));
-        }
-
-        // Estimates: sample mean, sample variance
-        mean += edf_vect.sum()/nrealizations;
-      }
-	_dof(output_indexS,output_indexT) = mean + q;
-}
-*/
-
 
 template<typename InputHandler>
 template<UInt ORDER, UInt mydim, UInt ndim, typename A>
