@@ -1,6 +1,6 @@
 Package: fdaPDE
-Version: 1.1-18
-Date: 2024-05-15
+Version: 1.1-19
+Date: 2024-07-08
 Title: Physics-Informed Spatial and Functional Data Analysis
 Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		     email = "eleonora.arnone@polimi.it"),
