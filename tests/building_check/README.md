@@ -41,6 +41,11 @@ Different shell scripts are available to check the development version of `fdaPD
   ```
     ./debian_gcc_devel.sh
   ```
+  
+  - Building check on Arch Linux using R (release) and gcc (latest version) as compiler, run from terminal:
+  ```
+    ./arch_gcc_release.sh
+  ```
 
 Finally, check the newly created directory `<distro>_<compiler>_<R_status>`.
   

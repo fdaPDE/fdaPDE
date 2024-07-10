@@ -208,7 +208,7 @@ class GCV_Exact<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
                  \param the_carrier the structure from which to take all the data for the derived classes
                  \sa set_R_()
                 */
-                GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_):
+                GCV_Exact(InputCarrier & the_carrier_):
                         GCV_Family<InputCarrier, 1>(the_carrier_)
                         {
                                 this->set_R_(); // this matrix is unchanged during the whole procedure, thus it's set once and for all
@@ -220,7 +220,7 @@ class GCV_Exact<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
                  \sa set_R_()
                  \sa set_lambdaT()
                 */
-                GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambdaT_):
+                GCV_Exact(InputCarrier & the_carrier_, Real lambdaT_):
                         GCV_Family<InputCarrier, 1>(the_carrier_)
                         {
                         	/*
@@ -313,7 +313,7 @@ class GCV_Exact<InputCarrier, 2>: public GCV_Family<InputCarrier, 2>
                  \param the_carrier the structure from which to take all the data for the derived classes
                  \sa set_R_()
                 */
-                GCV_Exact<InputCarrier, 2>(InputCarrier & the_carrier_):
+                GCV_Exact(InputCarrier & the_carrier_):
                         GCV_Family<InputCarrier, 2>(the_carrier_)
                         {
                                 this->set_R_();         // this matrix is unchanged during the whole procedure, thus it's set once and for all
