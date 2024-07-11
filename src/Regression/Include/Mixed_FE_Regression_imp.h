@@ -953,12 +953,12 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	// Set Areal data if present and no already done
 	if(regressionData_.getNumberOfRegions()>0 && !isAComputed)
 	{
-		this->template setA<ORDER, mydim, ndim>(mesh_);
+		this-> setA<ORDER, mydim, ndim>(mesh_);
 		isAComputed = true;
 	}
 	// Set psi matrix if not already done
 	if(!isPsiComputed){
-		this->template setPsi<ORDER, mydim, ndim>(mesh_);
+		this-> setPsi<ORDER, mydim, ndim>(mesh_);
 		isPsiComputed = true;
 	}
     psi_mini = psi_;
@@ -1080,7 +1080,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 	optimizationData_.set_last_lS_used(lambdaS);
 	optimizationData_.set_last_lT_used(lambdaT);
 
-    return this->template system_solve(b);
+    return this-> system_solve(b);
 }
 
 template<typename InputHandler>
@@ -1102,7 +1102,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b_iter(const MatrixXr & b
 	optimizationData_.set_last_lS_used(lambdaS);
 	optimizationData_.set_last_lT_used(lambdaT);
 
-    return this->template solve_covariates_iter(b, time_index);
+    return this-> solve_covariates_iter(b, time_index);
 }
 
 template<typename InputHandler>
@@ -1194,7 +1194,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			}
 
 			// system solution
-			_solution(s,t) = this->template system_solve(this->_rightHandSide);
+			_solution(s,t) = this-> system_solve(this->_rightHandSide);
 
 			
 			if(optimizationData_.get_loss_function()!="GCV" || isGAMData)
@@ -1353,9 +1353,9 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply_iterative(void) {
                     update_rhs(k, lambdaS, lambdaT, s, t);
 
                     if (regressionData_.getCovariates()->rows() == 0)
-                        _solution_k_ = this->template system_solve(_rightHandSide_k_);
+                        _solution_k_ = this-> system_solve(_rightHandSide_k_);
                     else
-                        _solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_,k);
+                        _solution_k_ = this-> solve_covariates_iter(_rightHandSide_k_,k);
 
                     //Store the solution fˆ{k,i}, gˆ{k,i} in _solution(s,t)
                     _solution(s, t).segment(k * N_, N_) = _solution_k_.topRows(N_);
@@ -1433,9 +1433,9 @@ void MixedFERegressionBase<InputHandler>::initialize_f(Real lambdaS, UInt& lambd
                                                                N_);  //setting the right hand side of the system
         _rightHandSide_k_.bottomRows(N_) = _rightHandSide.segment(nnodes + (k * N_), N_);
         if (regressionData_.getCovariates()->rows() == 0)
-            _solution_k_ = this->template system_solve(_rightHandSide_k_);
+            _solution_k_ = this-> system_solve(_rightHandSide_k_);
         else
-            _solution_k_ = this->template solve_covariates_iter(_rightHandSide_k_,k);
+            _solution_k_ = this-> solve_covariates_iter(_rightHandSide_k_,k);
         _solution(lambdaS_index, lambdaT_index).segment(k * N_, N_) = _solution_k_.topRows(N_); // saving f^{k,0}
     }
 }
