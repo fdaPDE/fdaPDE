@@ -1433,8 +1433,8 @@ VOID *trimalloc(int size)
   /* CHANGE TO SOURCE: The commented line below is the original. It
    needs to be replaced to use R's memory allocation functions that
    doesn't crash R on error -- David Sterratt 2/11/12. */
-  /* memptr = (VOID *) malloc((unsigned int) size); */
-  memptr = (VOID *) Calloc(size, unsigned char);
+  memptr = (VOID *) malloc((unsigned int) size);
+  //memptr = (VOID *) Calloc(size, unsigned char);
   if (memptr == (VOID *) NULL) {
     printf("Error:  Out of memory.\n");
     triexit(1);
@@ -1448,8 +1448,8 @@ void trifree(VOID *memptr)
   /* CHANGE TO SOURCE: The commented line below is the original. It
    needs to be replaced to use R's memory allocation functions that
    doesn't crash R on error -- David Sterratt 2/11/12. */
-  /* free(memptr); */
-  Free(memptr);
+  /* free(memptr); CRAN seems to have changed its mind -- Aldo Clemente 15/09/24 */
+  free(memptr);
 }
 
 /**                                                                         **/
@@ -3939,7 +3939,7 @@ void poolinit(struct memorypool *pool, int bytecount, int itemcount,
 
 /*****************************************************************************/
 /*                                                                           */
-/*  pooldeinit()   Free to the operating system all memory taken by a pool.  */
+/*  pooldeinit()   free to the operating system all memory taken by a pool.  */
 /*                                                                           */
 /*****************************************************************************/
 
@@ -4481,7 +4481,7 @@ vertex getvertex(struct mesh *m, struct behavior *b, int number)
 
 /*****************************************************************************/
 /*                                                                           */
-/*  triangledeinit()   Free all remaining allocated memory.                  */
+/*  triangledeinit()   free all remaining allocated memory.                  */
 /*                                                                           */
 /*****************************************************************************/
 
@@ -12442,7 +12442,7 @@ void carveholes(struct mesh *m, struct behavior *b, TRIREAL *holelist, int holes
     }
   }
 
-  /* Free up memory. */
+  /* free up memory. */
   if (((holes > 0) && !b->noholes) || !b->convex || (regions > 0)) {
     pooldeinit(&m->viri);
   }

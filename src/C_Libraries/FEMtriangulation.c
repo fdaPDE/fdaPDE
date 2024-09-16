@@ -373,28 +373,28 @@ SEXP R_triangulate_native(SEXP P, SEXP PB, SEXP PA, SEXP S, SEXP SB, SEXP(H), SE
   SET_VECTOR_ELT(ans, 12, oAV);
   UNPROTECT(15);
 
-  /* Free all allocated arrays, including those allocated by Triangle. */
+  /* free all allocated arrays, including those allocated by Triangle. */
   free(flags_ptr);
   
-  Free(mid.pointlist);
-  Free(mid.pointattributelist);
-  Free(mid.pointmarkerlist);
-  Free(mid.trianglelist);
-  Free(mid.triangleattributelist);
-  /* Free(mid.trianglearealist); */
-  Free(mid.neighborlist);
-  Free(mid.segmentlist);
-  Free(mid.segmentmarkerlist);
-  Free(mid.edgelist);
-  Free(mid.edgemarkerlist);
-  Free(vorout.pointlist);
-  Free(vorout.pointattributelist);
-  Free(vorout.edgelist);
-  Free(vorout.normlist);
-  /*  Free(out.pointlist);
-  Free(out.pointattributelist);
-  Free(out.trianglelist);
-  Free(out.triangleattributelist); */
+  free(mid.pointlist);
+  free(mid.pointattributelist);
+  free(mid.pointmarkerlist);
+  free(mid.trianglelist);
+  free(mid.triangleattributelist);
+  /* free(mid.trianglearealist); */
+  free(mid.neighborlist);
+  free(mid.segmentlist);
+  free(mid.segmentmarkerlist);
+  free(mid.edgelist);
+  free(mid.edgemarkerlist);
+  free(vorout.pointlist);
+  free(vorout.pointattributelist);
+  free(vorout.edgelist);
+  free(vorout.normlist);
+  /*  free(out.pointlist);
+  free(out.pointattributelist);
+  free(out.trianglelist);
+  free(out.triangleattributelist); */
 
   return(ans);
 }
