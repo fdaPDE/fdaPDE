@@ -33,6 +33,7 @@ NULL
 #'@slot alpha 1 minus confidence level vector of sign-flipping approaches confidence intervals. Used only if interval is not 0.
 #'@slot n_flip An integer representing the number of sign-flips in the case of sign-flipping approaches.
 #'@slot tol_fspai A real number greater than 0 specifying the tolerance for FSPAI algorithm, in case of non-exact inference (not implemented in this version).
+#'@slot seed_flip An integer representing the seed for the sign-flips in the case of sign-flipping approaches.
 #'@slot definition An integer taking value 0 or 1. If set to 1, the class will be considered as created by the function \code{\link{inferenceDataObjectTimeBuilder}},
 #'leading to avoid some of the checks that are performed on inference data within smoothing functions.
 #'
@@ -65,6 +66,7 @@ inferenceDataObjectTime<-setClass("inferenceDataObjectTime", slots = list(test =
                                                                      alpha = "numeric",
                                                                      n_flip = "integer",
                                                                      tol_fspai = "numeric",
+                                                                     seed_flip = "integer",
                                                                      definition="integer")
 )
 
@@ -117,6 +119,7 @@ inferenceDataObjectTime<-setClass("inferenceDataObjectTime", slots = list(test =
 #'@param n_flip Number of flips performed in sign-flipping approaches, defaulted to 1000.
 #'@param tol_fspai Tolerance for FSPAI algorithm taking value greater than 0, defaulted to NULL. It is taken into account only if \code{exact} is set to FALSE. The lower is the tolerance, the heavier is the computation.
 #'If left to NULL it is by default selected as the number of \code{locations} times 10^-5.
+#'@param seed_flip Seed for the sign-flips performed in sign-flipping approaches, defaulted to NULL.
 #'@return The output is a well defined \code{\link{inferenceDataObjectTime}}, that can be used as input parameter in the \code{\link{smooth.FEM}} function.
 #'@description A function that build an \code{\link{inferenceDataObjectTime}}. In the process of construction many checks over the input parameters are carried out so that the output is a well defined object,
 #'that can be used as parameter in \code{\link{smooth.FEM}} or \code{\link{smooth.FEM.time}} functions. Notice that this constructor ensures well-posedness of the object, but a further check on consistency with the smoothing functions parameters will be carried out.
@@ -136,7 +139,8 @@ inferenceDataObjectTime<-setClass("inferenceDataObjectTime", slots = list(test =
 #'f_var = FALSE,
 #'level = 0.95,
 #'n_flip = 1000,
-#'tol_fspai = NULL)
+#'tol_fspai = NULL,
+#'seed_flip = NULL)
 #' @export
 #' @examples 
 #' obj<-inferenceDataObjectTimeBuilder(test = 'oat', dim = 2, beta0 = rep(1,4), n_cov = 4);
@@ -159,7 +163,8 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
                                          f_var = F,
                                          level = 0.95,
                                          n_flip = 1000,
-                                         tol_fspai = NULL){
+                                         tol_fspai = NULL,
+                                         seed_flip = NULL){
   
   # Preliminary check of parameters input types, translation into numeric representation of default occurrences.
   if(!is.null(test)){
@@ -307,6 +312,12 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
       stop("'tol_fspai' should be numeric")
     if(length(tol_fspai)==0)
       stop("'tol_fspai' is zerodimensional, should be a positive number between 0 and 1")
+  }
+  
+  if(!is.null(seed_flip)){
+    if(class(seed_flip)!="numeric" && class(seed_flip)!="integer")
+      stop("'seed_flip' should be an integer or convertible to integer type")
+    seed_flip=as.integer(seed_flip)
   }
   
   # Check of consistency of parameters. Translation into numeric representation. The checks are repeated for each element of the vectors test, interval and type
@@ -618,6 +629,13 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
       stop("tol_fspai should be a positive value")
   }
   
+  if(!is.null(seed_flip)){
+    if(seed_flip <= 0)                                                
+      stop("'seed_flip' must be a positive value")
+  }else {
+    n_flip <- as.integer(-1)
+  }
+  
   
   definition=as.integer(1)
   
@@ -625,11 +643,11 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
   if(!is.null(locations_indices))
     result<-new("inferenceDataObjectTime", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
                 locations_indices = as.integer(locations_indices), locations_are_nodes = locations_by_nodes_numeric,  time_locations = time_locations, coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile,
-                alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+                alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, seed_flip = seed_flip, definition=definition)
   else
     result<-new("inferenceDataObjectTime", test = as.integer(test_numeric), interval = as.integer(interval_numeric), type = as.integer(type_numeric), component = as.integer(component_numeric), exact = exact_numeric, dim = dim, n_cov = n_cov,
                 locations = locations, locations_are_nodes =locations_by_nodes_numeric,  time_locations = time_locations,coeff = coeff, beta0 = beta0, f0 = f0_3D, f_var = f_var_numeric, quantile = quantile,
-                alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, definition=definition)
+                alpha = alpha, n_flip = n_flip, tol_fspai = tol_fspai, seed_flip = seed_flip, definition=definition)
   
   
   return(result)

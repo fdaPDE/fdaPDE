@@ -18,11 +18,12 @@
   \param inference_Alpha_ significance used to compute ESF confidence intervals
   \param n_Flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
   \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
+  \param seed_Flip_ parameter that provides the seed for the sign-flips to be used for the eigen-sign-flip tests (if they are required)
   \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_,
 			     SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP coeff_Inference_, SEXP beta_0_,SEXP f0_eval_,  SEXP scaling_Factor_,  SEXP f_Var_,
-			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_){
+			     SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_,SEXP seed_Flip_, SEXP definition_){
   //test_Type
   UInt size_test_Type=Rf_length(test_Type_);
   test_Type.resize(size_test_Type);
@@ -172,6 +173,9 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   //tol_Fspai
   this->set_tol_Fspai(REAL(tol_Fspai_)[0]);
 
+  //seed_flip
+  this->set_seed_Flip(INTEGER(seed_Flip_)[0]);
+
   //definition
   this->set_definition(bool(INTEGER(definition_)[0]));
 
@@ -196,11 +200,12 @@ InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implemen
   \param inference_Alpha_ significance used to compute ESF confidence intervals
   \param n_Flip_ parameter that provides the number of sign-flips to be used for the eigen-sign-flip tests (if they are required)
   \param tol_Fspai_ parameter that provides the tolerance used in the FSPAI algorithm
+  \param seed_Flip_ parameter that provides the seed for sign-flips to be used for the eigen-sign-flip tests (if they are required)
   \param definition_ parameter used to set definition of the InferenceData object
 */
 InferenceData::InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
 			     SEXP exact_Inference_, SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes_, SEXP time_locs_inf_ ,SEXP coeff_Inference_, SEXP beta_0_,
-			     SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_,SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, locs_Inference_, locs_index_Inference_, locs_are_nodes_, coeff_Inference_, beta_0_, f0_eval_, scaling_Factor_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, definition_){
+			     SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_,SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP seed_Flip_, SEXP definition_):InferenceData(test_Type_, interval_Type_, implementation_Type_, component_Type_, exact_Inference_, locs_Inference_, locs_index_Inference_, locs_are_nodes_, coeff_Inference_, beta_0_, f0_eval_, scaling_Factor_, f_Var_, inference_Quantile_, inference_Alpha_, n_Flip_, tol_Fspai_, seed_Flip_, definition_){
 
  //time_locs_inf
   UInt size_time_locs_inf=Rf_length(time_locs_inf_); 
@@ -297,4 +302,5 @@ void InferenceData::print_inference_data() const{
   Rprintf("n_Flip: %d\n", n_Flip);
   Rprintf("tol_Fspai: %f\n", tol_Fspai);
   Rprintf("definition: %d\n",definition);
+  Rprintf("seed_Fspai: %d\n", n_Flip);
 };

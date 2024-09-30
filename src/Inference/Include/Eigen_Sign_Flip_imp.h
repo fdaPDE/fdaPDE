@@ -119,6 +119,15 @@ template<typename InputHandler, typename MatrixType>
   // Random sign-flips
   std::random_device rd; 
   std::default_random_engine eng{rd()};
+  
+  // Check wether a seed is present or not, and in case, set it
+  unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+  if(seed_Flip >= 0){
+    std::default_random_engine eng_seed{seed_Flip};
+    eng = eng_seed;
+  }
+  
   std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
   Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
   Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
@@ -213,6 +222,15 @@ template<typename InputHandler, typename MatrixType>
     // Random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
+    
+    // Check wether a seed is present or not, and in case, set it
+    unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+    if(seed_Flip >= 0){
+      std::default_random_engine eng_seed{seed_Flip};
+      eng = eng_seed;
+    }
+    
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
     Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
@@ -257,6 +275,15 @@ template<typename InputHandler, typename MatrixType>
     // Random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
+    
+    // Check wether a seed is present or not, and in case, set it
+    unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+    if(seed_Flip >= 0){
+      std::default_random_engine eng_seed{seed_Flip};
+      eng = eng_seed;
+    }
+    
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count_Up = 0;   // Counter for the number of flipped statistics that are larger the observed statistic
     Real count_Down = 0; // Counter for the number of flipped statistics that are smaller the observed statistic
@@ -365,6 +392,15 @@ template<typename InputHandler, typename MatrixType>
     //Random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
+    
+    // Check wether a seed is present or not, and in case, set it
+    unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+    if(seed_Flip >= 0){
+      std::default_random_engine eng_seed{seed_Flip};
+      eng = eng_seed;
+    }
+    
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count_Up=0;
     Real count_Down=0;
@@ -436,6 +472,15 @@ template<typename InputHandler, typename MatrixType>
     // Random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
+    
+    // Check wether a seed is present or not, and in case, set it
+    unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+    if(seed_Flip >= 0){
+      std::default_random_engine eng_seed{seed_Flip};
+      eng = eng_seed;
+    }
+    
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     VectorXr count_Up = VectorXr::Zero(p);
     VectorXr count_Down = VectorXr::Zero(p);
@@ -544,6 +589,15 @@ template<typename InputHandler, typename MatrixType>
     // random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
+    
+    // Check wether a seed is present or not, and in case, set it
+    unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+    if(seed_Flip >= 0){
+      std::default_random_engine eng_seed{seed_Flip};
+      eng = eng_seed;
+    }
+    
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
     VectorXr res_perm = V_Partial_f_res_H0; 
@@ -590,6 +644,15 @@ template<typename InputHandler, typename MatrixType>
     // random sign-flips
     std::random_device rd; 
     std::default_random_engine eng{rd()};
+    
+    // Check wether a seed is present or not, and in case, set it
+    unsigned long int seed_Flip=this->inf_car.getInfData()->get_seed_Flip();
+  
+    if(seed_Flip >= 0){
+      std::default_random_engine eng_seed{seed_Flip};
+      eng = eng_seed;
+    }
+    
     std::uniform_int_distribution<> distr{0,1}; // Bernoulli(1/2)
     Real count=0;
     VectorXr res_perm = this->Partial_f_res_H0; 

@@ -34,6 +34,7 @@ class InferenceData
   		bool definition					= false;			//!< Defines whether the inference analysis needs to be carried out or not
                 long int n_Flip 				= 1000; 			//!< Number of sign-flips if eigen-sign-flip tests are required
 		Real tol_Fspai 					= 0.05; 			//!< Tolerance given in input to the FSPAI algorithm
+		long int seed_Flip 				= -1; 			        //!< seed for sign-flips
 
 	public:
   	//Constructors
@@ -42,11 +43,11 @@ class InferenceData
                 //! Space constructor (with inference for f)
   		InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
 				SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_,
-			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
+			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP seed_Flip_, SEXP definition_);
                 //! Space-time constructor (without inference for f --> not implemented yet)
                 InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, 
                 	      SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP time_locs_inf_, SEXP coeff_Inference_, SEXP beta_0_,
-                	      SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_, SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
+                	      SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_, SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP seed_Flip_, SEXP definition_);
                 
                 
         //Setters
@@ -70,6 +71,7 @@ class InferenceData
   		inline void set_definition(const bool & definition_){definition = definition_;};				//!< Setter for definition \param definition_ new definition
 		inline void set_n_Flip(long int n_Flip_){n_Flip=n_Flip_;}; 							//!< Setter for n_Flip \param n_Flip_ new n_Flip
 		inline void set_tol_Fspai(Real tol_Fspai_){tol_Fspai=tol_Fspai_;}; 						//!< Setter for tol_Fspai \param tol_Fspai_ new tol_Fspai
+		inline void set_seed_Flip(long int seed_Flip_){seed_Flip=seed_Flip_;}; 						//!< Setter for seed_Flip \param seed_Flip
 
   	//Getters
   		inline std::vector<std::string> get_test_type() const{return this->test_Type;}; 				//!< Getter for test_Type \return test_Type
@@ -92,6 +94,8 @@ class InferenceData
   		inline bool get_definition() const{return this->definition;};					                //!< Getter for definition \return definition
 		inline long int get_n_Flip() const{return this->n_Flip;}; 					                //!< Getter for n_Flip \return n_Flip
 		inline Real get_tol_Fspai() const{return this->tol_Fspai;}; 					                //!< Getter for tol_Fspai \return tol_Fspai
+		inline long int get_seed_Flip() const{return this->seed_Flip;}; 					        //!< Getter for seed_Flip \return seed_Flip
+		
 
 	//For debugging
   		void print_inference_data() const;
