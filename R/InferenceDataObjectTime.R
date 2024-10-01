@@ -627,6 +627,8 @@ inferenceDataObjectTimeBuilder<-function(test = NULL,
   if(exact==FALSE & !is.null(tol_fspai)){
     if(tol_fspai <= 0 )                                                
       stop("tol_fspai should be a positive value")
+  }else{
+    tol_fspai = 0.05
   }
   
   if(!is.null(seed_flip)){
