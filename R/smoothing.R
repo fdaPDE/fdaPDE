@@ -94,7 +94,7 @@
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 #' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
 #' Default value \code{lambda.optimization.tolerance=0.05}.
-#' @param inference.data.object An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear parameters of the model. This parameter needs to be 
+#' @param inference.data.object An \code{\link{inferenceDataObject}} that stores all the information regarding inference over the linear and nonlinear parameters of the model. This parameter needs to be 
 #' consistent with \code{covariates}, otherwise will be discarded. If set and well defined, the function will have in output the inference results. It is suggested to create this object via \code{\link{inferenceDataObjectBuilder}} function, so that the object is guaranteed to be well defined.
 #' @return A list with the following variables:
 #' \itemize{
@@ -163,8 +163,8 @@
 #' via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
 #'    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization. 
 #'  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
-#'    \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2021). Some first inferential tools for spatial regression
-#'    with differential regularization. Journal of Multivariate Analysis, to appear}
+#'    \item{Federico Ferraccioli, Laura M. Sangalli & Livio Finos (2022). Some first inferential tools for spatial regression
+#'    with differential regularization. Journal of Multivariate Analysis, 189, 104866.}
 #' }
 #' @examples
 #' library(fdaPDE)
@@ -531,14 +531,14 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     warning("Inference is not defined when lambda grid is provided without GCV, discarding inference")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
-                                f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+                                f0_eval = -1, scaling_factor = as.numeric(1), f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, seed_flip = as.integer(-1), definition=as.integer(0))
   }
   # In the areal case, inference on f is not implemented 
   if(inference.data.object@definition==1 && any(inference.data.object@component!=1) && !is.null(incidence_matrix)){
     warning("Inference on f is not implemented for areal data, discarding inference")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                               locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
-                              f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+                              f0_eval = -1, scaling_factor = as.numeric(1), f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, seed_flip = as.integer(-1), definition=as.integer(0))
   }
   
   # if I have PDE non-sv case I need (constant) matrices as parameters
@@ -587,7 +587,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     warning("Inference for linear estimators is implemented only for gaussian family in regression-Laplace and regression-PDE,\nInference Data are ignored")
     inference.data.object=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), 
                                 locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
-                                f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+                                f0_eval = -1, scaling_factor = as.numeric(1), f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, seed_flip = as.integer(-1), definition=as.integer(0))
   }
 
   ################## End checking parameters, sizes and conversion #############################
@@ -1053,6 +1053,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
               inference$f$CI$sign_flip[[length(inference$f$CI$sign_flip)+1]] = ci_f
               inference$f$CI$sign_flip=as.list(inference$f$CI$sign_flip)
             }
+            else if(inference.data.object@type[i]==6){ # sscore confidence intervals for f
+              inference$f$CI$score[[length(inference$f$CI$score)+1]] = ci_f
+              inference$f$CI$score=as.list(inference$f$CI$score)
+            }
           }
         }
         
@@ -1118,6 +1122,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           else if(inference.data.object@type[i]==5){
             inference$f$p_values$sign_flip[[length(inference$f$p_values$sign_flip)+1]] = p_value
             inference$f$p_values$sign_flip=as.list(inference$f$p_values$sign_flip)
+          }
+          else if(inference.data.object@type[i]==6){
+            inference$f$p_values$score[[length(inference$f$p_values$score)+1]] = p_value
+            inference$f$p_values$score=as.list(inference$f$p_values$score)
           }
         }
         }

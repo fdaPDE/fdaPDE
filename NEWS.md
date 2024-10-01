@@ -1,3 +1,7 @@
+# fdaPDE 1.1-15
+
+1) Wald inference on the nonparametric component for space-time model.
+
 # fdaPDE 1.1-9
 
 ## New features

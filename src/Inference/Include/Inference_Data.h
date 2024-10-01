@@ -15,7 +15,7 @@ class InferenceData
 		// Type of analysis required
   		std::vector<std::string> test_Type		= {"not-defined"};	        //!< Values: not-defined [default], one-at-the-time, simultaneous
   		std::vector<std::string> interval_Type  	= {"not-defined"};	        //!< Values: not-defined [default], one-at-the-time, simultaneous, bonferroni
-  		std::vector<std::string> implementation_Type  	= {"wald"}; 	                //!< Values: wald [default], speckman, sign-flip, eigen-sign-flip
+  		std::vector<std::string> implementation_Type  	= {"wald"}; 	                //!< Values: wald [default], speckman, sign-flip, eigen-sign-flip, score
 		std::vector<std::string> component_Type		= {"parametric"};		//!< Values: parametric [default], nonparametric, both
   		std::string exact_Inference			= "non-exact";		        //!< Values: non-exact [default], exact 
 		std::vector<bool> enhanced_Inference		= {false};			//!< Values: false [default], true 
@@ -23,15 +23,18 @@ class InferenceData
 		MatrixXr locs_Inference;							//!< Matrix of spatial locations to be considered for nonparametric inference
 		std::vector<UInt> locs_index_Inference;						//!< Vector of location indices to be considered for nonparametric inference
                 bool locations_are_nodes                        = false;                        //!< Boolean defining whether the selected locations are a subset of mesh nodes
-                MatrixXr coeff_Inference;	        					//!< Matrix of coefficients for the linear combinations of parameters 
+                MatrixXr coeff_Inference;	        					//!< Matrix of coefficients for the linear combinations of parameters
+                VectorXr time_locs_inf;             	              				//!< Time locations used in ST Wald inference on f 
                 VectorXr beta_0;             	              					//!< Values for the null hypostesis, if test_Type != not-defined
 		VectorXr f0_eval;								//!< Evaluations of the field f under the null hypothesis in the selected locations 
+		Real scaling_Factor                             = 1.00;             	        //!< Factor used to scale lambda in inference variances computation
                 bool f_Var                                      = false;             	        //!< Defines whether the local f variance has to be computed or not
   		VectorXr inference_Quantile;		 					//!< Quantiles needed for confidence intervals if interval_Type != not-defined
 		VectorXr inference_Alpha                        = VectorXr::Constant(1,0.05); 	//!< Significance used in ESF confidence interval computation;
   		bool definition					= false;			//!< Defines whether the inference analysis needs to be carried out or not
                 long int n_Flip 				= 1000; 			//!< Number of sign-flips if eigen-sign-flip tests are required
 		Real tol_Fspai 					= 0.05; 			//!< Tolerance given in input to the FSPAI algorithm
+		long int seed_Flip 				= -1; 			        //!< seed for sign-flips
 
 	public:
   	//Constructors
@@ -39,11 +42,12 @@ class InferenceData
   		InferenceData() = default;
                 //! Space constructor (with inference for f)
   		InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_,
-				SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP f_Var_,
-			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
+				SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP coeff_Inference_, SEXP beta_0_, SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_,
+			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP seed_Flip_, SEXP definition_);
                 //! Space-time constructor (without inference for f --> not implemented yet)
-                InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, SEXP exact_Inference_, SEXP coeff_Inference_, SEXP beta_0_, SEXP f_Var_,
-			        SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP definition_);
+                InferenceData(SEXP test_Type_, SEXP interval_Type_, SEXP implementation_Type_, SEXP component_Type_, 
+                	      SEXP exact_Inference_,SEXP locs_Inference_, SEXP locs_index_Inference_, SEXP locs_are_nodes, SEXP time_locs_inf_, SEXP coeff_Inference_, SEXP beta_0_,
+                	      SEXP f0_eval_, SEXP scaling_Factor_, SEXP f_Var_, SEXP inference_Quantile_, SEXP inference_Alpha_, SEXP n_Flip_, SEXP tol_Fspai_, SEXP seed_Flip_, SEXP definition_);
                 
                 
         //Setters
@@ -56,15 +60,18 @@ class InferenceData
                 inline void set_locs_inference(const MatrixXr & locs_inf){locs_Inference = locs_inf;};		        	//!< Setter for locs_Inference \param locs_inf new locs_Inference
 		inline void set_locs_index_inference(const std::vector<UInt> & locs_ind_inf){locs_index_Inference = locs_ind_inf;}; //!< Setter for locs_index_Inference \param locs_ind_inf new locs_index_Inference
                 inline void set_locs_are_nodes_inference(const bool & locs_are_nodes){locations_are_nodes = locs_are_nodes;};   //!< Setter for locations_are_nodes \param new locs_are_nodes
+                inline void set_time_locs_inf(const VectorXr & time_locs_inf_){time_locs_inf = time_locs_inf_;};	        //!< Setter for time_locs_inf \param time_locs_inf_ new time_locs_inf
   		inline void set_coeff_inference(const MatrixXr & coeff_inf){coeff_Inference = coeff_inf;};		        //!< Setter for coeff_Inference \param coeff_inf new coeff_Inference
   		inline void set_beta_0(const VectorXr & beta_0_){beta_0 = beta_0_;};					        //!< Setter for beta0 \param beta0_ new beta0
 		inline void set_f_0(const VectorXr & f_0_){f0_eval = f_0_;};					        	//!< Setter for f0_eval \param f_0_ new f0_eval
+		inline void set_scaling_Factor(Real scaling_Factor_){scaling_Factor = scaling_Factor_;};			//!< Setter for scaling_Factor \param scaling_Factor_ new scaling_Factor
                 inline void set_f_Var(const bool & f_Var_){f_Var = f_Var_;};				                        //!< Setter for f_Var \param f_Var_ new f_Var
   		inline void set_inference_quantile(const VectorXr & inference_Quantile_){inference_Quantile = inference_Quantile_;};//!< Setter for inference_Quantile \param inference_Quantile_ new inference_Quantile
 		inline void set_inference_Alpha(const VectorXr & inference_Alpha_){inference_Alpha=inference_Alpha_;}; 		//!< Setter for inference_Alpha \param inference_Alpha_ new inference_Alpha
   		inline void set_definition(const bool & definition_){definition = definition_;};				//!< Setter for definition \param definition_ new definition
 		inline void set_n_Flip(long int n_Flip_){n_Flip=n_Flip_;}; 							//!< Setter for n_Flip \param n_Flip_ new n_Flip
 		inline void set_tol_Fspai(Real tol_Fspai_){tol_Fspai=tol_Fspai_;}; 						//!< Setter for tol_Fspai \param tol_Fspai_ new tol_Fspai
+		inline void set_seed_Flip(long int seed_Flip_){seed_Flip=seed_Flip_;}; 						//!< Setter for seed_Flip \param seed_Flip
 
   	//Getters
   		inline std::vector<std::string> get_test_type() const{return this->test_Type;}; 				//!< Getter for test_Type \return test_Type
@@ -76,15 +83,19 @@ class InferenceData
 		inline MatrixXr get_locs_inference() const{return this->locs_Inference;};		                        //!< Getter for locs_Inference \return locs_Inference
 		inline std::vector<UInt> get_locs_index_inference() const{return this->locs_index_Inference;};		        //!< Getter for locs_index_Inference \return locs_index_Inference
                 inline bool get_locs_are_nodes_inference() const{return this->locations_are_nodes;};                            //!< Getter for locations_are_nodes \return locations_are_nodes
+                inline VectorXr get_time_locs_inf() const{return this->time_locs_inf;};				                //!< Getter for time_locs_inf \return time_locs_inf
  		inline MatrixXr get_coeff_inference() const{return this->coeff_Inference;};		                        //!< Getter for coeff_Inference \return coeff_Inference
   		inline VectorXr get_beta_0() const{return this->beta_0;};				                        //!< Getter for beta0 \return beta0
 		inline VectorXr get_f_0() const{return this->f0_eval;};				                        	//!< Getter for f0_eval \return f0_eval
+		inline Real get_scaling_factor() const{return this->scaling_Factor;};			                        //!< Getter for scaling_Factor \return scaling_Factor
                 inline bool get_f_var() const{return this->f_Var;};					                        //!< Getter for f_var \return f_var
   		inline VectorXr get_inference_quantile() const{return this->inference_Quantile;};			        //!< Getter for inference_Quantile \return inference_Quantile
 		inline VectorXr get_inference_alpha() const{return this->inference_Alpha;}; 			                //!< Getter for inference_Alpha \return inference_Alpha
   		inline bool get_definition() const{return this->definition;};					                //!< Getter for definition \return definition
 		inline long int get_n_Flip() const{return this->n_Flip;}; 					                //!< Getter for n_Flip \return n_Flip
 		inline Real get_tol_Fspai() const{return this->tol_Fspai;}; 					                //!< Getter for tol_Fspai \return tol_Fspai
+		inline long int get_seed_Flip() const{return this->seed_Flip;}; 					        //!< Getter for seed_Flip \return seed_Flip
+		
 
 	//For debugging
   		void print_inference_data() const;

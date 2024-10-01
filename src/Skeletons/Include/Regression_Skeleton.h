@@ -370,12 +370,17 @@ template<typename InputHandler>
 void lambda_inference_selection (const OptimizationData & optimizationData, const output_Data<1> & output, const InferenceData & inferenceData, MixedFERegression<InputHandler> & regression, Real & lambda_inference){
   if(inferenceData.get_definition()==true && optimizationData.get_loss_function()!="unused"){
     lambda_inference = output.lambda_sol;
+    if(1-inferenceData.get_scaling_factor() < -0.005 || 1 - inferenceData.get_scaling_factor()>0.005){lambda_inference=lambda_inference/inferenceData.get_scaling_factor();}
     if(optimizationData.get_last_lS_used() != lambda_inference){
       regression.build_regression_inference(lambda_inference);
     }
   }else{ 		// supposing we have only one lambda when GCV is unused, otherwise inference gets discarded in smoothing.R
     if(inferenceData.get_definition()==true){
       lambda_inference = optimizationData.get_last_lS_used();
+      if(1-inferenceData.get_scaling_factor() < -0.005 || 1 - inferenceData.get_scaling_factor()>0.005){
+        lambda_inference=lambda_inference/inferenceData.get_scaling_factor();
+        regression.build_regression_inference(lambda_inference);
+      }
     }
   }
   return; 
@@ -483,14 +488,13 @@ template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
     // set it into the inference carrier
     inf_car_.setPsi_loc(psi);
     inf_car_.setN_loc(psi.rows());
-         
     
-
-    // in the sign-flip and eigen-sign-flip cases, additional matrices have to be computed
+    // in the sign-flip, eigen-sign-flip and score cases, additional matrices have to be computed
     const std::vector<std::string> implementation_type = inferenceData_.get_implementation_type();
 
     if(std::find(implementation_type.begin(), implementation_type.end(), "sign-flip") != implementation_type.end() ||
-       std::find(implementation_type.begin(), implementation_type.end(), "eigen-sign-flip") != implementation_type.end()){
+       std::find(implementation_type.begin(), implementation_type.end(), "eigen-sign-flip") != implementation_type.end() ||
+       std::find(implementation_type.begin(), implementation_type.end(), "score") != implementation_type.end()){
       // reduced vector of observations		
       VectorXr z_loc; 
       z_loc.resize(row_indices.size());

@@ -69,7 +69,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   # Create a null inference object for preliminary computations 
   inference.data.object.null=new("inferenceDataObject", test = as.integer(0), interval =as.integer(0), type = as.integer(0), component = as.integer(0), exact = as.integer(0), dim = as.integer(0), n_cov = as.integer(0), 
                                    locations = matrix(data=0, nrow = 1 ,ncol = 1), locations_indices = as.integer(0), locations_are_nodes = as.integer(0), coeff = matrix(data=0, nrow = 1 ,ncol = 1), beta0 = -1, f0 = function(){}, 
-                                   f0_eval = -1, f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1, definition=as.integer(0))
+                                   f0_eval = -1, scaling_factor = as.numeric(1), f_var = as.integer(0), quantile = -1, alpha = 0, n_flip = as.integer(1000), tol_fspai = -1,  seed_flip = as.integer(-1), definition=as.integer(0))
   
   ## Extract the parameters for inference from inference.data.object to prepare them for c++ reading
   test_Type<-as.vector(inference.data.object@test)
@@ -77,13 +77,19 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   implementation_Type<-as.vector(inference.data.object@type)
   component_Type<-as.vector(inference.data.object@component)
   exact_Inference<-inference.data.object@exact
+  locs_Inference<-as.matrix(inference.data.object@locations)
+  locs_index_Inference<-as.vector(inference.data.object@locations_indices - 1) #converting the indices from R to c++ ones 
+  locs_are_nodes_Inference<-inference.data.object@locations_are_nodes
+  time_locations_Inference<-inference.data.object@time_locations
   coeff_Inference=as.matrix(inference.data.object@coeff)
   beta_0=as.vector(inference.data.object@beta0)
+  f_0_eval<-as.vector(inference.data.object@f0_eval)
   f_var_Inference<-inference.data.object@f_var
   inference_Quantile=as.vector(inference.data.object@quantile)
   inference_Alpha=inference.data.object@alpha
   inference_N_Flip=inference.data.object@n_flip
   inference_Tol_Fspai=inference.data.object@tol_fspai
+  inference_Seed_Flip=inference.data.object@seed_flip
   inference_Defined=inference.data.object@definition
   
   ## Extract the parameters for preliminary computations from inference.data.object.null to prepare them for c++ reading
@@ -98,11 +104,13 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   coeff_Inference_Null=as.matrix(inference.data.object.null@coeff)
   beta_0_Null=as.vector(inference.data.object.null@beta0)
   f_0_eval_Null<-as.vector(inference.data.object.null@f0_eval)
+  scaling_factor_Inference_Null<-inference.data.object.null@scaling_factor
   f_var_Inference_Null<-inference.data.object.null@f_var
   inference_Quantile_Null=as.vector(inference.data.object.null@quantile)
   inference_Alpha_Null=inference.data.object.null@alpha
   inference_N_Flip_Null=inference.data.object.null@n_flip
   inference_Tol_Fspai_Null=inference.data.object.null@tol_fspai
+  inference_Seed_Flip_Null=inference.data.object.null@seed_flip
   inference_Defined_Null=inference.data.object.null@definition
 
 
@@ -157,13 +165,19 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(implementation_Type) <- "integer"
   storage.mode(component_Type) <- "integer"
   storage.mode(exact_Inference) <- "integer"
+  storage.mode(locs_Inference) <- "double"
+  storage.mode(locs_index_Inference) <- "integer"
+  storage.mode(locs_are_nodes_Inference) <- "integer"
+  storage.mode(time_locations_Inference) <- "double"
   storage.mode(coeff_Inference) <- "double"
   storage.mode(beta_0) <- "double"
+  storage.mode(f_0_eval) <- "double"
   storage.mode(f_var_Inference) <- "integer"
   storage.mode(inference_Quantile) <- "double"
   storage.mode(inference_Alpha) <- "double"
   storage.mode(inference_N_Flip) <- "integer"
   storage.mode(inference_Tol_Fspai) <- "double"
+  storage.mode(inference_Seed_Flip) <- "integer"
   storage.mode(inference_Defined) <- "integer"
   
   ## Set proper type for correct C++ reading for preliminary computations inference parameters
@@ -178,11 +192,13 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   storage.mode(coeff_Inference_Null) <- "double"
   storage.mode(beta_0_Null) <- "double"
   storage.mode(f_0_eval_Null) <- "double"
+  storage.mode(scaling_factor_Inference_Null) <- "double"
   storage.mode(f_var_Inference_Null) <- "integer"
   storage.mode(inference_Quantile_Null) <- "double"
   storage.mode(inference_Alpha_Null) <- "double"
   storage.mode(inference_N_Flip_Null) <- "integer"
   storage.mode(inference_Tol_Fspai_Null) <- "double"
+  storage.mode(inference_Seed_Flip_Null) <- "integer"
   storage.mode(inference_Defined_Null) <- "integer"
   
   ## Call C++ function
@@ -212,7 +228,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
       search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
       test_Type_Null,interval_Type_Null,implementation_Type_Null,component_Type_Null,exact_Inference_Null,locs_Inference_Null,locs_index_Inference_Null,locs_are_nodes_Inference_Null,coeff_Inference_Null,
-      beta_0_Null,f_0_eval_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Defined_Null,
+      beta_0_Null,f_0_eval_Null,scaling_factor_Inference_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Seed_Flip_Null, inference_Defined_Null,
       PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
@@ -226,7 +242,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
          search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor, lambda.optimization.tolerance, 
          test_Type_Null,interval_Type_Null,implementation_Type_Null,component_Type_Null,exact_Inference_Null,locs_Inference_Null,locs_index_Inference_Null,locs_are_nodes_Inference_Null,coeff_Inference_Null,
-         beta_0_Null,f_0_eval_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Defined_Null,
+         beta_0_Null,f_0_eval_Null,scaling_factor_Inference_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Seed_Flip_Null, inference_Defined_Null,
          PACKAGE = "fdaPDE")
     }
     else
@@ -242,7 +258,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
            BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
            search, as.integer(c(0,2,1)), lambdaSIC, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix_IC, GCV.inflation.factor,lambda.optimization.tolerance, 
            test_Type_Null,interval_Type_Null,implementation_Type_Null,component_Type_Null,exact_Inference_Null,locs_Inference_Null,locs_index_Inference_Null,locs_are_nodes_Inference_Null,coeff_Inference_Null,
-           beta_0_Null,f_0_eval_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Defined_Null,
+           beta_0_Null,f_0_eval_Null,scaling_factor_Inference_Null,f_var_Inference_Null,inference_Quantile_Null,inference_Alpha_Null,inference_N_Flip_Null, inference_Tol_Fspai_Null, inference_Seed_Flip_Null, inference_Defined_Null,
            PACKAGE = "fdaPDE")
       }
     }
@@ -276,7 +292,8 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
                   mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC, FLAG_ITERATIVE, max.steps, threshold,
                   IC, search, optim, lambdaS, lambdaT, DOF.stochastic.realizations, DOF.stochastic.seed, DOF.matrix, GCV.inflation.factor, lambda.optimization.tolerance, 
-                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,coeff_Inference,beta_0,f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Defined,
+                  test_Type,interval_Type,implementation_Type,component_Type,exact_Inference,locs_Inference,locs_index_Inference,locs_are_nodes_Inference, time_locations_Inference,
+                  coeff_Inference,beta_0,f_0_eval,as.numeric(1),f_var_Inference,inference_Quantile,inference_Alpha,inference_N_Flip,inference_Tol_Fspai,inference_Seed_Flip,inference_Defined,
                   PACKAGE = "fdaPDE")
 
   return(c(bigsol,ICsol))
