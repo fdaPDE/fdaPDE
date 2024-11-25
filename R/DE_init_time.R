@@ -89,7 +89,10 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
                              init="Heat", nFolds=5, search="tree", 
                              isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE)
 {
-  if(is(FEMbasis$mesh, "mesh.2D")){
+  if(is(FEMbasis$mesh, "mesh.1.5D")){
+    ndim = 2
+    mydim = 1
+  }else if(is(FEMbasis$mesh, "mesh.2D")){
     ndim = 2
     mydim = 2
   }else if(is(FEMbasis$mesh, "mesh.2.5D")){
@@ -120,9 +123,12 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
     search=1
   }else if(search=="tree"){
     search=2
+  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.1.5D")){
+    stop("walking search is not available for mesh class mesh.1.5D.")
   }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
     stop("walking search is not available for mesh class mesh.2.5D.")
-  }else if(search=="walking" & is(FEMbasis$mesh, "mesh.2.5D")){
+  }else if(search=="walking" & !is(FEMbasis$mesh, "mesh.1.5D") &
+           !is(FEMbasis$mesh, "mesh.2.5D")){
     search=3
   }else{
     stop("'search' must must belong to the following list: 'naive', 'tree' or 'walking'.")
@@ -158,9 +164,17 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
                                            nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds, inference)
 
   } else if(is(FEMbasis$mesh, "mesh.3D")){
+    
     bigsol = CPP_FEM.volume.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
                                          mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
                                          nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds, inference)
+    
+  } else if(is(FEMbasis$mesh, "mesh.1.5D")){
+    
+    bigsol = CPP_FEM.graph.DE_init_time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling, fvec, heatStep, heatIter, ndim,
+                                        mydim, step_method, direction_method, preprocess_method, stepProposals, tol1, tol2, print,
+                                        nfolds, nsimulations, search, isTimeDiscrete, flagMass, flagLumped, init, nFolds, inference)
+    
   }
 
   ################################################### Collect Results ##################################################
