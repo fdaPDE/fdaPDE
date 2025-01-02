@@ -75,7 +75,7 @@ triangulate_native <- function(P, PB, PA, S, SB,H, TR, flags) {
 #' \item{\code{triangles}}{A #triangles-by-3 (when \code{order} = 1) or #triangles-by-6 (when \code{order} = 2) matrix.
 #' This option is used when a triangulation is already available. It specifies the triangles giving the indices in \code{nodes} of the triangles' vertices and (when \code{nodes} = 2) also if the triangles' edges midpoints. The triangles' vertices and midpoints are ordered as described
 #' at  \cr https://www.cs.cmu.edu/~quake/triangle.highorder.html.}
-#' \item{\code{segmentsmarker}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
+#' \item{\code{segmentsmarkers}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
 #' an entry '0' indicates that the corresponding segment is not a boundary segment.}
 #' \item{\code{edges}}{A #edges-by-2 matrix containing all the edges of the triangles in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the edge starts from and ends to.}
 #' \item{\code{edgesmarkers}}{A vector of lenght #edges with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{edge} is a boundary edge;
@@ -340,7 +340,7 @@ refine.mesh.2D<-function(mesh, minimum_angle = NA, maximum_area = NA, delaunay =
     mesh$nodesmarkers,
     mesh$nodesattributes,
     mesh$segments,
-    mesh$segmentmarkers,
+    mesh$segmentsmarkers,
     t(mesh$holes),
     mesh$triangles,
     flags
@@ -396,7 +396,7 @@ refine.mesh.2D<-function(mesh, minimum_angle = NA, maximum_area = NA, delaunay =
 #' \item{\code{triangles}}{A #triangles-by-3 (when \code{order} = 1) or #triangles-by-6 (when \code{order} = 2) matrix.
 #' It specifies the triangles giving the indices in \code{nodes} of the triangles' vertices and (when \code{nodes} = 2) also if the triangles' edges midpoints. The triangles' vertices and midpoints are ordered as described
 #' at  \cr https://www.cs.cmu.edu/~quake/triangle.highorder.html.}
-#' \item{\code{segmentsmarker}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
+#' \item{\code{segmentsmarkers}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
 #' an entry '0' indicates that the corresponding segment is not a boundary segment.}
 #' \item{\code{edges}}{A #edges-by-2 matrix containing all the edges of the triangles in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the edge starts from and ends to.}
 #' \item{\code{edgesmarkers}}{A vector of lenght #edges with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{edge} is a boundary edge;
@@ -597,7 +597,7 @@ projection.points.2.5D<-function(mesh, locations) {
 #' These are passed unchanged from the input.}
 #' \item{\code{tetrahedrons}}{A #tetrahedrons-by-4 (when \code{order} = 1) or #tetrahedrons-by-10 (when \code{order} = 2) matrix.
 #' It specifies the tetrahedrons giving the indices in \code{nodes} of the tetrahedrons' vertices and (when \code{nodes} = 2) also if the tetrahedrons' edges midpoints.} 
-#' \item{\code{segmentsmarker}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
+#' \item{\code{segmentsmarkers}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
 #' an entry '0' indicates that the corresponding segment is not a boundary segment.}
 #' \item{\code{faces}}{A #faces-by-3 matrix containing all the faces of the tetrahedrons in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the face starts from and ends to.}
 #' \item{\code{facesmarkers}}{A vector of lenght #faces with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{faces} is a boundary face;
