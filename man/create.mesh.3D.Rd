@@ -43,7 +43,7 @@ An object of the class mesh.3D with the following output:
 These are passed unchanged from the input.}
 \item{\code{tetrahedrons}}{A #tetrahedrons-by-4 (when \code{order} = 1) or #tetrahedrons-by-10 (when \code{order} = 2) matrix.
 It specifies the tetrahedrons giving the indices in \code{nodes} of the tetrahedrons' vertices and (when \code{nodes} = 2) also if the tetrahedrons' edges midpoints.} 
-\item{\code{segmentsmarker}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
+\item{\code{segmentsmarkers}}{A vector of length #segments with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{segments} is a boundary segment;
 an entry '0' indicates that the corresponding segment is not a boundary segment.}
 \item{\code{faces}}{A #faces-by-3 matrix containing all the faces of the tetrahedrons in the output triangulation. Each row contains the row's indices in \code{nodes}, indicating the nodes where the face starts from and ends to.}
 \item{\code{facesmarkers}}{A vector of lenght #faces with entries either '1' or '0'. An entry '1' indicates that the corresponding element in \code{faces} is a boundary face;
