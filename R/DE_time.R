@@ -35,7 +35,7 @@
 #' N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.
 #' @param nfolds An integer specifying the number of folds used in cross validation technique to find the best pair of
 #' (\code{lambda}, \code{lambda_time}) smoothing parameters.
-#' If there is only one pair of (\code{lambda}, \code{lambda_time}) it can be \code{NULL}. Default is \code{NULL}.
+#' If there is only one pair of (\code{lambda}, \code{lambda_time}) it can be \code{0}. Default is \code{0}.
 #' @param nsimulations An integer specifying the number of iterations used in the optimization algorithms. Default value is 500.
 #' @param step_method A string specifying which step method to use in the descent algorithm.
 #' If it is \code{Fixed_Step}, the step is constant during the algorithm and it is chosen according to \code{stepProposals};
@@ -88,7 +88,7 @@
 #' order time-derivative), when points are located over a planar mesh. The computation relies only on the C++ implementation of the algorithm.
 #' @usage DE.FEM.time(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling=NULL,
 #'                    fvec=NULL, heatStep=0.1, heatIter=10, stepProposals=NULL, tol1=1e-4,
-#'                    tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
+#'                    tol2=0, print=FALSE, nfolds=0, nsimulations=500,
 #'                    step_method="Fixed_Step", direction_method="BFGS",
 #'                    preprocess_method="NoCrossValidation", search="tree",
 #'                    isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE,
@@ -155,7 +155,7 @@
 
 
 DE.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda, lambda_time, scaling=NULL, fvec=NULL, heatStep=0.1, heatIter=10,
-                        stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL, nsimulations=500,
+                        stepProposals=NULL, tol1=1e-4, tol2=0, print=FALSE, nfolds=0, nsimulations=500,
                         step_method="Fixed_Step", direction_method="BFGS", preprocess_method="NoCrossValidation",
                         search="tree", isTimeDiscrete=FALSE, flagMass=FALSE, flagLumped=FALSE, inference=FALSE)
 {
