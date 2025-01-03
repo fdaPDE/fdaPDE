@@ -7,6 +7,36 @@ CPP_FEM.DE_init <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, hea
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
 
+  if(is.null(stepProposals))
+    stepProposals = c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)
+
+  if(is.null(preprocess_method))
+    preprocess_method = ""
+    
+	cat("data \t is.null:", is.null(data), "\n")
+  cat("FEMbasis$mesh \t is.null:", is.null(FEMbasis$mesh), "\n")	
+  cat("order \t is.null:", is.null(FEMbasis$order), "\n")
+  cat("mydim \t is.null: ", is.null(mydim), "\n")
+  cat("ndim\t is.null: ", is.null(ndim), "\n")
+  cat("scaling \t is.null: ", is.null(scaling), "\n")
+  cat("fvec \t is.null: ", is.null(fvec), length(fvec),"\n")
+  cat("heatStep \t is.null: ", is.null(heatStep), "\n")
+  cat("heatIter \t is.null: ", is.null(heatIter), "\n")
+  cat("lambda \t is.null: ", is.null(lambda), "\n")
+  cat("nfolds \t is.null: ", is.null(nfolds), "\n")
+  cat("nsimulations \t is.null: ", is.null(nsimulations), "\n")
+  cat("stepProposals \t is.null: ", is.null(stepProposals), "\n")
+  cat("tol1 \t is.null: ", is.null(tol1), "\n")
+  cat("tol2 \t is.null: ", is.null(tol2), "\n")
+  cat("print \t is.null: ", is.null(print), "\n")
+  cat("step_method \t is.null: ", is.null(step_method), "\n")
+  cat("direction_method \t is.null: ", is.null(direction_method), "\n")
+  cat("preprocess_method \t is.null: ", is.null(preprocess_method), "\n")
+  cat("search \t is.null: ", is.null(search), "\n")
+  cat("nFolds \t is.null: ", is.null(nFolds), "\n") 
+  cat("inference \t is.null: ", is.null(inference), "\n")
+  
+
   ## Set proper type for correct C++ reading
   storage.mode(data) <- "double"                        
   storage.mode(FEMbasis$mesh$nodes) <- "double"

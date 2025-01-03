@@ -5,7 +5,7 @@
 \title{Nonparametric density estimation with differential regularization}
 \usage{
 DE.FEM(data, FEMbasis, lambda, scaling=NULL, fvec=NULL, heatStep=0.1, heatIter=500,
-       stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=NULL,
+       stepProposals=NULL,tol1=1e-4, tol2=0, print=FALSE, nfolds=0,
        nsimulations=500, step_method="Fixed_Step", direction_method="BFGS",
        preprocess_method="NoCrossValidation", search = "tree", inference = FALSE)
 }
@@ -49,7 +49,7 @@ penalization term printed on console at each iteration of the descent algorithm.
 N.B. We suggest to let it \code{FALSE} if \code{preprocess_method} is 'RightCV' or 'SimplifiedCV'.}
 
 \item{nfolds}{An integer specifying the number of folds used in cross validation technique to find the best \code{lambda} parameter.
-If there is only one \code{lambda} it can be \code{NULL}. Default is \code{NULL}.}
+If there is only one \code{lambda} it can be \code{0}. Default is \code{0}.}
 
 \item{nsimulations}{An integer specifying the number of iterations used in the optimization algorithms. Default value is 500.}
 

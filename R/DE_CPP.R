@@ -12,7 +12,7 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter
 
   if(is.null(preprocess_method))
     preprocess_method = ""
-
+  
   ## Set proper type for correct C++ reading
   storage.mode(data) <- "double"
   storage.mode(FEMbasis$mesh$nodes) <- "double"
@@ -44,7 +44,7 @@ CPP_FEM.DE <- function(data, FEMbasis, lambda, scaling, fvec, heatStep, heatIter
   storage.mode(nsimulations) <- "integer"
   storage.mode(search) <- "integer"
   storage.mode(inference) <- "logical"
-
+  
   ## Call C++ function
   bigsol <- .Call("Density_Estimation", data, FEMbasis$mesh, FEMbasis$order, mydim, ndim, scaling, fvec,
                   heatStep, heatIter, lambda, nfolds, nsimulations, stepProposals, tol1, tol2,

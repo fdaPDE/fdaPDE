@@ -7,7 +7,13 @@ CPP_FEM.DE_init_time <- function(data, data_time, FEMbasis, mesh_time, lambda, l
   FEMbasis$mesh$triangles = FEMbasis$mesh$triangles - 1
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
+  
+  if(is.null(stepProposals))
+    stepProposals = c(0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 1e-7, 1e-8, 1e-9)
 
+  if(is.null(preprocess_method))
+    preprocess_method = ""
+    
   ## Set proper type for correct C++ reading
   storage.mode(data) <- "double"
   storage.mode(data_time) <- "double"
