@@ -105,18 +105,9 @@ DE.heat.FEM.time <- function(data, data_time, FEMbasis, mesh_time, lambda=NULL,
     stop('Unknown mesh class')
   }
 
-  scaling=NULL
-  fvec=NULL
-  stepProposals=NULL
-  tol1=NULL
-  tol2=NULL
-  print=NULL
-  nfolds=NULL
-  nsimulations=NULL
-  step_method=NULL
-  direction_method=NULL
-  preprocess_method=NULL
-  inference=NULL
+  scaling= sqrt(dim(data)[1]); stepProposals=NULL; fvec=NULL;
+  tol1=1e-4; tol2=0; print=FALSE; nfolds=0; nsimulations=500; step_method="Fixed_Step";
+  direction_method="BFGS"; preprocess_method="NoCrossValidation"; inference = FALSE
 
   # Search algorithm
   if(search=="naive"){
