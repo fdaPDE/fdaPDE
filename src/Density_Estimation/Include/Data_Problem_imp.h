@@ -229,7 +229,7 @@ template<UInt ORDER, UInt mydim, UInt ndim>
 void DataProblem_time<ORDER, mydim, ndim>::fillTimeMass(void)
 {
     Spline<SPLINE_DEGREE, 0> spline_0(mesh_time_);
-    Assembler::operKernel(spline_, K0_);
+    Assembler::operKernel(spline_0, K0_);
 }
 
 template<UInt ORDER, UInt mydim, UInt ndim>
