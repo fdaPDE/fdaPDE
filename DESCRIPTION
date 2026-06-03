@@ -1,6 +1,6 @@
 Package: fdaPDE
-Version: 1.1-23
-Date: 2025-09-23
+Version: 1.1-24
+Date: 2026-06-03
 Title: Physics-Informed Spatial and Functional Data Analysis
 Authors@R: c(person("Eleonora", "Arnone", role = c("aut", "cre"),
 		     email = "eleonora.arnone@polimi.it"),
@@ -42,7 +42,7 @@ Maintainer: Eleonora Arnone <eleonora.arnone@polimi.it>
 Depends: 
     R (>= 3.5.0),
     stats, grDevices, graphics,
-    rgl, Matrix, plot3D, methods
+    Matrix, methods, rgl, plot3D
 LinkingTo: 
 	RcppEigen, Rcpp
 Suggests: 

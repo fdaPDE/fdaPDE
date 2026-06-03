@@ -43,13 +43,14 @@ SEXP DE_init_skeleton_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rscali
     if(init == "Heat"){
 
         // Construct densityInit object
-        std::unique_ptr<DensityInitialization_time<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<HeatProcess_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem);
+        //std::unique_ptr<DensityInitialization_time<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<HeatProcess_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem);
+        HeatProcess_time<ORDER, mydim, ndim> densityInit(dataProblem, functionalProblem);
 
         // Fill fInit
         std::vector<VectorXr> fInit(dataProblem.getNlambda() * dataProblem.getNlambda_time());
         for(UInt l = 0; l < dataProblem.getNlambda(); ++l){
             for(UInt k = 0; k < dataProblem.getNlambda_time(); ++k){
-                fInit[k+l*dataProblem.getNlambda_time()] = *(densityInit->chooseInitialization(dataProblem.getLambda(l), dataProblem.getLambda_time(k)));
+                fInit[k+l*dataProblem.getNlambda_time()] = *(densityInit.chooseInitialization(dataProblem.getLambda(l), dataProblem.getLambda_time(k)));
             }
         }
 
@@ -73,11 +74,12 @@ SEXP DE_init_skeleton_time(SEXP Rdata, SEXP Rdata_time, SEXP Rorder, SEXP Rscali
     else if(init=="CV"){
 
         // Construct densityInit object
-        std::unique_ptr<Heat_CV_time<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<Heat_CV_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem, init_fold);
+        //std::unique_ptr<Heat_CV_time<ORDER, mydim, ndim>> densityInit = fdaPDE::make_unique<Heat_CV_time<ORDER, mydim, ndim>>(dataProblem, functionalProblem, init_fold);
+        Heat_CV_time<ORDER, mydim, ndim> densityInit(dataProblem, functionalProblem, init_fold);
 
         // Fill fInit
         VectorXr fInit;
-        fInit = *(densityInit->chooseInitialization(0, 0));
+        fInit = *(densityInit.chooseInitialization(0, 0));
 
         // Copy result in R memory
         SEXP result = NILSXP;
