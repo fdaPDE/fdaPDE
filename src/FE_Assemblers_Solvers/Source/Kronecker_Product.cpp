@@ -100,7 +100,7 @@ SpMat kroneckerProduct(const SpMat& A, const SpMat& B)
 		Acurrent = Aouter[i];
 	}
 
-	Eigen::MappedSparseMatrix<Real, Eigen::ColMajor, UInt> ABM(ABr, ABc, ABnz, ABouter.data(), ABinner.data(), ABvalues.data());
+	Eigen::Map<Eigen::SparseMatrix<Real>, Eigen::ColMajor, UInt> ABM(ABr, ABc, ABnz, ABouter.data(), ABinner.data(), ABvalues.data());
 	SpMat AB(ABM);
 
 //	delete[] ABvalues;
